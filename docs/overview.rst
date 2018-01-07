@@ -1,7 +1,7 @@
 
 .. _what_APM_does:
 
-What is GEKKO Doing?
+What is GEKKO?
 ==========================
 
 .. toctree::
