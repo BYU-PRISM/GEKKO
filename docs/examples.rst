@@ -11,8 +11,8 @@ Examples
 
 
 
-HS 71
-=====
+**HS 71**
+
 .. math::
 
    min x_1 x_4 (x_1 + x_2 + x_3) + x_3
