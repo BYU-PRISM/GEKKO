@@ -46,6 +46,7 @@ Contents
 	CV_options
 	global
 	model_methods
+	examples
 
 
 
