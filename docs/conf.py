@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# ThunderSnow documentation build configuration file, created by
+# GEKKO documentation build configuration file, created by
 # sphinx-quickstart on Fri Jul  7 22:01:18 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -49,7 +49,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'ThunderSnow'
+project = u'GEKKO'
 copyright = u'2017, Logan Beal, John Hedengren'
 author = u'Logan Beal, John Hedengren'
 

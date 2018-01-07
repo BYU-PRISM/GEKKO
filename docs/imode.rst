@@ -5,6 +5,8 @@
 
 
 
+.. _imode:
+
 Special Modes
 =======================================
 
@@ -14,7 +16,6 @@ Special Modes
 
 
 
-.. _imode:
 
 IMODE
 =====

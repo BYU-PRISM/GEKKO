@@ -4,7 +4,7 @@
 
 
 
-Most Commonly Used Tuning Parameters
+Tuning Parameters
 ====================================
 
 .. toctree::

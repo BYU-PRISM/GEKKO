@@ -36,16 +36,15 @@ Contents
 ========
 
 .. toctree::
-	:maxdepth: 2
+	:maxdepth: 1
 	
 	overview
-	modelparts
+	quick_start
 	imode
 	tuning_params
 	MV_options
 	CV_options
 	global
-	questions
 	model_methods
 
 
