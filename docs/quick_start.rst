@@ -33,10 +33,10 @@ are degrees of freedom and are changed by the solve. All variable declarations r
 
 Fixed Variables (FV), Manipulated Variables (MV), State Variables (SV) and Controlled 
 Variables (CV) expand parameters and variables with extra attributes and features to 
-facilitate dynamic optimization problem forumlation and robustness for online use.
+facilitate dynamic optimization problem formulation and robustness for online use.
 These attributes are discussed in :ref:`_MV_options` and :ref:'_CV_options'.
 
-All of these variable types have the optional arguement 'name'. The name is used 
+All of these variable types have the optional argument 'name'. The name is used 
 on the back-end to write the model file and is only useful if the user intends to 
 manually use the model file later. If a name is not provided, one is automatically assigned
 a letter and number (c#/p#/v#/i#).
@@ -46,7 +46,7 @@ Constants
 ^^^^^^^^^
 
 Define a Constant. There is no functional difference between using
-a GEKKO Constant, a python variable or a magic number in the Equations. However, the Constanst
+a GEKKO Constant, a python variable or a magic number in the Equations. However, the Constant
 can be provided a name to make the .apm model more clear::
 
     c =  m.Const(value, [name]):
@@ -58,7 +58,7 @@ Parameters
 
 Parameters are capable of becoming MVs and FVs. Since GEKKO defines 
 MVs and FVs directly, parameters just serve as constant values. However, Parameters 
-(unline Constants) can be (and usually are) arrays.::
+(unlike Constants) can be (and usually are) arrays.::
 
 	p = m.Param([name], [value]])
 
@@ -79,7 +79,7 @@ Calculated by solver to meet constraints (Equations)::
 Intermediates
 ^^^^^^^^^^^^^
 
-Intermediates are a unique GEKKO variable type. Intermediates, and their associated equations, are like variables except their values and gradients are evaluated explicitly only once, at the beginning of the iteration. This saves time in function evaluations, but must be balanced with increased iterations resulting from incorrect values used in the rest of the iteration. The function creates an intermediate variable "i" and sets it equal to arguement "equation":: 
+Intermediates are a unique GEKKO variable type. Intermediates, and their associated equations, are like variables except their values and gradients are evaluated explicitly only once, at the beginning of the iteration. This saves time in function evaluations, but must be balanced with increased iterations resulting from incorrect values used in the rest of the iteration. The function creates an intermediate variable "i" and sets it equal to argument "equation":: 
 
     i = m.Intermediate(equation,[name]])
  
@@ -98,7 +98,7 @@ throughout the horizon (i.e. they are not discretized is dynamic modes).::
 Manipulated Variable
 ^^^^^^^^^^^^^^^^^^^^
 
-Manipulated Variables (MV) inherit FVs but are discretized throughout the horizon and have time-dependant atttributes::
+Manipulated Variables (MV) inherit FVs but are discretized throughout the horizon and have time-dependant attributes::
 
 	m = m.MV([name], [value], [lb], [ub])
 
