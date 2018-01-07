@@ -6,7 +6,7 @@ Examples
 
 
 .. toctree::
-	:maxdepth: 2
+	:maxdepth: 1
 
 
 
@@ -14,6 +14,7 @@ Examples
 HS 71
 =====
 This example demonstrates how to solve the HS71 benchmark problem using GEKKO::
+	
 	from gekko import GEKKO
 	
 	# Initialize Model
@@ -65,3 +66,4 @@ This example demonstrates how to solve the HS71 benchmark problem using GEKKO::
 	print('x2: ' + str(x2.value))
 	print('x3: ' + str(x3.value))
 	print('x4: ' + str(x4.value))
+	
