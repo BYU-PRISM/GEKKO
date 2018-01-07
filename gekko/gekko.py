@@ -93,7 +93,7 @@ class GEKKO(object):
         self._constants.append(const)
         return const
 
-    def Param(self, name='', value=0, lb=None, ub=None, integer=False):
+    def Param(self, name='', value=0, integer=False):
         """GK parameters can become MVs and FVs. Since GEKKO defines
         MVs and FVs directly, there's not much use for parameters. Parameters
         are effectively constants unless the resulting .spm model is used later
