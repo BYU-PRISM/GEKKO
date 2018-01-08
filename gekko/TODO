@@ -36,6 +36,8 @@ Interface
 
 -Load back FV MV SV CV outputs
 
+-Make Constant(value,name) consistent with other variable definitions.
+
 
 Robustness
 ----------
