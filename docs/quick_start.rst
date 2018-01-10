@@ -29,7 +29,7 @@ GEKKO has eight types of variables, four of which have extra properties.
 
 Constants, Parameters, Variables and Intermediates are the standard types.
 Constants and Parameters are fixed by the user, while Variables and Intermediates
-are degrees of freedom and are changed by the solve. All variable declarations return references to a new object.
+are degrees of freedom and are changed by the solver. All variable declarations return references to a new object.
 
 Fixed Variables (FV), Manipulated Variables (MV), State Variables (SV) and Controlled 
 Variables (CV) expand parameters and variables with extra attributes and features to 
