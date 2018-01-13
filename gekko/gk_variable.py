@@ -52,7 +52,7 @@ class GKVariable(GK_Operators):
         self.UB = ub #upper bound
         
         #register values that are changed by the user 
-        self._changed = False
+        #self._changed = True
         # now allow options to be sent to the server
         self._initialized = True
 
@@ -77,15 +77,17 @@ class GKVariable(GK_Operators):
 
             #only allow user to set input or input/output options:
             if name in options[self.type]['inputs']+options[self.type]['inout']:
-                self.__dict__[name] = value
+                if name == 'VALUE':
+                    self.__dict__[name].value = value
+                else:
+                    self.__dict__[name] = value
+                    
                 #write option to dbs file
                 if self.type != None: #only for SV and CV
                     if name != 'VALUE': #don't write values to dbs
                         f = open(os.path.join(self.path,'overrides.dbs'),'a')
                         f.write(self.name+'.'+name+' = '+str(value)+'\n')
                         f.close()
-                    elif name == 'VALUE':
-                        self._changed = True
                         
             #don't allow writing to output properties by default
             elif name in options[self.type]['outputs']:

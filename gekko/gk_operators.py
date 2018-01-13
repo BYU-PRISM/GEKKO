@@ -14,7 +14,7 @@ class GK_Operators:
         else:
             self.NAME = name
         
-        self.VALUE = value
+        self.VALUE = GK_Value(value)
             
     def __repr__(self):
         return self.name
@@ -96,3 +96,80 @@ class GK_Operators:
     def __rxor__(self,other): # ^
         return GK_Operators('(' + str(other) + '^' + str(self) + ')')
     """
+    
+class GK_Value():
+    def __init__(self,value):
+        self.value = value
+        self.change = True
+        
+    def __repr__(self):
+        return str(self.value)
+    def __str__(self):
+        return str(self.value)
+    
+    
+    def __len__(self):
+        return len(self.value)
+    
+    def __getitem__(self,key):
+        return self.value[key]
+    
+    def __setattr__(self, name, value):
+        if name == 'value':
+            self.__dict__[name] = value
+            self.__dict__['change'] = True
+        elif name == 'change':
+            self.__dict__['change'] = value
+        else:
+            raise Exception('Unrecognized property')
+    
+    def __setitem__(self,key,value):
+        self.value[key] = value
+        if type(self.change) is bool:
+            self.__dict__['change'] = [key]
+        else: 
+            self.__dict__['change'].append(key)
+            
+        #%%Operator overloading for building functions
+    #comparisons
+    def __lt__(self,other): #less than
+        return self.value < other
+    def __le__(self,other): #less than or equal to
+        return self.value <= other
+    def __gt__(self,other): #greater than
+        return self.value > other
+    def __ge__(self,other): #greater than or equal to
+        return self.value >= other
+    def __eq__(self,other): #equal ==
+        return self.value == other
+    #math operators
+    def __add__(self,other): # +
+        return self.value + other
+    def __sub__(self,other): # -
+        return self.value - other
+    def __pow__(self,other): # **
+        return self.value ** other
+    def __div__(self,other): # /
+        return self.value / other
+    def __truediv__(self,other): # /
+        return self.value / other
+    def __mul__(self,other): # *
+        return self.value * other
+    def __neg__(self): #-x
+        return self.value*-1
+    # reverse math    
+    def __radd__(self,other): # +
+        return other + self.value
+    def __rsub__(self,other): # -
+        return other - self.value
+    def __rpow__(self,other): # **
+        return other ** self.value
+    def __rdiv__(self,other): # /
+        return other / self.value
+    def __rtruediv__(self,other): # /
+        return other / self.value
+    def __rmul__(self,other): # *
+        return other * self.value
+    #other
+    def __abs__(self):
+        return abs(self.value)

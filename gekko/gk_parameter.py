@@ -47,9 +47,6 @@ class GKParameter(GK_Operators):
             
         if not hasattr(self,'type'): #don't overwrite FV and MV
             self.type = None 
-
-        #register values that are changed by the user 
-        self._changed = False
         
         # now allow options to be sent to the server
         self._initialized = True
@@ -66,6 +63,7 @@ class GKParameter(GK_Operators):
         self.value[key] = value
 
 
+    
     def __setattr__(self, name, value):
         if self._initialized:
             #ignore cases on global options
@@ -73,15 +71,17 @@ class GKParameter(GK_Operators):
 
             #only allow user to set input or input/output options:
             if name in options[self.type]['inputs']+options[self.type]['inout']:
-                self.__dict__[name] = value
+                if name == 'VALUE':
+                    self.__dict__[name].value = value
+                else:
+                    self.__dict__[name] = value
+                    
                 #write option to dbs file
                 if self.type != None: #only for FV and MV
                     if name != 'VALUE': #don't write values to dbs
                         f = open(os.path.join(self.path,'overrides.dbs'),'a')
                         f.write(self.name+'.'+name+' = '+str(value)+'\n')
                         f.close()
-                    elif name == 'VALUE':
-                        self._changed = True
                     
             #don't allow writing to output properties by default
             elif name in options[self.type]['outputs']:
