@@ -28,7 +28,7 @@ More of the backend details available at :ref:`what_APM_does`
 Installation
 ============
 
-A pip package is coming. For now, copy the entire project and import GEKKO from gekko::
+A pip package is available:: 
 
 	from gekko import GEKKO
 
@@ -46,6 +46,7 @@ Contents
 	CV_options
 	global
 	model_methods
+	examples
 
 
 
