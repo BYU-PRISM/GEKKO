@@ -6,20 +6,20 @@ Created on Fri Dec 22 12:48:38 2017
 """
 
 
-import hw_A
-assert hw_A.m.options.SOLVESTATUS == 1
+import hw_skydive
+assert hw_skydive.m.options.SOLVESTATUS == 1
 
-import hw_B
-assert hw_B.m.options.SOLVESTATUS == 1
+import hw_reservoirs
+assert hw_reservoirs.m.options.SOLVESTATUS == 1
 
-import hw_C_HIV
-assert hw_C_HIV.m.options.SOLVESTATUS == 1
+import hw_HIV
+assert hw_HIV.m.options.SOLVESTATUS == 1
 
-import hw_C_collocation
+import hw_collocation
 
-import hw_D_baddata
+import hw_baddata
 
-import hw_D_flightcontrol
+import hw_flightcontrol
 
 import mpc_example
 
