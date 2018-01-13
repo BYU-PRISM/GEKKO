@@ -19,7 +19,7 @@ Model
 Create a python model object::
 
 	from gekko import GEKKO
-	m = GEKKO([server], [name]]):
+	m = GEKKO([server], [name]):
 
 
 Variable Types
@@ -60,7 +60,7 @@ Parameters are capable of becoming MVs and FVs. Since GEKKO defines
 MVs and FVs directly, parameters just serve as constant values. However, Parameters 
 (unline Constants) can be (and usually are) arrays.::
 
-	p = m.Param([name], [value]])
+	p = m.Param([name], [value])
 
 * The value can be a python scalar, python list of numpy array. If the value is a scalar, it will be used throughout the horizon. 
 
@@ -81,7 +81,7 @@ Intermediates
 
 Intermediates are a unique GEKKO variable type. Intermediates, and their associated equations, are like variables except their values and gradients are evaluated explicitly only once, at the beginning of the iteration. This saves time in function evaluations, but must be balanced with increased iterations resulting from incorrect values used in the rest of the iteration. The function creates an intermediate variable "i" and sets it equal to arguement "equation":: 
 
-    i = m.Intermediate(equation,[name]])
+    i = m.Intermediate(equation,[name])
  
 
 Fixed Variable
@@ -110,7 +110,7 @@ State Variable
 
 State Variables (SV) inherit Variables with just a couple extra attributes::
 
-    s =  m.SV([name], [value] [lb], [ub])
+    s =  m.SV([name], [value], [lb], [ub])
 
 
 Controlled Variable
@@ -118,7 +118,7 @@ Controlled Variable
 
 Controlled Variables (CV) inherit SVs are are typically what you're trying to match (to data or a setpoint)::
 
-    c = m.CV([name], [value] [lb], [ub])
+    c = m.CV([name], [value], [lb], [ub])
 
 
 
