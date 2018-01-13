@@ -24,6 +24,8 @@ Functionality
 
 -allow user to load custom .apm or .csv files?
 
+-make comparing options with output optional
+
 
 Interface
 ---------
@@ -36,9 +38,13 @@ Interface
 
 -Load back FV MV SV CV outputs
 
+-Load back values of scalars not as list
+
 
 Robustness
 ----------
+
+-find and replace double operators in model file (++, +-, -+, --)
 
 -if .dt() used and csv not provided, demand time variable
 
@@ -63,6 +69,8 @@ Robustness
 -pytest on tests http://pytest.readthedocs.io/en/latest/ 
 
 -model validations: 1. invalid (reserved keywords) in variables 2. correct imode 
+
+-are results of FV/MV with STATUS = 0 in results.csv/json?
 
 
 Code cleanup
