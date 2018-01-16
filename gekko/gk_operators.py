@@ -26,6 +26,8 @@ class GK_Operators:
     def __getattr__(self,name):
         if name.upper() in self.__dict__:
             return self.__dict__[name.upper()]
+        elif name.lower() in self.__dict__:
+            return self.__dict__[name.lower()]
         else: 
             raise AttributeError
     #%%Operator overloading for building functions
@@ -97,7 +99,7 @@ class GK_Operators:
         return GK_Operators('(' + str(other) + '^' + str(self) + ')')
     """
     
-class GK_Value():
+class GK_Value(list):
     def __init__(self,value):
         self.value = value
         self.change = True

@@ -34,8 +34,10 @@ m.Equations([H.dt() == kr[0] - kr[1]*H - kr[2]*H*V,
 #options
 m.options.imode = 4
 m.options.SOLVER = 2
+
+m.options.MAX_ITER = 1000
 #solve
-m.solve()
+m.solve(remote=False)
 
 # load data file for comparison
 data = np.genfromtxt('hiv_data.csv', delimiter=',')
@@ -43,13 +45,13 @@ data = np.genfromtxt('hiv_data.csv', delimiter=',')
 log_v = data[:,][:,1] # 2nd column of data
 v = np.power(10,log_v)
 
-H.value = np.array(H.value)
+
 # plot results
 import matplotlib.pyplot as plt
 plt.figure(1)
-plt.semilogy(m.time,H.value,'b-')
-plt.semilogy(m.time,I.value,'g:')
-plt.semilogy(m.time,V.value,'r--')
+plt.semilogy(m.time,H,'b-')
+plt.semilogy(m.time,I,'g:')
+plt.semilogy(m.time,V,'r--')
 plt.semilogy(data[:,][:,0],v,'ro')
 plt.xlabel('Time (yr)')
 plt.ylabel('States (log scale)')

@@ -74,6 +74,8 @@ Robustness
 
 -are results of FV/MV with STATUS = 0 in results.csv/json?
 
+-case-insensitive reading of json
+
 
 Code cleanup
 ------------

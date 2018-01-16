@@ -62,7 +62,12 @@ class GKParameter(GK_Operators):
     def __setitem__(self,key,value):
         self.value[key] = value
 
-
+#    def __getattr__(self,name):
+#        name = name.upper()
+#        if name == 'VALUE':
+#            return self.__dict__['VALUE'].value
+#        else:
+#            return self.__dict__[name]
     
     def __setattr__(self, name, value):
         if self._initialized:

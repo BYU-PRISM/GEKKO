@@ -274,9 +274,7 @@ class GEKKO(object):
         
             # Calls apmonitor through the command line
             if os.name == 'nt': #Windows
-                apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin/apm.exe')
-                print(apm_exe)
-                print(self.path)
+                apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm.exe')
                 app = subprocess.Popen([apm_exe, self.model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self.path, env = {"PATH" : self.path }, universal_newlines=True)
                 if disp == True:
                     for line in iter(app.stdout.readline, ""):
@@ -286,12 +284,13 @@ class GEKKO(object):
                             pass
                 app.wait()
             else:
-                apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin/apmonitor')
+                apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apmonitor')
                 app = subprocess.Popen([apm_exe, self.model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self.path, env = {"PATH" : self.path, "LD_LIBRARY_PATH" : os.path.dirname(os.path.realpath(__file__))+'/bin/lib' }, universal_newlines=True)
-                
                 for line in iter(app.stdout.readline, ""):
                     if disp == True:
                         print(line.replace('\n', ''))
+                    else:
+                        pass
                 app.wait()
             out, errs = app.communicate()
             # print(out)
@@ -594,19 +593,19 @@ class GEKKO(object):
                     
                 if vp.value.change is True: #Save the entire array of values
                     #discretize all values to arrays
-                    if not isinstance(vp.VALUE, (list,np.ndarray)):
+                    if not isinstance(vp.VALUE.value, (list,np.ndarray)):
                         vp.VALUE = np.ones(length)*vp.VALUE
                     #confirm that previously discretized values are the right length
-                    elif np.size(vp.VALUE) != length:
+                    elif np.size(vp.VALUE.value) != length:
                         raise Exception('Data points must match time discretization')
                     #group data with column header
-                    t = np.hstack((str(vp),np.array(vp.VALUE).flatten()))
+                    t = np.hstack((vp.name,np.array(vp.VALUE.value).flatten().astype(object)))
                     
                 elif isinstance(vp.value.change,list): #only certain elements should be saved
                     t = np.array(vp.VALUE).astype(object)
                     t[:] = ' '
                     t[vp.value.change] = vp.value[vp.value.change]
-                    t = np.hstack((str(vp),t))
+                    t = np.hstack((str(vp),t.flatten().astype(object)))
                 
                 else: #somebody broke value.change
                     raise Exception('Variable value modification monitor malfunction.')
@@ -619,7 +618,13 @@ class GEKKO(object):
                 if hasattr(vp,'MEAS'):                    
                     if vp.MEAS != None:
                         #vp.VALUE = np.array(vp.VALUE).astype(object)
-                        t[1] = "measurement"
+                        if self.options.IMODE in set((5,8)):
+                            t[-1] = 'measurement'
+                        else:
+                            t[1] = "measurement"
+                        
+                        #reset MEAS so it doesn't get repeated on next solve
+                        vp.MEAS = None
                 
                 if first_array == False:
                     csv_data = t
