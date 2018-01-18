@@ -18,14 +18,14 @@ m = GEKKO()
 m.time = np.linspace(0,15,61)
 #parameters
 lg10_kr = [m.Param(value=lkr[i]) for i in range(6)]
-#intermediates
-kr = [m.Intermediate(10**lg10_kr[i]) for i in range(6)]
 #variables
+kr = [m.Var() for i in range(6)]
 H = m.Var(value=1e6)
 V = m.Var(value=1e2)
 I = m.Var(value=0)
 LV = m.Var(value=2)
 #equations
+m.Equations([10**lg10_kr[i]==kr[i] for i in range(6)])
 m.Equations([H.dt() == kr[0] - kr[1]*H - kr[2]*H*V,
              I.dt() == kr[2]*H*V - kr[3]*I,
              V.dt() == -kr[2]*H*V - kr[4]*V + kr[5]*I, 
@@ -33,11 +33,11 @@ m.Equations([H.dt() == kr[0] - kr[1]*H - kr[2]*H*V,
 
 #options
 m.options.imode = 4
-m.options.SOLVER = 2
+m.options.SOLVER = 3
 
 m.options.MAX_ITER = 1000
 #solve
-m.solve(remote=False)
+m.solve(remote=True)
 
 # load data file for comparison
 data = np.genfromtxt('hiv_data.csv', delimiter=',')
