@@ -136,9 +136,10 @@ sol_apm = np.empty(5) # store 5 results
 i = 0
 for nodes in range(2,7):
     m.options.nodes = nodes
-    #m.clear_data()#apm(s,a,'clear all') # clear prior application
-    #x.value=0
-    m.solve(remote=False) # solve problem
+    m.clear_data()  # clear prior application
+    x.value=0
+    u.value=4
+    m.solve() # solve problem
     sol_apm[i] = x.value[-1] # store solution (last point)
     i += 1
 
