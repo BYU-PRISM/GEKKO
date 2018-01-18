@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import numpy as np
 """This class enables operator overloading for turning python equations into
 strings for the .apm model. Each variable type inherits this class. Operations 
 done on an instance of this class return a new instance to enable chained 
@@ -20,7 +21,10 @@ class GK_Operators:
         return self.name
     def __str__(self):
         return self.name
-    
+    def __len__(self):
+        return len(self.value)
+    def __getitem__(self,key):
+        return self.value[key]
     #make attributes case in-sensitive for reading too
     # (this is inherited by variables and paramters)
     def __getattr__(self,name):
@@ -131,6 +135,9 @@ class GK_Value(list):
             self.__dict__['change'] = [key]
         else: 
             self.__dict__['change'].append(key)
+    
+    def __array__(self):
+        return np.array(self.value)
             
         #%%Operator overloading for building functions
     #comparisons
