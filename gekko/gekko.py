@@ -1,3 +1,4 @@
+
 #%% Imports
 import os
 import sys
@@ -618,7 +619,7 @@ class GEKKO(object):
                 if hasattr(vp,'MEAS'):                    
                     if vp.MEAS != None:
                         #vp.VALUE = np.array(vp.VALUE).astype(object)
-                        if self.options.IMODE in set((5,8)):
+                        if self.options.IMODE in [5,8]:
                             t[-1] = 'measurement'
                         else:
                             t[1] = "measurement"
@@ -818,7 +819,16 @@ class GEKKO(object):
         for f in files:
             os.remove(f)
     def clear_data(self):
-        os.remove(os.path.join(self.path,self.model_name+'.csv'))
+        #csv file
+        try:
+            os.remove(os.path.join(self.path,self.model_name+'.csv'))
+        except:
+            pass
+        #t0 files
+        d = os.listdir(self.path)
+        for f in d:
+            if f.endswith('.t0') or f.endswith('.dxdt'):
+                os.remove(os.path.join(self.path,f))
             
             
     #%% Trig functions

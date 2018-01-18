@@ -57,12 +57,12 @@ xs = x.value.value
 ys = y.value.value
 #%% Plot results
 plt.figure()
-plt.plot(xs,ys)
+plt.plot(x,y)
 plt.xlabel('x')
 plt.ylabel('y')
 
 plt.figure()
-plt.plot(m.time,x,label='x')
+plt.plot(m.time,x.value,label='x')
 plt.plot(m.time,y,label='y')
 plt.xlabel('time')
 plt.legend()
