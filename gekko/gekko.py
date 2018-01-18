@@ -94,7 +94,7 @@ class GEKKO(object):
         self._constants.append(const)
         return const
 
-    def Param(self, name='', value=0, integer=False):
+    def Param(self, name='', value=None, integer=False):
         """GK parameters can become MVs and FVs. Since GEKKO defines
         MVs and FVs directly, there's not much use for parameters. Parameters
         are effectively constants unless the resulting .spm model is used later
@@ -106,7 +106,7 @@ class GEKKO(object):
         self.parameters.append(parameter)
         return parameter
 
-    def FV(self, name='',value=0, lb=None, ub=None, integer=False):
+    def FV(self, name='',value=None, lb=None, ub=None, integer=False):
         """A manipulated variable that is fixed with time. Therefore it lacks
         time-based attributes."""
         if name == '':
@@ -121,7 +121,7 @@ class GEKKO(object):
         #self.saved_model_options.append('info FV, {0}'.format(name))
         return parameter
 
-    def MV(self, name='', value=0, lb=None, ub=None, integer=False):
+    def MV(self, name='', value=None, lb=None, ub=None, integer=False):
         """Change these variables optimally to meet objectives"""
         if name == '':
             name = 'p' + str(len(self.parameters) + 1)
@@ -135,7 +135,7 @@ class GEKKO(object):
         #self.saved_model_options.append('info MV, {0}'.format(name))
         return parameter
 
-    def Var(self, name='', value=0, lb=None, ub=None, integer=False):
+    def Var(self, name='', value=None, lb=None, ub=None, integer=False):
         """Calculated by solver to meet constraints (Equations). The number of
         variables (including CVs and SVs) must equal the number of equations."""
         if name == '':
@@ -147,7 +147,7 @@ class GEKKO(object):
         self.variables.append(variable)
         return variable
 
-    def SV(self, name='', value=0, lb=None, ub=None, integer=False):
+    def SV(self, name='', value=None, lb=None, ub=None, integer=False):
         """A variable that's special"""
         if name == '':
             name = 'v' + str(len(self.variables) + 1)
@@ -161,7 +161,7 @@ class GEKKO(object):
         #self.saved_model_options.append('info SV, {0}'.format(name))
         return variable
 
-    def CV(self, name='', value=0, lb=None, ub=None, integer=False):
+    def CV(self, name='', value=None, lb=None, ub=None, integer=False):
         """A variable with a setpoint. Reaching the setpoint is added to the
         objective."""
         if name == '':
@@ -598,7 +598,7 @@ class GEKKO(object):
                         vp.VALUE = np.ones(length)*vp.VALUE
                     #confirm that previously discretized values are the right length
                     elif np.size(vp.VALUE.value) != length:
-                        raise Exception('Data points must match time discretization')
+                        raise Exception('Data arrays must have the same length, and match time discretization in dynamic problems')
                     #group data with column header
                     t = np.hstack((vp.name,np.array(vp.VALUE.value).flatten().astype(object)))
                     

@@ -30,7 +30,7 @@ class GKVariable(GK_Operators):
     """Represents a parameter in a model"""
     counter = 0
     
-    def __init__(self, name='', value=0, lb=None, ub=None, integer=False):
+    def __init__(self, name='', value=None, lb=None, ub=None, integer=False):
         if name == '':
             name = 'v' + GKVariable.counter
             GKVariable.counter += 1

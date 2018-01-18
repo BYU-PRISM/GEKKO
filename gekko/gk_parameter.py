@@ -29,7 +29,7 @@ class GKParameter(GK_Operators):
     """Represents a parameter in a model."""
     counter = 1
 
-    def __init__(self, name='', value=0, integer=False):
+    def __init__(self, name='', value=None, integer=False):
         if name == '':
             name = 'p' + GKParameter.counter
             GKParameter.counter += 1

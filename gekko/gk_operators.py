@@ -105,9 +105,13 @@ class GK_Operators:
     
 class GK_Value(list):
     def __init__(self,value):
-        self.value = value
-        self.change = True
-        
+        if value is not None:
+            self.change = True
+            self.value = value
+        else:
+            self.value = 0 #store default value without triggering change detection
+            self.change = False
+            
     def __repr__(self):
         return str(self.value)
     def __str__(self):

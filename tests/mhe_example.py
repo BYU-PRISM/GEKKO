@@ -72,13 +72,13 @@ Tc_mhe.STATUS = 0 #don't estimate
 Tc_mhe.FSTATUS = 1 #receive measurement
 
 #Measurement to match simulation with
-T_mhe = m.CV(value=324.475443431599 ,lb=250,ub=500,name='t')
+T_mhe = m.CV(value=325 ,lb=250,ub=500,name='t')
 T_mhe.STATUS = 1  #minimize error between simulation and measurement
 T_mhe.FSTATUS = 1 #receive measurement
 T_mhe.MEAS_GAP = 0.1 #measurement deadband gap
 
 #State to watch
-Ca_mhe = m.SV(value=0.87725294608097, ub=1, lb=0,name='ca')
+Ca_mhe = m.SV(value=0.8, ub=1, lb=0,name='ca')
 
 #Other parameters
 q = m.Param(value=100)

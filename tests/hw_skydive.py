@@ -62,7 +62,7 @@ plt.xlabel('x')
 plt.ylabel('y')
 
 plt.figure()
-plt.plot(m.time,x.value,label='x')
+plt.plot(m.time,x,label='x')
 plt.plot(m.time,y,label='y')
 plt.xlabel('time')
 plt.legend()
@@ -72,3 +72,4 @@ plt.plot(m.time,vx,label='vx')
 plt.plot(m.time,vy,label='vy')
 plt.xlabel('time')
 plt.legend()
+
