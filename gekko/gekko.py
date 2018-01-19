@@ -66,7 +66,6 @@ class GEKKO(object):
         self.time = None
 
         self.model_initialized = False
-        self.saved_model_options = [] #what does this do?
         self.csv_status = None #indicate 'provided' or 'generated'
         self.model = ''
 
@@ -118,7 +117,6 @@ class GEKKO(object):
         self.parameters.append(parameter)
         #Classify variable in .info file
         self.f_info.write('F, '+name+'\n')
-        #self.saved_model_options.append('info FV, {0}'.format(name))
         return parameter
 
     def MV(self, name='', value=None, lb=None, ub=None, integer=False):
@@ -132,7 +130,6 @@ class GEKKO(object):
         self.parameters.append(parameter)
         #Classify variable in .info file
         self.f_info.write('M, '+name+'\n')
-        #self.saved_model_options.append('info MV, {0}'.format(name))
         return parameter
 
     def Var(self, name='', value=None, lb=None, ub=None, integer=False):
@@ -158,7 +155,6 @@ class GEKKO(object):
         self.variables.append(variable)
         #Classify variable in .info file
         self.f_info.write('S, '+name+'\n')
-        #self.saved_model_options.append('info SV, {0}'.format(name))
         return variable
 
     def CV(self, name='', value=None, lb=None, ub=None, integer=False):
@@ -173,7 +169,6 @@ class GEKKO(object):
         self.variables.append(variable)
         #Classify variable in .info file
         self.f_info.write('C, '+name+'\n')
-        #self.saved_model_options.append('info CV, {0}'.format(name))
         return variable
 
     def Intermediate(self,equation,name=''):
