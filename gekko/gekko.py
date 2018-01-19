@@ -491,7 +491,7 @@ class GEKKO(object):
                     i = 1
                     model += ' = %s' % parameter.VALUE
                 if parameter.type != None: #Only FV/MV have bounds
-                    if parameter.UB != None:
+                    if parameter.UB is not None:
                         if i == 1:
                             model += ', '
                         i = 1
@@ -512,7 +512,7 @@ class GEKKO(object):
                 if not isinstance(parameter.VALUE.value, (list,np.ndarray)):
                     i = 1
                     model += ' = %s' % parameter.VALUE
-                if parameter.UB != None:
+                if parameter.UB is not None:
                     if i == 1:
                         model += ', '
                     i = 1

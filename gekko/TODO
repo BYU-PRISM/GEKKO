@@ -74,6 +74,8 @@ Robustness
 
 -case-insensitive reading of json
 
+-Raise exception and direct to Equation() if the argument to Equations() is not a list
+
 
 Code cleanup
 ------------
