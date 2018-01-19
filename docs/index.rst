@@ -30,7 +30,13 @@ Installation
 
 A pip package is available:: 
 
-	from gekko import GEKKO
+	pip install gekko 
+
+The most recent version is 0.0.2a. You can upgrade from the commandline with the upgrade flag::
+    
+    pip install --upgrade gekko
+
+
 
 Contents
 ========
@@ -47,6 +53,7 @@ Contents
 	global
 	model_methods
 	examples
+	support
 
 
 
