@@ -65,7 +65,7 @@ class GEKKO(object):
         #time discretization
         self.time = None
 
-        self.model_initialized = False
+        self.model_initialized = False #probably not needed
         self.csv_status = None #indicate 'provided' or 'generated'
         self.model = ''
 
@@ -330,18 +330,22 @@ class GEKKO(object):
                     return byte.decode().replace('\r','')
                 else:
                     return byte
-            results = byte2str(apm.get_file(self.server,self.model_name,'results.csv'))
-            f = open(os.path.join(self.path,'results.csv'), 'w')
-            f.write(str(results))
-            f.close() 
-            results = byte2str(apm.get_file(self.server,self.model_name,'results.json'))
-            f = open(os.path.join(self.path,'results.json'), 'w')
-            f.write(str(results))
-            f.close() 
-            options = byte2str(apm.get_file(self.server,self.model_name,'options.json'))
-            f = open(os.path.join(self.path,'options.json'), 'w')
-            f.write(str(options))
-            f.close() 
+            
+            try:
+                results = byte2str(apm.get_file(self.server,self.model_name,'results.csv'))
+                f = open(os.path.join(self.path,'results.csv'), 'w')
+                f.write(str(results))
+                f.close() 
+                results = byte2str(apm.get_file(self.server,self.model_name,'results.json'))
+                f = open(os.path.join(self.path,'results.json'), 'w')
+                f.write(str(results))
+                f.close() 
+                options = byte2str(apm.get_file(self.server,self.model_name,'options.json'))
+                f = open(os.path.join(self.path,'options.json'), 'w')
+                f.write(str(options))
+                f.close() 
+            except:
+                raise ImportError('Results files not found. APM did not find a solution or the server is unreachable.')
         
         if timing == True:
             print('solve', time.time() - t)
