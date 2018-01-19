@@ -52,7 +52,7 @@ class GK_Operators:
     def __sub__(self,other): # -
         return GK_Operators('(' + str(self) + '-' + str(other) + ')')
     def __pow__(self,other): # **
-        return GK_Operators('(' + str(self) + '^' + str(other) + ')')
+        return GK_Operators('((' + str(self) + ')^(' + str(other) + '))')
     def __div__(self,other): # /
         return GK_Operators('(' + str(self) + '/' + str(other) + ')')
     def __truediv__(self,other): # /
