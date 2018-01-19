@@ -1,7 +1,6 @@
 
 .. _MV_options:
 
-
 Manipulated Variable Options
 ====================================
 

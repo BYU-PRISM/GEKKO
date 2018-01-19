@@ -67,11 +67,16 @@ Model Building
 	Solve the optimization problem.
 	
 	This function has these substeps:
-	*Validates the model and write .apm file (if .apm not supplied)
-	*Validate and write .csv file (if none provided)
-	*Write options to overrides.dbs
-	*Solve the problem using the apm.exe commandline interface. 
-	*Load results into python variables.
+
+	* Validates the model and write .apm file (if .apm not supplied)
+
+	* Validate and write .csv file (if none provided)
+
+	* Write options to overrides.dbs
+
+	* Solve the problem using the apm.exe commandline interface. 
+
+	* Load results into python variables.
 	
 
 

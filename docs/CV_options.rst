@@ -2,7 +2,6 @@
 
 .. _CV_options:
 
-
 Controlled Variable Options
 ====================================
 

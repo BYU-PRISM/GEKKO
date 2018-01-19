@@ -34,7 +34,7 @@ are degrees of freedom and are changed by the solver. All variable declarations 
 Fixed Variables (FV), Manipulated Variables (MV), State Variables (SV) and Controlled 
 Variables (CV) expand parameters and variables with extra attributes and features to 
 facilitate dynamic optimization problem formulation and robustness for online use.
-These attributes are discussed in :ref:`_MV_options` and :ref:'_CV_options'.
+These attributes are discussed in :doc:`MV_options` and :doc:`CV_options`.
 
 All of these variable types have the optional argument 'name'. The name is used 
 on the back-end to write the model file and is only useful if the user intends to 
