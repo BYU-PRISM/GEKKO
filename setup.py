@@ -32,7 +32,11 @@ setup(name='gekko',
     packages=find_packages(),
     install_requires=[
         'APMonitor',
-        'numpy'#,
+        'numpy',
+        'dash',
+        'dash_html_components',
+        'dash_core_components',
+        'dash_renderer'#,
         #'ujson',
     ],
 #    scripts=[
@@ -44,7 +48,3 @@ setup(name='gekko',
 #    tests_require=['pytest'],
     python_requires='>=2.6',
     zip_safe=False)
-
-
-
-
