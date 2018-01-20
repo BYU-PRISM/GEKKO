@@ -79,7 +79,8 @@ class GEKKO(object):
         #Create and open configuration files
         self.f_info = open(os.path.join(self.path,self.model_name)+'.info', 'w+') #for classifiying variables
 
-
+        #clear anything already on the server
+        apm.cmd(self.server,self.model_name,'clear all')
 
         
     #%% Parts of the model
@@ -304,8 +305,11 @@ class GEKKO(object):
                     f.close()
                     apm.cmd(self.server, self.model_name, extension+' '+file)
                     
-            #clear anything already on the server
-            apm.cmd(self.server,self.model_name,'clear all')
+            
+            #clear apm and csv files already on the server
+            apm.cmd(self.server,self.model_name,'clear apm')
+            apm.cmd(self.server,self.model_name,'clear csv')
+            
             #send model file
             f = open(os.path.join(self.path,self.model_name + '.apm'))
             model = f.read()

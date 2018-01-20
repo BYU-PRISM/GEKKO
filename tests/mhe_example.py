@@ -112,7 +112,7 @@ m.options.SOLVER = 3 #IPOPT
 #%% Loop
 
 # number of cycles to run
-cycles = 10
+cycles = 50
 
 # step in the jacket cooling temperature at cycle 6
 Tc_meas = np.empty(cycles)
@@ -136,7 +136,7 @@ for i in range(cycles):
     # input Tc (jacket cooling temperature)
     Tc.MEAS = Tc_meas[i]
     # simulate process model, 1 time step
-    s.solve(disp=True,remote=False)
+    s.solve()
     # retrieve Ca and T measurements from the process
     Ca_meas[i] = Ca.MODEL
     T_meas[i] = T.MODEL
@@ -149,7 +149,7 @@ for i in range(cycles):
     T_mhe.MEAS = T_meas[i] #CV
 
     # solve process model, 1 time step
-    m.solve(disp=True,remote=False)
+    m.solve()
     # check if successful
     if m.options.APPSTATUS == 1:
         # retrieve solution
@@ -166,36 +166,6 @@ for i in range(cycles):
         ' Ca (actual)=' + str(Ca_meas[i]) + \
         ' UA (estimated)=' + str(UA_mhe_store[i]) + \
         ' UA (actual)=50000')
-
-
-    if False:
-        plt.figure()
-        plt.subplot(411)
-        plt.plot(s.time+.4,s.Tc.value,'k-',linewidth=2)
-        plt.plot(m.time,m.Tc.value,'g-',linewidth=1)
-        plt.ylabel('Jacket T (K)')
-        plt.legend(['sim','mhe'])
-        plt.ylim([275,305])
-
-        plt.subplot(412)
-        plt.plot([0,time[-1]],[50000,50000],'k--')
-        plt.plot(m.time,UA_mhe.value,'r:',linewidth=2)
-        plt.axis([0,time[-1],10000,100000])
-        plt.ylabel('UA')
-        plt.legend(['Actual UA','Predicted UA'])
-
-        plt.subplot(413)
-        plt.plot(s.time+.4,T.value,'ro')
-        plt.plot(m.time,T_mhe.value,'b-',linewidth=2)
-        plt.ylabel('Reactor T (K)')
-        plt.legend(['Measured T','Predicted T'])
-
-        plt.subplot(414)
-        plt.plot(s.time+.4,Ca.value,'go')
-        plt.plot(m.time,Ca_mhe.value,'m-',linewidth=2)
-        plt.ylabel('Reactor C_a (mol/L)')
-        plt.legend(['Measured C_a','Predicted C_a'])
-        plt.show()
 
 #%% plot results
 plt.figure()
