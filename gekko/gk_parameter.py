@@ -77,6 +77,9 @@ class GKParameter(GK_Operators):
             #only allow user to set input or input/output options:
             if name in options[self.type]['inputs']+options[self.type]['inout']:
                 if name == 'VALUE':
+                    # Extract input array from pandas series if needed
+                    if type(value).__name__ == 'Series':
+                        value = value.values
                     self.__dict__[name].value = value
                 else:
                     self.__dict__[name] = value
