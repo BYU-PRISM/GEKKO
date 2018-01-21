@@ -48,6 +48,15 @@ class GKVariable(GK_Operators):
         #self.VALUE = value #initialized value THIS IS DONE IS GK_Operators
         if not hasattr(self,'type'): #don't overwrite SV and CV
             self.type = None 
+            
+        if lb is not None:
+            self.LOWER = lb
+        else:
+            self.LOWER = -1.23456789e20
+        if ub is not None:
+            self.UPPER = ub
+        else:
+            self.UPPER = 1.23456789e20
         self.LB = lb #lower bound
         self.UB = ub #upper bound
         
@@ -139,7 +148,7 @@ class GK_SV(GKVariable):
         self.path = model_path #use the same path as the model 
         
         # SV specific options
-        self.FSTATUS = 1
+        self.FSTATUS = 0
         self.LOWER = -1.0e20
         self.MEAS = None
         self.MODEL = 1.0

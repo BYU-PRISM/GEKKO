@@ -143,7 +143,7 @@ class GK_FV(GKParameter):
         if lb is not None:
             self.LOWER = lb
         else:
-            self.LOWER = -1.0e20
+            self.LOWER = -1.23456789e20
         self.LSTVAL = 1.0
         self.MEAS = None
         self.NEWVAL = 1.0
@@ -152,7 +152,7 @@ class GK_FV(GKParameter):
         if ub is not None:
             self.UPPER = ub
         else:
-            self.UPPER = 1.0e20
+            self.UPPER = 1.23456789e20
         self.VDVL = 1.0e20
         self.VLACTION = 0
         self.VLHI = 1.0e20
