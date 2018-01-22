@@ -12,7 +12,7 @@ Welcome to GEKKO's documentation!
 	
 
 Overview
-========
+--------
 
 GEKKO is optimization software for mixed-integer and
 differential algebraic equations. It is coupled with large-scale solvers for
@@ -26,7 +26,7 @@ More of the backend details available at :ref:`what_APM_does`
 
 
 Installation
-============
+------------
 
 A pip package is available:: 
 
@@ -37,9 +37,18 @@ The most recent version is 0.0.2a. You can upgrade from the commandline with the
     pip install --upgrade gekko
 
 
+Advanced Installation
+---------------------
+
+To enable local solve (rather than solving on the remote server), copy the required executables from the `GEKKO GitHub repo <https://github.com/BYU-PRISM/GEKKO>`_ to your local path. ::
+
+    gekko/gekko/bin/*
+
+Local executables are currently only available for Windows (apm.exe).
+
 
 Contents
-========
+--------
 
 .. toctree::
 	:maxdepth: 1
