@@ -72,10 +72,6 @@ m.y.FSTATUS = 1
 m.K.DMAX = 1
 m.tau.DMAX = .1
 
-# DCOST = penalize parameter movement
-#m.K.DCOST = 1
-#m.tau.DCOST = 0
-
 # MEAS_GAP = dead-band for measurement / model mismatch
 m.y.MEAS_GAP = 0.25
 

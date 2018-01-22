@@ -101,13 +101,13 @@ class GKParameter(GK_Operators):
                     else:
                         raise TypeError
                 except TypeError:
-                    print(str(name)+" is an output property")
-                    raise AttributeError
+                    raise AttributeError(str(name)+" is an output property")
+
                     
             #no other properties allowed
             else:
-                print(str(name)+" is not a recognized property")
-                raise AttributeError
+                raise AttributeError(str(name)+" is not a property of this variable")
+
                 
         #for initializing model
         else:
