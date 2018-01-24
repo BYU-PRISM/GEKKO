@@ -64,6 +64,8 @@ Robustness
 
 -model validations: 1. invalid (reserved keywords) in variables 2. correct imode 
 
+-'CSV_READ was not written correctly' message for SS optimization -- change APM or make gekko recognize when csv file not written
+
 
 Code cleanup
 ------------

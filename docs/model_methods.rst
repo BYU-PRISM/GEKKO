@@ -18,6 +18,7 @@ Model Building
 
 .. py:class::	m = GEKKO([server], [name]):
 
+	Creates a GEKKO model `m`.
 
 .. py:classmethod::    c =  m.Const(value, [name]):
 
@@ -52,7 +53,9 @@ Model Building
 .. py:classmethod::    m.Obj(obj)
 
 
-.. py:classmethod::    m.Array(type,dimension)
+.. py:classmethod::    a = m.Array(type,dimension)
+	
+	Create an n-dimensional array (as defined in tuple input `dimension`) of GEKKO variables of type `type`.
 
 
 .. py:classmethod:: m.solve(remote=True,disp=True)
