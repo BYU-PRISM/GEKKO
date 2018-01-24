@@ -1,3 +1,4 @@
+
 #%% Imports
 import os
 import sys
@@ -65,8 +66,7 @@ class GEKKO(object):
         #time discretization
         self.time = None
 
-        self.model_initialized = False
-        self.saved_model_options = [] #what does this do?
+        self.model_initialized = False #probably not needed
         self.csv_status = None #indicate 'provided' or 'generated'
         self.model = ''
 
@@ -80,7 +80,8 @@ class GEKKO(object):
         #Create and open configuration files
         self.f_info = open(os.path.join(self.path,self.model_name)+'.info', 'w+') #for classifiying variables
 
-
+        #clear anything already on the server
+        apm.cmd(self.server,self.model_name,'clear all')
 
 
     #%% Parts of the model
@@ -94,7 +95,7 @@ class GEKKO(object):
         self._constants.append(const)
         return const
 
-    def Param(self, name='', value=0, integer=False):
+    def Param(self, name='', value=None, integer=False):
         """GK parameters can become MVs and FVs. Since GEKKO defines
         MVs and FVs directly, there's not much use for parameters. Parameters
         are effectively constants unless the resulting .spm model is used later
@@ -106,7 +107,7 @@ class GEKKO(object):
         self.parameters.append(parameter)
         return parameter
 
-    def FV(self, name='',value=0, lb=None, ub=None, integer=False):
+    def FV(self, name='',value=None, lb=None, ub=None, integer=False):
         """A manipulated variable that is fixed with time. Therefore it lacks
         time-based attributes."""
         if name == '':
@@ -118,10 +119,9 @@ class GEKKO(object):
         self.parameters.append(parameter)
         #Classify variable in .info file
         self.f_info.write('F, '+name+'\n')
-        #self.saved_model_options.append('info FV, {0}'.format(name))
         return parameter
 
-    def MV(self, name='', value=0, lb=None, ub=None, integer=False):
+    def MV(self, name='', value=None, lb=None, ub=None, integer=False):
         """Change these variables optimally to meet objectives"""
         if name == '':
             name = 'p' + str(len(self.parameters) + 1)
@@ -132,10 +132,9 @@ class GEKKO(object):
         self.parameters.append(parameter)
         #Classify variable in .info file
         self.f_info.write('M, '+name+'\n')
-        #self.saved_model_options.append('info MV, {0}'.format(name))
         return parameter
 
-    def Var(self, name='', value=0, lb=None, ub=None, integer=False):
+    def Var(self, name='', value=None, lb=None, ub=None, integer=False):
         """Calculated by solver to meet constraints (Equations). The number of
         variables (including CVs and SVs) must equal the number of equations."""
         if name == '':
@@ -147,7 +146,7 @@ class GEKKO(object):
         self.variables.append(variable)
         return variable
 
-    def SV(self, name='', value=0, lb=None, ub=None, integer=False):
+    def SV(self, name='', value=None, lb=None, ub=None, integer=False):
         """A variable that's special"""
         if name == '':
             name = 'v' + str(len(self.variables) + 1)
@@ -158,10 +157,9 @@ class GEKKO(object):
         self.variables.append(variable)
         #Classify variable in .info file
         self.f_info.write('S, '+name+'\n')
-        #self.saved_model_options.append('info SV, {0}'.format(name))
         return variable
 
-    def CV(self, name='', value=0, lb=None, ub=None, integer=False):
+    def CV(self, name='', value=None, lb=None, ub=None, integer=False):
         """A variable with a setpoint. Reaching the setpoint is added to the
         objective."""
         if name == '':
@@ -173,7 +171,6 @@ class GEKKO(object):
         self.variables.append(variable)
         #Classify variable in .info file
         self.f_info.write('C, '+name+'\n')
-        #self.saved_model_options.append('info CV, {0}'.format(name))
         return variable
 
     def Intermediate(self,equation,name=''):
@@ -308,9 +305,12 @@ class GEKKO(object):
                     file = f.read()
                     f.close()
                     apm.cmd(self.server, self.model_name, extension+' '+file)
+            
+            
+            #clear apm and csv files already on the server
+            apm.cmd(self.server,self.model_name,'clear apm')
+            apm.cmd(self.server,self.model_name,'clear csv')
 
-            #clear anything already on the server
-            apm.cmd(self.server,self.model_name,'clear all')
             #send model file
             f = open(os.path.join(self.path,self.model_name + '.apm'))
             model = f.read()
@@ -335,18 +335,23 @@ class GEKKO(object):
                     return byte.decode().replace('\r','')
                 else:
                     return byte
-            results = byte2str(apm.get_file(self.server,self.model_name,'results.csv'))
-            f = open(os.path.join(self.path,'results.csv'), 'w')
-            f.write(str(results))
-            f.close()
-            results = byte2str(apm.get_file(self.server,self.model_name,'results.json'))
-            f = open(os.path.join(self.path,'results.json'), 'w')
-            f.write(str(results))
-            f.close()
-            options = byte2str(apm.get_file(self.server,self.model_name,'options.json'))
-            f = open(os.path.join(self.path,'options.json'), 'w')
-            f.write(str(options))
-            f.close()
+
+            
+            try:
+                results = byte2str(apm.get_file(self.server,self.model_name,'results.csv'))
+                f = open(os.path.join(self.path,'results.csv'), 'w')
+                f.write(str(results))
+                f.close() 
+                results = byte2str(apm.get_file(self.server,self.model_name,'results.json'))
+                f = open(os.path.join(self.path,'results.json'), 'w')
+                f.write(str(results))
+                f.close() 
+                options = byte2str(apm.get_file(self.server,self.model_name,'options.json'))
+                f = open(os.path.join(self.path,'options.json'), 'w')
+                f.write(str(options))
+                f.close() 
+            except:
+                raise ImportError('Results files not found. APM did not find a solution or the server is unreachable.')
 
         if timing == True:
             print('solve', time.time() - t)
@@ -491,7 +496,7 @@ class GEKKO(object):
                     i = 1
                     model += ' = %s' % parameter.VALUE
                 if parameter.type != None: #Only FV/MV have bounds
-                    if parameter.UB != None:
+                    if parameter.UB is not None:
                         if i == 1:
                             model += ', '
                         i = 1
@@ -512,7 +517,7 @@ class GEKKO(object):
                 if not isinstance(parameter.VALUE.value, (list,np.ndarray)):
                     i = 1
                     model += ' = %s' % parameter.VALUE
-                if parameter.UB != None:
+                if parameter.UB is not None:
                     if i == 1:
                         model += ', '
                     i = 1
@@ -598,7 +603,7 @@ class GEKKO(object):
                         vp.VALUE = np.ones(length)*vp.VALUE
                     #confirm that previously discretized values are the right length
                     elif np.size(vp.VALUE.value) != length:
-                        raise Exception('Data points must match time discretization')
+                        raise Exception('Data arrays must have the same length, and match time discretization in dynamic problems')
                     #group data with column header
                     t = np.hstack((vp.name,np.array(vp.VALUE.value).flatten().astype(object)))
 
@@ -619,7 +624,7 @@ class GEKKO(object):
                 if hasattr(vp,'MEAS'):
                     if vp.MEAS != None:
                         #vp.VALUE = np.array(vp.VALUE).astype(object)
-                        if self.options.IMODE in set((5,8)):
+                        if self.options.IMODE in [5,8]:
                             t[-1] = 'measurement'
                         else:
                             t[1] = "measurement"
@@ -819,9 +824,17 @@ class GEKKO(object):
         for f in files:
             os.remove(f)
     def clear_data(self):
-        os.remove(os.path.join(self.path,self.model_name+'.csv'))
-
-
+        #csv file
+        try:
+            os.remove(os.path.join(self.path,self.model_name+'.csv'))
+        except:
+            pass
+        #t0 files
+        d = os.listdir(self.path)
+        for f in d:
+            if f.endswith('.t0') or f.endswith('.dxdt'):
+                os.remove(os.path.join(self.path,f))
+            
     #%% Trig functions
     def sin(self,other):
         return GK_Operators('sin(' + str(other) + ')')

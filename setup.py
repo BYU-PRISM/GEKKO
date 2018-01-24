@@ -2,16 +2,23 @@
 from setuptools import setup, find_packages
 # To use a consistent encoding
 from codecs import open
-from os import path
+import os
 
-here = path.abspath(path.dirname(__file__))
+here = os.path.abspath(os.path.dirname(__file__))
 # Get the long description from the README file
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
+with open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
+#APM binaries based on OS (currently only available for Windows)
+#if os.name == 'nt':
+#    apm_binary = {'gekko': ['bin/apm.exe']}
+#else:
+#    apm_binary = []
+#elif linux:
+#   apm_binary = ['gekko/bin/apmonitor' AND LA libaries]
 
 setup(name='gekko',
-    version='0.0.1rc1',
+    version='0.0.2b1',
     description='Optimization software for differential algebraic equations',
     long_description=long_description,
     #url="https://readthedocsurl",
@@ -32,17 +39,14 @@ setup(name='gekko',
     packages=find_packages(),
     install_requires=[
         'APMonitor',
-        'numpy',
         'dash',
         'dash_html_components',
         'dash_core_components',
-        'dash_renderer'#,
+        'dash_renderer',
+        'numpy>=1.9'#,
         #'ujson',
     ],
-#    scripts=[
-#        'gekko/bin/apmonitor',
-#        'gekko/bin/apm.exe'
-#    ],
+#    package_data=apm_binary,
 #   TODO add testing
 #    test_suite='pytest.collector',
 #    tests_require=['pytest'],

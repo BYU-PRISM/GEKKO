@@ -29,7 +29,7 @@ class GKParameter(GK_Operators):
     """Represents a parameter in a model."""
     counter = 1
 
-    def __init__(self, name='', value=0, integer=False):
+    def __init__(self, name='', value=None, integer=False):
         if name == '':
             name = 'p' + GKParameter.counter
             GKParameter.counter += 1
@@ -77,6 +77,9 @@ class GKParameter(GK_Operators):
             #only allow user to set input or input/output options:
             if name in options[self.type]['inputs']+options[self.type]['inout']:
                 if name == 'VALUE':
+                    # Extract input array from pandas series if needed
+                    if type(value).__name__ == 'Series':
+                        value = value.values
                     self.__dict__[name].value = value
                 else:
                     self.__dict__[name] = value
@@ -98,13 +101,13 @@ class GKParameter(GK_Operators):
                     else:
                         raise TypeError
                 except TypeError:
-                    print(str(name)+" is an output property")
-                    raise AttributeError
+                    raise AttributeError(str(name)+" is an output property")
+
                     
             #no other properties allowed
             else:
-                print(str(name)+" is not a recognized property")
-                raise AttributeError
+                raise AttributeError(str(name)+" is not a property of this variable")
+
                 
         #for initializing model
         else:
@@ -140,7 +143,7 @@ class GK_FV(GKParameter):
         if lb is not None:
             self.LOWER = lb
         else:
-            self.LOWER = -1.0e20
+            self.LOWER = -1.23456789e20
         self.LSTVAL = 1.0
         self.MEAS = None
         self.NEWVAL = 1.0
@@ -149,7 +152,7 @@ class GK_FV(GKParameter):
         if ub is not None:
             self.UPPER = ub
         else:
-            self.UPPER = 1.0e20
+            self.UPPER = 1.23456789e20
         self.VDVL = 1.0e20
         self.VLACTION = 0
         self.VLHI = 1.0e20

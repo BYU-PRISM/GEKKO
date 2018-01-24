@@ -3,6 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Remote solve files
+tests/results.csv
+tests/results.json
+tests/options.json
+
 # C extensions
 *.so
 
