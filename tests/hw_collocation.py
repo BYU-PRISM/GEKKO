@@ -130,12 +130,15 @@ m.Equation(5*x.dt() == -x**2 + u)
 m.time = [0,tf]
 
 m.options.imode = 4
+m.options.TIME_SHIFT = 0
 
 sol_apm = np.empty(5) # store 5 results
 i = 0
 for nodes in range(2,7):
-    m.clear()#apm(s,a,'clear all') # clear prior application
     m.options.nodes = nodes
+    m.clear_data()  # clear prior application
+    x.value=0
+    u.value=4
     m.solve() # solve problem
     sol_apm[i] = x.value[-1] # store solution (last point)
     i += 1

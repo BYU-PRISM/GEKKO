@@ -102,7 +102,7 @@ plt.subplot(3,1,3)
 plt.plot(m.time, Ca.value)
 plt.show()
 
-m.to_JSON()
+
 #%% Solve test problem hs23
 m = GEKKO(name='hs23')
 """

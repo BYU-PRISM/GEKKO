@@ -1,3 +1,4 @@
+
 #%% Imports
 import os
 import sys
@@ -64,8 +65,7 @@ class GEKKO(object):
         #time discretization
         self.time = None
 
-        self.model_initialized = False
-        self.saved_model_options = [] #what does this do?
+        self.model_initialized = False #probably not needed
         self.csv_status = None #indicate 'provided' or 'generated'
         self.model = ''
 
@@ -79,7 +79,8 @@ class GEKKO(object):
         #Create and open configuration files
         self.f_info = open(os.path.join(self.path,self.model_name)+'.info', 'w+') #for classifiying variables
 
-
+        #clear anything already on the server
+        apm.cmd(self.server,self.model_name,'clear all')
 
         
     #%% Parts of the model
@@ -93,7 +94,7 @@ class GEKKO(object):
         self._constants.append(const)
         return const
 
-    def Param(self, name='', value=0, integer=False):
+    def Param(self, name='', value=None, integer=False):
         """GK parameters can become MVs and FVs. Since GEKKO defines
         MVs and FVs directly, there's not much use for parameters. Parameters
         are effectively constants unless the resulting .spm model is used later
@@ -105,7 +106,7 @@ class GEKKO(object):
         self.parameters.append(parameter)
         return parameter
 
-    def FV(self, name='',value=0, lb=None, ub=None, integer=False):
+    def FV(self, name='',value=None, lb=None, ub=None, integer=False):
         """A manipulated variable that is fixed with time. Therefore it lacks
         time-based attributes."""
         if name == '':
@@ -117,10 +118,9 @@ class GEKKO(object):
         self.parameters.append(parameter)
         #Classify variable in .info file
         self.f_info.write('F, '+name+'\n')
-        #self.saved_model_options.append('info FV, {0}'.format(name))
         return parameter
 
-    def MV(self, name='', value=0, lb=None, ub=None, integer=False):
+    def MV(self, name='', value=None, lb=None, ub=None, integer=False):
         """Change these variables optimally to meet objectives"""
         if name == '':
             name = 'p' + str(len(self.parameters) + 1)
@@ -131,10 +131,9 @@ class GEKKO(object):
         self.parameters.append(parameter)
         #Classify variable in .info file
         self.f_info.write('M, '+name+'\n')
-        #self.saved_model_options.append('info MV, {0}'.format(name))
         return parameter
 
-    def Var(self, name='', value=0, lb=None, ub=None, integer=False):
+    def Var(self, name='', value=None, lb=None, ub=None, integer=False):
         """Calculated by solver to meet constraints (Equations). The number of
         variables (including CVs and SVs) must equal the number of equations."""
         if name == '':
@@ -146,7 +145,7 @@ class GEKKO(object):
         self.variables.append(variable)
         return variable
 
-    def SV(self, name='', value=0, lb=None, ub=None, integer=False):
+    def SV(self, name='', value=None, lb=None, ub=None, integer=False):
         """A variable that's special"""
         if name == '':
             name = 'v' + str(len(self.variables) + 1)
@@ -157,10 +156,9 @@ class GEKKO(object):
         self.variables.append(variable)
         #Classify variable in .info file
         self.f_info.write('S, '+name+'\n')
-        #self.saved_model_options.append('info SV, {0}'.format(name))
         return variable
 
-    def CV(self, name='', value=0, lb=None, ub=None, integer=False):
+    def CV(self, name='', value=None, lb=None, ub=None, integer=False):
         """A variable with a setpoint. Reaching the setpoint is added to the
         objective."""
         if name == '':
@@ -172,7 +170,6 @@ class GEKKO(object):
         self.variables.append(variable)
         #Classify variable in .info file
         self.f_info.write('C, '+name+'\n')
-        #self.saved_model_options.append('info CV, {0}'.format(name))
         return variable
 
     def Intermediate(self,equation,name=''):
@@ -212,7 +209,7 @@ class GEKKO(object):
             return [init(sizes[1:], f) for i in xrange(sizes[0])]           
     """        
     #%% Get a solution
-    def solve(self,remote=True,disp=True):
+    def solve(self,remote=True,disp=True,verify_input=False):
         """Solve the optimization problem.
 
         This function has these substeps:
@@ -238,14 +235,13 @@ class GEKKO(object):
         # Build the model
         if self.model != 'provided': #no model was provided
             self.build_model()
-
         if timing == True:
             print('build model', time.time() - t)
 
 
         if timing == True:
             t = time.time()
-        if self.time is not None and self.csv_status != 'provided': 
+        if self.csv_status != 'provided': 
             self.write_csv()
         if timing == True:
             print('build csv', time.time() - t)
@@ -275,9 +271,7 @@ class GEKKO(object):
         
             # Calls apmonitor through the command line
             if os.name == 'nt': #Windows
-                apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin/apm.exe')
-                print(apm_exe)
-                print(self.path)
+                apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm.exe')
                 app = subprocess.Popen([apm_exe, self.model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self.path, env = {"PATH" : self.path }, universal_newlines=True)
                 if disp == True:
                     for line in iter(app.stdout.readline, ""):
@@ -287,12 +281,13 @@ class GEKKO(object):
                             pass
                 app.wait()
             else:
-                apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin/apmonitor')
+                apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apmonitor')
                 app = subprocess.Popen([apm_exe, self.model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self.path, env = {"PATH" : self.path, "LD_LIBRARY_PATH" : os.path.dirname(os.path.realpath(__file__))+'/bin/lib' }, universal_newlines=True)
-                
                 for line in iter(app.stdout.readline, ""):
                     if disp == True:
                         print(line.replace('\n', ''))
+                    else:
+                        pass
                 app.wait()
             out, errs = app.communicate()
             # print(out)
@@ -310,8 +305,11 @@ class GEKKO(object):
                     f.close()
                     apm.cmd(self.server, self.model_name, extension+' '+file)
                     
-            #clear anything already on the server
-            apm.cmd(self.server,self.model_name,'clear all')
+            
+            #clear apm and csv files already on the server
+            apm.cmd(self.server,self.model_name,'clear apm')
+            apm.cmd(self.server,self.model_name,'clear csv')
+            
             #send model file
             f = open(os.path.join(self.path,self.model_name + '.apm'))
             model = f.read()
@@ -336,18 +334,22 @@ class GEKKO(object):
                     return byte.decode().replace('\r','')
                 else:
                     return byte
-            results = byte2str(apm.get_file(self.server,self.model_name,'results.csv'))
-            f = open(os.path.join(self.path,'results.csv'), 'w')
-            f.write(str(results))
-            f.close() 
-            results = byte2str(apm.get_file(self.server,self.model_name,'results.json'))
-            f = open(os.path.join(self.path,'results.json'), 'w')
-            f.write(str(results))
-            f.close() 
-            options = byte2str(apm.get_file(self.server,self.model_name,'options.json'))
-            f = open(os.path.join(self.path,'options.json'), 'w')
-            f.write(str(options))
-            f.close() 
+            
+            try:
+                results = byte2str(apm.get_file(self.server,self.model_name,'results.csv'))
+                f = open(os.path.join(self.path,'results.csv'), 'w')
+                f.write(str(results))
+                f.close() 
+                results = byte2str(apm.get_file(self.server,self.model_name,'results.json'))
+                f = open(os.path.join(self.path,'results.json'), 'w')
+                f.write(str(results))
+                f.close() 
+                options = byte2str(apm.get_file(self.server,self.model_name,'options.json'))
+                f = open(os.path.join(self.path,'options.json'), 'w')
+                f.write(str(options))
+                f.close() 
+            except:
+                raise ImportError('Results files not found. APM did not find a solution or the server is unreachable.')
         
         if timing == True:
             print('solve', time.time() - t)
@@ -366,7 +368,8 @@ class GEKKO(object):
         
         if timing == True:
             t = time.time()
-        self.verify_input_options()
+        if verify_input == True:
+            self.verify_input_options()
         if timing == True:
             print('compare options', time.time() - t)
         
@@ -395,7 +398,7 @@ class GEKKO(object):
         return json_data
     
     
-    def to_JSON(self):
+    def to_JSON(self): #JSON input to APM not currently supported -- this function isn't tested
         """
         include in JSON:
         global options
@@ -487,11 +490,11 @@ class GEKKO(object):
             for parameter in self.parameters:
                 i = 0
                 model += '\t%s' % parameter
-                if not isinstance(parameter.VALUE, (list,np.ndarray)):
+                if not isinstance(parameter.VALUE.value, (list,np.ndarray)):
                     i = 1
                     model += ' = %s' % parameter.VALUE
                 if parameter.type != None: #Only FV/MV have bounds
-                    if parameter.UB != None:
+                    if parameter.UB is not None:
                         if i == 1:
                             model += ', '
                         i = 1
@@ -509,10 +512,10 @@ class GEKKO(object):
             for parameter in self.variables:
                 i = 0
                 model += '\t%s' % parameter
-                if not isinstance(parameter.VALUE, (list,np.ndarray)):
+                if not isinstance(parameter.VALUE.value, (list,np.ndarray)):
                     i = 1
                     model += ' = %s' % parameter.VALUE
-                if parameter.UB != None:
+                if parameter.UB is not None:
                     if i == 1:
                         model += ', '
                     i = 1
@@ -541,7 +544,10 @@ class GEKKO(object):
             model += 'End Equations'
 
         #print(model) #for debugging
-
+        
+        #replace multiple operators resulting from signs
+        model = model.replace('++','+').replace('--','+').replace('+-','-').replace('-+','-')
+        
         # Create .apm file
         if(self.model_name == None):
             self.model_name = "default_model_name"
@@ -572,52 +578,74 @@ class GEKKO(object):
         if self.options.IMODE > 3:
             #Start with time
             length = np.size(self.time)
-            csv_data = np.hstack(('time',np.array(self.time).flatten()))
-    
-            #check all parameters and arrays
-            for vp in self.variables+self.parameters:
-                #discretize all values to arrays
-                if not isinstance(vp.VALUE, (list,np.ndarray)):
-                    vp.VALUE = np.ones(length)*vp.VALUE
-                #confirm that previously discretized values are the right length
-                elif np.size(vp.VALUE) != length:
-                    raise Exception('Data points must match time discretization')
-                #if a measurement exists, save a nonnumeric first element in
-                #value array to allow measurement to be read in
-                #TODO remove this check with new JSON input
-                if hasattr(vp,'MEAS'):                    
-                    if vp.MEAS != None:
-                        vp.VALUE = np.array(vp.VALUE).astype(object)
-                        vp.VALUE[0] = "measurement"
-                #add a new row with the variable name and the data array
-                t = np.hstack((str(vp),np.array(vp.VALUE).flatten()))
-                csv_data = np.vstack((csv_data,t))
-        ## SS data csv
+            csv_data = np.hstack(('time',np.array(self.time).flatten().astype(object)))
+            first_array = True
+        ## SS data
         else:
-            csv_data = np.ndarray(2)
+            first_array = False
     
-            #check all parameters and arrays
-            for vp in self.variables+self.parameters:
-                #ensure that values are scalars
-                if isinstance(vp.VALUE, (list,np.ndarray)):
-                    # flatten array to avoid nested arrays
-                    vp.VALUE = np.array(vp.VALUE).flatten()                    
-                    if np.size(vp.VALUE) != 1:
-                        raise Exception('Data points must be scalars')
-                    else:
-                        vp.VALUE = vp.VALUE[0]
-
-                #if a measurement exists, save a nonnumeric to allow measurement to be read in
-                #TODO remove this check with new JSON input
+        #check all parameters and arrays
+        for vp in self.variables+self.parameters:
+            #Only save csv data if the user changed the value (changes registered in vp.value.change)
+            if vp.value.change is False:
+                continue
+            else:
+                if first_array == False:
+                    length = np.size(np.array(vp.value).flatten())
+                    if self.options.IMODE in set((1,3)) and length > 1:
+                        raise Exception('This steady-state IMODE only allows scalar values.')
+                    
+                if vp.value.change is True: #Save the entire array of values
+                    #discretize all values to arrays
+                    if not isinstance(vp.VALUE.value, (list,np.ndarray)):
+                        vp.VALUE = np.ones(length)*vp.VALUE
+                    #confirm that previously discretized values are the right length
+                    elif np.size(vp.VALUE.value) != length:
+                        raise Exception('Data arrays must have the same length, and match time discretization in dynamic problems')
+                    #group data with column header
+                    t = np.hstack((vp.name,np.array(vp.VALUE.value).flatten().astype(object)))
+                    
+                elif isinstance(vp.value.change,list): #only certain elements should be saved
+                    t = np.array(vp.VALUE).astype(object)
+                    t[:] = ' '
+                    t[vp.value.change] = vp.value[vp.value.change]
+                    t = np.hstack((str(vp),t.flatten().astype(object)))
+                
+                else: #somebody broke value.change
+                    raise Exception('Variable value modification monitor malfunction.')
+                    
+                #reset change indicator
+                vp.value.change = False
+                
+                #if a measurement exists, save a nonnumeric in
+                #value array to allow measurement to be read in
                 if hasattr(vp,'MEAS'):                    
                     if vp.MEAS != None:
-                        vp.VALUE = "measurement"
-                #add a new row with the variable name and the data array
-                t = np.hstack((str(vp),vp.VALUE))
-                csv_data = np.vstack((csv_data,t))
+                        #vp.VALUE = np.array(vp.VALUE).astype(object)
+                        if self.options.IMODE in [5,8]:
+                            t[-1] = 'measurement'
+                        else:
+                            t[1] = "measurement"
+                        
+                        #reset MEAS so it doesn't get repeated on next solve
+                        vp.MEAS = None
+                
+                if first_array == False:
+                    csv_data = t
+                    first_array = True
+                else:
+                    try:
+                        csv_data = np.vstack((csv_data,t))
+                    except ValueError:
+                        raise Exception('All variable value arrays must be the same length (and match the length of model time in dynamic problems).')
+                
+        #print(csv_data)
         #save array to csv
-        np.savetxt(os.path.join(self.path,file_name), csv_data.T, delimiter=",", fmt='%s')
-        self.csv_status = 'generated'
+        if first_array == False: #no data
+            self.csv_status = 'none'
+        else:
+            np.savetxt(os.path.join(self.path,file_name), csv_data.T, delimiter=",", fmt='%1.18s')
+            self.csv_status = 'generated'
 
     def generate_overrides_dbs_file(self):
         '''Write options to overrides.dbs file
@@ -656,7 +684,7 @@ class GEKKO(object):
                                 for i in range(11):
                                     pred.append(data[vp.name][o+'['+str(i)+']'])
                             except:
-                                print('PRED only to '+str(i))
+                                pass
                             finally:
                                 vp.__dict__[o] = pred
                     elif o == 'DPRED': #Pred can be an array of up to 10
@@ -668,7 +696,7 @@ class GEKKO(object):
                                 for i in range(1,11):
                                     pred.append(data[vp.name][o+'['+str(i)+']'])
                             except:
-                                print('DPRED only to '+str(i))
+                                pass
                             finally:
                                 vp.__dict__[o] = dpred
                     else: #everything besides value, dpred and pred
@@ -688,7 +716,7 @@ class GEKKO(object):
                                 for i in range(11):
                                     pred.append(data[vp.name][o+'['+str(i)+']'])
                             except:
-                                print('PRED only to '+str(i))
+                                pass
                             finally:
                                 vp.__dict__[o] = pred
                     else: #everything besides value and pred
@@ -701,9 +729,17 @@ class GEKKO(object):
             data = json.load(f)
             f.close()
             
-            for vp in self.parameters+self.variables:
+            for vp in self.parameters:
+                if vp.type is not None:
+                    if vp.STATUS != 0:
+                        try:
+                            vp.VALUE = data[vp.name]
+                        except Exception:
+                            print(vp.name+ " not found in results file")  
+            for vp in self.variables:
                 try:
                     vp.VALUE = data[vp.name]
+                    vp.value.change = False
                 except Exception:
                     print(vp.name+ " not found in results file")
             
@@ -718,6 +754,14 @@ class GEKKO(object):
         print(data['APM']['SOLVESTATUS'])
         return data
     
+    #define comparison of options between APM and GEKKO
+    #to avoid false positive when floats are off by a little
+    def like(self,one,two):
+        if isinstance(one,str): #string are compared directly
+            return one==two
+        else:
+            return (one+self.options.OTOL >= two and one-self.options.OTOL <= two)
+        
     def verify_input_options(self):
         ## Load data
         f = open(os.path.join(self.path,'options.json'))
@@ -725,6 +769,8 @@ class GEKKO(object):
         f.close()
         ## Global Options
         for o in self.options._input_option_list: #for each global input option
+            if o == 'CSV_READ' and self.csv_status == 'none':
+                continue
             if self.options.__dict__[o] != data['APM'][o]: #compare APM to GK
                 print(str(o)+" was not written correctly") #give message if they don't match
         ## Local Options
@@ -732,15 +778,14 @@ class GEKKO(object):
             if vp.type != None: #(FV/MV/SV/CV) not Param or Var
                 for o in parameter_options[vp.type]['inputs']:
                     if o not in ['LB','UB']: #TODO: for o in data[vp.name] to avoid this check
-                        if vp.__dict__[o] != None and vp.__dict__[o] != data[vp.name][o]:
+                        if vp.__dict__[o] != None and not self.like(vp.__dict__[o], data[vp.name][o]):
                             print(str(vp)+'.'+str(o)+" was not written correctly") #give message if they don't match
                         
         for vp in self.variables:
             if vp.type != None: #(FV/MV/SV/CV) not Param or Var
-             if vp.type != None: #(FV/MV/SV/CV) not Param or Var
                 for o in variable_options[vp.type]['inputs']:
                     if o not in ['LB','UB']:
-                        if vp.__dict__[o] != None and vp.__dict__[o] != data[vp.name][o]:
+                        if vp.__dict__[o] != None and not self.like(vp.__dict__[o], data[vp.name][o]):
                             print(str(vp)+'.'+str(o)+" was not written correctly") #give message if they don't match
                             
         
@@ -777,7 +822,16 @@ class GEKKO(object):
         for f in files:
             os.remove(f)
     def clear_data(self):
-        os.remove(os.path.join(self.path,self.model_name+'.csv'))
+        #csv file
+        try:
+            os.remove(os.path.join(self.path,self.model_name+'.csv'))
+        except:
+            pass
+        #t0 files
+        d = os.listdir(self.path)
+        for f in d:
+            if f.endswith('.t0') or f.endswith('.dxdt'):
+                os.remove(os.path.join(self.path,f))
             
             
     #%% Trig functions

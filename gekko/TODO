@@ -24,6 +24,8 @@ Functionality
 
 -allow user to load custom .apm or .csv files?
 
+-make comparing options with output optional
+
 
 Interface
 ---------
@@ -36,13 +38,17 @@ Interface
 
 -Load back FV MV SV CV outputs
 
+-Load back values of scalars not as list
+
+-Make Constant(value,name) parameter order consistent with other variable definitions.
+
 
 Robustness
 ----------
 
--if .dt() used and csv not provided, demand time variable
+-in IMODE=2 (MPU), look for an array with len>1 before starting to build csv. This avoids finding first_array when the variable is initialized with a scalar then throws errors for values initialized as arrays not of length 1
 
--Only write values to csv if user changed
+-if .dt() used and csv not provided, demand time variable
 
 -check L1/L2 global with setting SP/SPHILO
 
@@ -64,7 +70,11 @@ Robustness
 
 -model validations: 1. invalid (reserved keywords) in variables 2. correct imode 
 
--'CSV_READ was not written correctly' message for SS optimization -- change APM or make gekko recognize when csv file not written
+-are results of FV/MV with STATUS = 0 in results.csv/json?
+
+-case-insensitive reading of json
+
+-Raise exception and direct to Equation() if the argument to Equations() is not a list
 
 
 Code cleanup

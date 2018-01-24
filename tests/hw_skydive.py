@@ -70,3 +70,4 @@ plt.plot(m.time,vx.value,label='vx')
 plt.plot(m.time,vy.value,label='vy')
 plt.xlabel('time')
 plt.legend()
+

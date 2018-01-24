@@ -19,7 +19,7 @@ Model
 Create a python model object::
 
 	from gekko import GEKKO
-	m = GEKKO([server], [name]]):
+	m = GEKKO([server], [name]):
 
 
 Variable Types
@@ -29,12 +29,12 @@ GEKKO has eight types of variables, four of which have extra properties.
 
 Constants, Parameters, Variables and Intermediates are the standard types.
 Constants and Parameters are fixed by the user, while Variables and Intermediates
-are degrees of freedom and are changed by the solve. All variable declarations return references to a new object.
+are degrees of freedom and are changed by the solver. All variable declarations return references to a new object.
 
 Fixed Variables (FV), Manipulated Variables (MV), State Variables (SV) and Controlled 
 Variables (CV) expand parameters and variables with extra attributes and features to 
 facilitate dynamic optimization problem formulation and robustness for online use.
-These attributes are discussed in :ref:`_MV_options` and :ref:'_CV_options'.
+These attributes are discussed in :doc:`MV_options` and :doc:`CV_options`.
 
 All of these variable types have the optional argument 'name'. The name is used 
 on the back-end to write the model file and is only useful if the user intends to 
@@ -54,13 +54,13 @@ can be provided a name to make the .apm model more clear::
 * Value must be provided and must be a scalar
 
 Parameters
-^^^^^^^^^
+^^^^^^^^^^
 
 Parameters are capable of becoming MVs and FVs. Since GEKKO defines 
 MVs and FVs directly, parameters just serve as constant values. However, Parameters 
 (unlike Constants) can be (and usually are) arrays.::
 
-	p = m.Param([name], [value]])
+	p = m.Param([name], [value])
 
 * The value can be a python scalar, python list of numpy array. If the value is a scalar, it will be used throughout the horizon. 
 
@@ -79,9 +79,9 @@ Calculated by solver to meet constraints (Equations)::
 Intermediates
 ^^^^^^^^^^^^^
 
-Intermediates are a unique GEKKO variable type. Intermediates, and their associated equations, are like variables except their values and gradients are evaluated explicitly only once, at the beginning of the iteration. This saves time in function evaluations, but must be balanced with increased iterations resulting from incorrect values used in the rest of the iteration. The function creates an intermediate variable "i" and sets it equal to argument "equation":: 
+Intermediates are a unique GEKKO variable type. Intermediates, and their associated equations, are like variables except their values and gradients are evaluated explicitly only once, at the beginning of the iteration. This saves time in function evaluations, but must be balanced with increased iterations resulting from static values used in the rest of the iteration. The function creates an intermediate variable "i" and sets it equal to argument "equation":: 
 
-    i = m.Intermediate(equation,[name]])
+    i = m.Intermediate(equation,[name])
  
 
 Fixed Variable
@@ -110,7 +110,7 @@ State Variable
 
 State Variables (SV) inherit Variables with just a couple extra attributes::
 
-    s =  m.SV([name], [value] [lb], [ub])
+    s =  m.SV([name], [value], [lb], [ub])
 
 
 Controlled Variable
@@ -118,7 +118,7 @@ Controlled Variable
 
 Controlled Variables (CV) inherit SVs are are typically what you're trying to match (to data or a setpoint)::
 
-    c = m.CV([name], [value] [lb], [ub])
+    c = m.CV([name], [value], [lb], [ub])
 
 
 

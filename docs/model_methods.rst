@@ -46,29 +46,40 @@ Model Building
 
 .. py:classmethod::    m.Equation(equation)
 
-
+    
 .. py:classmethod::    m.Equations(eqs)
 
+    Accepts a list or array of equations.
 
 .. py:classmethod::    m.Obj(obj)
 
+    The problem objective to minimize. If multiple objective are provided, they are summed.
+
+.. py:attribute::   m.time
+
+    Sets the time array indicating the discrete elements of time discretization for dynamic modes (`IMODE > 3`). Accepts a python list of a numpy array.
 
 .. py:classmethod::    a = m.Array(type,dimension)
 	
 	Create an n-dimensional array (as defined in tuple input `dimension`) of GEKKO variables of type `type`.
 
 
-.. py:classmethod:: m.solve(remote=True,disp=True)
+.. py:classmethod:: m.solve(remote=True,disp=True,verify_input=False)
 	
 	
 	Solve the optimization problem.
 	
 	This function has these substeps:
-	*Validates the model and write .apm file (if .apm not supplied)
-	*Validate and write .csv file (if none provided)
-	*Write options to overrides.dbs
-	*Solve the problem using the apm.exe commandline interface. 
-	*Load results into python variables.
+
+	* Validates the model and write .apm file (if .apm not supplied)
+
+	* Validate and write .csv file (if none provided)
+
+	* Write options to overrides.dbs
+
+	* Solve the problem using the apm.exe commandline interface. 
+
+	* Load results into python variables.
 	
 
 
@@ -76,27 +87,22 @@ Model Building
 Equation Functions
 ------------------
 
-Special function besides algebraic operators are available through GEKKO functions:
+Special function besides algebraic operators are available through GEKKO functions. These must be used (not numpy or other equivalent functions):
 	
 .. py:classmethod:: m.sin(other)
 
-	sin function 
 	
 .. py:classmethod:: m.cos(other)
 
-	cos function
 
 .. py:classmethod:: m.tan(other)
 
-	Use tan in the GEKKO model.
 
 .. py:classmethod:: m.sinh(other)
 
-	Enable sinh function in GEKKO model
 
 .. py:classmethod:: m.mcosh(other)
 
-	Bet you can't guess this one!
 
 .. py:classmethod:: m.tanh(other)
 
@@ -126,8 +132,10 @@ Available by::
     from gekko import SS
     
 	
-Internal Functions
+Internal Methods
 ------------------
+
+These are the major methods used internal by GEKKO. They are not intended for external use, but may prove useful for highly customized applications.
 	
 .. py:staticmethod:: build_model(self)
 	
@@ -142,14 +150,73 @@ Internal Functions
 	
 	All global and local variable options are listed in the overrides database file.
 	
+.. py:staticmethod:: load_json()
+
+    Reads back global and variable options from the options.json file. Stores output and input/output options to the associated variable.
+
 .. py:staticmethod:: load_results()
 	
-	The executable returns results in a csv. This function reads the csv and loads the results back into local python variables.
-        
-	
-	
-	
-	
+	The executable returns variable value results in a json. This function reads the json and loads the results back into local python variables.
+
+.. py:staticmethod:: verify_input_options()
+
+    Called when optional `solve` argument `verify_input=True`. Compares input options of the model and variables from GEKKO to those reported by APM to find discrepencies. 
+
+
+Internal Attributes
+--------------------
+
+These are GEKKO model attributes used internally. They are not intended for external use, but may prove useful in advanced applications.
+
+
+.. py:attribute::   server
+
+    String representation of the server url where the model is solved. The default is 'http://xps.apmonitor.com'. This is set by the optional argument `server` when intializing a model.
+
+.. py:attribute::   id
+
+.. py:attribute::   _constants
+
+    A python list of pointers to GEKKO Constants attributed to the model.
+
+.. py:attribute::   parameters
+
+    A python list of pointers to GEKKO Parameters, FVs and MVs attributed to the model.
+
+.. py:attribute::   variables
+
+    A python list of pointers to GEKKO Variables, SVs and CVs attributed to the model.
+
+.. py:attribute::   intermediates
+
+    A python list of pointers to GEKKO Intermediate variables attributed to the model.
+
+.. py:attribute::   inter_equations
+    
+    A python list of the explicit intermediate equations. The order of this list must match the order of intermediates in the `intermediates` attribute.
+
+.. py:attribute::   equations
+
+    A python list of equations
+
+.. py:attribute::   objectives
+    
+    A python list of objective.
+
+.. py:attribute::   csv_status
+
+    Set to 'generated' if any time, parameter or variable data is communicated through the csv file. Otherwise set to 'none'.
+
+.. py:attribute::   model_name
+
+    The name of the model as a string. Used in local temporary file name and application name for remote solves. This is set by the optional argument `name` when intializing a model. Default names include the model `id` attribute to maintain unique names.
+
+.. py:attribute::   path
+
+    The absolute path of the temporary file used to store all input/output files for the APMonitor executable.
+
+
+
 	
 	
 	
