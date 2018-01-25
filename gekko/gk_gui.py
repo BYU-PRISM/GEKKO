@@ -7,16 +7,19 @@ import os
 import webbrowser
 
 class GK_GUI(object):
-    """docstring for GUI."""
+    """GUI class for GEKKO
+    This class handles creation and management of the gui. It pulls the required
+    data from options.json and results.json and displays using DASH.
+    """
     def __init__(self):
         super(GK_GUI, self).__init__()
         self.app = dash.Dash()
         self.serve_static()
-        print(__file__)
         self.vars = {}
         self.get_data()
         self.app.layout = Div(children=[
             H1(children='GEKKO results', style={'text-align': 'center'}),
+            # Display the tabular data in the smaller column
             Div(
                 className='col-sm-3',
                 children=[
@@ -30,6 +33,7 @@ class GK_GUI(object):
                     ])
                 ]
             ),
+            # Display the different charts as tabs in the main section
             Div(
                 className='col-sm-9',
                 children=[self.make_tabs()]
