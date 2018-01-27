@@ -43,10 +43,11 @@ m.options.EV_TYPE = 2 #l2 norm
 m.options.COLDSTART = 2
 m.options.SOLVER = 1
 m.options.MAX_ITER = 1000
+m.options.NODES = 2
 
 m.solve()
 
-for i in range(6):
+for i in range(5):
     lg10_kr[i].STATUS = 1 #Allow optimizer to fit these values
     lg10_kr[i].DMAX = 2
     lg10_kr[i].LOWER = -10
@@ -64,7 +65,6 @@ LV.STATUS = 1 #build objective function to match data and prediction
 LV.value = log_v #v data from csv
 
 m.solve()
-
 
 # plot results
 import matplotlib.pyplot as plt

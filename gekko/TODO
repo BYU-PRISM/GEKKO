@@ -76,6 +76,8 @@ Robustness
 
 -Raise exception and direct to Equation() if the argument to Equations() is not a list
 
+-python 3 has less sig figs in str() of values
+
 
 Code cleanup
 ------------
