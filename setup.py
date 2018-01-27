@@ -18,7 +18,7 @@ with open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
 #   apm_binary = ['gekko/bin/apmonitor' AND LA libaries]
 
 setup(name='gekko',
-    version='0.0.2b1',
+    version='0.0.2b2',
     description='Optimization software for differential algebraic equations',
     long_description=long_description,
     #url="https://readthedocsurl",
@@ -39,7 +39,7 @@ setup(name='gekko',
     packages=find_packages(),
     install_requires=[
         'APMonitor',
-        'numpy>=1.9'#,
+        'numpy~=1.8'#,
         #'ujson',
     ],
 #    package_data=apm_binary,
