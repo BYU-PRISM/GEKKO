@@ -1,7 +1,9 @@
 import dash
 import flask
 from dash.dependencies import Input, Output, State
+import dash_core_components as dcc
 from dash_html_components import H1, Div, H3, Table, Thead, Tbody, Tr, Th, Td
+# import plotly.graph_objs as go
 import json
 import os
 import webbrowser
@@ -17,28 +19,11 @@ class GK_GUI(object):
         self.serve_static()
         self.vars = {}
         self.get_data()
-        self.app.layout = Div(children=[
-            H1(children='GEKKO results', style={'text-align': 'center'}),
-            # Display the tabular data in the smaller column
-            Div(
-                className='col-sm-3',
-                children=[
-                    H3("options['INFO']"),
-                    Div(children=[
-                        self.make_options_table(self.options['INFO'], ["Option", "Value"])
-                    ]),
-                    H3("options['APM']"),
-                    Div(children=[
-                        self.make_options_table(self.options['APM'], ["Option", "Value"])
-                    ])
-                ]
-            ),
-            # Display the different charts as tabs in the main section
-            Div(
-                className='col-sm-9',
-                children=[self.make_tabs()]
-            )
-        ])
+        self.app.layout = self.make_layout()
+
+
+    def make_plot(self, var):
+        return {'x': self.time, 'y': self.results[var], 'type': 'linear', 'name': var}
 
     # Gether the data that GEKKO returns from the run
     def get_data(self):
@@ -69,13 +54,63 @@ class GK_GUI(object):
     def make_tabs(self):
         return
 
+    def make_layout(self):
+        return Div(children=[
+            H1(children='GEKKO results', style={'text-align': 'center'}),
+            # Display the tabular data in the smaller column
+            Div(
+                className='row',
+                children=[
+                    Div(
+                        className='col-sm-3',
+                        children=[
+                            Div(
+                                className='tabsBox',
+                                style={'height': '800px', 'overflow-y': 'scroll', 'margin': '20px'},
+                                children=[
+                                    H3("options['INFO']"),
+                                    Div(children=[
+                                        self.make_options_table(self.options['INFO'], ["Option", "Value"])
+                                    ]),
+                                    H3("options['APM']"),
+                                    Div(children=[
+                                        self.make_options_table(self.options['APM'], ["Option", "Value"])
+                                    ])
+                                ]
+                            )
+                        ]
+                    ),
+                    # Display the different charts as tabs in the main section
+                    Div(
+                        className='col-sm-9',
+                        children=[
+                        dcc.Graph(
+                            id='main_plot',
+                            figure={
+                                'data': [self.make_plot(var) for var in self.vars],
+                                'layout':{
+                                    'title': 'Plot title',
+                                    'height':800,
+                                    'xaxis': {'title': 'Time (s)'},
+                                    'yaxis': {'title': 'Your dimensions'}
+                                }
+                            },
+                            config={'displaylogo': False},
+                        )
+                        ]
+                    )
+                ]
+            )
+        ])
+
     def serve_static(self):
-        stylesheets = ['bootstrap.min.css']
+        stylesheets = ['bootstrap.min.css', 'bootstrap.min.css.map']
         static_css_route = '/static/'
         static_css_path = os.path.join(os.path.dirname(__file__), 'static')
 
         @self.app.server.route('{}<stylesheet>'.format(static_css_route))
         def serve_stylesheet(stylesheet):
+            print("Stylesheet requested: {}".format(stylesheet))
             if stylesheet not in stylesheets:
                 raise Exception(
                     '"{}" is excluded from the allowed static files'.format(
@@ -93,5 +128,7 @@ class GK_GUI(object):
             GEKKO results are being displayed over localhost:8050
         """)
         # Add this to have it automatically open a web browser to the page.
-        # webbrowser.open("http://localhost:8050/")
-        self.app.run_server(debug=True)
+        webbrowser.open("http://localhost:8050/")
+        # Flask will double load the page and reoptimize everything when DEBUG=True
+        # Set to True when developing on smaller models for auto-reload
+        self.app.run_server(debug=False)
