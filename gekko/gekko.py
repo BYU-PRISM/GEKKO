@@ -305,8 +305,8 @@ class GEKKO(object):
                     file = f.read()
                     f.close()
                     apm.cmd(self.server, self.model_name, extension+' '+file)
-            
-            
+
+
             #clear apm and csv files already on the server
             apm.cmd(self.server,self.model_name,'clear apm')
             apm.cmd(self.server,self.model_name,'clear csv')
@@ -336,20 +336,20 @@ class GEKKO(object):
                 else:
                     return byte
 
-            
+
             try:
                 results = byte2str(apm.get_file(self.server,self.model_name,'results.csv'))
                 f = open(os.path.join(self.path,'results.csv'), 'w')
                 f.write(str(results))
-                f.close() 
+                f.close()
                 results = byte2str(apm.get_file(self.server,self.model_name,'results.json'))
                 f = open(os.path.join(self.path,'results.json'), 'w')
                 f.write(str(results))
-                f.close() 
+                f.close()
                 options = byte2str(apm.get_file(self.server,self.model_name,'options.json'))
                 f = open(os.path.join(self.path,'options.json'), 'w')
                 f.write(str(options))
-                f.close() 
+                f.close()
             except:
                 raise ImportError('Results files not found. APM did not find a solution or the server is unreachable.')
 
@@ -834,7 +834,7 @@ class GEKKO(object):
         for f in d:
             if f.endswith('.t0') or f.endswith('.dxdt'):
                 os.remove(os.path.join(self.path,f))
-            
+
     #%% Trig functions
     def sin(self,other):
         return GK_Operators('sin(' + str(other) + ')')
@@ -863,6 +863,13 @@ class GEKKO(object):
     def __del__(self):
         self.f_info.close()
 
-    def GUI(self):
-        gui = GK_GUI()
+    def GUI(self, namespace):
+        gui = GK_GUI(namespace)
+        # print("NAMESPACE VARIABLES:", vars(self))
+
+        # print("length:", len(gekko_namespace))
+        # for n in gekko_namespace:
+        #     if isinstance(v[n],GKVariable):
+        #         print(n, v[n].name)
+
         gui.display()

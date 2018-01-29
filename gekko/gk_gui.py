@@ -8,19 +8,20 @@ import json
 import os
 import webbrowser
 
-class GK_GUI(object):
+class GK_GUI:
     """GUI class for GEKKO
     This class handles creation and management of the gui. It pulls the required
     data from options.json and results.json and displays using DASH.
     """
-    def __init__(self):
-        super(GK_GUI, self).__init__()
+    def __init__(self, namespace):
+        # super(GK_GUI, self).__init__()
         self.app = dash.Dash()
         self.serve_static()
         self.vars = {}
         self.get_data()
         self.app.layout = self.make_layout()
-
+        print("script namespace:", namespace)
+        # print("Globals:", globals())
 
     def make_plot(self, var):
         return {'x': self.time, 'y': self.results[var], 'type': 'linear', 'name': var}
@@ -132,7 +133,7 @@ class GK_GUI(object):
             GEKKO results are being displayed over localhost:8050
         """)
         # Add this to have it automatically open a web browser to the page.
-        webbrowser.open("http://localhost:8050/")
+        # webbrowser.open("http://localhost:8050/")
         # Flask will double load the page and reoptimize everything when DEBUG=True
         # Set to True when developing on smaller models for auto-reload
-        self.app.run_server(debug=False)
+        self.app.run_server(debug=True)
