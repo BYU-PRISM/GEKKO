@@ -9,7 +9,7 @@ class GK_Operators:
     count = 0
     
     def __init__(self, name, value=None):                
-        if name == '':
+        if name is None:
             self.NAME = 'i'+str(GK_Operators.count)
             GK_Operators.count += 1
         else:
