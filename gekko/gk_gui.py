@@ -25,8 +25,8 @@ class GK_GUI(object):
     def make_plot(self, var):
         return {'x': self.time, 'y': self.results[var], 'type': 'linear', 'name': var}
 
-    # Gether the data that GEKKO returns from the run
     def get_data(self):
+        # Gether the data that GEKKO returns from the run
         # Load options.json
         self.options = json.loads(open("./options.json").read())
         # Load results.json
@@ -36,8 +36,8 @@ class GK_GUI(object):
             if var != 'time':
                 self.vars[var] = self.results[var]
 
-    # Makes a DASH table from the dict passed in with the given table_id
     def make_options_table(self, data, header_row):
+        # Makes a DASH table from the dict passed in with the given table_id
         return Table(
             # Makes the header row
             className="table",
@@ -52,9 +52,11 @@ class GK_GUI(object):
         )
 
     def make_tabs(self):
+        # Make the tab sections of the page
         return
 
     def make_layout(self):
+        # Generate the general layout
         return Div(children=[
             H1(children='GEKKO results', style={'text-align': 'center'}),
             # Display the tabular data in the smaller column
@@ -104,6 +106,7 @@ class GK_GUI(object):
         ])
 
     def serve_static(self):
+        # Serve the local css files on /static/
         stylesheets = ['bootstrap.min.css', 'bootstrap.min.css.map']
         static_css_route = '/static/'
         static_css_path = os.path.join(os.path.dirname(__file__), 'static')
@@ -124,6 +127,7 @@ class GK_GUI(object):
             self.app.css.append_css({"external_url": "/static/{}".format(stylesheet)})
 
     def display(self):
+        # Start the flask server and open the webbrowser
         print("""
             GEKKO results are being displayed over localhost:8050
         """)
