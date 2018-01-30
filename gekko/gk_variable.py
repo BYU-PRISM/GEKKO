@@ -180,7 +180,7 @@ class GK_CV(GK_SV):
         self.STATUS = None
         self.TAU = None
         self.TIER = None
-        self.TR_INIT = None
+        self.TR_INIT = 0
         self.TR_OPEN = None
         self.VDVL = None
         self.VLACTION = None
