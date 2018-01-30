@@ -87,6 +87,8 @@ class GEKKO(object):
         can be provided a name to make the .apm model more clear."""
         if name is not None:
             name = ''.join(e for e in name if e.isalnum()).lower()
+            if name == '':
+                name = None
         if isinstance(value, (list,np.ndarray)):
             raise ValueError("Constant value must be scalar.")
         const = GK_Operators(name,value)
@@ -176,6 +178,10 @@ class GEKKO(object):
         return variable
 
     def Intermediate(self,equation,name=None):
+        if name is not None:
+            name = ''.join(e for e in name if e.isalnum()).lower()
+            if name == '':
+                name = None
         inter = GK_Operators(name)
         self.intermediates.append(inter)
         self.inter_equations.append(str(equation))
@@ -653,7 +659,7 @@ class GEKKO(object):
         if first_array == False: #no data
             self.csv_status = 'none'
         else:
-            np.savetxt(os.path.join(self.path,file_name), csv_data.T, delimiter=",", fmt='%1.18s')
+            np.savetxt(os.path.join(self.path,file_name), csv_data.T, delimiter=",", fmt='%1.25s')
             self.csv_status = 'generated'
 
 
