@@ -23,14 +23,17 @@ class GK_GUI:
         self.app = dash.Dash()
         self.serve_static()
         self.vars = {}
+        self.vars_dict = {}
         self.get_data()
         self.app.layout = self.make_layout()
         print("Globals from GUI:")
-        pprint(vars(main))
-        # pprint(main.x1.lb)
-        for var in vars(main):
-            if isinstance(var, GKVariable):
-                print(var, "is a GKVariable")
+        main_dict = vars(main)
+        pprint(main_dict)
+        for var in main_dict:
+            if isinstance(main_dict[var], GKVariable):
+                print(var, "is GKVariable", main_dict[var].name)
+                self.vars_dict[main_dict[var].name] = var
+        pprint(self.vars_dict)
 
     def make_plot(self, var):
         return {'x': self.time, 'y': self.results[var], 'type': 'linear', 'name': var}
