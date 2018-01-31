@@ -1,6 +1,10 @@
 # Notes on Gekko Gui development
 
 ## Questions
+- How to pass in the local vars to GUI?
+  - `m.GUI(vars())`
+  - `m.GUI(gui.vars)` where `gui.vars = vars()` or something similar
+  - Declare Gekko vars as globals?
 
 ## Answered Questions  
 - Are the JSON structures pretty static or will there be field that only appear

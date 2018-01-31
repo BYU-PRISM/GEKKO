@@ -863,8 +863,8 @@ class GEKKO(object):
     def __del__(self):
         self.f_info.close()
 
-    def GUI(self, namespace):
-        gui = GK_GUI(namespace)
+    def GUI(self):
+        gui = GK_GUI()
         # print("NAMESPACE VARIABLES:", vars(self))
 
         # print("length:", len(gekko_namespace))

@@ -1,4 +1,5 @@
 import dash
+from .gk_variable import GKVariable
 import flask
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
@@ -8,20 +9,28 @@ import json
 import os
 import webbrowser
 
+
+import __main__ as main
+from pprint import pprint
+
 class GK_GUI:
     """GUI class for GEKKO
     This class handles creation and management of the gui. It pulls the required
     data from options.json and results.json and displays using DASH.
     """
-    def __init__(self, namespace):
+    def __init__(self):
         # super(GK_GUI, self).__init__()
         self.app = dash.Dash()
         self.serve_static()
         self.vars = {}
         self.get_data()
         self.app.layout = self.make_layout()
-        print("script namespace:", namespace)
-        # print("Globals:", globals())
+        print("Globals from GUI:")
+        pprint(vars(main))
+        # pprint(main.x1.lb)
+        for var in vars(main):
+            if isinstance(var, GKVariable):
+                print(var, "is a GKVariable")
 
     def make_plot(self, var):
         return {'x': self.time, 'y': self.results[var], 'type': 'linear', 'name': var}
