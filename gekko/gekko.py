@@ -76,67 +76,72 @@ class GEKKO(object):
         #Path of model folder
         self.path = tempfile.mkdtemp(suffix=self.model_name)
         
-        #Create and open configuration files
-        self.f_info = open(os.path.join(self.path,self.model_name)+'.info', 'w+') #for classifiying variables
-
         #clear anything already on the server
         apm.cmd(self.server,self.model_name,'clear all')
 
         
     #%% Parts of the model
-    def Const(self, value=0, name=''):
+    def Const(self, value=0, name=None):
         """ Define a constant. There is no functional difference between using
         this Const, a python variable or a magic number. However, this Const
         can be provided a name to make the .apm model more clear."""
+        if name is not None:
+            name = ''.join(e for e in name if e.isalnum()).lower()
+            if name == '':
+                name = None
         if isinstance(value, (list,np.ndarray)):
             raise ValueError("Constant value must be scalar.")
         const = GK_Operators(name,value)
         self._constants.append(const)
         return const
 
-    def Param(self, name='', value=None, integer=False):
+    def Param(self, name=None, value=None, integer=False):
         """GK parameters can become MVs and FVs. Since GEKKO defines
         MVs and FVs directly, there's not much use for parameters. Parameters
         are effectively constants unless the resulting .spm model is used later
         and the parameters can be set as MVs or FVs. """
-        if name == '':
+        if name is not None:
+            name = ''.join(e for e in name if e.isalnum()).lower()
+        else:
             name = 'p' + str(len(self.parameters) + 1)
 
         parameter = GKParameter(name, value)
         self.parameters.append(parameter)
         return parameter
 
-    def FV(self, name='',value=None, lb=None, ub=None, integer=False):
+    def FV(self, name=None,value=None, lb=None, ub=None, integer=False):
         """A manipulated variable that is fixed with time. Therefore it lacks
         time-based attributes."""
-        if name == '':
+        if name is not None:
+            name = ''.join(e for e in name if e.isalnum()).lower()
+        else:
             name = 'p' + str(len(self.parameters) + 1)
             if integer == True:
                 name = 'int_'+name
 
         parameter = GK_FV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer) 
         self.parameters.append(parameter)
-        #Classify variable in .info file
-        self.f_info.write('F, '+name+'\n')
         return parameter
 
-    def MV(self, name='', value=None, lb=None, ub=None, integer=False):
+    def MV(self, name=None, value=None, lb=None, ub=None, integer=False):
         """Change these variables optimally to meet objectives"""
-        if name == '':
+        if name is not None:
+            name = ''.join(e for e in name if e.isalnum()).lower()
+        else:
             name = 'p' + str(len(self.parameters) + 1)
             if integer == True:
                 name = 'int_'+name
 
         parameter = GK_MV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
         self.parameters.append(parameter)
-        #Classify variable in .info file
-        self.f_info.write('M, '+name+'\n')
         return parameter
 
-    def Var(self, name='', value=None, lb=None, ub=None, integer=False):
+    def Var(self, name=None, value=None, lb=None, ub=None, integer=False):
         """Calculated by solver to meet constraints (Equations). The number of
         variables (including CVs and SVs) must equal the number of equations."""
-        if name == '':
+        if name is not None:
+            name = ''.join(e for e in name if e.isalnum()).lower()
+        else:
             name = 'v' + str(len(self.variables) + 1)
             if integer == True:
                 name = 'int_'+name
@@ -145,34 +150,38 @@ class GEKKO(object):
         self.variables.append(variable)
         return variable
 
-    def SV(self, name='', value=None, lb=None, ub=None, integer=False):
+    def SV(self, name=None, value=None, lb=None, ub=None, integer=False):
         """A variable that's special"""
-        if name == '':
+        if name is not None:
+            name = ''.join(e for e in name if e.isalnum()).lower()
+        else:
             name = 'v' + str(len(self.variables) + 1)
             if integer == True:
                 name = 'int_'+name
 
         variable = GK_SV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
         self.variables.append(variable)
-        #Classify variable in .info file
-        self.f_info.write('S, '+name+'\n')
         return variable
 
-    def CV(self, name='', value=None, lb=None, ub=None, integer=False):
+    def CV(self, name=None, value=None, lb=None, ub=None, integer=False):
         """A variable with a setpoint. Reaching the setpoint is added to the
         objective."""
-        if name == '':
+        if name is not None:
+            name = ''.join(e for e in name if e.isalnum()).lower()
+        else:
             name = 'v' + str(len(self.variables) + 1)
             if integer == True:
                 name = 'int_'+name
 
         variable = GK_CV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
         self.variables.append(variable)
-        #Classify variable in .info file
-        self.f_info.write('C, '+name+'\n')
         return variable
 
-    def Intermediate(self,equation,name=''):
+    def Intermediate(self,equation,name=None):
+        if name is not None:
+            name = ''.join(e for e in name if e.isalnum()).lower()
+            if name == '':
+                name = None
         inter = GK_Operators(name)
         self.intermediates.append(inter)
         self.inter_equations.append(str(equation))
@@ -256,7 +265,7 @@ class GEKKO(object):
         if timing == True:
             t = time.time()
         #Close files for writing
-        self.f_info.close()
+        self.write_info()
         if timing == True:
             print('close files', time.time() - t)
 
@@ -592,13 +601,15 @@ class GEKKO(object):
             else:
                 if first_array == False:
                     length = np.size(np.array(vp.value).flatten())
-                    if self.options.IMODE in set((1,3)) and length > 1:
+                    if self.options.IMODE in (1,3) and length > 1:
                         raise Exception('This steady-state IMODE only allows scalar values.')
                     
                 if vp.value.change is True: #Save the entire array of values
                     #discretize all values to arrays
                     if not isinstance(vp.VALUE.value, (list,np.ndarray)):
                         vp.VALUE = np.ones(length)*vp.VALUE
+                    elif len(vp.VALUE) == 1:
+                        vp.VALUE = np.ones(length)*vp.VALUE[0]
                     #confirm that previously discretized values are the right length
                     elif np.size(vp.VALUE.value) != length:
                         raise Exception('Data arrays must have the same length, and match time discretization in dynamic problems')
@@ -606,9 +617,13 @@ class GEKKO(object):
                     t = np.hstack((vp.name,np.array(vp.VALUE.value).flatten().astype(object)))
                     
                 elif isinstance(vp.value.change,list): #only certain elements should be saved
+                    if not isinstance(vp.VALUE.value, (list,np.ndarray)):
+                        vp.VALUE.value = np.ones(length)*vp.VALUE.value
+                    elif len(vp.VALUE) == 1:
+                        vp.VALUE = np.ones(length)*vp.VALUE[0]
                     t = np.array(vp.VALUE).astype(object)
                     t[:] = ' '
-                    t[vp.value.change] = vp.value[vp.value.change]
+                    t[vp.value.change] = np.array(vp.value)[vp.value.change]
                     t = np.hstack((str(vp),t.flatten().astype(object)))
                 
                 else: #somebody broke value.change
@@ -644,21 +659,56 @@ class GEKKO(object):
         if first_array == False: #no data
             self.csv_status = 'none'
         else:
-            np.savetxt(os.path.join(self.path,file_name), csv_data.T, delimiter=",", fmt='%1.18s')
+            np.savetxt(os.path.join(self.path,file_name), csv_data.T, delimiter=",", fmt='%1.25s')
             self.csv_status = 'generated'
 
+
+
+    def write_info(self):
+        #Classify variable in .info file
+        filename = self.model_name+'.info'
+        
+        #Create and open configuration files
+        with open(os.path.join(self.path,filename), 'w+') as f:
+            #check each Var and Param for FV/MV/SV/CV
+            for vp in self.variables+self.parameters:
+                if vp.type is not None:
+                    f.write(vp.type+', '+vp.name+'\n')
+        
+        
     def generate_overrides_dbs_file(self):
         '''Write options to overrides.dbs file
 
         Returns:
             Does not return
         '''
+        #set filename
         filename = 'overrides.dbs'
+        #print all global options
         file_content = self.options.getOverridesString()
-
-        f = open(os.path.join(self.path,filename), 'a')
-        f.write(file_content)
-        f.close()
+        #cycle through all Params and Vars to find set options
+        with open(os.path.join(self.path,filename), 'w+') as f:
+            f.write(file_content)
+            #check for set options of each Var and Param
+            for vp in self.parameters:
+                if vp.type is not None: #(FV/MV/SV/CV) not Param or Var
+                    for o in parameter_options[vp.type]['inputs']+parameter_options[vp.type]['inout']:
+                        if o == 'VALUE':
+                            continue
+                        else: #everything else is an option
+                            if vp.__dict__[o] is not None:
+                                f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
+                            
+            for vp in self.variables:
+                if vp.type is not None: #(FV/MV/SV/CV) not Param or Var
+                    for o in variable_options[vp.type]['inputs']+variable_options[vp.type]['inout']:
+                        if o == 'VALUE':
+                            continue
+                        else: #everything else is an option
+                            if vp.__dict__[o] is not None:
+                                f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
+    
+                        
 
     #%% Post-solve processing
 
@@ -731,11 +781,11 @@ class GEKKO(object):
             
             for vp in self.parameters:
                 if vp.type is not None:
-                    if vp.STATUS != 0:
-                        try:
-                            vp.VALUE = data[vp.name]
-                        except Exception:
-                            print(vp.name+ " not found in results file")  
+                    try:
+                        vp.VALUE = data[vp.name]
+                        vp.value.change = False
+                    except Exception:
+                        print(vp.name+ " not found in results file")  
             for vp in self.variables:
                 try:
                     vp.VALUE = data[vp.name]
@@ -778,14 +828,14 @@ class GEKKO(object):
             if vp.type != None: #(FV/MV/SV/CV) not Param or Var
                 for o in parameter_options[vp.type]['inputs']:
                     if o not in ['LB','UB']: #TODO: for o in data[vp.name] to avoid this check
-                        if vp.__dict__[o] != None and not self.like(vp.__dict__[o], data[vp.name][o]):
+                        if vp.__dict__[o] is not None and not self.like(vp.__dict__[o], data[vp.name][o]):
                             print(str(vp)+'.'+str(o)+" was not written correctly") #give message if they don't match
                         
         for vp in self.variables:
             if vp.type != None: #(FV/MV/SV/CV) not Param or Var
                 for o in variable_options[vp.type]['inputs']:
                     if o not in ['LB','UB']:
-                        if vp.__dict__[o] != None and not self.like(vp.__dict__[o], data[vp.name][o]):
+                        if vp.__dict__[o] is not None and not self.like(vp.__dict__[o], data[vp.name][o]):
                             print(str(vp)+'.'+str(o)+" was not written correctly") #give message if they don't match
                             
         
@@ -856,12 +906,6 @@ class GEKKO(object):
     def sqrt(self,other):
         return GK_Operators('sqrt('+str(other) + ')')
 
-    #%%
-
-    #close open files in case object is deleted mid-run
-    def __del__(self):
-        self.f_info.close()
-        
 
 
 

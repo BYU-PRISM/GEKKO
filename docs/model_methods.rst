@@ -18,6 +18,7 @@ Model Building
 
 .. py:class::	m = GEKKO([server], [name]):
 
+	Creates a GEKKO model `m`.
 
 .. py:classmethod::    c =  m.Const(value, [name]):
 
@@ -58,7 +59,9 @@ Model Building
 
     Sets the time array indicating the discrete elements of time discretization for dynamic modes (`IMODE > 3`). Accepts a python list of a numpy array.
 
-.. py:classmethod::    m.Array(type,dimension)
+.. py:classmethod::    a = m.Array(type,dimension)
+	
+	Create an n-dimensional array (as defined in tuple input `dimension`) of GEKKO variables of type `type`.
 
 
 .. py:classmethod:: m.solve(remote=True,disp=True,verify_input=False)

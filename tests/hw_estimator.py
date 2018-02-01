@@ -29,7 +29,10 @@ p.Equations([p.tau/n * p.x[i+1].dt() == -p.x[i+1] + p.x[i] for i in range(n)])
 p.Equation(p.y == p.K * p.x[n])
 
 #options
-p.options.IMODE = 5
+p.options.IMODE = 4
+
+#p.u.FSTATUS = 1
+#p.u.STATUS = 0
 
 
 #%% Model
@@ -53,13 +56,14 @@ m.Equations([m.tau * m.x.dt() == -m.x + m.u,
 
 #Options
 m.options.IMODE = 5 #MHE
-m.options.EV_TYPE = 2
+m.options.EV_TYPE = 1
 
 # STATUS = 0, optimizer doesn't adjust value
 # STATUS = 1, optimizer can adjust
 m.u.STATUS = 0
 m.K.STATUS = 1
-m.tau.STATUS = 0
+m.tau.STATUS = 1
+m.y.STATUS = 1
 
 # FSTATUS = 0, no measurement
 # FSTATUS = 1, measurement used to update model
@@ -72,10 +76,6 @@ m.y.FSTATUS = 1
 m.K.DMAX = 1
 m.tau.DMAX = .1
 
-# DCOST = penalize parameter movement
-#m.K.DCOST = 1
-#m.tau.DCOST = 0
-
 # MEAS_GAP = dead-band for measurement / model mismatch
 m.y.MEAS_GAP = 0.25
 
@@ -83,9 +83,9 @@ m.y.TR_INIT = 1
 
 #%% problem configuration
 # number of cycles
-cycles = 100
+cycles = 50
 # noise level
-noise = 0
+noise = 0.25
 
 # values of u change randomly over time every 10th step
 u_meas = np.zeros(cycles)
@@ -110,7 +110,7 @@ for i in range(cycles):
     # estimator
     m.u.MEAS = u_meas[i]
     m.y.MEAS = y_meas[i]
-    m.solve(remote=False,verify_input=True)
+    m.solve(remote=False)
     y_est[i] = m.y.MODEL 
     k_est[i] = m.K.NEWVAL 
     tau_est[i] = m.tau.NEWVAL 

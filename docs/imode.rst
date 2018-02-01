@@ -71,19 +71,42 @@ CV
 MHE
 ^^^
 
-Moving Horizon Estimation
+Moving Horizon Estimation is for dynamic estimation, both for states and parameter regression. The horizon to match is the discretized time horizon of the model `m.time`. `m.time` should be discretized and regular intervals. New measurements are added at the end of the horizon `m.time[-1]` and the oldest measurements (`m.time[0]`) is dropped off.
+
+`m.options.TIMESHIFT` enables automatic shifting of all variables and parameters with each new solve of a model. The frequency of new measurements should match the discretization of `m.time`.
 
 FV
 ""
 
+Fixed variables are fixed through the horizon. 
+
+`STATUS` adds one degree of freedom for the optimizer, i.e. a fixed parameter for fit. 
+
+`FSTATUS` allows giving a fixed measurement.
+
+
 MV
 ""
+
+Manipulated variables are like FVs, but discretized with time. 
+
+`STATUS` adds one degree of freedom for each time point for the optimizer, i.e. a dynamic parameter for fit. 
+
+`FSTATUS` allows giving a measurements for each time.
 
 SV
 ""
 
 CV
 ""
+
+Controlled variables are the measurement to match. 
+
+If `STATUS` is on (`STATUS=1`), an objective function is added to minimize the model prediction to the measurements. The error is either squared or absolute depending on if `m.options.EV_TYPE` is 2 or 1, respectively.
+
+If `m.options.EV_TYPE = 1`, `CV.MEAS_GAP=v` will provide a deadband of size `v` around the measurement to avoid fitting to measurement noise.
+
+`FSTATUS` enables receiving measurements through the `MEAS` attribute.  
 
 Control
 -------

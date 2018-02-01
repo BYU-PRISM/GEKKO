@@ -52,11 +52,11 @@ class GKVariable(GK_Operators):
         if lb is not None:
             self.LOWER = lb
         else:
-            self.LOWER = -1.23456789e20
+            self.LOWER = None
         if ub is not None:
             self.UPPER = ub
         else:
-            self.UPPER = 1.23456789e20
+            self.UPPER = None
         self.LB = lb #lower bound
         self.UB = ub #upper bound
         
@@ -101,12 +101,6 @@ class GKVariable(GK_Operators):
                 else:
                     self.__dict__[name] = value
                     
-                #write option to dbs file
-                if self.type != None: #only for SV and CV
-                    if name != 'VALUE': #don't write values to dbs
-                        f = open(os.path.join(self.path,'overrides.dbs'),'a')
-                        f.write(self.name+'.'+name+' = '+str(value)+'\n')
-                        f.close()
                         
             #don't allow writing to output properties by default
             elif name in options[self.type]['outputs']:
@@ -118,12 +112,12 @@ class GKVariable(GK_Operators):
                     else:
                         raise TypeError
                 except TypeError:
-                    print(str(name)+" is an output property")
-                    raise AttributeError
+                    raise AttributeError(str(name)+" is an output property")
+
                     
             #no other properties allowed
             else:
-                raise AttributeError(str(name)+" is not a recognized property")
+                raise AttributeError(str(name)+" is not a property of this variable")
                 
         #for initializing model
         else:
@@ -148,12 +142,12 @@ class GK_SV(GKVariable):
         self.path = model_path #use the same path as the model 
         
         # SV specific options
-        self.FSTATUS = 0
-        self.LOWER = -1.0e20
+        self.FSTATUS = None
+        self.LOWER = None
         self.MEAS = None
-        self.MODEL = 1.0
-        self.PRED = 1.0
-        self.UPPER = 1.0e20
+        self.MODEL = None
+        self.PRED = None
+        self.UPPER = None
         
         GKVariable.__init__(self, name, value, lb, ub, integer)
 
@@ -173,30 +167,30 @@ class GK_CV(GK_SV):
         self.type = 'CV'
         
         # CV specific options
-        self.BIAS = 0.0
-        self.COST = 0.0
-        self.CRITICAL = 0
-        self.FDELAY = 0
-        self.LSTVAL = 1.0
-        self.MEAS_GAP = 1.0e-3
-        self.PSTATUS = 1
-        self.SP = 0.0
-        self.SPHI = 1.0e20
-        self.SPLO = -1.0e20
-        self.STATUS = 0
-        self.TAU = 60.0
-        self.TIER = 1
-        self.TR_INIT = 2
-        self.TR_OPEN = 1.0
-        self.VDVL = 1.0e20
-        self.VLACTION = 0
-        self.VLHI = 1.0e20
-        self.VLLO = -1.0e20
-        self.WMEAS = 20.0
-        self.WMODEL = 2.0
-        self.WSP = 20.0
-        self.WSPHI = 20.0
-        self.WSPLO = 20.0
+        self.BIAS = None
+        self.COST = None
+        self.CRITICAL = None
+        self.FDELAY = None
+        self.LSTVAL = None
+        self.MEAS_GAP = None
+        self.PSTATUS = None
+        self.SP = None
+        self.SPHI = None
+        self.SPLO = None
+        self.STATUS = None
+        self.TAU = None
+        self.TIER = None
+        self.TR_INIT = 0
+        self.TR_OPEN = None
+        self.VDVL = None
+        self.VLACTION = None
+        self.VLHI = None
+        self.VLLO = None
+        self.WMEAS = None
+        self.WMODEL = None
+        self.WSP = None
+        self.WSPHI = None
+        self.WSPLO = None
 
         GK_SV.__init__(self, name=name, value=value, lb=lb, ub=ub, gk_model=gk_model, model_path=model_path, integer=integer)
 
