@@ -116,7 +116,7 @@ c.y.SPLO = 2.9
 #if CV_TYPE = 2, use SP
 #c.y.SP = 3
 
-
+c.y.TR_INIT = 0
 
 #%% problem configuration
 # number of cycles
