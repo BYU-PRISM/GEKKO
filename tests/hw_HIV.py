@@ -43,10 +43,12 @@ m.options.EV_TYPE = 2 #l2 norm
 m.options.COLDSTART = 2
 m.options.SOLVER = 1
 m.options.MAX_ITER = 1000
+m.options.NODES = 2
+
 
 m.solve()
 
-for i in range(6):
+for i in range(5):
     lg10_kr[i].STATUS = 1 #Allow optimizer to fit these values
     lg10_kr[i].DMAX = 2
     lg10_kr[i].LOWER = -10
@@ -66,6 +68,7 @@ LV.value = log_v #v data from csv
 m.solve()
 m.GUI()
 
+<<<<<<< HEAD
 # # plot results
 # import matplotlib.pyplot as plt
 # plt.figure(1)
@@ -77,3 +80,16 @@ m.GUI()
 # plt.ylabel('States (log scale)')
 # plt.legend(['H','I','V']) #,'V data')
 # plt.show()
+=======
+# plot results
+import matplotlib.pyplot as plt
+plt.figure(1)
+plt.semilogy(m.time,H,'b-')
+plt.semilogy(m.time,I,'g:')
+plt.semilogy(m.time,V,'r--')
+plt.semilogy(data[:,][:,0],v,'ro')
+plt.xlabel('Time (yr)')
+plt.ylabel('States (log scale)')
+plt.legend(['H','I','V']) #,'V data')
+plt.show()
+>>>>>>> master

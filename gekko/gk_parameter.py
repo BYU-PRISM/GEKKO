@@ -83,13 +83,7 @@ class GKParameter(GK_Operators):
                     self.__dict__[name].value = value
                 else:
                     self.__dict__[name] = value
-                    
-                #write option to dbs file
-                if self.type != None: #only for FV and MV
-                    if name != 'VALUE': #don't write values to dbs
-                        f = open(os.path.join(self.path,'overrides.dbs'),'a')
-                        f.write(self.name+'.'+name+' = '+str(value)+'\n')
-                        f.close()
+
                     
             #don't allow writing to output properties by default
             elif name in options[self.type]['outputs']:
@@ -135,28 +129,28 @@ class GK_FV(GKParameter):
         self.UB = ub #upper bound
         
         # FV options
-        self.CRITICAL = 0
-        self.DMAX = 1.0e20
-        self.DMAXHI = 1.0e20
-        self.DMAXLO = -1.0e20
-        self.FSTATUS = 1.0
+        self.CRITICAL = None
+        self.DMAX = None
+        self.DMAXHI = None
+        self.DMAXLO = None
+        self.FSTATUS = None
         if lb is not None:
             self.LOWER = lb
         else:
-            self.LOWER = -1.23456789e20
-        self.LSTVAL = 1.0
+            self.LOWER = None
+        self.LSTVAL = None
         self.MEAS = None
-        self.NEWVAL = 1.0
-        self.PSTATUS = 1
-        self.STATUS = 1
+        self.NEWVAL = None
+        self.PSTATUS = None
+        self.STATUS = None
         if ub is not None:
             self.UPPER = ub
         else:
-            self.UPPER = 1.23456789e20
-        self.VDVL = 1.0e20
-        self.VLACTION = 0
-        self.VLHI = 1.0e20
-        self.VLLO = -1.0e20
+            self.UPPER = None
+        self.VDVL = None
+        self.VLACTION = None
+        self.VLHI = None
+        self.VLLO = None
        
         GKParameter.__init__(self, name=name, value=value, integer=integer)
 
@@ -200,15 +194,15 @@ class GK_MV(GK_FV):
         self.type = 'MV'
 
         # options for manipulated variables
-        self.AWS = 0
-        self.COST = 0.0
-        self.DCOST = 0.00001
-        self.DPRED = 0.0
-        self.MV_STEP_HOR = 0
-        self.NXTVAL = 1.0
-        self.PRED = 1.0
-        self.REQONCTRL = 0
-        self.TIER = 1
+        self.AWS = None
+        self.COST = None
+        self.DCOST = None
+        self.DPRED = None
+        self.MV_STEP_HOR = None
+        self.NXTVAL = None
+        self.PRED = None
+        self.REQONCTRL = None
+        self.TIER = None
 
         
         GK_FV.__init__(self, name=name, value=value, lb=lb, ub=ub, gk_model=gk_model, model_path=model_path, integer=integer)
