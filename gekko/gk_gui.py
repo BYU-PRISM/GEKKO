@@ -9,7 +9,6 @@ import json
 import os
 import webbrowser
 
-
 import __main__ as main
 from pprint import pprint
 
@@ -19,24 +18,25 @@ class GK_GUI:
     data from options.json and results.json and displays using DASH.
     """
     def __init__(self):
-        # super(GK_GUI, self).__init__()
         self.app = dash.Dash()
         self.serve_static()
-        self.vars = {}
-        self.vars_dict = {}
+        self.vars = {}                          # dict of vars data from results.json
+        self.vars_map = self.get_script_vars()  # map of model vars to script vars
         self.get_data()
         self.app.layout = self.make_layout()
-        print("Globals from GUI:")
-        main_dict = vars(main)
-        pprint(main_dict)
-        for var in main_dict:
-            if isinstance(main_dict[var], GKVariable):
-                print(var, "is GKVariable", main_dict[var].name)
-                self.vars_dict[main_dict[var].name] = var
-        pprint(self.vars_dict)
 
     def make_plot(self, var):
-        return {'x': self.time, 'y': self.results[var], 'type': 'linear', 'name': var}
+        print(var)
+        return {'x': self.time, 'y': self.results[var], 'type': 'linear', 'name': self.vars_map[var]}
+
+    def get_script_vars(self):
+        vars_map = {}
+        main_dict = vars(main)
+        for var in main_dict:
+            if isinstance(main_dict[var], GKVariable):
+                vars_map[main_dict[var].name] = var
+        pprint(vars_map)
+        return vars_map
 
     def get_data(self):
         # Gether the data that GEKKO returns from the run
@@ -48,6 +48,7 @@ class GK_GUI:
         for var in self.results:
             if var != 'time':
                 self.vars[var] = self.results[var]
+        pprint(self.vars)
 
     def make_options_table(self, data, header_row):
         # Makes a DASH table from the dict passed in with the given table_id
@@ -102,12 +103,10 @@ class GK_GUI:
                         dcc.Graph(
                             id='main_plot',
                             figure={
-                                'data': [self.make_plot(var) for var in self.vars],
+                                'data': [self.make_plot(var) for var in self.vars_map],
                                 'layout':{
-                                    'title': 'Plot title',
-                                    'height':800,
+                                    'height':600,
                                     'xaxis': {'title': 'Time (s)'},
-                                    'yaxis': {'title': 'Your dimensions'}
                                 }
                             },
                             config={'displaylogo': False},

@@ -1,12 +1,15 @@
 # Notes on Gekko Gui development
 
 ## Questions
-- How to pass in the local vars to GUI?
-  - `m.GUI(vars())`
-  - `m.GUI(gui.vars)` where `gui.vars = vars()` or something similar
-  - Declare Gekko vars as globals?
+- What about if someone is running more than one gekko app at a time?
+  - `options.json` and `results.json` keep getting overwritten by each other
 
 ## Answered Questions  
+- How to pass in the local vars to GUI?
+  ```python
+  import __main__ as main
+  vars_dict = vars(main)
+  ```
 - Are the JSON structures pretty static or will there be field that only appear
   depending on what the user chooses? If not, can it be made static
   - pretty static. We can deal with exceptions as they come
@@ -40,9 +43,8 @@
   - may wait a little on this one as a tab component is actively being developed
 - Pretty up the graph
   - add log scale options
+  - Get it to autoscale to 100%
 - Decide what to put on each graph or at least what to display by default
-- Map the user var names to the model var names
-
 
 ## Bugs
 - When DASH renders it somehow triggers a rerender that even makes GEKKO

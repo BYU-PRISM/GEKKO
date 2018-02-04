@@ -865,11 +865,4 @@ class GEKKO(object):
 
     def GUI(self):
         gui = GK_GUI()
-        # print("NAMESPACE VARIABLES:", vars(self))
-
-        # print("length:", len(gekko_namespace))
-        # for n in gekko_namespace:
-        #     if isinstance(v[n],GKVariable):
-        #         print(n, v[n].name)
-
         gui.display()
