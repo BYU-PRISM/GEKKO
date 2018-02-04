@@ -39,15 +39,11 @@ setup(name='gekko',
     packages=find_packages(),
     install_requires=[
         'APMonitor',
-<<<<<<< HEAD
         'dash',
         'dash_html_components',
         'dash_core_components',
         'dash_renderer',
-        'numpy>=1.9'#,
-=======
-        'numpy~=1.8'#,
->>>>>>> master
+        'numpy>=1.8'#,
         #'ujson',
     ],
 #    package_data=apm_binary,

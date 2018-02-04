@@ -68,7 +68,6 @@ LV.value = log_v #v data from csv
 m.solve()
 m.GUI()
 
-<<<<<<< HEAD
 # # plot results
 # import matplotlib.pyplot as plt
 # plt.figure(1)
@@ -80,16 +79,3 @@ m.GUI()
 # plt.ylabel('States (log scale)')
 # plt.legend(['H','I','V']) #,'V data')
 # plt.show()
-=======
-# plot results
-import matplotlib.pyplot as plt
-plt.figure(1)
-plt.semilogy(m.time,H,'b-')
-plt.semilogy(m.time,I,'g:')
-plt.semilogy(m.time,V,'r--')
-plt.semilogy(data[:,][:,0],v,'ro')
-plt.xlabel('Time (yr)')
-plt.ylabel('States (log scale)')
-plt.legend(['H','I','V']) #,'V data')
-plt.show()
->>>>>>> master

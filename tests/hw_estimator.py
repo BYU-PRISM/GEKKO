@@ -110,7 +110,6 @@ for i in range(cycles):
     # estimator
     m.u.MEAS = u_meas[i]
     m.y.MEAS = y_meas[i]
-<<<<<<< HEAD
     m.solve(remote=True,verify_input=True)
     y_est[i] = m.y.MODEL
     k_est[i] = m.K.NEWVAL
@@ -135,28 +134,3 @@ m.GUI()
 # plt.subplot(4,1,4)
 # plt.plot(u_meas)
 # plt.legend('u')
-=======
-    m.solve(remote=False)
-    y_est[i] = m.y.MODEL 
-    k_est[i] = m.K.NEWVAL 
-    tau_est[i] = m.tau.NEWVAL 
-    
-
-#%% Plot results
-plt.figure()
-plt.subplot(4,1,1)
-plt.plot(y_meas)
-plt.plot(y_est)
-plt.legend(('meas','pred'))
-plt.subplot(4,1,2)
-plt.plot(np.ones(cycles)*p.K.value[0])
-plt.plot(k_est)
-plt.legend(('actual','pred'))
-plt.subplot(4,1,3)
-plt.plot(np.ones(cycles)*p.tau.value[0])
-plt.plot(tau_est)
-plt.legend(('actual','pred'))
-plt.subplot(4,1,4)
-plt.plot(u_meas)
-plt.legend('u')
->>>>>>> master

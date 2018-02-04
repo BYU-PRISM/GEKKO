@@ -76,14 +76,7 @@ class GEKKO(object):
         self.model_name = name.lower().replace(" ", "")
         #Path of model folder
         self.path = tempfile.mkdtemp(suffix=self.model_name)
-<<<<<<< HEAD
 
-        #Create and open configuration files
-        self.f_info = open(os.path.join(self.path,self.model_name)+'.info', 'w+') #for classifiying variables
-
-=======
-        
->>>>>>> master
         #clear anything already on the server
         apm.cmd(self.server,self.model_name,'clear all')
 
@@ -676,15 +669,15 @@ class GEKKO(object):
     def write_info(self):
         #Classify variable in .info file
         filename = self.model_name+'.info'
-        
+
         #Create and open configuration files
         with open(os.path.join(self.path,filename), 'w+') as f:
             #check each Var and Param for FV/MV/SV/CV
             for vp in self.variables+self.parameters:
                 if vp.type is not None:
                     f.write(vp.type+', '+vp.name+'\n')
-        
-        
+
+
     def generate_overrides_dbs_file(self):
         '''Write options to overrides.dbs file
 
@@ -707,7 +700,7 @@ class GEKKO(object):
                         else: #everything else is an option
                             if vp.__dict__[o] is not None:
                                 f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
-                            
+
             for vp in self.variables:
                 if vp.type is not None: #(FV/MV/SV/CV) not Param or Var
                     for o in variable_options[vp.type]['inputs']+variable_options[vp.type]['inout']:
@@ -716,8 +709,8 @@ class GEKKO(object):
                         else: #everything else is an option
                             if vp.__dict__[o] is not None:
                                 f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
-    
-                        
+
+
 
     #%% Post-solve processing
 
@@ -790,19 +783,11 @@ class GEKKO(object):
 
             for vp in self.parameters:
                 if vp.type is not None:
-<<<<<<< HEAD
-                    if vp.STATUS != 0:
-                        try:
-                            vp.VALUE = data[vp.name]
-                        except Exception:
-                            print(vp.name+ " not found in results file")
-=======
                     try:
                         vp.VALUE = data[vp.name]
                         vp.value.change = False
                     except Exception:
-                        print(vp.name+ " not found in results file")  
->>>>>>> master
+                        print(vp.name+ " not found in results file")
             for vp in self.variables:
                 try:
                     vp.VALUE = data[vp.name]
@@ -922,17 +907,9 @@ class GEKKO(object):
     def sqrt(self,other):
         return GK_Operators('sqrt('+str(other) + ')')
 
-<<<<<<< HEAD
-    #%%
-
-    #close open files in case object is deleted mid-run
-    def __del__(self):
-        self.f_info.close()
-=======
 
 
 
->>>>>>> master
 
     def GUI(self):
         gui = GK_GUI()
