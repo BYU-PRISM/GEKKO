@@ -22,7 +22,7 @@ horizon = 30
 #Initialize model
 m = GEKKO()
 
-#time array 
+#time array
 m.time = np.arange(50)
 
 #Parameters
@@ -34,7 +34,7 @@ tau = m.Param(value=0.1)
 #Variable
 flow = m.CV(value=42)
 
-#Equation 
+#Equation
 m.Equation(tau * flow.dt() == -flow + Cv * u + d)
 
 # Options
@@ -77,9 +77,9 @@ z[100] = 0
 for k in range(1, n_iter+1):
     print( 'Cycle ' + str(k) + ' of ' + str(n_iter))
     time[k] = k
-    
+
     # L1-norm MHE
-    flow.meas = z[k] 
+    flow.meas = z[k]
     m.solve()
     x1mhe[k] = flow.model
 
@@ -102,12 +102,12 @@ m.solve()
 for k in range(1, n_iter+1):
     print ('Cycle ' + str(k) + ' of ' + str(n_iter))
     time[k] = k
-    
+
     # L2-norm MHE
-    flow.meas = z[k] 
+    flow.meas = z[k]
     m.solve()
     x2mhe[k] = flow.model
-        
+
 
 
 #%% Filtered bias update
@@ -118,19 +118,21 @@ for k in range(1, n_iter+1):
     time[k] = k
 
     # filtered bias update
-    xb[k] = alpha * z[k] + (1.0-alpha) * xb[k-1] 
-    
-    
+    xb[k] = alpha * z[k] + (1.0-alpha) * xb[k-1]
+
+
+m.GUI()
+
 #%% plot results
-import matplotlib.pyplot as plt
-plt.figure(1)
-plt.plot(time,z,'kx',linewidth=2)
-plt.plot(time,xb,'g--',linewidth=3)
-plt.plot(time,x2mhe,'k-',linewidth=3)
-plt.plot(time,x1mhe,'r.-',linewidth=3)
-plt.plot(time,xtrue,'k:',linewidth=2)
-plt.legend(['Measurement','Filtered Bias Update','Sq Error MHE','l_1-Norm MHE','Actual Value'])
-plt.xlabel('Time (sec)')
-plt.ylabel('Flow Rate (T/hr)')
-plt.axis([0, time[n_iter], 32, 45])
-plt.show()
+# import matplotlib.pyplot as plt
+# plt.figure(1)
+# plt.plot(time,z,'kx',linewidth=2)
+# plt.plot(time,xb,'g--',linewidth=3)
+# plt.plot(time,x2mhe,'k-',linewidth=3)
+# plt.plot(time,x1mhe,'r.-',linewidth=3)
+# plt.plot(time,xtrue,'k:',linewidth=2)
+# plt.legend(['Measurement','Filtered Bias Update','Sq Error MHE','l_1-Norm MHE','Actual Value'])
+# plt.xlabel('Time (sec)')
+# plt.ylabel('Flow Rate (T/hr)')
+# plt.axis([0, time[n_iter], 32, 45])
+# plt.show()

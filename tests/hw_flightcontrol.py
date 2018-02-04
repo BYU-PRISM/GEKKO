@@ -34,7 +34,7 @@ A = np.array([[-.003, 0.039, 0, -0.322],
               [-0.065, -0.319, 7.74, 0],
               [0.020, -0.101, -0.429, 0],
               [0, 0, 1, 0]])
-            
+
 B = np.array([[0.01, 1],
               [-0.18, -0.04],
               [-1.16, 0.598],
@@ -84,27 +84,27 @@ y[1].status = 1
 
 
 m.solve()
+m.GUI()
 
-
-#%% plot results
-import matplotlib.pyplot as plt
-plt.figure(1)
-plt.subplot(311)
-plt.plot(m.time,u[0],'r-',linewidth=2.0)
-plt.plot(m.time,u[1],'k:',linewidth=2.0)
-plt.legend(['Elevator','Thrust'])
-plt.ylabel('MV Action')
-
-plt.subplot(312)
-plt.plot(m.time,y[0],'b:',linewidth=2.0)
-#plt.plot(m.time,y[0].tr_hi,'k-')
-#plt.plot(m.time,y[0].tr_lo,'k-')
-plt.legend(['Air Speed','Upper Trajectory','Lower Trajectory'])
-
-plt.subplot(313)
-plt.plot(m.time,y[1],'g--',linewidth=2.0)
-#plt.plot(m.time,y[1].tr_hi,'k-')
-#plt.plot(m.time,y[1].tr_lo,'k-')
-plt.legend(['Climb Rate','Upper Trajectory','Lower Trajectory'])
-
-plt.show()
+# #%% plot results
+# import matplotlib.pyplot as plt
+# plt.figure(1)
+# plt.subplot(311)
+# plt.plot(m.time,u[0],'r-',linewidth=2.0)
+# plt.plot(m.time,u[1],'k:',linewidth=2.0)
+# plt.legend(['Elevator','Thrust'])
+# plt.ylabel('MV Action')
+#
+# plt.subplot(312)
+# plt.plot(m.time,y[0],'b:',linewidth=2.0)
+# #plt.plot(m.time,y[0].tr_hi,'k-')
+# #plt.plot(m.time,y[0].tr_lo,'k-')
+# plt.legend(['Air Speed','Upper Trajectory','Lower Trajectory'])
+#
+# plt.subplot(313)
+# plt.plot(m.time,y[1],'g--',linewidth=2.0)
+# #plt.plot(m.time,y[1].tr_hi,'k-')
+# #plt.plot(m.time,y[1].tr_lo,'k-')
+# plt.legend(['Climb Rate','Upper Trajectory','Lower Trajectory'])
+#
+# plt.show()

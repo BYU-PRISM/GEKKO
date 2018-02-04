@@ -30,7 +30,7 @@ LV = m.CV(value=2)
 m.Equations([10**lg10_kr[i]==kr[i] for i in range(6)])
 m.Equations([H.dt() == kr[0] - kr[1]*H - kr[2]*H*V,
              I.dt() == kr[2]*H*V - kr[3]*I,
-             V.dt() == -kr[2]*H*V - kr[4]*V + kr[5]*I, 
+             V.dt() == -kr[2]*H*V - kr[4]*V + kr[5]*I,
              LV == m.log10(V)])
 
 
@@ -64,16 +64,16 @@ LV.STATUS = 1 #build objective function to match data and prediction
 LV.value = log_v #v data from csv
 
 m.solve()
+m.GUI()
 
-
-# plot results
-import matplotlib.pyplot as plt
-plt.figure(1)
-plt.semilogy(m.time,H,'b-')
-plt.semilogy(m.time,I,'g:')
-plt.semilogy(m.time,V,'r--')
-plt.semilogy(data[:,][:,0],v,'ro')
-plt.xlabel('Time (yr)')
-plt.ylabel('States (log scale)')
-plt.legend(['H','I','V']) #,'V data')
-plt.show()
+# # plot results
+# import matplotlib.pyplot as plt
+# plt.figure(1)
+# plt.semilogy(m.time,H,'b-')
+# plt.semilogy(m.time,I,'g:')
+# plt.semilogy(m.time,V,'r--')
+# plt.semilogy(data[:,][:,0],v,'ro')
+# plt.xlabel('Time (yr)')
+# plt.ylabel('States (log scale)')
+# plt.legend(['H','I','V']) #,'V data')
+# plt.show()

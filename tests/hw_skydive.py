@@ -53,21 +53,21 @@ m.options.IMODE = 4 #dynamic simulation
 #Solve simulation
 m.solve(remote=True)
 
-#%% Plot results
-plt.figure()
-plt.plot(x.value,y.value)
-plt.xlabel('x')
-plt.ylabel('y')
-
-plt.figure()
-plt.plot(m.time,x.value,label='x')
-plt.plot(m.time,y.value,label='y')
-plt.xlabel('time')
-plt.legend()
-
-plt.figure()
-plt.plot(m.time,vx.value,label='vx')
-plt.plot(m.time,vy.value,label='vy')
-plt.xlabel('time')
-plt.legend()
-
+m.GUI()
+# #%% Plot results
+# plt.figure()
+# plt.plot(x.value,y.value)
+# plt.xlabel('x')
+# plt.ylabel('y')
+#
+# plt.figure()
+# plt.plot(m.time,x.value,label='x')
+# plt.plot(m.time,y.value,label='y')
+# plt.xlabel('time')
+# plt.legend()
+#
+# plt.figure()
+# plt.plot(m.time,vx.value,label='vx')
+# plt.plot(m.time,vy.value,label='vy')
+# plt.xlabel('time')
+# plt.legend()
