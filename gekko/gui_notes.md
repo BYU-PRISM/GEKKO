@@ -36,15 +36,14 @@
 - Clean up the options.json display into pretty tabs
 
 ## Todo
-- make sure the right port is displayed in the event that dash chooses something
-  other than `localhost:8050`
-  - `app.port`?
 - Organize tables into tabs
   - may wait a little on this one as a tab component is actively being developed
 - Pretty up the graph
   - add log scale options
   - Get it to autoscale to 100%
 - Decide what to put on each graph or at least what to display by default
+- Find a good way of displaying var name if there is only one
+- Figure out what should be displayed for `hw_estimator.py` test and bug fix
 
 ## Bugs
 - When DASH renders it somehow triggers a rerender that even makes GEKKO

@@ -1,15 +1,18 @@
-import dash
+import socket
+import webbrowser
+import json
+import os
+
 from .gk_variable import GKVariable
+import __main__ as main
+
 import flask
+
+import dash
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 from dash_html_components import H1, Div, H3, Table, Thead, Tbody, Tr, Th, Td
 # import plotly.graph_objs as go
-import json
-import os
-import webbrowser
-
-import __main__ as main
 from pprint import pprint
 
 class GK_GUI:
@@ -26,7 +29,6 @@ class GK_GUI:
         self.app.layout = self.make_layout()
 
     def make_plot(self, var):
-        print(var)
         return {'x': self.time, 'y': self.results[var], 'type': 'linear', 'name': self.vars_map[var]}
 
     def get_script_vars(self):
@@ -35,7 +37,6 @@ class GK_GUI:
         for var in main_dict:
             if isinstance(main_dict[var], GKVariable):
                 vars_map[main_dict[var].name] = var
-        pprint(vars_map)
         return vars_map
 
     def get_data(self):
@@ -48,7 +49,6 @@ class GK_GUI:
         for var in self.results:
             if var != 'time':
                 self.vars[var] = self.results[var]
-        pprint(self.vars)
 
     def make_options_table(self, data, header_row):
         # Makes a DASH table from the dict passed in with the given table_id
@@ -139,12 +139,17 @@ class GK_GUI:
             self.app.css.append_css({"external_url": "/static/{}".format(stylesheet)})
 
     def display(self):
-        # Start the flask server and open the webbrowser
-        print("""
-            GEKKO results are being displayed over localhost:8050
-        """)
-        # Add this to have it automatically open a web browser to the page.
-        # webbrowser.open("http://localhost:8050/")
-        # Flask will double load the page and reoptimize everything when DEBUG=True
-        # Set to True when developing on smaller models for auto-reload
-        self.app.run_server(debug=True)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # Default port for plotly's dash
+        port = 8050
+        try:    # Check to see if :8050 is already bound
+            sock.bind(('127.0.0.1', port))
+            sock.close()
+        except OSError as e:   # Find an open port if :8050 is taken
+            sock.bind(('127.0.0.1', 0))
+            port = sock.getsockname()[1]
+            sock.close()
+
+        # Open the browser to the page and launch the app
+        webbrowser.open("http://localhost:" + str(port) + "/")
+        self.app.run_server(debug=False, port=port)
