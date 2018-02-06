@@ -61,6 +61,7 @@ class GEKKO(object):
         self.inter_equations = []
         self.equations = []
         self.objectives = [] 
+        self._connections = []
 
         #time discretization
         self.time = None
@@ -202,7 +203,29 @@ class GEKKO(object):
     def Obj(self,obj):
         self.objectives.append('minimize ' + str(obj))
 
+    #%% Connections
 
+    def Connection(self,var1, var2, pos1=None, pos2=None):
+        if pos1 is not None:
+            #make sure var1 is a GEKKO param or var
+            if type(var1) in ['GKParameter', 'GKVariable']:
+                var1 = 'p[' + pos1 + '].n[end]' + var1.name 
+            else:
+                raise TypeError('Variable 1 must be GEKKO Param or Var to use position')
+        if pos2 is not None:
+            #make sure var1 is a GEKKO param or var
+            if type(var2) in ['GKParameter', 'GKVariable']:
+                var2 = 'p[' + pos2 + '].n[end]' + var2.name 
+            else:
+                raise TypeError('Variable 2 must be GEKKO Param or Var to use position')
+        
+        self._connections.append(str(var1)+'='+str(var2))
+        
+    
+    def fix(self,var, pos, val):
+        self.Connection(self,var,val,pos1=pos)
+        
+        
     #%% Add array functionality to all types
     def Array(self,f,dim,**args):
         x = np.ndarray(dim,dtype=object)
@@ -217,6 +240,7 @@ class GEKKO(object):
         else:
             return [init(sizes[1:], f) for i in xrange(sizes[0])]           
     """        
+    
     #%% Get a solution
     def solve(self,remote=True,disp=True,verify_input=False):
         """Solve the optimization problem.
@@ -552,6 +576,11 @@ class GEKKO(object):
                     model += '\t%s\n' % o
             model += 'End Equations'
 
+        if self._connections:
+            model += 'Connections'
+            for connection in self._connections:
+                model += '\t%s\n' % connection
+            model += 'End Connections'
         #print(model) #for debugging
         
         #replace multiple operators resulting from signs
