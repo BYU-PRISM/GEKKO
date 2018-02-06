@@ -15,12 +15,26 @@ from dash_html_components import H1, Div, H3, Table, Thead, Tbody, Tr, Th, Td
 # import plotly.graph_objs as go
 from pprint import pprint
 
+# Toggle dev and production modes
+dev = True
+
+# Allows users to pick their desired css theme
+css_dict = {
+    'sandstone': 'bootstrap-sandstone.min.css',
+    'slate': 'bootstrap-slate.min.css',
+    'solarized': 'bootstrap-solarized.min.css'
+}
+
 class GK_GUI:
     """GUI class for GEKKO
     This class handles creation and management of the gui. It pulls the required
     data from options.json and results.json and displays using DASH.
     """
-    def __init__(self):
+    def __init__(self, theme='sandstone'):
+        try:
+            self.css_file = css_dict[theme]
+        except Exception as e:
+            self.css_file = css_dict['sandstone']
         self.app = dash.Dash()
         self.serve_static()
         self.vars = {}                          # dict of vars data from results.json
@@ -119,7 +133,7 @@ class GK_GUI:
 
     def serve_static(self):
         # Serve the local css files on /static/
-        stylesheets = ['bootstrap.min.css', 'bootstrap.min.css.map']
+        stylesheets = [self.css_file]
         static_css_route = '/static/'
         static_css_path = os.path.join(os.path.dirname(__file__), 'static')
 
@@ -151,5 +165,6 @@ class GK_GUI:
             sock.close()
 
         # Open the browser to the page and launch the app
-        webbrowser.open("http://localhost:" + str(port) + "/")
-        self.app.run_server(debug=False, port=port)
+        if not dev:
+            webbrowser.open("http://localhost:" + str(port) + "/")
+        self.app.run_server(debug=dev, port=port)

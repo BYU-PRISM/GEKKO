@@ -911,6 +911,6 @@ class GEKKO(object):
 
 
 
-    def GUI(self):
-        gui = GK_GUI()
+    def GUI(self, **kwargs):
+        gui = GK_GUI(**kwargs)
         gui.display()
