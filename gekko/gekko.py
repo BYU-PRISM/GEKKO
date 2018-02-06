@@ -209,7 +209,7 @@ class GEKKO(object):
         if pos1 is not None:
             #make sure var1 is a GEKKO param or var
             if type(var1) in ['GKParameter', 'GKVariable']:
-                var1 = 'p[' + pos1 + '].n[end]' + var1.name 
+                var1 = 'p[' + pos1 + '].n[end].' + var1.name 
             else:
                 raise TypeError('Variable 1 must be GEKKO Param or Var to use position')
         if pos2 is not None:
@@ -220,6 +220,10 @@ class GEKKO(object):
                 raise TypeError('Variable 2 must be GEKKO Param or Var to use position')
         
         self._connections.append(str(var1)+'='+str(var2))
+        
+        #for fixing to constants
+        if type(var2) not in ['GKParameter', 'GKVariable']:
+            self._connections.append(str(var1)+' = FIXED')
         
     
     def fix(self,var, pos, val):
