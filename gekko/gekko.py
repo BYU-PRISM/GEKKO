@@ -348,18 +348,18 @@ class GEKKO(object):
                     f = open(path)
                     file = f.read()
                     f.close()
-                    apm.cmd(self.server, self.model_name, extension+' '+file)
+                    apm.cmd(self.server, self.model_name, extension+' '+file, disp=disp)
                     
             
             #clear apm and csv files already on the server
-            apm.cmd(self.server,self.model_name,'clear apm')
-            apm.cmd(self.server,self.model_name,'clear csv')
+            apm.cmd(self.server,self.model_name,'clear apm', disp=disp)
+            apm.cmd(self.server,self.model_name,'clear csv', disp=disp)
             
             #send model file
             f = open(os.path.join(self.path,self.model_name + '.apm'))
             model = f.read()
             f.close()
-            apm.cmd(self.server, self.model_name, ' '+model)
+            apm.cmd(self.server, self.model_name, ' '+model, disp=disp)
             #send csv file
             send_if_exists('csv')
             #send info file
@@ -368,10 +368,10 @@ class GEKKO(object):
             f = open(os.path.join(self.path,'overrides.dbs'))
             dbs = f.read()
             f.close()
-            apm.cmd(self.server, self.model_name, 'option '+dbs)
+            apm.cmd(self.server, self.model_name, 'option '+dbs, disp=disp)
             
             #solve remotely
-            apm.cmd(self.server, self.model_name, 'solve')
+            apm.cmd(self.server, self.model_name, 'solve', disp=disp)
             
             #load results
             def byte2str(byte):
