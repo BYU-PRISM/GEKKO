@@ -208,14 +208,14 @@ class GEKKO(object):
     def Connection(self,var1, var2, pos1=None, pos2=None):
         if pos1 is not None:
             #make sure var1 is a GEKKO param or var
-            if type(var1) in ['GKParameter', 'GKVariable']:
-                var1 = 'p[' + pos1 + '].n[end].' + var1.name 
+            if isinstance(var1,(GKVariable,GKParameter)):
+                var1 = 'p(' + str(pos1) + ').n(end).' + var1.name 
             else:
                 raise TypeError('Variable 1 must be GEKKO Param or Var to use position')
         if pos2 is not None:
             #make sure var1 is a GEKKO param or var
-            if type(var2) in ['GKParameter', 'GKVariable']:
-                var2 = 'p[' + pos2 + '].n[end]' + var2.name 
+            if isinstance(var2,(GKVariable,GKParameter)):
+                var2 = 'p(' + pos2 + ').n(end)' + var2.name 
             else:
                 raise TypeError('Variable 2 must be GEKKO Param or Var to use position')
         
@@ -227,7 +227,7 @@ class GEKKO(object):
         
     
     def fix(self,var, pos, val):
-        self.Connection(self,var,val,pos1=pos)
+        self.Connection(var,val,pos1=pos)
         
         
     #%% Add array functionality to all types
@@ -578,10 +578,10 @@ class GEKKO(object):
             if self.objectives:
                 for o in self.objectives:
                     model += '\t%s\n' % o
-            model += 'End Equations'
+            model += 'End Equations\n'
 
         if self._connections:
-            model += 'Connections'
+            model += 'Connections\n'
             for connection in self._connections:
                 model += '\t%s\n' % connection
             model += 'End Connections'
