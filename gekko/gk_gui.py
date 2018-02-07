@@ -11,12 +11,15 @@ import flask
 import dash
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
-from dash_html_components import H1, Div, H3, Table, Thead, Tbody, Tr, Th, Td
+from dash_html_components import H1, Div, H3, Table, Thead, Tbody, Tr, Th, Td, Button
 # import plotly.graph_objs as go
 from pprint import pprint
 
 # Toggle dev and production modes
 dev = True
+
+# This has to be defined outside the class to allow the dash callbacks to work
+app = dash.Dash()
 
 # Allows users to pick their desired css theme
 css_dict = {
@@ -35,12 +38,40 @@ class GK_GUI:
             self.css_file = css_dict[theme]
         except Exception as e:
             self.css_file = css_dict['sandstone']
-        self.app = dash.Dash()
-        self.serve_static()
+        # self.app = dash.Dash()
         self.vars = {}                          # dict of vars data from results.json
         self.vars_map = self.get_script_vars()  # map of model vars to script vars
         self.get_data()
-        self.app.layout = self.make_layout()
+        app.layout = self.make_layout()
+        self.serve_static()
+        self.set_callbacks()
+
+    def set_callbacks(self):
+        @app.callback(
+            Output("tabContent", "children"),
+            [Input('tab1button', 'n_clicks')]
+        )
+        def tab1button_click(n_clicks):
+            print("tab1button_click called")
+            return [
+                H3("options['INFO']"),
+                Div(children=[
+                    self.make_options_table(self.options['INFO'], ["Option", "Value"])
+                ])
+            ]
+
+        @app.callback(
+            Output("tab2Content", "children"),
+            [Input('tab2button', 'n_clicks')]
+        )
+        def tab2button_click(n_clicks):
+            print("tab2button_click called")
+            return [
+                H3("options['APM']"),
+                Div(children=[
+                    self.make_options_table(self.options['APM'], ["Option", "Value"])
+                ])
+            ]
 
     def make_plot(self, var):
         return {'x': self.time, 'y': self.results[var], 'type': 'linear', 'name': self.vars_map[var]}
@@ -90,46 +121,74 @@ class GK_GUI:
             # Display the tabular data in the smaller column
             Div(
                 className='row',
+                style={'margin-right': 0},
                 children=[
-                    Div(
-                        className='col-sm-3',
-                        children=[
-                            Div(
-                                className='tabsBox',
-                                style={'height': '800px', 'overflow-y': 'scroll', 'margin': '20px'},
-                                children=[
-                                    H3("options['INFO']"),
-                                    Div(children=[
-                                        self.make_options_table(self.options['INFO'], ["Option", "Value"])
-                                    ]),
-                                    H3("options['APM']"),
-                                    Div(children=[
-                                        self.make_options_table(self.options['APM'], ["Option", "Value"])
+                Div(
+                    className='col-sm-3',
+                    children=[
+                        Div(
+                            style={'padding': 15},
+                            className='tabsBox',
+                            children=[
+                                Div(
+                                    style={'padding-bottom': 10},
+                                    className="btn-toolbar",
+                                    children=[
+                                    Div(
+                                        className="btn-group btn-group-sm",
+                                        # role="group",
+                                        children=[
+                                        Button(
+                                            className="btn btn-secondary",
+                                            id="tab1button",
+                                            type="button",
+                                            children=[
+                                            "Info"
+                                        ]),
+                                        Button(
+                                            className="btn btn-secondary",
+                                            id="tab2button",
+                                            type="button",
+                                            children=[
+                                            "APM"
+                                        ])
                                     ])
-                                ]
-                            )
-                        ]
+                                ]),
+                                Div(id="tabContent"),
+                                Div(
+                                    style={'display': 'none', 'overflow-y': 'auto'},
+                                    id="tab1Content",
+                                ),
+                                Div(
+                                    style={'display': 'block', 'overflow-y': 'auto'},
+                                    id="tab2Content",
+                                )
+                        ])
+                ]),
+                # Display the different charts as tabs in the main section
+                Div(
+                    className='col-sm-9',
+                    children=[
+                    dcc.Graph(
+                        id='main_plot',
+                        figure={
+                            'data': [self.make_plot(var) for var in self.vars_map],
+                            'layout':{
+                                'height':600,
+                                'xaxis': {'title': 'Time (s)'},
+                            }
+                        },
+                        config={'displaylogo': False},
                     ),
-                    # Display the different charts as tabs in the main section
                     Div(
-                        className='col-sm-9',
-                        children=[
-                        dcc.Graph(
-                            id='main_plot',
-                            figure={
-                                'data': [self.make_plot(var) for var in self.vars_map],
-                                'layout':{
-                                    'height':600,
-                                    'xaxis': {'title': 'Time (s)'},
-                                }
-                            },
-                            config={'displaylogo': False},
-                        )
-                        ]
+                        style={'display': 'none'},
+                        id="dummy_out"
                     )
-                ]
-            )
+                ])
+            ])
         ])
+
+
 
     def serve_static(self):
         # Serve the local css files on /static/
@@ -137,7 +196,7 @@ class GK_GUI:
         static_css_route = '/static/'
         static_css_path = os.path.join(os.path.dirname(__file__), 'static')
 
-        @self.app.server.route('{}<stylesheet>'.format(static_css_route))
+        @app.server.route('{}<stylesheet>'.format(static_css_route))
         def serve_stylesheet(stylesheet):
             print("Stylesheet requested: {}".format(stylesheet))
             if stylesheet not in stylesheets:
@@ -150,7 +209,7 @@ class GK_GUI:
 
 
         for stylesheet in stylesheets:
-            self.app.css.append_css({"external_url": "/static/{}".format(stylesheet)})
+            app.css.append_css({"external_url": "/static/{}".format(stylesheet)})
 
     def display(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -167,4 +226,4 @@ class GK_GUI:
         # Open the browser to the page and launch the app
         if not dev:
             webbrowser.open("http://localhost:" + str(port) + "/")
-        self.app.run_server(debug=dev, port=port)
+        app.run_server(debug=dev, port=port)
