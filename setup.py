@@ -38,7 +38,7 @@ setup(name='gekko',
     license='MIT',
     packages=find_packages(),
     install_requires=[
-        'APMonitor',
+        'APMonitor>0.31',
         'numpy~=1.8'#,
         #'ujson',
     ],
