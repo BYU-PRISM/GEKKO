@@ -48,7 +48,7 @@ class GEKKO(object):
     """Create a model object. This is the basic object for solving optimization problems"""
     _ids = count(0) #keep track of number of active class instances to not overwrite eachother with default model name
 
-    def __init__(self, server='http://xps.apmonitor.com', name=None):
+    def __init__(self, server='http://byu.apmonitor.com', name=None):
         self.server = compatible_string_strip(server)
         self.options = GKGlobalOptions()
         self.id = next(self._ids) #instance count of class
@@ -355,18 +355,18 @@ class GEKKO(object):
                     f = open(path)
                     file = f.read()
                     f.close()
-                    apm.cmd(self.server, self.model_name, extension+' '+file, disp=disp)
+                    apm.cmd(self.server, self.model_name, extension+' '+file)
                     
             
             #clear apm and csv files already on the server
-            apm.cmd(self.server,self.model_name,'clear apm', disp=disp)
-            apm.cmd(self.server,self.model_name,'clear csv', disp=disp)
+            apm.cmd(self.server,self.model_name,'clear apm')
+            apm.cmd(self.server,self.model_name,'clear csv')
             
             #send model file
             f = open(os.path.join(self.path,self.model_name + '.apm'))
             model = f.read()
             f.close()
-            apm.cmd(self.server, self.model_name, ' '+model, disp=disp)
+            apm.cmd(self.server, self.model_name, ' '+model)
             #send csv file
             send_if_exists('csv')
             #send info file
@@ -375,10 +375,10 @@ class GEKKO(object):
             f = open(os.path.join(self.path,'overrides.dbs'))
             dbs = f.read()
             f.close()
-            apm.cmd(self.server, self.model_name, 'option '+dbs, disp=disp)
+            apm.cmd(self.server, self.model_name, 'option '+dbs)
             
             #solve remotely
-            apm.cmd(self.server, self.model_name, 'solve', disp=disp)
+            apm.cmd(self.server, self.model_name, 'solve', disp)
             
             #load results
             def byte2str(byte):
