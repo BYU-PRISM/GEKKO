@@ -72,11 +72,11 @@ class GKGlobalOptions():
         self.MV_STEP_HOR = 1
         self.MV_TYPE = 0
         self.NODES = 2
-        self.OTOL = 1.0e-8
+        self.OTOL = 1.0e-6
         self.REDUCE = 0
         self.REQCTRLMODE = 3
         self.REPLAY = 0
-        self.RTOL = 1.0e-8
+        self.RTOL = 1.0e-6
         self.SCALING = 1
         self.SENSITIVITY = 0
         self.SEQUENTIAL = 0
