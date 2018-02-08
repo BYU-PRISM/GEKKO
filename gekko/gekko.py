@@ -48,7 +48,7 @@ class GEKKO(object):
     """Create a model object. This is the basic object for solving optimization problems"""
     _ids = count(0) #keep track of number of active class instances to not overwrite eachother with default model name
 
-    def __init__(self, server='http://xps.apmonitor.com', name=None):
+    def __init__(self, server='http://byu.apmonitor.com', name=None):
         self.server = compatible_string_strip(server)
         self.options = GKGlobalOptions()
         self.id = next(self._ids) #instance count of class
@@ -205,13 +205,14 @@ class GEKKO(object):
 
     #%% Connections
 
-    def Connection(self,var1, var2, pos1=None, pos2=None):
-            
+    def Connection(self,var1, var2, pos1=None, pos2=None, node1='end', node2='end'):
+        #TODO add checks for types
+            #e.g. if connecting a variable position (pos1 not None) to another variable, it must be an FV
         #make string versions of var1 and var2
         if pos1 is not None:
             #make sure var1 is a GEKKO param or var
             if isinstance(var1,(GKVariable,GKParameter)):
-                var1_str = 'p(' + str(pos1) + ').n(end).' + var1.name 
+                var1_str = 'p(' + str(pos1) + ').n(' + str(node1) + ').' + var1.name 
             else:
                 raise TypeError('Variable 1 must be GEKKO Param or Var to use position')
         else:
@@ -220,18 +221,24 @@ class GEKKO(object):
         if pos2 is not None:
             #make sure var1 is a GEKKO param or var
             if isinstance(var2,(GKVariable,GKParameter)):
-                var2_str = 'p(' + str(pos2) + ').n(end).' + var2.name 
+                var2_str = 'p(' + str(pos2) + ').n(' + str(node2) + ').' + var2.name 
             else:
                 raise TypeError('Variable 2 must be GEKKO Param or Var to use position')
         else:
             var2_str = str(var2)
-            
+           
+        #check for types
+        #if matching variable point to a second variable, the second variable must be an FV
+        if pos2 is not None and pos1 is None and isinstance(var1,(GKVariable,GKParameter)):
+            if var1.type != 'FV':
+                raise TypeError('Must matching FV to a single fixed point')
+
+        #add connection to list
         self._connections.append(var1_str+'='+var2_str)
         
         #for fixing to constants
         if not isinstance(var2,(GKVariable,GKParameter)):
-            print (type(var2))
-            self._connections.append(str(var1) + ' = FIXED')
+            self._connections.append(var1_str + ' = FIXED')
     
     #Simplified Connection
     def fix(self,var, pos, val):
@@ -371,7 +378,7 @@ class GEKKO(object):
             apm.cmd(self.server, self.model_name, 'option '+dbs)
             
             #solve remotely
-            apm.cmd(self.server, self.model_name, 'solve')
+            apm.cmd(self.server, self.model_name, 'solve', disp)
             
             #load results
             def byte2str(byte):
@@ -946,6 +953,12 @@ class GEKKO(object):
         return GK_Operators('log10('+str(other) + ')')
     def sqrt(self,other):
         return GK_Operators('sqrt('+str(other) + ')')
+    def asin(self,other):
+        return GK_Operators('asin('+str(other) + ')')
+    def acos(self,other):
+        return GK_Operators('acos('+str(other) + ')')
+    def atan(self,other):
+        return GK_Operators('atan('+str(other) + ')')
 
 
 
