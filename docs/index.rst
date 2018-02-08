@@ -9,7 +9,7 @@
 Welcome to GEKKO's documentation!
 =======================================
 
-	
+
 
 Overview
 --------
@@ -18,7 +18,7 @@ GEKKO is optimization software for mixed-integer and
 differential algebraic equations. It is coupled with large-scale solvers for
 linear, quadratic, nonlinear, and mixed integer programming (LP, QP, NLP, MILP,
 MINLP). Modes of operation include data reconciliation, real-time optimization,
-dynamic simulation, and nonlinear predictive control. 
+dynamic simulation, and nonlinear predictive control.
 
 GEKKO is an object-oriented python library to facilitate local execution of APMonitor.
 
@@ -28,12 +28,12 @@ More of the backend details available at :ref:`what_APM_does`
 Installation
 ------------
 
-A pip package is available:: 
+A pip package is available::
 
-	pip install gekko 
+	pip install gekko
 
-The most recent version is 0.0.2a. You can upgrade from the commandline with the upgrade flag::
-    
+The most recent version is 0.0.2rc4. You can upgrade from the commandline with the upgrade flag::
+
     pip install --upgrade gekko
 
 
@@ -44,7 +44,7 @@ To enable local solve (rather than solving on the remote server), copy the requi
 
     gekko/gekko/bin/*
 
-Local executables are currently only available for Windows (apm.exe).
+Currently, the pip packages already includes the Windows executable (apm.exe). Local executables for other operating systems are in development.
 
 
 Contents
@@ -52,7 +52,7 @@ Contents
 
 .. toctree::
 	:maxdepth: 1
-	
+
 	overview
 	quick_start
 	imode
@@ -63,6 +63,3 @@ Contents
 	model_methods
 	examples
 	support
-
-
-

@@ -24,8 +24,8 @@ IMODE
 +-----------------------+---------------+---------------+---------------+
 |                       | Simulation    | Estimation    | Control       |
 +-----------------------+---------------+---------------+---------------+
-|  Non-Dynamic          | `1` Sys of Eq | `2` MPU       | `3` RTO       |   
-+-----------------------+---------------+---------------+---------------+ 
+|  Non-Dynamic          | `1` Sys of Eq | `2` MPU       | `3` RTO       |
++-----------------------+---------------+---------------+---------------+
 |  Dynamic Simultaneous | `4` ODE Solver| `5` MHE       | `6` MPC       |
 +-----------------------+---------------+---------------+---------------+
 |  Dynamic Sequential   | `7` ODE Solver| `8` MHE       | `9` MPC       |
@@ -39,7 +39,7 @@ Non-Dynamic modes sets all differential terms to zero to calculate steady-state 
 
 Simultaneous methods use orthogonal collocation on finite elements to implicitly solve the DAE system. Non-simulation simultaneous methods (modes 5 and 6) simultaneously optimize the objective and implicitly calculate the model/constraints. Simultaneous methods tend to perform better for problems with many degrees of freedom.
 
-Sequential methods separate the NLP optimizer and the DAE simulator. 
+Sequential methods separate the NLP optimizer and the DAE simulator.
 
 
 Simulation
@@ -78,9 +78,9 @@ Moving Horizon Estimation is for dynamic estimation, both for states and paramet
 FV
 ""
 
-Fixed variables are fixed through the horizon. 
+Fixed variables are fixed through the horizon.
 
-`STATUS` adds one degree of freedom for the optimizer, i.e. a fixed parameter for fit. 
+`STATUS` adds one degree of freedom for the optimizer, i.e. a fixed parameter for fit.
 
 `FSTATUS` allows giving a fixed measurement.
 
@@ -88,9 +88,9 @@ Fixed variables are fixed through the horizon.
 MV
 ""
 
-Manipulated variables are like FVs, but discretized with time. 
+Manipulated variables are like FVs, but discretized with time.
 
-`STATUS` adds one degree of freedom for each time point for the optimizer, i.e. a dynamic parameter for fit. 
+`STATUS` adds one degree of freedom for each time point for the optimizer, i.e. a dynamic parameter for fit.
 
 `FSTATUS` allows giving a measurements for each time.
 
@@ -100,13 +100,14 @@ SV
 CV
 ""
 
-Controlled variables are the measurement to match. 
+Controlled variables are the measurement to match.
 
 If `STATUS` is on (`STATUS=1`), an objective function is added to minimize the model prediction to the measurements. The error is either squared or absolute depending on if `m.options.EV_TYPE` is 2 or 1, respectively.
 
 If `m.options.EV_TYPE = 1`, `CV.MEAS_GAP=v` will provide a deadband of size `v` around the measurement to avoid fitting to measurement noise.
 
-`FSTATUS` enables receiving measurements through the `MEAS` attribute.  
+`FSTATUS` enables receiving measurements through the `MEAS` attribute.
+
 
 Control
 -------
@@ -146,3 +147,19 @@ SV
 CV
 ""
 
+Controlled variables are the objective to match. When `STATUS=1` for a CV, the
+objective includes a minimization between model predictions and the setpoint.
+
+If `m.options.CV_TYPE=1`, the objective is an l1-norm (absolute error) with
+a dead-band. The setpoint range should be specified with `SPHI` and `SPLO`.
+If `m.options.CV_TYPE=2`, the objective is an l2-norm (squared error). The
+setpoint should be specified with `SP`.
+
+The other setpoint options include
+:ref:`tau`,
+:ref:`tier`,
+:ref:`tr_init`,
+:ref:`tr_open`,
+:ref:`wsp`,
+:ref:`wsphi`, and
+:ref:`wsplo`.

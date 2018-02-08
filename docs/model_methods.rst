@@ -44,10 +44,13 @@ Model Building
 .. py:classmethod::    i = m.Intermediate(equation, [name])
 
 
-.. py:classmethod::    m.Equation(equation)
+.. py:classmethod::    eq = m.Equation(equation)
 
-    
-.. py:classmethod::    m.Equations(eqs)
+    Add a constraint `equation` built from GEKKO Parameters, Variables and Intermediates,
+    and python scalars. Valid operators include python math and comparisons
+    (+,-,*,/,**,==,<,>). Available functions are listed below in :ref:`valid_eq_funcs`.
+
+.. py:classmethod::    [eqs] = m.Equations(equations)
 
     Accepts a list or array of equations.
 
@@ -60,15 +63,15 @@ Model Building
     Sets the time array indicating the discrete elements of time discretization for dynamic modes (`IMODE > 3`). Accepts a python list of a numpy array.
 
 .. py:classmethod::    a = m.Array(type,dimension)
-	
+
 	Create an n-dimensional array (as defined in tuple input `dimension`) of GEKKO variables of type `type`.
 
 
 .. py:classmethod:: m.solve(remote=True,disp=True,verify_input=False)
-	
-	
+
+
 	Solve the optimization problem.
-	
+
 	This function has these substeps:
 
 	* Validates the model and write .apm file (if .apm not supplied)
@@ -77,21 +80,41 @@ Model Building
 
 	* Write options to overrides.dbs
 
-	* Solve the problem using the apm.exe commandline interface. 
+	* Solve the problem using the apm.exe commandline interface.
 
 	* Load results into python variables.
-	
 
 
+.. py:classmethod:: m.Connection(var1,var2,pos1=None,pos2=None,node1='end',node2='end')
+
+    `var1` must be a GEKKO variable, but `var2` can be a static value. If `pos1` or
+    `pos2` is not `None`, the associated var must be a GEKKO variable and the position
+    is the (0-indexed) time-discretized index of the variable.
+
+    Connections are processed after the parameters and variables are parsed, but before
+    the initialization of the values. Connections are the merging of two variables
+    or connecting specific nodes of a discretized variable.
+    Once the variable is connected to another, the variable is only listed as an alias.
+    Any other references to the connected value are referred to the principal variable (`var1`).
+    The alias variable (`var2`) can be referenced in other parts of the model,
+    but will not appear in the solution files. ::
+
+
+.. py:classmethod:: m.fix(var,pos,val)
+
+    This function facilitates the `Connection` function when `var2` is a static value (`val`).
+
+
+.. _valid_eq_funcs:
 
 Equation Functions
 ------------------
 
 Special function besides algebraic operators are available through GEKKO functions. These must be used (not numpy or other equivalent functions):
-	
+
 .. py:classmethod:: m.sin(other)
 
-	
+
 .. py:classmethod:: m.cos(other)
 
 
@@ -125,42 +148,42 @@ Pre-Defined Models
 
 .. py:function:: m,x,y,u = SS(A,B,C,[D])
 
-For State Space models, input SS matricies A,B,C, and optionally D. Returns a GEKKO model `m`, array of states `x`, array of outputs `y` and array of inputs `u`. 
+For State Space models, input SS matricies A,B,C, and optionally D. Returns a GEKKO model `m`, array of states `x`, array of outputs `y` and array of inputs `u`.
 
 Available by::
 
     from gekko import SS
-    
-	
+
+
 Internal Methods
 ------------------
 
 These are the major methods used internal by GEKKO. They are not intended for external use, but may prove useful for highly customized applications.
-	
+
 .. py:staticmethod:: build_model(self)
-	
-	Write the .apm model file for the executable to read. The .apm file contains all constants, parameters, variables, intermediates, equations and objectives. 
+
+	Write the .apm model file for the executable to read. The .apm file contains all constants, parameters, variables, intermediates, equations and objectives.
 	Single values and/or initializations, along with variable bounds, are passed throught the .apm model file.
-	
+
 .. py:staticmethod:: write_csv()
-	
+
 	Any array values are passed through the csv, including variable initializations. If ``imode > 3`` then ``time`` must be discretized in the csv.
-	
+
 .. py:staticmethod:: generate_overrides_dbs_file()
-	
+
 	All global and local variable options are listed in the overrides database file.
-	
+
 .. py:staticmethod:: load_json()
 
     Reads back global and variable options from the options.json file. Stores output and input/output options to the associated variable.
 
 .. py:staticmethod:: load_results()
-	
+
 	The executable returns variable value results in a json. This function reads the json and loads the results back into local python variables.
 
 .. py:staticmethod:: verify_input_options()
 
-    Called when optional `solve` argument `verify_input=True`. Compares input options of the model and variables from GEKKO to those reported by APM to find discrepencies. 
+    Called when optional `solve` argument `verify_input=True`. Compares input options of the model and variables from GEKKO to those reported by APM to find discrepencies.
 
 
 Internal Attributes
@@ -192,7 +215,7 @@ These are GEKKO model attributes used internally. They are not intended for exte
     A python list of pointers to GEKKO Intermediate variables attributed to the model.
 
 .. py:attribute::   inter_equations
-    
+
     A python list of the explicit intermediate equations. The order of this list must match the order of intermediates in the `intermediates` attribute.
 
 .. py:attribute::   equations
@@ -200,8 +223,12 @@ These are GEKKO model attributes used internally. They are not intended for exte
     A python list of equations
 
 .. py:attribute::   objectives
-    
+
     A python list of objective.
+
+.. py.attribute::   _connections
+
+    A python list of connections
 
 .. py:attribute::   csv_status
 
@@ -217,26 +244,25 @@ These are GEKKO model attributes used internally. They are not intended for exte
 
 
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-.. |APMonitor| replace:: replacement *ThunderSnow*
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.. |APMonitor| replace:: replacement *ThunderSnow*
