@@ -32,7 +32,7 @@ A pip package is available::
 
 	pip install gekko
 
-The most recent version is 0.0.2rc4. You can upgrade from the commandline with the upgrade flag::
+The most recent version is 0.0.3a1. You can upgrade from the commandline with the upgrade flag::
 
     pip install --upgrade gekko
 
