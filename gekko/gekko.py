@@ -956,6 +956,12 @@ class GEKKO(object):
         return GK_Operators('log10('+str(other) + ')')
     def sqrt(self,other):
         return GK_Operators('sqrt('+str(other) + ')')
+    def asin(self,other):
+        return GK_Operators('asin('+str(other) + ')')
+    def acos(self,other):
+        return GK_Operators('acos('+str(other) + ')')
+    def atan(self,other):
+        return GK_Operators('atan('+str(other) + ')')
 
 
 
