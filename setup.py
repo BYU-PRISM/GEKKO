@@ -18,7 +18,7 @@ with open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
 #   apm_binary = ['gekko/bin/apmonitor' AND LA libaries]
 
 setup(name='gekko',
-    version='0.0.2rc2',
+    version='0.0.3a2',
     description='Optimization software for differential algebraic equations',
     long_description=long_description,
     #url="https://readthedocsurl",
@@ -38,13 +38,12 @@ setup(name='gekko',
     license='MIT',
     packages=find_packages(),
     install_requires=[
-        'APMonitor>=0.33',
+        # 'APMonitor>=0.33',
         'dash',
         'dash_html_components',
         'dash_core_components',
         'dash_renderer',
         'numpy>=1.8'#,
-        'numpy~=1.8'#,
         #'ujson',
     ],
 #    package_data=apm_binary,
