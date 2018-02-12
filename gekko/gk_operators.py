@@ -135,10 +135,12 @@ class GK_Value(list):
     
     def __setitem__(self,key,value):
         self.value[key] = value
-        if type(self.change) is bool:
+        if self.change is False:
             self.__dict__['change'] = [key]
-        else: 
+        elif isinstance(self.change,list): 
             self.__dict__['change'].append(key)
+        else:
+            pass
     
     def __array__(self):
         return np.array(self.value)
