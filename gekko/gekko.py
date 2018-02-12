@@ -2,12 +2,15 @@
 #%% Imports
 import os
 import sys
-import APMonitor.apm as apm
 import subprocess
 import json
 import glob
+import csv
 import tempfile #making a temporary directory for all the files
 import numpy as np #to support initializing with numpy arrays
+
+#remote solve functions
+from .apm import cmd, get_file
 
 from .gk_global_options import GKGlobalOptions
 from .gk_parameter import GKParameter, GK_MV, GK_FV
@@ -78,7 +81,7 @@ class GEKKO(object):
         self.path = tempfile.mkdtemp(suffix=self.model_name)
         
         #clear anything already on the server
-        apm.cmd(self.server,self.model_name,'clear all')
+        cmd(self.server,self.model_name,'clear all')
 
         
     #%% Parts of the model
@@ -355,18 +358,18 @@ class GEKKO(object):
                     f = open(path)
                     file = f.read()
                     f.close()
-                    apm.cmd(self.server, self.model_name, extension+' '+file)
+                    cmd(self.server, self.model_name, extension+' '+file)
                     
             
             #clear apm and csv files already on the server
-            apm.cmd(self.server,self.model_name,'clear apm')
-            apm.cmd(self.server,self.model_name,'clear csv')
+            cmd(self.server,self.model_name,'clear apm')
+            cmd(self.server,self.model_name,'clear csv')
             
             #send model file
             f = open(os.path.join(self.path,self.model_name + '.apm'))
             model = f.read()
             f.close()
-            apm.cmd(self.server, self.model_name, ' '+model)
+            cmd(self.server, self.model_name, ' '+model)
             #send csv file
             send_if_exists('csv')
             #send info file
@@ -375,10 +378,10 @@ class GEKKO(object):
             f = open(os.path.join(self.path,'overrides.dbs'))
             dbs = f.read()
             f.close()
-            apm.cmd(self.server, self.model_name, 'option '+dbs)
+            cmd(self.server, self.model_name, 'option '+dbs)
             
             #solve remotely
-            apm.cmd(self.server, self.model_name, 'solve', disp)
+            cmd(self.server, self.model_name, 'solve', disp)
             
             #load results
             def byte2str(byte):
@@ -388,15 +391,15 @@ class GEKKO(object):
                     return byte
             
             try:
-                results = byte2str(apm.get_file(self.server,self.model_name,'results.csv'))
+                results = byte2str(get_file(self.server,self.model_name,'results.csv'))
                 f = open(os.path.join(self.path,'results.csv'), 'w')
                 f.write(str(results))
                 f.close() 
-                results = byte2str(apm.get_file(self.server,self.model_name,'results.json'))
+                results = byte2str(get_file(self.server,self.model_name,'results.json'))
                 f = open(os.path.join(self.path,'results.json'), 'w')
                 f.write(str(results))
                 f.close() 
-                options = byte2str(apm.get_file(self.server,self.model_name,'options.json'))
+                options = byte2str(get_file(self.server,self.model_name,'options.json'))
                 f = open(os.path.join(self.path,'options.json'), 'w')
                 f.write(str(options))
                 f.close() 
@@ -892,7 +895,7 @@ class GEKKO(object):
         # Load results.csv into a dictionary keyed with variable names
         if (os.path.isfile(os.path.join(self.path, 'results.csv'))):
             with open(os.path.join(self.path,'results.csv')) as f: 
-                reader = apm.csv.reader(f, delimiter=',')
+                reader = csv.reader(f, delimiter=',')
                 y={}
                 for row in reader:
                     if len(row)==2:
