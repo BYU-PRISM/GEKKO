@@ -121,6 +121,15 @@ Special function besides algebraic operators are available through GEKKO functio
 .. py:classmethod:: m.tan(other)
 
 
+.. py:classmethod:: m.asin(other)
+
+
+.. py:classmethod:: m.acos(other)
+
+
+.. py:classmethod:: m.atan(other)
+
+
 .. py:classmethod:: m.sinh(other)
 
 
