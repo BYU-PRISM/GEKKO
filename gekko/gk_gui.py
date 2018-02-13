@@ -3,10 +3,10 @@ import webbrowser
 import json
 import os
 
-# from .gk_variable import GKVariable
+from .gk_variable import GKVariable
 import __main__ as main
 
-from flask import Flask
+from flask import Flask, jsonify
 
 from pprint import pprint
 
@@ -15,28 +15,23 @@ dev = True
 
 app = Flask(__name__)
 
-
-
 class GK_GUI:
     """GUI class for GEKKO
     This class handles creation and management of the gui. It pulls the required
     data from options.json and results.json and displays using DASH.
     """
-    def __init__(self, theme='sandstone'):
-        # self.app = dash.Dash()
-        self.vars = {}                          # dict of vars data from results.json
+    def __init__(self):
+        self.vars = {}
         self.vars_map = self.get_script_vars()  # map of model vars to script vars
         self.get_data()
-
 
     def get_script_vars(self):
         vars_map = {}
         main_dict = vars(main)
-        return vars(main)
-        # for var in main_dict:
-        #     if isinstance(main_dict[var], GKVariable):
-        #         vars_map[main_dict[var].name] = var
-        # return vars_map
+        for var in main_dict:
+            if isinstance(main_dict[var], GKVariable):
+                vars_map[main_dict[var].name] = var
+        return vars_map
 
     def get_data(self):
         # Gather the data that GEKKO returns from the run
@@ -58,7 +53,11 @@ class GK_GUI:
         # respond to api call for data
         @app.route('/get_data')
         def get_data():
-            return json.dumps(self.vars)
+            pprint(self.vars_map)
+            resp = jsonify(self.vars_map)
+            pprint(resp)
+            resp.headers.add('Access-Control-Allow-Origin', '*')
+            return resp
 
         # Serve static files here. Will need this for compiled Vue project
         @app.route('/static')
@@ -68,7 +67,6 @@ class GK_GUI:
     def display(self):
         self.set_endpoints()
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # Default port for plotly's dash
         port = 8050
         try:    # Check to see if :8050 is already bound
             sock.bind(('127.0.0.1', port))
@@ -79,9 +77,11 @@ class GK_GUI:
             sock.close()
 
         # Open the browser to the page and launch the app
-        if not dev:
+        if dev:
+            app.run(debug=True, port=8050)
+        else:
             webbrowser.open("http://localhost:" + str(port) + "/")
-        app.run(debug=dev, port=port)
+            app.run(debug=False, port=port)
 
 if __name__ == '__main__':
     gui = GK_GUI()

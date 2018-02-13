@@ -12,6 +12,7 @@ import { Observable } from 'rxjs/Observable'
 Vue.use(VueRx, { Observable })
 Vue.use(VueResource)
 Vue.config.productionTip = false
+Vue.http.options.root = 'http://localhost:8050'
 
 Vue.component('tabs', Tabs)
 Vue.component('tab', Tab)
