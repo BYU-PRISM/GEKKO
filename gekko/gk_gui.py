@@ -4,6 +4,7 @@ import json
 import os
 
 from .gk_variable import GKVariable
+from .gk_parameter import GKParameter
 import __main__ as main
 
 from flask import Flask, jsonify
@@ -20,16 +21,17 @@ class GK_GUI:
     This class handles creation and management of the gui. It pulls the required
     data from options.json and results.json and displays using DASH.
     """
-    def __init__(self):
-        self.vars = {}
+    def __init__(self, theme='sandstone'):
+        self.vars_dict = {}
         self.vars_map = self.get_script_vars()  # map of model vars to script vars
+        pprint(self.vars_map)
         self.get_data()
 
     def get_script_vars(self):
         vars_map = {}
         main_dict = vars(main)
         for var in main_dict:
-            if isinstance(main_dict[var], GKVariable):
+            if isinstance(main_dict[var], GKVariable) or isinstance(main_dict[var], GKParameter):
                 vars_map[main_dict[var].name] = var
         return vars_map
 
@@ -39,10 +41,12 @@ class GK_GUI:
         self.options = json.loads(open("./options.json").read())
         # Load results.json
         self.results = json.loads(open("./results.json").read())
-        self.time = self.results['time']
-        for var in self.results:
+        self.vars_dict['time'] = self.results['time']
+        for var in self.vars_map:
             if var != 'time':
-                self.vars[var] = self.results[var]
+                self.vars_dict[self.vars_map[var]] = self.results[var]
+
+
 
     def set_endpoints(self):
         # Serve the home page/only page
@@ -53,8 +57,8 @@ class GK_GUI:
         # respond to api call for data
         @app.route('/get_data')
         def get_data():
-            pprint(self.vars_map)
-            resp = jsonify(self.vars_map)
+            pprint(self.vars_dict)
+            resp = jsonify(self.vars_dict)
             pprint(resp)
             resp.headers.add('Access-Control-Allow-Origin', '*')
             return resp
