@@ -242,6 +242,7 @@ class GEKKO(object):
         #for fixing to constants
         if not isinstance(var2,(GKVariable,GKParameter)):
             self._connections.append(var1_str + ' = FIXED')
+            var1.__dict__['_fixed_values'].append((pos1,var2))
     
     #Simplified Connection
     def fix(self,var, pos, val):
@@ -696,6 +697,14 @@ class GEKKO(object):
                         #reset MEAS so it doesn't get repeated on next solve
                         vp.MEAS = None
                 
+                #If a value was fixed through a connection, ensure consistency in the 
+                #csv file, otherwise the requested fixed value will be overridden by
+                #whatever initialization value is in the csv
+                if hasattr(vp,'_fixed_values'):
+                    for i in vp._fixed_values: #for each tuple of (position,value)
+                        #set value in t array
+                        t[i[0]+1] = i[1] #index is +1 because of prepended header 
+        
                 if first_array == False:
                     csv_data = t
                     first_array = True

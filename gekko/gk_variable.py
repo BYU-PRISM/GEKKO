@@ -60,6 +60,11 @@ class GKVariable(GK_Operators):
         self.LB = lb #lower bound
         self.UB = ub #upper bound
         
+        #register fixed values through connections to ensure consistency in the 
+        #csv file, otherwise the requested fixed value will be overridden by
+        #whatever initialization value is in the csv
+        self._fixed_values = []
+        
         #register values that are changed by the user 
         #self._changed = True
         # now allow options to be sent to the server
