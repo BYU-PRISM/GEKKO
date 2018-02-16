@@ -65,7 +65,8 @@ class GEKKO(object):
         self.equations = []
         self.objectives = [] 
         self._connections = []
-
+        self._objects = []
+        
         #time discretization
         self.time = None
 
@@ -79,6 +80,9 @@ class GEKKO(object):
         self.model_name = name.lower().replace(" ", "")
         #Path of model folder
         self.path = tempfile.mkdtemp(suffix=self.model_name)
+        
+        #extra, non-default files to send to server (eg solver.opt, cspline.csv)
+        self._extra_files = []
         
         #clear anything already on the server
         cmd(self.server,self.model_name,'clear all')
@@ -248,7 +252,69 @@ class GEKKO(object):
     def fix(self,var, pos, val):
         self.Connection(var,val,pos1=pos)
         
+    #%% Objects
+        # There isn't generalized syntax for objects, so each one is added individually
+    
+    ## Cubic Spline
+    def cspline(self, x,y,x_data,y_data,bound_x=False):
+        """Generate a 1d cubic spline with continuous first and seconds derivatives
+        from arrays of x and y data which link to GEKKO variables x and y with a 
+        constraint that y=f(x).
         
+        Input: x: GEKKO variable, y: GEKKO variable, x_data: array of x data,
+        y_data: array of y data that matches x_data, bound_x: boolean to state 
+        x should be bounded at the upper and lower bounds of x_data to avoid
+        extrapolation error of the cspline. """
+        
+        #verify that x and y are valid GEKKO variables
+        if not isinstance(x,(GKVariable,GKParameter)):
+            raise TypeError("First arguement must be a GEKKO parameter or variable")
+        if not isinstance(y,(GKVariable)):
+            raise TypeError("Second arguement must be a GEKKO variable")
+                
+        #verify data input types
+        if not isinstance(x_data, (list,np.ndarray)):
+            raise TypeError("x_data must be a python list or numpy array")
+        if not isinstance(y_data, (list,np.ndarray)):
+            raise TypeError("y_data must be a python list or numpy array")
+        
+        #convert data to flat numpy arrays
+        x_data = np.array(x_data).flatten()
+        y_data = np.array(y_data).flatten()
+        
+        #verify data inputs for same length and ordered x_data
+        if np.size(x_data) != np.size(y_data):
+            raise Exception('Data arrays must have the same length')
+        sort_order = np.argsort(x_data)
+        x_data = x_data[sort_order]
+        y_data = y_data[sort_order]
+        
+        #build cspline object with unique object name
+        cspline_name = 'cspline' + str(len(self._objects) + 1)
+        self._objects.append(cspline_name + ' = cspline')
+        
+        #write x_data and y_data to objectname.csv
+        file_name = cspline_name + '.csv'
+        csv_data = np.hstack(('x_data',x_data.astype(object)))
+        csv_data = np.vstack((csv_data,np.hstack(('y_data',y_data.astype(object)))))
+        np.savetxt(os.path.join(self.path,file_name), csv_data.T, delimiter=",", fmt='%1.25s')
+        
+        #add csv file to list of extra file to send to server
+        self._extra_files.append(file_name)
+
+        #Add connections between x and y with cspline object data
+        self._connections.append(x.name + ' = ' + cspline_name+'.x_data')
+        self._connections.append(y.name + ' = ' + cspline_name+'.y_data')
+        
+        #Bound x to x_data limits
+        if bound_x is True:
+            x.LOWER = x_data[0]
+            x.UPPER = x_data[-1]
+            
+            
+            
+    
+    
     #%% Add array functionality to all types
     def Array(self,f,dim,**args):
         x = np.ndarray(dim,dtype=object)
@@ -356,9 +422,8 @@ class GEKKO(object):
             def send_if_exists(extension):
                 path = os.path.join(self.path,self.model_name + '.' + extension)
                 if os.path.isfile(path):
-                    f = open(path)
-                    file = f.read()
-                    f.close()
+                    with open(path) as f:
+                        file = f.read()
                     cmd(self.server, self.model_name, extension+' '+file)
                     
             
@@ -367,20 +432,23 @@ class GEKKO(object):
             cmd(self.server,self.model_name,'clear csv')
             
             #send model file
-            f = open(os.path.join(self.path,self.model_name + '.apm'))
-            model = f.read()
-            f.close()
+            with open(os.path.join(self.path,self.model_name + '.apm')) as f:
+                model = f.read()
             cmd(self.server, self.model_name, ' '+model)
             #send csv file
             send_if_exists('csv')
             #send info file
             send_if_exists('info')
             #send dbs file
-            f = open(os.path.join(self.path,'overrides.dbs'))
-            dbs = f.read()
-            f.close()
+            with open(os.path.join(self.path,'overrides.dbs')) as f:
+                dbs = f.read()
             cmd(self.server, self.model_name, 'option '+dbs)
-            
+            #extra files (eg solver.opt, cspline.data)
+            for f_name in self._extra_files:
+                with open(os.path.join(self.path,f_name)) as f:
+                    extra_file_data = f.read()
+                cmd(self.server,self.model_name, 'apm '+extra_file_data)
+                
             #solve remotely
             cmd(self.server, self.model_name, 'solve', disp)
             
@@ -604,6 +672,12 @@ class GEKKO(object):
             for connection in self._connections:
                 model += '\t%s\n' % connection
             model += 'End Connections'
+            
+        if self._objects:
+            model += 'Objects\n'
+            for obj_str in self._objects:
+                model += '\t%s\n' % obj_str
+            model += 'End Objects'
         #print(model) #for debugging
         
         #replace multiple operators resulting from signs
