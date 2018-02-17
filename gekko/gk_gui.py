@@ -12,9 +12,9 @@ from flask import Flask, jsonify
 from pprint import pprint
 
 # Toggle dev and production modes
-dev = True
+dev = False
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/gui/dist')
 
 class GK_GUI:
     """GUI class for GEKKO
@@ -49,11 +49,6 @@ class GK_GUI:
 
 
     def set_endpoints(self):
-        # Serve the home page/only page
-        @app.route('/')
-        def index():
-            return "Hello World!"
-
         # respond to api call for data
         @app.route('/get_data')
         def get_data():
@@ -63,10 +58,21 @@ class GK_GUI:
             resp.headers.add('Access-Control-Allow-Origin', '*')
             return resp
 
+        @app.route('/<path:path>')
+        def static_file(path):
+            print("Handling request for:", path)
+            return app.send_static_file(path)
+
+        # # Serve the home page/only page
+        # @app.route('/')
+        # def index():
+        #     return "Hello World!"
+        #
+
         # Serve static files here. Will need this for compiled Vue project
-        @app.route('/static')
-        def serve_static():
-            return "No static content being served yet!"
+        # @app.route('/static')
+        # def serve_static():
+        #     return "No static content being served yet!"
 
     def display(self):
         self.set_endpoints()
@@ -84,7 +90,7 @@ class GK_GUI:
         if dev:
             app.run(debug=True, port=8050)
         else:
-            webbrowser.open("http://localhost:" + str(port) + "/")
+            webbrowser.open("http://localhost:" + str(port) + "/index.html")
             app.run(debug=False, port=port)
 
 if __name__ == '__main__':
