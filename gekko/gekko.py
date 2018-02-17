@@ -83,6 +83,8 @@ class GEKKO(object):
         
         #extra, non-default files to send to server (eg solver.opt, cspline.csv)
         self._extra_files = []
+        #list of strings for solver options
+        self.solver_options = []
         
         #clear anything already on the server
         cmd(self.server,self.model_name,'clear all')
@@ -308,8 +310,8 @@ class GEKKO(object):
         
         #Bound x to x_data limits
         if bound_x is True:
-            x.LOWER = x_data[0]
-            x.UPPER = x_data[-1]
+            x.lb = x_data[0]
+            x.ub = x_data[-1]
             
             
             
@@ -374,6 +376,12 @@ class GEKKO(object):
         if timing == True:
             print('build overrides', time.time() - t)
 
+
+        if timing == True:
+            t = time.time()
+        self.write_solver_options(remote)
+        if timing == True:
+            print('build solver options', time.time() - t)
 
         if timing == True:
             t = time.time()
@@ -443,11 +451,17 @@ class GEKKO(object):
             with open(os.path.join(self.path,'overrides.dbs')) as f:
                 dbs = f.read()
             cmd(self.server, self.model_name, 'option '+dbs)
+            #solver options
+            if self.solver_options:
+                opt_file=self.write_solver_options(remote)
+                cmd(self.server,self.model_name, ' '+opt_file)
+                    
             #extra files (eg solver.opt, cspline.data)
             for f_name in self._extra_files:
                 with open(os.path.join(self.path,f_name)) as f:
-                    extra_file_data = f.read()
-                cmd(self.server,self.model_name, 'apm '+extra_file_data)
+                    extra_file_data = f.read() #read data
+                    extra_file_data = 'File ' + f_name + '\n' + extra_file_data + 'End File \n' #format for appending to apm file
+                cmd(self.server,self.model_name, ' '+extra_file_data)
                 
             #solve remotely
             cmd(self.server, self.model_name, 'solve', disp)
@@ -658,10 +672,11 @@ class GEKKO(object):
                 model += '\t%s=%s\n' % (str(self.intermediates[i]), str(self.inter_equations[i]))
             model += 'End Intermediates\n'
 
-        if self.equations:
+        if self.equations or self.objectives:
             model += 'Equations\n'
-            for equation in self.equations:
-                model += '\t%s\n' % equation
+            if self.equations:
+                for equation in self.equations:
+                    model += '\t%s\n' % equation
             if self.objectives:
                 for o in self.objectives:
                     model += '\t%s\n' % o
@@ -671,13 +686,13 @@ class GEKKO(object):
             model += 'Connections\n'
             for connection in self._connections:
                 model += '\t%s\n' % connection
-            model += 'End Connections'
+            model += 'End Connections\n'
             
         if self._objects:
             model += 'Objects\n'
             for obj_str in self._objects:
                 model += '\t%s\n' % obj_str
-            model += 'End Objects'
+            model += 'End Objects\n'
         #print(model) #for debugging
         
         #replace multiple operators resulting from signs
@@ -843,7 +858,42 @@ class GEKKO(object):
                                 f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
     
                         
+    def write_solver_options(self,remote):
+        opt_file = ''
+        if self.solver_options:
+            #determine filename from solver number
+            if self.options.SOLVER == 1:
+                filename = 'apopt.opt'
+            elif self.options.SOLVER == 3:
+                filename = 'ipopt.opt'
+            else:
+                raise TypeError("Solver options only available for APOPT(1) and IPOPT(3)")
+            
+            #write each option to a line
+            for option in self.solver_options:
+                opt_file += option + '\n'
+                
+            #If remote solve, pass string to append to .apm file
+            if remote is True:
+                return 'File ' + filename + '\n' + opt_file + 'End File\n'
+            #write file for local solve
+            else:
+                with open(os.path.join(self.path,filename), 'w+') as f:
+                    f.write(opt_file)
+                    
+        #do nothing if no options were added
+        else:
+            return opt_file
+        
+        
+            
+        
 
+        opt_file += 'End File\n'
+        return opt_file
+    
+    
+    
     #%% Post-solve processing
 
     def load_JSON(self):
