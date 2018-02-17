@@ -118,24 +118,25 @@ Model Building
 		m = GEKKO()
 		m.solver_options = ['max_iter 100','max_cpu_time 100']
 		
-.._ py.classmethod:: m.cspline(x,y,x_data,y_data,bound_x=False):
-..        
-..		Generate a 1d cubic spline with continuous first and seconds derivatives
-..        from arrays of x and y data which link to GEKKO variables x and y with a 
-..        constraint that y=f(x).
-..        
-..        Inputs: 
-..		
-..		x: GEKKO variable 
-..		
-..		y: GEKKO variable
-..		
-..		x_data: array of x data
-..		
-..        y_data: array of y data that matches x_data
-..
-..		bound_x: boolean to state that x should be bounded at the upper and lower bounds of x_data to avoid
-..        extrapolation error of the cspline. 
+		
+.. py.classmethod:: m.cspline(x,y,x_data,y_data,bound_x=False):
+        
+		Generate a 1d cubic spline with continuous first and seconds derivatives
+        from arrays of x and y data which link to GEKKO variables x and y with a 
+        constraint that y=f(x).
+        
+        Inputs: 
+		
+		x: GEKKO variable 
+		
+		y: GEKKO variable
+		
+		x_data: array of x data
+		
+        y_data: array of y data that matches x_data
+
+		bound_x: boolean to state that x should be bounded at the upper and lower bounds of x_data to avoid
+        extrapolation error of the cspline. 
 		
 		
 .. _valid_eq_funcs:
