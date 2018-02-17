@@ -6,7 +6,7 @@
 
 
 
-Welcome to GEKKO's documentation!
+GEKKO Optimization Suite
 =======================================
 
 
