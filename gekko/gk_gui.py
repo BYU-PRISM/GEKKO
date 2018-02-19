@@ -46,10 +46,8 @@ class GK_GUI:
             if var != 'time':
                 self.vars_dict[self.vars_map[var]] = self.results[var]
 
-
-
     def set_endpoints(self):
-        # respond to api call for data
+        """Sets the flask API endpoints"""
         @app.route('/get_data')
         def get_data():
             pprint(self.vars_dict)

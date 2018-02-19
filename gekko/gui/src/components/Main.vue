@@ -15,7 +15,6 @@
         </div>
       </div>
       <div class="col-sm-9">
-        <h4>Plot Here</h4>
         <plot/>
       </div>
     </div>

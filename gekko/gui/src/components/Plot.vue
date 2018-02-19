@@ -1,14 +1,13 @@
 <template>
   <div>
     <div id="plot-div"></div>
-    <button type="button" name="button" @click="update_error">Show Plot</button>
-    <p class="error">{{ error }}</p>
   </div>
 </template>
 
 <script>
 import Plotly from 'plotly.js'
 
+// Resizes the plots whenever the size of the window changes
 window.onresize = () => {
   Plotly.Plots.resize('plot-div')
 }
@@ -22,9 +21,6 @@ export default {
   },
 
   methods: {
-    update_error () {
-      this.error = 'No Errors!'
-    }
   },
 
   created () {
