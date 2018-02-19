@@ -61,16 +61,15 @@ class GK_GUI:
             print("Handling request for:", path)
             return app.send_static_file(path)
 
-        # # Serve the home page/only page
-        # @app.route('/')
-        # def index():
-        #     return "Hello World!"
-        #
+        @app.route('/get_options')
+        def get_options():
+            resp = jsonify(self.options)
+            resp.headers.add('Access-Control-Allow-Origin', '*')
+            return resp
 
-        # Serve static files here. Will need this for compiled Vue project
-        # @app.route('/static')
-        # def serve_static():
-        #     return "No static content being served yet!"
+        @app.route('/get_results')
+        def get_results():
+            return jsonify(self.results)
 
     def display(self):
         self.set_endpoints()

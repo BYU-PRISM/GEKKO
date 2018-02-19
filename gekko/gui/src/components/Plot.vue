@@ -26,9 +26,7 @@ export default {
   created () {
     this.$http.headers.common['Access-Control-Allow-Origin'] = '*'
     this.$http.get('get_data')
-      .then(response => {
-        return response.json()
-      })
+      .then(response => response.json())
       .then(data => {
         console.log(data)
         var plotArray = []

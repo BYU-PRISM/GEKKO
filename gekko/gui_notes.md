@@ -41,7 +41,6 @@
 
 ## Todo
 - Organize tables into tabs
-  - may wait a little on this one as a tab component is actively being developed
 - Pretty up the graph
   - add log scale options
   - Get it to autoscale to 100%

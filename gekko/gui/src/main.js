@@ -4,8 +4,8 @@ import Vue from 'vue'
 import VueRx from 'vue-rx'
 import App from './App'
 import Plot from './components/Plot'
+import Tabs from './components/Tabs'
 import VueResource from 'vue-resource'
-import { Tabs, Tab } from 'vue-tabs-component'
 import router from './router'
 import { Observable } from 'rxjs/Observable'
 
@@ -20,13 +20,10 @@ if (process.env.NODE_ENV === 'development') {
   Vue.http.options.root = 'http://' + location.hostname + ':' + location.port
 }
 
-Vue.component('tabs', Tabs)
-Vue.component('tab', Tab)
-
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   router,
-  components: { App, Plot },
+  components: { App, Plot, Tabs },
   template: '<App/>'
 })
