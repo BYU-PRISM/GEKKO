@@ -1,6 +1,9 @@
 # Notes on Gekko Gui development
 
 ## Questions
+- With the Vue app:
+  - Would you like to have the whole dev project stored in the Gekko project or just the built version?
+    - We could split it out to a different repo and then just include the built files
 - What about if someone is running more than one gekko app at a time?
   - `options.json` and `results.json` keep getting overwritten by each other
 
