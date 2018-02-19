@@ -9,6 +9,10 @@
 <script>
 import Plotly from 'plotly.js'
 
+window.onresize = () => {
+  Plotly.Plots.resize('plot-div')
+}
+
 export default {
   name: 'Plot',
   data () {
