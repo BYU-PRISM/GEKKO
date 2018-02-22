@@ -2,10 +2,12 @@
   <div>
     <ul class="nav nav-tabs">
       <li class="nav-item tab">
-        <a class="nav-link active" @click="activeTab = 'Model'">Model</a>
+        <a class="nav-link "
+          @click="activeTab = 'Model'">Model</a>
       </li>
       <li class="nav-item tab">
-        <a class="nav-link" @click="activeTab = 'Results'">Results</a>
+        <a class="nav-link"
+        @click="activeTab = 'Variables'">Variables</a>
       </li>
     </ul>
     <div class="tab-div">
@@ -19,7 +21,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(value, prop) in APMdata" :key="prop.id">
+              <tr v-for="(value, prop) in modelData" :key="prop.id">
                 <td>{{prop}}</td>
                 <td>{{value}}</td>
               </tr>
@@ -27,7 +29,7 @@
           </table>
         </div>
       </template>
-      <template v-if="activeTab === 'Results'">
+      <template v-if="activeTab === 'Variables'">
         Results tab here
       </template>
     </div>
@@ -38,16 +40,40 @@ export default {
   name: 'Tabs',
   data () {
     return {
-      activeTab: 'Model',
-      APMdata: {}
+      activeTab: 'Variables',
+      modelData: {},
+      varsData: {}
     }
   },
+  computed: {
+    // activeTab = 'Variables'
+  },
+
   created () {
+    const ignoredProps = ['INFO', 'APM']
+    let options
     this.$http.get('get_options')
       .then(response => response.json())
-      .then(options => {
-        this.APMdata = options.APM
-        console.log('Options', options)
+      .then(obj => {
+        options = obj
+        console.log('obj:', obj)
+        this.modelData = obj['APM']
+        return Object.keys(obj).filter(key => !ignoredProps.includes(key))
+      })
+      .then(keys => {
+        keys.forEach(key => {
+          console.log(options)
+          this.varsData[key] = options[key]
+          return null
+        })
+      }).then(() => {
+        console.log('varsData:', this.varsData)
+      })
+    this.$http.get('get_model')
+      .then(response => response.json())
+      .then(model => {
+        this.modelData = model
+        console.log('model:', this.modelData)
       })
   }
 }

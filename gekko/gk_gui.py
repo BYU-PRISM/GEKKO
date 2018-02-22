@@ -22,10 +22,13 @@ class GK_GUI:
     data from options.json and results.json and displays using DASH.
     """
     def __init__(self, theme='sandstone'):
-        self.vars_dict = {}
+        self.vars_dict = {}                     # vars dict with script names as keys
+        self.options_dict = {}                  # options dict with script names as keys
+        self.model = {}                    # APM model information
+        self.info = {}
         self.vars_map = self.get_script_vars()  # map of model vars to script vars
         pprint(self.vars_map)
-        self.get_data()
+        self.get_script_data()
 
     def get_script_vars(self):
         vars_map = {}
@@ -35,16 +38,23 @@ class GK_GUI:
                 vars_map[main_dict[var].name] = var
         return vars_map
 
-    def get_data(self):
-        # Gather the data that GEKKO returns from the run
+    def get_script_data(self):
+        """Gather the data that GEKKO returns from the run and process it into
+        the objects that the GUI can handle"""
         # Load options.json
         self.options = json.loads(open("./options.json").read())
         # Load results.json
         self.results = json.loads(open("./results.json").read())
         self.vars_dict['time'] = self.results['time']
+        self.model = self.options['APM']
+        self.info = self.options['INFO']
         for var in self.vars_map:
             if var != 'time':
                 self.vars_dict[self.vars_map[var]] = self.results[var]
+        for var in self.vars_map:
+            # FIXME: Find a better way to only try to add the vars, params
+            if var[0] == 'v':
+                self.options_dict[self.vars_map[var]] = self.options[var]
 
     def set_endpoints(self):
         """Sets the flask API endpoints"""
@@ -53,7 +63,25 @@ class GK_GUI:
             pprint(self.vars_dict)
             resp = jsonify(self.vars_dict)
             pprint(resp)
-            resp.headers.add('Access-Control-Allow-Origin', '*')
+            resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
+            return resp
+
+        @app.route('/get_options')
+        def get_options():
+            resp = jsonify(self.options_dict)
+            resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
+            return resp
+
+        @app.route('/get_model')
+        def get_model():
+            resp = jsonify(self.model)
+            resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
+            return resp
+
+        @app.route('/get_info')
+        def get_info():
+            resp =  jsonify(self.info)
+            resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
             return resp
 
         @app.route('/<path:path>')
@@ -61,17 +89,8 @@ class GK_GUI:
             print("Handling request for:", path)
             return app.send_static_file(path)
 
-        @app.route('/get_options')
-        def get_options():
-            resp = jsonify(self.options)
-            resp.headers.add('Access-Control-Allow-Origin', '*')
-            return resp
-
-        @app.route('/get_results')
-        def get_results():
-            return jsonify(self.results)
-
     def display(self):
+        """Finds the appropriate port starts the api and opens the webbrowser"""
         self.set_endpoints()
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         port = 8050

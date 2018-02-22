@@ -28,11 +28,9 @@ export default {
     this.$http.get('get_data')
       .then(response => response.json())
       .then(data => {
-        console.log(data)
         var plotArray = []
         for (var key in data) {
           if (data.hasOwnProperty(key)) {
-            console.log(data[key])
             if (key !== 'time') {
               plotArray.push({
                 x: data.time,
