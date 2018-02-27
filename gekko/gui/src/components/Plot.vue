@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import Plotly from 'plotly.js'
+import Plotly from 'plotly.js/dist/plotly.min'
 
 // Resizes the plots whenever the size of the window changes
 window.onresize = () => {
