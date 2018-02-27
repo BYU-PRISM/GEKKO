@@ -3,11 +3,13 @@
     <ul class="nav nav-tabs">
       <li class="nav-item tab">
         <a class="nav-link "
-          @click="activeTab = 'Model'">Model</a>
+          @click="activeTab = 'Model'"
+          :class="{ active: activeTab == 'Model'}">Model</a>
       </li>
       <li class="nav-item tab">
         <a class="nav-link"
-        @click="activeTab = 'Variables'">Variables</a>
+        @click="activeTab = 'Variables'"
+        :class="{ active: activeTab == 'Variables'}">Variables</a>
       </li>
     </ul>
     <div class="tab-div">
@@ -30,7 +32,29 @@
         </div>
       </template>
       <template v-if="activeTab === 'Variables'">
-        Results tab here
+        <div v-if="varsData">
+          <ul v-for="(v, key) in varsData" :key="v.id">
+            <a>
+              {{ key }}
+            </a>
+            <div class="table-responsive">
+              <table class="table table-striped table-sm">
+                <thead>
+                  <tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(value, prop) in v" :key="prop.id">
+                    <td>{{prop}}</td>
+                    <td>{{value}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </ul>
+        </div>
       </template>
     </div>
   </div>
@@ -42,7 +66,8 @@ export default {
     return {
       activeTab: 'Variables',
       modelData: {},
-      varsData: {}
+      varsData: {},
+      open: false
     }
   },
   computed: {
@@ -75,6 +100,12 @@ export default {
         this.modelData = model
         console.log('model:', this.modelData)
       })
+  },
+
+  methods: {
+    toggle: function () {
+      this.open = !this.open
+    }
   }
 }
 </script>
