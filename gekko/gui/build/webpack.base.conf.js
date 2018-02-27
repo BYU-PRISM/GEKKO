@@ -35,7 +35,6 @@ module.exports = {
     extensions: ['.js', '.vue', '.json'],
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
-      'plotly.js': 'plotly.js/dist/plotly.min',
       '@': resolve('src'),
     }
   },
