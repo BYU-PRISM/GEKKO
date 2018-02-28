@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div id="plot-div"></div>
+    <div :id="id"></div>
   </div>
 </template>
 
@@ -9,21 +9,26 @@ import Plotly from 'plotly.js/dist/plotly.min'
 
 // Resizes the plots whenever the size of the window changes
 window.onresize = () => {
-  Plotly.Plots.resize('plot-div')
 }
 
 export default {
   name: 'Plot',
   data () {
     return {
-      error: ''
+      id: Math.random().toString(36).substring(7)
     }
   },
-
-  methods: {
+  beforeDestroy: function () {
+    window.removeEventListener('resize', this.plotlyResize)
   },
-
-  created () {
+  methods: {
+    plotlyResize () {
+      console.log('handling resize for:', this.id)
+      Plotly.Plots.resize(this.id)
+    }
+  },
+  mounted () {
+    window.addEventListener('resize', this.plotlyResize)
     this.$http.headers.common['Access-Control-Allow-Origin'] = '*'
     this.$http.get('get_data')
       .then(response => response.json())
@@ -42,11 +47,8 @@ export default {
             }
           }
         }
-        Plotly.newPlot('plot-div', plotArray)
+        Plotly.newPlot(this.id, plotArray)
       })
-  },
-  mounted () {
-    Plotly.newPlot('plot-div', [{}])
   }
 }
 </script>

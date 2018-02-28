@@ -6,6 +6,7 @@
       </div>
       <div class="col-sm-9">
         <plot/>
+        <plot/>
       </div>
     </div>
   </div>
