@@ -71,11 +71,10 @@ Type: Integer, Input
 
 Default Value: 0
 
-Description: Automatically cold start model after a
-              specified number of bad cycles
-              0  = do not auto coldstart
-              1+ = cold start after specified number of
-                   bad cycles as recorded by BAD_CYCLES
+Description:
+Automatically cold start model after a specified number of bad cycles
+0  = do not auto coldstart
+1+ = cold start after specified number of bad cycles as recorded by BAD_CYCLES
 
 Explanation: AUTO_COLD is the number of consecutive bad cycles to wait to attempt a COLDSTART as an initialization mode for an application. It is by default at 0 (no action with bad cycles) but can be set to a higher integer level (1+) as a trigger to initiate a coldstart. When the AUTO_COLD limit is reached, the COLDSTART flag is set to 1 (ON) and it remains on until there is a successful solution. Once a successful solution is found, COLDSTART and BAD_CYCLES are set to zero.
 
@@ -88,9 +87,8 @@ Type: Integer, Input/Output
 Default Value: 0
 
 Description: Counter on number of bad cycles
-              0  = initial value
-              1+ = number of consecutive unsuccessful
-                   solution attempts
+0  = initial value
+1+ = number of consecutive unsuccessful solution attempts
 
 Explanation: BAD_CYCLES is a counter that increments when the application fails to produce a successful solution. When BAD_CYCLES reaches the AUTO_COLD limit, a COLDSTART is initiated. Once a successful solution is found, COLDSTART and BAD_CYCLES are set to zero.
 
@@ -240,8 +238,8 @@ Type: Integer, Input
 Default Value: 1
 
 Description: Database level limited to a subset of options
-              0=Basic, Limited Options
-              1=All Options
+0=Basic, Limited Options
+1=All Options
 
 Explanation: DBS_LEVEL is an input option to control what is written to the DBS (database) file. When DBS_LEVEL=0, only a subset of basic parameters are written to the DBS file. This is used for compatibility with some industrial control systems that only support a subset of parameters. The basic global parameters are the following.
 
@@ -344,8 +342,8 @@ Type: Integer, Input
 Default Value: 1
 
 Description: Frozen measurement checking
-			 1=ON
-			 0=OFF
+1=ON
+0=OFF
 
 Explanation: FRZE_CHK is a checking mechanism to ensure that a measurement has variation and is not frozen at the same value for repeat cycles of the application. If the measurement does not change, it is marked as bad and not used in the application. FRZE_CHK is useful for certain types of measurements that are known to periodically fail and stay at a constant value, such as gas chromatographs. FRZE_CHK can also detect when the application is cycling at a faster rate than the measurement device can deliver a new measurement. FRZE_CHK may be undesirable if the sensor resolution gives a false indication of a frozen measurement when it is actually a steady signal and poor sensor resolution. When FRZE_CHK is OFF, there is no checking of the difference from the prior measurement. BNDS_CHK, FRZE_CHK, and MEAS_CHK are options regarding data cleansing before it enters the applications.
 
@@ -415,7 +413,7 @@ Type: Integer, Input
 Default Value: 0
 
 Description: 0 - Nonlinear problem
-              1 - Linear problem
+1 - Linear problem
 
 Explanation: Linear programming (LP) or mixed integer linear programming (MILP) problems can typically be solved much faster than a comparably sized nonlinear programming problem. The LINEAR option indicates whether the problem is linear. This allows the modeling language to set options in certain nonlinear solvers that improve the efficiency of the solution. All of the solvers built into APMonitor are nonlinear programming (NLP) or mixed-integer nonlinear programming (MINLP) solvers. Some of the solvers have simplifications to handle linear problems as well. This option does not override the choice of solver with SOLVER but does communicate to the solver that the problem has linear structure.
 
@@ -438,10 +436,9 @@ Type: Integer, Input
 
 Default Value: 4
 
-Description: Maximum memory utilized during model
-			 compilation with range 102 to 1010
+Description: Maximum memory utilized during model compilation with range 10^2 to 10^10
 
-Explanation: Computer memory is allocated at run-time based on the size of the problem but there are particular parts during the model compilation that need an upper limit on model complexity. MAX_MEMORY=4 allows up to 104 = 10,000 sparsity elements per equation but can go up to 1010. There are rare cases when more sparsity elements are needed than the default of 10,000. In these cases, an error message states that the amount of memory should be increased with the option MAX_MEMORY. A good practice is to increase MAX_MEMORY by an order of magnitude (+1) until the error is not encountered. Increasing MAX_MEMORY requires more Random Access Memory (RAM) when the model is compiled at the start of each optimization problem.
+Explanation: Computer memory is allocated at run-time based on the size of the problem but there are particular parts during the model compilation that need an upper limit on model complexity. MAX_MEMORY=4 allows up to 10^4 = 10,000 sparsity elements per equation but can go up to 10^10. There are rare cases when more sparsity elements are needed than the default of 10,000. In these cases, an error message states that the amount of memory should be increased with the option MAX_MEMORY. A good practice is to increase MAX_MEMORY by an order of magnitude (+1) until the error is not encountered. Increasing MAX_MEMORY requires more Random Access Memory (RAM) when the model is compiled at the start of each optimization problem.
 
 
 MAX_TIME
@@ -562,8 +559,7 @@ Type: Integer, Input
 
 Default Value: 0
 
-Description: Number of pre-processing cycles to identify
-			 equations or variables to eliminate
+Description: Number of pre-processing cycles to identify equations or variables to eliminate
 
 Explanation: REDUCE is the number of cycles of pre-solve analysis before sending the problem to a solver. The analysis eliminates variables and equations with the following characteristics:
 
@@ -654,8 +650,8 @@ Type: Integer, Input
 Default Value: 0
 
 Description: Sequential solution method
-			 0=Off
-			 1=On
+0=Off
+1=On
 
 Explanation: SEQUENTIAL determines whether a the solution is attempted with a simultaneous (0) or sequential (1) approach. The sequential solution method solves independent decision variables in an outer loop from the system equations. This approach attempts to maintain feasibility from iteration to iteration but can significantly slow down the overall solution time. The SEQUENTIAL option can be used with any problem that has degrees of freedom such as IMODE=2,3,5,6. When IMODE=7-9 (Sequential Dynamic Simulation, Estimation, and Control), the SEQUENTIAL option is automatically elevated to 1 and placed back to the default of 0 when the solution is completed.
 
@@ -715,10 +711,10 @@ Type: Integer, Input
 Default Value: 0
 
 Description: Statistical Process Control chart
-			 0=OFF
-			 1=add +/- 3 set point limits (red lines)
-			 2=add +/- 2 set point limits (yellow lines)
-			 3=add +/- 1 set point limits (green lines)
+0=OFF
+1=add +/- 3 set point limits (red lines)
+2=add +/- 2 set point limits (yellow lines)
+3=add +/- 1 set point limits (green lines)
 
 Explanation: SPC_CHART is a web-interface trend option to create Statistical Process Control (SPC) style charts for Controlled Variables (CVs). When SPC_CHARTS=0, there are no additional limits placed on the trend. As SPC_CHARTS is increased by 1, there are additional ranges added to the CV plots. With a level of 1, new lines at +/- 3 SPHI-SPLO are added to the plot as red upper and lower control limits. With a level of 2, new lines at +/- 2 SPHI-SPLO are added to the plot as yellow upper and lower control limits. With a level of 1, new lines at +/- 1 SPHI-SPLO are added to the plot as green upper and lower control limits. Each level adds an additional two lines.
 
@@ -730,8 +726,8 @@ Type: Integer, Input
 Default Value: 0
 
 Description: Stream level options
-			 0=Mass Balance
-			 1=Mass, Mole, and Energy Balances
+0=Mass Balance
+1=Mass, Mole, and Energy Balances
 
 Explanation: STREAM_LEVEL controls the amount of detailed contained in flowsheet models through OBJECT declarations. At the basic level (0), only mass balance equations are solved. Variables for each stream are mass flow rate and mass fractions of all species declared in the COMPOUNDS section of the model. The last mass fraction is automatically set to make the summation equal to 1.0. At more the more advanced level (1), mole and energy balances are added. The higher stream level adds temperature, pressure, enthalpy, mole fractions, volumetric flow, density, and concentration.
 
