@@ -46,10 +46,7 @@ export default {
       })
   },
   mounted () {
-    Plotly.newPlot('plot-div', [{
-      x: [1, 2, 3, 4],
-      y: [56, 34, 87, 12]
-    }])
+    Plotly.newPlot('plot-div', [{}])
   }
 }
 </script>

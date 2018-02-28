@@ -14,7 +14,7 @@
     </ul>
     <div class="tab-div">
       <template v-if="activeTab === 'Model'">
-        <div class="table-responsive">
+        <div class="table-responsive tab-table">
           <table class="table table-striped table-sm">
             <thead>
               <tr>
@@ -32,28 +32,30 @@
         </div>
       </template>
       <template v-if="activeTab === 'Variables'">
-        <div v-if="varsData">
-          <ul v-for="(v, key) in varsData" :key="v.id">
-            <a>
-              {{ key }}
-            </a>
-            <div class="table-responsive">
-              <table class="table table-striped table-sm">
-                <thead>
-                  <tr>
-                    <th>Property</th>
-                    <th>Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(value, prop) in v" :key="prop.id">
-                    <td>{{prop}}</td>
-                    <td>{{value}}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </ul>
+        <div v-if="varsData" class="tab-table">
+          <div style="overflow-y:auto; max-height:inherit">
+            <ul v-for="(v, key) in varsData" :key="v.id" class="tab-table-item">
+              <a>
+                {{ key }}
+              </a>
+              <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                  <thead>
+                    <tr>
+                      <th>Property</th>
+                      <th>Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(value, prop) in v" :key="prop.id">
+                      <td>{{prop}}</td>
+                      <td>{{value}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </ul>
+          </div>
         </div>
       </template>
     </div>
@@ -64,14 +66,11 @@ export default {
   name: 'Tabs',
   data () {
     return {
-      activeTab: 'Variables',
+      activeTab: 'Model',
       modelData: {},
       varsData: {},
       open: false
     }
-  },
-  computed: {
-    // activeTab = 'Variables'
   },
 
   created () {
@@ -112,5 +111,11 @@ export default {
 <style lang="css">
 .tab {
   cursor: pointer;
+}
+.tab-table {
+  max-height: 87vh;
+}
+.tab-table-item {
+  padding-left: 0px;
 }
 </style>

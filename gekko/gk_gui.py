@@ -27,6 +27,7 @@ class GK_GUI:
         self.model = {}                    # APM model information
         self.info = {}
         self.vars_map = self.get_script_vars()  # map of model vars to script vars
+        print('vars_map:', end='')
         pprint(self.vars_map)
         self.get_script_data()
 
@@ -60,9 +61,7 @@ class GK_GUI:
         """Sets the flask API endpoints"""
         @app.route('/get_data')
         def get_data():
-            pprint(self.vars_dict)
             resp = jsonify(self.vars_dict)
-            pprint(resp)
             resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
             return resp
 
