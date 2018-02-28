@@ -71,6 +71,12 @@ Model Building
 
 
 	Solve the optimization problem.
+	
+	If `remote` is `True`, the problem is sent to `self.server` to be solved. If `False`, GEKKO looks for local binaries of APMonitor.
+	
+	If disp is `True`, APM and solve output are printed.
+	
+	If `verify_input` is `True`, user-defined and default input options are compared against options used by APM. This is useful in debugging strange results.
 
 	This function has these substeps:
 
@@ -104,7 +110,35 @@ Model Building
 
     This function facilitates the `Connection` function when `var2` is a static value (`val`).
 
+	
+.. py:attribute::   m.solver_options
 
+    A list of strings to pass to the solver; one string for each option name and value. For example::
+		
+		m = GEKKO()
+		m.solver_options = ['max_iter 100','max_cpu_time 100']
+		
+		
+.. py.classmethod:: m.cspline(x,y,x_data,y_data,bound_x=False):
+        
+		Generate a 1d cubic spline with continuous first and seconds derivatives
+        from arrays of x and y data which link to GEKKO variables x and y with a 
+        constraint that y=f(x).
+        
+        Inputs: 
+		
+		x: GEKKO variable 
+		
+		y: GEKKO variable
+		
+		x_data: array of x data
+		
+        y_data: array of y data that matches x_data
+
+		bound_x: boolean to state that x should be bounded at the upper and lower bounds of x_data to avoid
+        extrapolation error of the cspline. 
+		
+		
 .. _valid_eq_funcs:
 
 Equation Functions
