@@ -15,7 +15,7 @@ Global Options
 ..	MV_options
 ..	CV_options
 ..	imode
-..	questions		
+..	questions
 
 
 The following is a list of global model attributes. Each attribute is available through the model attributes `options`, eg: ::
@@ -63,6 +63,36 @@ Description: Application status: 1=good, 0=bad
 
 Explanation: APPSTATUS is the overall health monitoring for an application. An application may be unsuccessful for a number of reasons and the APPSTATUS changes to 0 (bad) if it is not able to provide a solution. The APPSTATUS is 1 (good) when the solver converges to a successful solution and there are no errors in reporting the solution.
 
+
+AUTO_COLD
+---------------------------
+
+Type: Integer, Input
+
+Default Value: 0
+
+Description:
+Automatically cold start model after a specified number of bad cycles
+0  = do not auto coldstart
+1+ = cold start after specified number of bad cycles as recorded by BAD_CYCLES
+
+Explanation: AUTO_COLD is the number of consecutive bad cycles to wait to attempt a COLDSTART as an initialization mode for an application. It is by default at 0 (no action with bad cycles) but can be set to a higher integer level (1+) as a trigger to initiate a coldstart. When the AUTO_COLD limit is reached, the COLDSTART flag is set to 1 (ON) and it remains on until there is a successful solution. Once a successful solution is found, COLDSTART and BAD_CYCLES are set to zero.
+
+
+BAD_CYCLES
+---------------------
+
+Type: Integer, Input/Output
+
+Default Value: 0
+
+Description: Counter on number of bad cycles
+0  = initial value
+1+ = number of consecutive unsuccessful solution attempts
+
+Explanation: BAD_CYCLES is a counter that increments when the application fails to produce a successful solution. When BAD_CYCLES reaches the AUTO_COLD limit, a COLDSTART is initiated. Once a successful solution is found, COLDSTART and BAD_CYCLES are set to zero.
+
+
 BNDS_CHK
 ------------------------
 
@@ -94,7 +124,7 @@ Default Value: 1
 
 Description: CSV read: 0=Off, 1=Batch, 2=Sequential
 
-Explanation: CSV_READ indicates whether a comma separated value data file should be used by the application as part of initializing a problem and loading data. The name of the CSV file is the same as the name of the model file. When using the Python, MATLAB, or Julia interfaces, the server automatically renames the model and data files to be the same when they are passed to the server. A data file is passed to the server with the csv_load(s,a,’data_file_name.csv’) command. The CSV file can also be removed from the server with the apm(s,a,’clear csv’) command. If there is no CSV (data) file to read and CSV_READ is on, the program continues after leaving a warning message.
+Explanation: CSV_READ indicates whether a comma separated value data file should be used by the application as part of initializing a problem and loading data. The name of the CSV file is the same as the name of the model file. GEKKO writes the model time array and any new user-defined values of GEKKO variables to the csv file. The csv file is the primary method of passing values to APMonitor.
 
 
 CSV_WRITE
@@ -106,7 +136,10 @@ Default Value: 0
 
 Description: CSV write: 0=Off, 1=Write results.csv, 2=Write results_all.csv
 
-Explanation: CSV_WRITE is an option that controls how much information is written to results files. When it is 0 (OFF), no result files are written. This may be desirable to further reduce the time associated with solution post-processing. When CSV_WRITE=1, a file results.csv is written with all of the constants, parameters, and variables. The data is written in a row oriented form with each row header as the name and subsequent column values are the values at each of the time points requested in the input data file. The data file can be retrieved from the server with the apm_sol(s,a) client function that stores the results.csv file locally as solution.csv. When CSV_WRITE=2, another file named results_all.csv is produced that contains not only the endpoints but also the intermediate collocation nodes of the solution. This file offers a more detailed view of the solution that is also reported through the web-interface plots.
+Explanation: CSV_WRITE is an option that controls how much information is written to results files.
+When it is 0 (OFF), no result files are written. This may be desirable to further reduce the time associated with solution post-processing.
+When CSV_WRITE=1, a file results.csv is written with all of the constants, parameters, and variables. The data is written in a row oriented form with each row header as the name and subsequent column values are the values at each of the time points requested in the input data file. The values from results.csv are automatically loaded back to the GEKKO variables' attribute `value`.
+When CSV_WRITE=2, another file named results_all.csv is produced that contains not only the endpoints but also the intermediate collocation nodes of the solution. This data file is saved in the model path, visible by `print(m.path)`.
 
 CTRLMODE
 ------------------------
@@ -161,7 +194,7 @@ Default Value: 1
 
 Description: Controlled variable error model type: 1=linear, 2=squared, 3=ref traj
 
-Explanation: CV_TYPE is a selection of the type of objective function to be used for variables defines as controlled variables (CVs) in control (IMODE=6 or 9) applications. The options are to use a linear penalty from a dead-band trajectory (CV_TYPE=1), squared error from a reference trajectory (CV_TYPE=2), or an experimental reference trajectory type (CV_TYPE=3). 
+Explanation: CV_TYPE is a selection of the type of objective function to be used for variables defines as controlled variables (CVs) in control (IMODE=6 or 9) applications. The options are to use a linear penalty from a dead-band trajectory (CV_TYPE=1), squared error from a reference trajectory (CV_TYPE=2), or an experimental reference trajectory type (CV_TYPE=3).
 
 CV_WGT_SLOPE
 ------------------------
@@ -195,7 +228,32 @@ Default Value: 0
 
 Description: Cycle count, increments every cycle
 
-Explanation: CYCLECOUNT is a counter that records the number of cycles of the application. It is both an input and output value because the CYCLECOUNT value can be reset. The CYCLECOUNT may be reset when it is desirable to record when a certain event occurs such as a set point change or when the application is re-initialized. 
+Explanation: CYCLECOUNT is a counter that records the number of cycles of the application. It is both an input and output value because the CYCLECOUNT value can be reset. The CYCLECOUNT may be reset when it is desirable to record when a certain event occurs such as a set point change or when the application is re-initialized.
+
+DBS_LEVEL
+------------------
+
+Type: Integer, Input
+
+Default Value: 1
+
+Description: Database level limited to a subset of options
+0=Basic, Limited Options
+1=All Options
+
+Explanation: DBS_LEVEL is an input option to control what is written to the DBS (database) file. When DBS_LEVEL=0, only a subset of basic parameters are written to the DBS file. This is used for compatibility with some industrial control systems that only support a subset of parameters. The basic global parameters are the following.
+
+APPINFO, APPINFOCHG, APPSTATUS, COLDSTART, CYCLECOUNT,
+DIAGLEVEL, ITERATIONS, OBJFCNVAL, REQCTRLMODE, SOLVESTATUS,
+SOLVETIME
+
+Local parameters that are designated as basic types are only used when DBS_LEVEL=0.
+
+BIAS, COST, CRITICAL, DCOST, DMAX, DMAXHI, DMAXLO, FSTATUS,
+LOWER, LSTVAL, MEAS, MODEL, NEWVAL, NXTVAL, PSTATUS, REQONCTRL,
+SP, SPHI, SPLO, STATUS, TAU, UPPER, VDVL, VLHI, VLLO, WSPHI,
+WSPLO
+
 
 DBS_READ
 ------------------------
@@ -217,7 +275,7 @@ Default Value: 1
 
 Description: Database write: 0=OFF, 1={Name = Value, Status, Units}, 2={Name,Value}
 
-Explanation: DBS_WRITE specifies when to write the output DBS files with 0=OFF, 1=Write values with Units, and 2=Write values without Units. It may be desirable to turn off the DBS file writing when the DBS file sends feedback to the process and the application is under development. 
+Explanation: DBS_WRITE specifies when to write the output DBS files with 0=OFF, 1=Write values with Units, and 2=Write values without Units. It may be desirable to turn off the DBS file writing when the DBS file sends feedback to the process and the application is under development.
 
 DIAGLEVEL
 ------------------------
@@ -228,7 +286,7 @@ Default Value: 0
 
 Description: Diagnostic level: 0=none, 1=messages, 2=file checkpoints, 4=diagnostic files, 5=check 1st deriv
 
-Explanation: DIAGLEVEL is the diagnostic level for an application. With higher levels, it is used to give increasingly greater detail about the model compilation, validation, and traceability of information. At level 0, there is minimal information reported that typically includes a summary of the problem and the solver output. At level 1, there are more information messages and timing information for the different parts of the program execution. At level 2, there are diagnostic files created at every major step of the program execution. A diagnostic level of >=2 slows down the application because of increased file input and output, validation steps, and reports on problem structure. Additional diagnostic files are created at level 4. The analytic 1st derivatives are verified with finite differences at level 5 and analytic 2nd derivatives are verified with finite differences at level 6. The DIAGLEVEL is also sent to the solver to indicate a desire for more verbose output as the level is increased. Some solvers do not support increased output as the diagnostic level is increased. A diagnostic level up to 10 is allowed. 
+Explanation: DIAGLEVEL is the diagnostic level for an application. With higher levels, it is used to give increasingly greater detail about the model compilation, validation, and traceability of information. At level 0, there is minimal information reported that typically includes a summary of the problem and the solver output. At level 1, there are more information messages and timing information for the different parts of the program execution. At level 2, there are diagnostic files created at every major step of the program execution. A diagnostic level of >=2 slows down the application because of increased file input and output, validation steps, and reports on problem structure. Additional diagnostic files are created at level 4. The analytic 1st derivatives are verified with finite differences at level 5 and analytic 2nd derivatives are verified with finite differences at level 6. The DIAGLEVEL is also sent to the solver to indicate a desire for more verbose output as the level is increased. Some solvers do not support increased output as the diagnostic level is increased. A diagnostic level up to 10 is allowed.
 
 EV_TYPE
 ------------------------
@@ -251,6 +309,44 @@ Default Value: 0.0
 Description: Slope for weight on more current EV error (e.g. favor near-term matching)
 
 Explanation: EV_WGT_SLOPE is how the weight on measurement error (WMEAS) and prior model difference (WMODEL) change with time over the estimation horizon. This option is typically used to favor alignment of the most recent data. It is normally set to zero but can be adjusted to be positive to increase the weighting for more recent data points.
+
+
+FILTER
+------------
+
+Type: Floating Point, Input
+
+Default Value: 1.0
+
+Description: Measurement first-order filter: (0-1)
+
+Explanation: FILTER determines how much of the raw measurement is used to update the value of MEAS. A filter of 0 indicates that the measurement should not be used in updating the MEAS value. The FILTER parameter applies to all inputs into the model from the CSV (data) file and also from the DBS (database) file. FILTER at 1.0 uses all of the measurement and ignores any prior measurement value and 0.5 uses half of each.
+
+ CSV (data) file
+
+ Model = Model * (1-FILTER) + Measured * FILTER
+
+
+ DBS (database) file
+
+ MEAS =  MEAS * FILTER + LSTVAL * (1-FILTER)
+
+The FSTATUS parameter is used to adjust the fractional update from new measurements when using apm_meas(s,a,'name',value) but this only applies to a single entity at a time. FILTER applies globally to all inputs. Both FSTATUS and FILTER are useful to control the flow of information into the model. It is sometimes desirable to set FILTER or FSTATUS to a low value (close to 0) when the solver is not able to find a solution because of big input changes. A drawback of a filter on data is that raw inputs are not used in the application and it takes several cycles to reach true input values.
+
+
+FRZE_CHK
+---------------
+
+Type: Integer, Input
+
+Default Value: 1
+
+Description: Frozen measurement checking
+1=ON
+0=OFF
+
+Explanation: FRZE_CHK is a checking mechanism to ensure that a measurement has variation and is not frozen at the same value for repeat cycles of the application. If the measurement does not change, it is marked as bad and not used in the application. FRZE_CHK is useful for certain types of measurements that are known to periodically fail and stay at a constant value, such as gas chromatographs. FRZE_CHK can also detect when the application is cycling at a faster rate than the measurement device can deliver a new measurement. FRZE_CHK may be undesirable if the sensor resolution gives a false indication of a frozen measurement when it is actually a steady signal and poor sensor resolution. When FRZE_CHK is OFF, there is no checking of the difference from the prior measurement. BNDS_CHK, FRZE_CHK, and MEAS_CHK are options regarding data cleansing before it enters the applications.
+
 
 HIST_HOR
 ------------------------
@@ -308,6 +404,19 @@ Description: Iterations for solution: >=1
 
 Explanation: ITERATIONS are the number of major iterations required to find a solution. If the number of iterations reaches MAX_ITER, the unfinished solution is returned with an error message. The number of iterations is typically in the range of 3-100 for most problems although this number can be higher for large-scale or complex systems.
 
+
+LINEAR
+--------------
+
+Type: Integer, Input
+
+Default Value: 0
+
+Description: 0 - Nonlinear problem
+1 - Linear problem
+
+Explanation: Linear programming (LP) or mixed integer linear programming (MILP) problems can typically be solved much faster than a comparably sized nonlinear programming problem. The LINEAR option indicates whether the problem is linear. This allows the modeling language to set options in certain nonlinear solvers that improve the efficiency of the solution. All of the solvers built into APMonitor are nonlinear programming (NLP) or mixed-integer nonlinear programming (MINLP) solvers. Some of the solvers have simplifications to handle linear problems as well. This option does not override the choice of solver with SOLVER but does communicate to the solver that the problem has linear structure.
+
 MAX_ITER
 ------------------------
 
@@ -318,6 +427,19 @@ Default Value: 100
 Description: Maximum iteration: >=1
 
 Explanation: MAX_ITER is the maximum number of major iterations for solution by the solver. If this number is reached, the result cannot be trusted because the equation convergence or objective minimization does not satisfy the Karush Kuhn Tucker conditions for optimality. Reaching the maximum number of iterations can happen when the problem is large, difficult, highly nonlinear or if the problem is infeasible. Increasing MAX_ITER for infeasible problems will not lead to a feasible solution but can help detect the infeasible conditions.
+
+
+MAX_MEMORY
+-----------------------
+
+Type: Integer, Input
+
+Default Value: 4
+
+Description: Maximum memory utilized during model compilation with range 10^2 to 10^10
+
+Explanation: Computer memory is allocated at run-time based on the size of the problem but there are particular parts during the model compilation that need an upper limit on model complexity. MAX_MEMORY=4 allows up to 10^4 = 10,000 sparsity elements per equation but can go up to 10^10. There are rare cases when more sparsity elements are needed than the default of 10,000. In these cases, an error message states that the amount of memory should be increased with the option MAX_MEMORY. A good practice is to increase MAX_MEMORY by an order of magnitude (+1) until the error is not encountered. Increasing MAX_MEMORY requires more Random Access Memory (RAM) when the model is compiled at the start of each optimization problem.
+
 
 MAX_TIME
 ------------------------
@@ -429,6 +551,52 @@ Description: Time for each step in the horizon
 
 Explanation: PRED_TIME is the prediction time of a controller beyond the control horizon. PRED_TIME is typically set to a larger value than CTRL_TIME to reach steady state conditions but also have fine resolution for near term movement of MVs. When CSV_READ is on and the horizon time points are specified from the data file, the CTRL_TIME and PRED_TIME are set equal to the time increment of the first time step.
 
+
+REDUCE
+-------------------
+
+Type: Integer, Input
+
+Default Value: 0
+
+Description: Number of pre-processing cycles to identify equations or variables to eliminate
+
+Explanation: REDUCE is the number of cycles of pre-solve analysis before sending the problem to a solver. The analysis eliminates variables and equations with the following characteristics:
+
+* variables that don't belong to an equation or objective
+* equations with assignments such as x=2.5 (set to value and fix)
+
+	+ identified with a single non-zero in Jacobian row
+	+ set variable equal to zero, evaluate residual
+	+ then set x = -resid/jac (when abs(jac)>tolerance)
+	+ check that upper or lower limits are not violated
+
+* equations that connect two variables y = z (merge)
+
+	+ set variables equal to zero, evaluate residual
+	+ if abs(residual)~0 and abs(jac_1 - jac_2) ~ 0, merge
+
+* independent blocks of linear equations (not yet implemented)
+
+	+ perform Lower Block Triangularization (LBT)
+	+ analyze independent blocks
+	+ if equation blocks are linear then solve and fix
+
+If no variables are left (all reduced) then APMonitor reports a successful solution without sending the problem to a solver. When no variables or equations are eliminated, the remainder of the REDUCE cycles are skipped. REDUCE has the potential to present a more dense and smaller problem to the solver but may also require more pre-processing time that is more efficiently utilized by the solver.
+
+
+REPLAY
+------------------
+
+Type: Integer, Input
+
+Default Value: 0
+
+Description: Row counter for data in replay.csv
+
+Explanation: REPLAY is a row indicator that is incremented each cycle when REPLAY >= 1. When replay mode is activated, data from successive rows in replay.csv are inserted into the file measurements.dbs. The application solves and then REPLAY is incremented by 1. On the next cycle, measurements.dbs is populated from the next row and the cycle repeats. REPLAY is an efficient way of loading large amounts of data into an application without needing to load each measurement individually through apm_meas(s,a,'variable',value) function calls.
+
+
 REQCTRLMODE
 ------------------------
 
@@ -473,16 +641,20 @@ Description: Sensitivity Analysis: 0=Off, 1=On
 
 Explanation: SENSITIVITY determines whether a sensitivity analysis is performed as a post-processing step. The sensitivity analysis results are accessed either through the web-interface with the SENS tab or by retrieving the sensitivity.txt or sensitivity.htm files. The sensitivity is a measure of how the FV and MV values influence the objective function, SV, and CV final values. Another file, sensitivity_all.txt contains sensitivities for all of the dependent variable values with respect to the FV and MV values.
 
-SOLVESTATUS
-------------------------
 
-Type: Integer, Output
+SEQUENTIAL
+-------------
 
-Default Value: 1
+Type: Integer, Input
 
-Description: Solution solve status: 1=good
+Default Value: 0
 
-Explanation: SOLVESTATUS is an indication of whether the solver returns a successful solution (1) or is unsuccessful at finding a solution (0). The solver may be unsuccessful for a variety of reasons including reaching a maximum iteration limit, an infeasible constraint, or an unbounded solution.
+Description: Sequential solution method
+0=Off
+1=On
+
+Explanation: SEQUENTIAL determines whether a the solution is attempted with a simultaneous (0) or sequential (1) approach. The sequential solution method solves independent decision variables in an outer loop from the system equations. This approach attempts to maintain feasibility from iteration to iteration but can significantly slow down the overall solution time. The SEQUENTIAL option can be used with any problem that has degrees of freedom such as IMODE=2,3,5,6. When IMODE=7-9 (Sequential Dynamic Simulation, Estimation, and Control), the SEQUENTIAL option is automatically elevated to 1 and placed back to the default of 0 when the solution is completed.
+
 
 SOLVER
 ------------------------
@@ -494,6 +666,19 @@ Default Value: 3
 Description: Solver options: 0 = Benchmark All Solvers, 1-5 = Available Solvers Depending on License
 
 Explanation: SOLVER selects the solver to use in an attempt to find a solution. There are free solvers: 1: APOPT, 2: BPOPT, 3: IPOPT distributed with the public version of the software. There are additional solvers that are not included with the public version and require a commercial license. IPOPT is generally the best for problems with large numbers of degrees of freedom or when starting without a good initial guess. BPOPT has been found to be the best for systems biology applications. APOPT is generally the best when warm-starting from a prior solution or when the number of degrees of freedom (Number of Variables - Number of Equations) is less than 2000. APOPT is also the only solver that handles Mixed Integer problems. Use option 0 to compare all available solvers.
+
+
+SOLVESTATUS
+------------------------
+
+Type: Integer, Output
+
+Default Value: 1
+
+Description: Solution solve status: 1=good
+
+Explanation: SOLVESTATUS is an indication of whether the solver returns a successful solution (1) or is unsuccessful at finding a solution (0). The solver may be unsuccessful for a variety of reasons including reaching a maximum iteration limit, an infeasible constraint, or an unbounded solution.
+
 
 SOLVETIME
 ------------------------
@@ -516,6 +701,36 @@ Default Value: 1
 Description: Specifications from restart file: 1=ON, 0=OFF
 
 Explanation: The default specifications of fixed or calculated are indicated in the restart t0 files that store prior solutions for warm starting the next solution. The SPECS option indicates whether the specifications should be read from the t0 file (ON) or ignored (OFF) when reading the t0 file for initialization.
+
+
+SPC_CHART
+-------------------
+
+Type: Integer, Input
+
+Default Value: 0
+
+Description: Statistical Process Control chart
+0=OFF
+1=add +/- 3 set point limits (red lines)
+2=add +/- 2 set point limits (yellow lines)
+3=add +/- 1 set point limits (green lines)
+
+Explanation: SPC_CHART is a web-interface trend option to create Statistical Process Control (SPC) style charts for Controlled Variables (CVs). When SPC_CHARTS=0, there are no additional limits placed on the trend. As SPC_CHARTS is increased by 1, there are additional ranges added to the CV plots. With a level of 1, new lines at +/- 3 SPHI-SPLO are added to the plot as red upper and lower control limits. With a level of 2, new lines at +/- 2 SPHI-SPLO are added to the plot as yellow upper and lower control limits. With a level of 1, new lines at +/- 1 SPHI-SPLO are added to the plot as green upper and lower control limits. Each level adds an additional two lines.
+
+STREAM_LEVEL
+--------------------
+
+Type: Integer, Input
+
+Default Value: 0
+
+Description: Stream level options
+0=Mass Balance
+1=Mass, Mole, and Energy Balances
+
+Explanation: STREAM_LEVEL controls the amount of detailed contained in flowsheet models through OBJECT declarations. At the basic level (0), only mass balance equations are solved. Variables for each stream are mass flow rate and mass fractions of all species declared in the COMPOUNDS section of the model. The last mass fraction is automatically set to make the summation equal to 1.0. At more the more advanced level (1), mole and energy balances are added. The higher stream level adds temperature, pressure, enthalpy, mole fractions, volumetric flow, density, and concentration.
+
 
 TIME_SHIFT
 ------------------------
@@ -559,29 +774,16 @@ Default Value: 10
 
 Description: Automatic refresh rate on HTML pages (default 10 minutes)
 
-Explanation: WEB_REFRESH is an internal time ot the auto-generated web-interface to automatically reload the page. The default value is 10 minutes although it is not typically necessary to update the web-page. New values are automatically loaded to the web-page through AJAX communication that updates the parts of the page that need to be updated.
+Explanation: WEB_REFRESH is an internal time of the auto-generated web-interface to automatically reload the page. The default value is 10 minutes although it is not typically necessary to update the web-page. New values are automatically loaded to the web-page through AJAX communication that updates the parts of the page that need to be updated.
 
 
+WEB_PLOT_FREQ
+-----------------
 
+Type: Integer, Input
 
+Default Value: 1
 
-Missing Options
----------------
+Description: Automatic refresh rate on web interface plots
 
- 'AUTO_COLD',
- 'BAD_CYCLES',
- 'CV_WGT_SLOPE',
- 'CYCLECOUNT',
- 'DBS_LEVEL',
- 'FILTER',
- 'FRZE_CHK',
- 'ITERATIONS',
- 'LINEAR',
- 'MAX_MEMORY',
- 'REDUCE',
- 'REPLAY',
- 'SEQUENTIAL',
- 'SPC_CHART',
- 'STREAM_LEVEL',
- 'WEB_PLOT_FREQ'
-
+Explanation: WEB_PLOT_FREQ is an internal time in seconds to refresh the web-interface plots. This option does not automatically reload the page but just the plot within the web-page. The default value is 1 second but this value can be increased to lessen the network load as data is repeatedly sent from the server to the web-interface. Processes with slow dynamics or long cycle times may not need the fast refresh rates. If an error message appears, it may indicate that the plot source files were in the process of being rewritten when the new request for data was initiated. The error message is resolved by reloading the web-page.

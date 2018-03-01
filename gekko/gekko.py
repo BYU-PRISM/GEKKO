@@ -474,7 +474,6 @@ class GEKKO(object):
                 else:
                     return byte
 
-
             try:
                 results = byte2str(get_file(self.server,self.model_name,'results.csv'))
                 f = open(os.path.join(self.path,'results.csv'), 'w')
@@ -488,6 +487,10 @@ class GEKKO(object):
                 f = open(os.path.join(self.path,'options.json'), 'w')
                 f.write(str(options))
                 f.close()
+                if self.options.CSV_WRITE == 2:
+                    results_all = byte2str(get_file(self.server,self.model_name,'results_all.csv'))
+                    with open(os.path.join(self.path,'results_all.csv'), 'w') as f:
+                        f.write(str(results_all))
             except:
                 raise ImportError('Results files not found. APM did not find a solution or the server is unreachable.')
 
@@ -1069,6 +1072,7 @@ class GEKKO(object):
             if f.endswith('.t0') or f.endswith('.dxdt'):
                 os.remove(os.path.join(self.path,f))
 
+
     #%% Trig functions
     def sin(self,other):
         return GK_Operators('sin(' + str(other) + ')')
@@ -1096,10 +1100,6 @@ class GEKKO(object):
         return GK_Operators('acos('+str(other) + ')')
     def atan(self,other):
         return GK_Operators('atan('+str(other) + ')')
-
-
-
-
 
     def GUI(self, **kwargs):
         gui = GK_GUI(**kwargs)

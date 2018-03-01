@@ -102,11 +102,14 @@ CV
 
 Controlled variables are the measurement to match.
 
-If `STATUS` is on (`STATUS=1`), an objective function is added to minimize the model prediction to the measurements. The error is either squared or absolute depending on if `m.options.EV_TYPE` is 2 or 1, respectively.
+If `FSTATUS` is on (`FSTATUS=1`), an objective function is added to minimize the
+model prediction to the measurements. The error is either squared or absolute depending
+on if `m.options.EV_TYPE` is 2 or 1, respectively. `FSTATUS` enables receiving measurements
+through the `MEAS` attribute.
 
-If `m.options.EV_TYPE = 1`, `CV.MEAS_GAP=v` will provide a deadband of size `v` around the measurement to avoid fitting to measurement noise.
+If `m.options.EV_TYPE = 1`, `CV.MEAS_GAP=v` will provide a dead-band of size `v` around the measurement to avoid fitting to measurement noise.
 
-`FSTATUS` enables receiving measurements through the `MEAS` attribute.
+`STATUS` is ignored in MHE.
 
 
 Control
@@ -132,8 +135,8 @@ CV
 MPC
 ^^^
 
-Model Predictive Control
 
+Model Predictive Control
 
 FV
 ""
