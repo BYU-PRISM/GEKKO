@@ -21,7 +21,8 @@ class GK_GUI:
     This class handles creation and management of the gui. It pulls the required
     data from options.json and results.json and displays using DASH.
     """
-    def __init__(self, theme='sandstone'):
+    def __init__(self, path, theme='sandstone'):
+        self.path = path
         self.vars_dict = {}                     # vars dict with script names as keys
         self.options_dict = {}                  # options dict with script names as keys
         self.model = {}                    # APM model information
@@ -35,17 +36,22 @@ class GK_GUI:
         vars_map = {}
         main_dict = vars(main)
         for var in main_dict:
-            if isinstance(main_dict[var], GKVariable) or isinstance(main_dict[var], GKParameter):
+            if isinstance(main_dict[var], (GKVariable,GKParameter)):
                 vars_map[main_dict[var].name] = var
+            if isinstance(main_dict[var], list):
+                list_var = main_dict[var]
+                for i in range(len(list_var)):
+                    if isinstance(list_var[i], (GKVariable,GKParameter)):
+                        vars_map[list_var[i].name] = var+'['+str(i)+']'
         return vars_map
 
     def get_script_data(self):
         """Gather the data that GEKKO returns from the run and process it into
         the objects that the GUI can handle"""
         # Load options.json
-        self.options = json.loads(open("./options.json").read())
+        self.options = json.loads(open(os.path.join(self.path,'options.json')).read())
         # Load results.json
-        self.results = json.loads(open("./results.json").read())
+        self.results = json.loads(open(os.path.join(self.path,"results.json")).read())
         self.vars_dict['time'] = self.results['time']
         self.model = self.options['APM']
         self.info = self.options['INFO']
@@ -53,9 +59,13 @@ class GK_GUI:
             if var != 'time':
                 self.vars_dict[self.vars_map[var]] = self.results[var]
         for var in self.vars_map:
-            # FIXME: Find a better way to only try to add the vars, params
-            if var[0] == 'v':
+            try:
                 self.options_dict[self.vars_map[var]] = self.options[var]
+            except:
+                print(str(var)+' not in options.json')
+            # FIXME: Find a better way to only try to add the vars, params
+            #if var[0] == 'v':
+            #    self.options_dict[self.vars_map[var]] = self.options[var]
 
     def set_endpoints(self):
         """Sets the flask API endpoints"""
