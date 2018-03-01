@@ -45,7 +45,7 @@ class EquationObj(object):
         self.value = str(value)
     def __str__(self):
         return self.value
-        
+
 #%%Create class
 class GEKKO(object):
     """Create a model object. This is the basic object for solving optimization problems"""
@@ -63,10 +63,10 @@ class GEKKO(object):
         self.intermediates = []
         self.inter_equations = []
         self.equations = []
-        self.objectives = [] 
+        self.objectives = []
         self._connections = []
         self._objects = []
-        
+
         #time discretization
         self.time = None
 
@@ -80,16 +80,16 @@ class GEKKO(object):
         self.model_name = name.lower().replace(" ", "")
         #Path of model folder
         self.path = tempfile.mkdtemp(suffix=self.model_name)
-        
+
         #extra, non-default files to send to server (eg solver.opt, cspline.csv)
         self._extra_files = []
         #list of strings for solver options
         self.solver_options = []
-        
+
         #clear anything already on the server
         cmd(self.server,self.model_name,'clear all')
 
-        
+
     #%% Parts of the model
     def Const(self, value=0, name=None):
         """ Define a constant. There is no functional difference between using
@@ -129,7 +129,7 @@ class GEKKO(object):
             if integer == True:
                 name = 'int_'+name
 
-        parameter = GK_FV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer) 
+        parameter = GK_FV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
         self.parameters.append(parameter)
         return parameter
 
@@ -201,9 +201,9 @@ class GEKKO(object):
         EqObj = EquationObj(equation)
         self.equations.append(EqObj)
         return EqObj
-        
+
     def Equations(self,eqs):
-        l = []        
+        l = []
         for eq in eqs:
             eo = self.Equation(eq)
             l.append(eo)
@@ -221,21 +221,21 @@ class GEKKO(object):
         if pos1 is not None:
             #make sure var1 is a GEKKO param or var
             if isinstance(var1,(GKVariable,GKParameter)):
-                var1_str = 'p(' + str(pos1) + ').n(' + str(node1) + ').' + var1.name 
+                var1_str = 'p(' + str(pos1) + ').n(' + str(node1) + ').' + var1.name
             else:
                 raise TypeError('Variable 1 must be GEKKO Param or Var to use position')
         else:
             var1_str = str(var1)
-            
+
         if pos2 is not None:
             #make sure var1 is a GEKKO param or var
             if isinstance(var2,(GKVariable,GKParameter)):
-                var2_str = 'p(' + str(pos2) + ').n(' + str(node2) + ').' + var2.name 
+                var2_str = 'p(' + str(pos2) + ').n(' + str(node2) + ').' + var2.name
             else:
                 raise TypeError('Variable 2 must be GEKKO Param or Var to use position')
         else:
             var2_str = str(var2)
-           
+
         #check for types
         #if matching variable point to a second variable, the second variable must be an FV
         if pos2 is not None and pos1 is None and isinstance(var1,(GKVariable,GKParameter)):
@@ -244,79 +244,79 @@ class GEKKO(object):
 
         #add connection to list
         self._connections.append(var1_str+'='+var2_str)
-        
+
         #for fixing to constants
         if not isinstance(var2,(GKVariable,GKParameter)):
             self._connections.append(var1_str + ' = FIXED')
             var1.__dict__['_fixed_values'].append((pos1,var2))
-    
+
     #Simplified Connection
     def fix(self,var, pos, val):
         self.Connection(var,val,pos1=pos)
-        
+
     #%% Objects
         # There isn't generalized syntax for objects, so each one is added individually
-    
+
     ## Cubic Spline
     def cspline(self, x,y,x_data,y_data,bound_x=False):
         """Generate a 1d cubic spline with continuous first and seconds derivatives
-        from arrays of x and y data which link to GEKKO variables x and y with a 
+        from arrays of x and y data which link to GEKKO variables x and y with a
         constraint that y=f(x).
-        
+
         Input: x: GEKKO variable, y: GEKKO variable, x_data: array of x data,
-        y_data: array of y data that matches x_data, bound_x: boolean to state 
+        y_data: array of y data that matches x_data, bound_x: boolean to state
         x should be bounded at the upper and lower bounds of x_data to avoid
         extrapolation error of the cspline. """
-        
+
         #verify that x and y are valid GEKKO variables
         if not isinstance(x,(GKVariable,GKParameter)):
             raise TypeError("First arguement must be a GEKKO parameter or variable")
         if not isinstance(y,(GKVariable)):
             raise TypeError("Second arguement must be a GEKKO variable")
-                
+
         #verify data input types
         if not isinstance(x_data, (list,np.ndarray)):
             raise TypeError("x_data must be a python list or numpy array")
         if not isinstance(y_data, (list,np.ndarray)):
             raise TypeError("y_data must be a python list or numpy array")
-        
+
         #convert data to flat numpy arrays
         x_data = np.array(x_data).flatten()
         y_data = np.array(y_data).flatten()
-        
+
         #verify data inputs for same length and ordered x_data
         if np.size(x_data) != np.size(y_data):
             raise Exception('Data arrays must have the same length')
         sort_order = np.argsort(x_data)
         x_data = x_data[sort_order]
         y_data = y_data[sort_order]
-        
+
         #build cspline object with unique object name
         cspline_name = 'cspline' + str(len(self._objects) + 1)
         self._objects.append(cspline_name + ' = cspline')
-        
+
         #write x_data and y_data to objectname.csv
         file_name = cspline_name + '.csv'
         csv_data = np.hstack(('x_data',x_data.astype(object)))
         csv_data = np.vstack((csv_data,np.hstack(('y_data',y_data.astype(object)))))
         np.savetxt(os.path.join(self.path,file_name), csv_data.T, delimiter=",", fmt='%1.25s')
-        
+
         #add csv file to list of extra file to send to server
         self._extra_files.append(file_name)
 
         #Add connections between x and y with cspline object data
         self._connections.append(x.name + ' = ' + cspline_name+'.x_data')
         self._connections.append(y.name + ' = ' + cspline_name+'.y_data')
-        
+
         #Bound x to x_data limits
         if bound_x is True:
             x.lb = x_data[0]
             x.ub = x_data[-1]
-            
-            
-            
-    
-    
+
+
+
+
+
     #%% Add array functionality to all types
     def Array(self,f,dim,**args):
         x = np.ndarray(dim,dtype=object)
@@ -329,9 +329,9 @@ class GEKKO(object):
         if (len(sizes) == 1):
             return [f()] * sizes[0]
         else:
-            return [init(sizes[1:], f) for i in xrange(sizes[0])]           
-    """        
-    
+            return [init(sizes[1:], f) for i in xrange(sizes[0])]
+    """
+
     #%% Get a solution
     def solve(self,remote=True,disp=True,verify_input=False):
         """Solve the optimization problem.
@@ -347,13 +347,13 @@ class GEKKO(object):
         timing = False
         if timing == True:
             import time
-        
+
         # JSON input read to APM
 #        t = time.time()
 #        self.to_JSON()
 #        print('print JSON', time.time() - t)
-        
-        
+
+
         if timing == True:
             t = time.time()
         # Build the model
@@ -365,7 +365,7 @@ class GEKKO(object):
 
         if timing == True:
             t = time.time()
-        if self.csv_status != 'provided': 
+        if self.csv_status != 'provided':
             self.write_csv()
         if timing == True:
             print('build csv', time.time() - t)
@@ -393,12 +393,12 @@ class GEKKO(object):
         if remote == False:#local_solve
             if timing == True:
                 t = time.time()
-            
+
             # Check for all the necessary libraries
             if os.name != 'nt':
                 if not os.path.isdir(os.path.join(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'bin'),'lib')):
                     print('Warning: \'lib\' folder is missing. Necessary libraries may not be present.')
-        
+
             # Calls apmonitor through the command line
             if os.name == 'nt': #Windows
                 apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm.exe')
@@ -425,7 +425,7 @@ class GEKKO(object):
                 print("Error:", errs)
             if timing == True:
                 print('solve', time.time() - t)
-            
+
         else: #solve on APM server
             def send_if_exists(extension):
                 path = os.path.join(self.path,self.model_name + '.' + extension)
@@ -433,12 +433,12 @@ class GEKKO(object):
                     with open(path) as f:
                         file = f.read()
                     cmd(self.server, self.model_name, extension+' '+file)
-                    
-            
+
+
             #clear apm and csv files already on the server
             cmd(self.server,self.model_name,'clear apm')
             cmd(self.server,self.model_name,'clear csv')
-            
+
             #send model file
             with open(os.path.join(self.path,self.model_name + '.apm')) as f:
                 model = f.read()
@@ -455,62 +455,66 @@ class GEKKO(object):
             if self.solver_options:
                 opt_file=self.write_solver_options(remote)
                 cmd(self.server,self.model_name, ' '+opt_file)
-                    
+
             #extra files (eg solver.opt, cspline.data)
             for f_name in self._extra_files:
                 with open(os.path.join(self.path,f_name)) as f:
                     extra_file_data = f.read() #read data
                     extra_file_data = 'File ' + f_name + '\n' + extra_file_data + 'End File \n' #format for appending to apm file
                 cmd(self.server,self.model_name, ' '+extra_file_data)
-                
+
             #solve remotely
             cmd(self.server, self.model_name, 'solve', disp)
-            
+
             #load results
             def byte2str(byte):
                 if type(byte) is bytes:
                     return byte.decode().replace('\r','')
                 else:
                     return byte
-            
+
             try:
                 results = byte2str(get_file(self.server,self.model_name,'results.csv'))
                 f = open(os.path.join(self.path,'results.csv'), 'w')
                 f.write(str(results))
-                f.close() 
+                f.close()
                 results = byte2str(get_file(self.server,self.model_name,'results.json'))
                 f = open(os.path.join(self.path,'results.json'), 'w')
                 f.write(str(results))
-                f.close() 
+                f.close()
                 options = byte2str(get_file(self.server,self.model_name,'options.json'))
                 f = open(os.path.join(self.path,'options.json'), 'w')
                 f.write(str(options))
-                f.close() 
+                f.close()
+                if self.options.CSV_WRITE == 2:
+                    results_all = byte2str(get_file(self.server,self.model_name,'results_all.csv'))
+                    with open(os.path.join(self.path,'results_all.csv'), 'w') as f:
+                        f.write(str(results_all))
             except:
                 raise ImportError('Results files not found. APM did not find a solution or the server is unreachable.')
-        
+
         if timing == True:
             print('solve', time.time() - t)
-        
+
         if timing == True:
             t = time.time()
-        self.load_results() 
+        self.load_results()
         if timing == True:
             print('load results', time.time() - t)
-        
+
         if timing == True:
             t = time.time()
         self.load_JSON()
         if timing == True:
             print('load JSON', time.time() - t)
-        
+
         if timing == True:
             t = time.time()
         if verify_input == True:
             self.verify_input_options()
         if timing == True:
             print('compare options', time.time() - t)
-        
+
         if os.path.isfile(os.path.join(os.path.dirname(os.path.realpath(__file__)),'infeasibilities.txt')):
             raise StopIteration('Infeasible problem! Solution not trustworthy.')
 
@@ -534,15 +538,15 @@ class GEKKO(object):
         else:
             json_data = data
         return json_data
-    
-    
+
+
     def to_JSON(self): #JSON input to APM not currently supported -- this function isn't tested
         """
         include in JSON:
         global options
         variables (const,param,inter,var)
             name
-            value            
+            value
             type
             option_list
         """
@@ -552,7 +556,7 @@ class GEKKO(object):
         for o in global_options['inputs']+global_options['inout']:
             o_dict[o] = getattr(self.options,o)
         json_data['global options'] = o_dict
-        
+
         if self.time is not None:
             json_data['time'] = self.jsonify(self.time)
         #Constants can't and won't change so there's no reason to pass them in the JSON
@@ -576,7 +580,7 @@ class GEKKO(object):
                 o_dict['type'] = parameter.type
                 p_dict[parameter.name] = o_dict
             json_data['parameters'] = p_dict
-        
+
         if self.variables:
             p_dict = dict()
             for parameter in self.variables:
@@ -596,18 +600,18 @@ class GEKKO(object):
             for intermediate in self.intermediates:
                 temp_dict['name'] = {'value':self.jsonify(intermediate.value)}
             json_data['intermediates'] = temp_dict
-        """        
+        """
         f = open(os.path.join(self.path,'jsontest.json'), 'w')
         #f.write(json.dumps(self, default=lambda o: _try(o), sort_keys=True, indent=2, separators=(',',':')).replace('\n', ''))
-        json.dump(json_data,f, indent=2,separators=(',', ':'))     
+        json.dump(json_data,f, indent=2,separators=(',', ':'))
         f.close()
         #return json.dumps(self, default=lambda o: _try(o), sort_keys=True, indent=0, separators=(',',':')).replace('\n', '')
-        #load JSON to dictionary: 
+        #load JSON to dictionary:
         #with open(os.path.join(self.path,'jsontest.json')) as json_file:
         #   data = json.load(json_file)
-        
 
-        
+
+
     def build_model(self):
         ''' Write model to apm file.
 
@@ -687,17 +691,17 @@ class GEKKO(object):
             for connection in self._connections:
                 model += '\t%s\n' % connection
             model += 'End Connections\n'
-            
+
         if self._objects:
             model += 'Objects\n'
             for obj_str in self._objects:
                 model += '\t%s\n' % obj_str
             model += 'End Objects\n'
         #print(model) #for debugging
-        
+
         #replace multiple operators resulting from signs
         model = model.replace('++','+').replace('--','+').replace('+-','-').replace('-+','-')
-        
+
         # Create .apm file
         if(self.model_name == None):
             self.model_name = "default_model_name"
@@ -733,7 +737,7 @@ class GEKKO(object):
         ## SS data
         else:
             first_array = False
-    
+
         #check all parameters and arrays
         for vp in self.variables+self.parameters:
             #Only save csv data if the user changed the value (changes registered in vp.value.change)
@@ -744,7 +748,7 @@ class GEKKO(object):
                     length = np.size(np.array(vp.value).flatten())
                     if self.options.IMODE in (1,3) and length > 1:
                         raise Exception('This steady-state IMODE only allows scalar values.')
-                    
+
                 if vp.value.change is True: #Save the entire array of values
                     #discretize all values to arrays
                     if not isinstance(vp.VALUE.value, (list,np.ndarray)):
@@ -756,7 +760,7 @@ class GEKKO(object):
                         raise Exception('Data arrays must have the same length, and match time discretization in dynamic problems')
                     #group data with column header
                     t = np.hstack((vp.name,np.array(vp.VALUE.value).flatten().astype(object)))
-                    
+
                 elif isinstance(vp.value.change,list): #only certain elements should be saved
                     if not isinstance(vp.VALUE.value, (list,np.ndarray)):
                         vp.VALUE.value = np.ones(length)*vp.VALUE.value
@@ -766,34 +770,34 @@ class GEKKO(object):
                     t[:] = ' '
                     t[vp.value.change] = np.array(vp.value)[vp.value.change]
                     t = np.hstack((str(vp),t.flatten().astype(object)))
-                
+
                 else: #somebody broke value.change
                     raise Exception('Variable value modification monitor malfunction.')
-                    
+
                 #reset change indicator
                 vp.value.change = False
-                
+
                 #if a measurement exists, save a nonnumeric in
                 #value array to allow measurement to be read in
-                if hasattr(vp,'MEAS'):                    
+                if hasattr(vp,'MEAS'):
                     if vp.MEAS != None:
                         #vp.VALUE = np.array(vp.VALUE).astype(object)
                         if self.options.IMODE in [5,8]:
                             t[-1] = 'measurement'
                         else:
                             t[1] = "measurement"
-                        
+
                         #reset MEAS so it doesn't get repeated on next solve
                         vp.MEAS = None
-                
-                #If a value was fixed through a connection, ensure consistency in the 
+
+                #If a value was fixed through a connection, ensure consistency in the
                 #csv file, otherwise the requested fixed value will be overridden by
                 #whatever initialization value is in the csv
                 if hasattr(vp,'_fixed_values'):
                     for i in vp._fixed_values: #for each tuple of (position,value)
                         #set value in t array
-                        t[i[0]+1] = i[1] #index is +1 because of prepended header 
-        
+                        t[i[0]+1] = i[1] #index is +1 because of prepended header
+
                 if first_array == False:
                     csv_data = t
                     first_array = True
@@ -802,7 +806,7 @@ class GEKKO(object):
                         csv_data = np.vstack((csv_data,t))
                     except ValueError:
                         raise Exception('All variable value arrays must be the same length (and match the length of model time in dynamic problems).')
-                
+
         #print(csv_data)
         #save array to csv
         if first_array == False: #no data
@@ -816,15 +820,15 @@ class GEKKO(object):
     def write_info(self):
         #Classify variable in .info file
         filename = self.model_name+'.info'
-        
+
         #Create and open configuration files
         with open(os.path.join(self.path,filename), 'w+') as f:
             #check each Var and Param for FV/MV/SV/CV
             for vp in self.variables+self.parameters:
                 if vp.type is not None:
                     f.write(vp.type+', '+vp.name+'\n')
-        
-        
+
+
     def generate_overrides_dbs_file(self):
         '''Write options to overrides.dbs file
 
@@ -847,7 +851,7 @@ class GEKKO(object):
                         else: #everything else is an option
                             if vp.__dict__[o] is not None:
                                 f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
-                            
+
             for vp in self.variables:
                 if vp.type is not None: #(FV/MV/SV/CV) not Param or Var
                     for o in variable_options[vp.type]['inputs']+variable_options[vp.type]['inout']:
@@ -856,8 +860,8 @@ class GEKKO(object):
                         else: #everything else is an option
                             if vp.__dict__[o] is not None:
                                 f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
-    
-                        
+
+
     def write_solver_options(self,remote):
         opt_file = ''
         if self.solver_options:
@@ -868,11 +872,11 @@ class GEKKO(object):
                 filename = 'ipopt.opt'
             else:
                 raise TypeError("Solver options only available for APOPT(1) and IPOPT(3)")
-            
+
             #write each option to a line
             for option in self.solver_options:
                 opt_file += option + '\n'
-                
+
             #If remote solve, pass string to append to .apm file
             if remote is True:
                 return 'File ' + filename + '\n' + opt_file + 'End File\n'
@@ -880,20 +884,20 @@ class GEKKO(object):
             else:
                 with open(os.path.join(self.path,filename), 'w+') as f:
                     f.write(opt_file)
-                    
+
         #do nothing if no options were added
         else:
             return opt_file
-        
-        
-            
-        
+
+
+
+
 
         opt_file += 'End File\n'
         return opt_file
-    
-    
-    
+
+
+
     #%% Post-solve processing
 
     def load_JSON(self):
@@ -956,38 +960,38 @@ class GEKKO(object):
                     else: #everything besides value and pred
                         vp.__dict__[o] = data[vp.name][o]
         return data
-        
+
     def load_results(self):
         if (os.path.isfile(os.path.join(self.path, 'results.json'))):
             f = open(os.path.join(self.path,'results.json'))
             data = json.load(f)
             f.close()
-            
+
             for vp in self.parameters:
                 if vp.type is not None:
                     try:
                         vp.VALUE = data[vp.name]
                         vp.value.change = False
                     except Exception:
-                        print(vp.name+ " not found in results file")  
+                        print(vp.name+ " not found in results file")
             for vp in self.variables:
                 try:
                     vp.VALUE = data[vp.name]
                     vp.value.change = False
                 except Exception:
                     print(vp.name+ " not found in results file")
-            
+
             return data
-            
+
         else:
             print("Error: 'results.json' not found. Check above for additional error details")
             return {}
-            
 
-                
+
+
         print(data['APM']['SOLVESTATUS'])
         return data
-    
+
     #define comparison of options between APM and GEKKO
     #to avoid false positive when floats are off by a little
     def like(self,one,two):
@@ -995,7 +999,7 @@ class GEKKO(object):
             return one==two
         else:
             return (one+self.options.OTOL >= two and one-self.options.OTOL <= two)
-        
+
     def verify_input_options(self):
         ## Load data
         f = open(os.path.join(self.path,'options.json'))
@@ -1014,20 +1018,20 @@ class GEKKO(object):
                     if o not in ['LB','UB']: #TODO: for o in data[vp.name] to avoid this check
                         if vp.__dict__[o] is not None and not self.like(vp.__dict__[o], data[vp.name][o]):
                             print(str(vp)+'.'+str(o)+" was not written correctly") #give message if they don't match
-                        
+
         for vp in self.variables:
             if vp.type != None: #(FV/MV/SV/CV) not Param or Var
                 for o in variable_options[vp.type]['inputs']:
                     if o not in ['LB','UB']:
                         if vp.__dict__[o] is not None and not self.like(vp.__dict__[o], data[vp.name][o]):
                             print(str(vp)+'.'+str(o)+" was not written correctly") #give message if they don't match
-                            
-        
+
+
     def load_csv_results(self):
 
         # Load results.csv into a dictionary keyed with variable names
         if (os.path.isfile(os.path.join(self.path, 'results.csv'))):
-            with open(os.path.join(self.path,'results.csv')) as f: 
+            with open(os.path.join(self.path,'results.csv')) as f:
                 reader = csv.reader(f, delimiter=',')
                 y={}
                 for row in reader:
@@ -1066,8 +1070,8 @@ class GEKKO(object):
         for f in d:
             if f.endswith('.t0') or f.endswith('.dxdt'):
                 os.remove(os.path.join(self.path,f))
-            
-            
+
+
     #%% Trig functions
     def sin(self,other):
         return GK_Operators('sin(' + str(other) + ')')
@@ -1095,8 +1099,3 @@ class GEKKO(object):
         return GK_Operators('acos('+str(other) + ')')
     def atan(self,other):
         return GK_Operators('atan('+str(other) + ')')
-
-
-
-
-

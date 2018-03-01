@@ -79,16 +79,25 @@ Calculated by solver to meet constraints (Equations)::
 Intermediates
 ^^^^^^^^^^^^^
 
-Intermediates are a unique GEKKO variable type. Intermediates, and their associated equations, are like variables except their values and gradients are evaluated explicitly only once, at the beginning of the iteration. This saves time in function evaluations, but must be balanced with increased iterations resulting from static values used in the rest of the iteration. The function creates an intermediate variable "i" and sets it equal to argument "equation"::
+Intermediates are a unique GEKKO variable type. Intermediates, and their associated
+equations, are like variables except their values and gradients are evaluated
+explicitly, rather than being solved implicitly by the optimizer. Intermediate
+variables essentially blend the benefits of sequential solver approaches into
+simultaneous methods.
+
+The function creates an intermediate variable `i` and sets it equal to argument `equation`::
 
     i = m.Intermediate(equation,[name])
 
+`Equation` must be an explicitly equality. Each intermediate equation is solved in
+order of declaration. All variable values used in the explicit equation come from
+either the previous iteration or an intermediate variable declared previously.
 
 Fixed Variable
 ^^^^^^^^^^^^^^
 
-Fixed Variables (FV) inherit Parameters, but add a degree of freedom and are always fixed
-throughout the horizon (i.e. they are not discretized is dynamic modes).::
+Fixed Variables (FV) inherit Parameters, but potentially add a degree of freedom and are always fixed
+throughout the horizon (i.e. they are not discretized in dynamic modes).::
 
 	f = m.FV([name], [value], [lb], [ub])
 
@@ -98,7 +107,7 @@ throughout the horizon (i.e. they are not discretized is dynamic modes).::
 Manipulated Variable
 ^^^^^^^^^^^^^^^^^^^^
 
-Manipulated Variables (MV) inherit FVs but are discretized throughout the horizon and have time-dependant attributes::
+Manipulated Variables (MV) inherit FVs but are discretized throughout the horizon and have time-dependent attributes::
 
 	m = m.MV([name], [value], [lb], [ub])
 
@@ -116,7 +125,9 @@ State Variables (SV) inherit Variables with just a couple extra attributes::
 Controlled Variable
 ^^^^^^^^^^^^^^^^^^^
 
-Controlled Variables (CV) inherit SVs are are typically what you're trying to match (to data or a setpoint)::
+Controlled Variables (CV) inherit SVs but potentially add an objective (such as
+reaching a setpoint in control applications or matching model and measured values
+in estimation)::
 
     c = m.CV([name], [value], [lb], [ub])
 
@@ -137,11 +148,15 @@ For example, with variables ``x``, ``y`` and ``z``::
 Multiple equations can be defined at once if provided in an array or python list::
     m.Equations(eqs)
 
+Equations are all solved implicitly together.
+
 
 Objectives
 ----------
 
-Objectives are defined like equations, except they must not be equality or inequality expressions. Objectives are always minimized::
+Objectives are defined like equations, except they must not be equality or inequality
+expressions. Objectives are always minimized (maximization is possible by multiplying
+the objective by -1)::
 
 	m.Obj(obj)
 
