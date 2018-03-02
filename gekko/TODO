@@ -10,10 +10,6 @@ Do it
 Functionality
 -------------
 
--Integer variables (debug)
-
--in case of MEAS, change value array element to string based on variable type and imode
-
 -add combined scheduling and control elements
 
 -Expand functionality for modular units that connect with APM Connections
@@ -23,8 +19,6 @@ Functionality
 -Read in CV params from results.json (tau, tr_hi, sp_hi, bias, err_hi, cost, etc)
 
 -allow user to load custom .apm or .csv files?
-
--make comparing options with output optional
 
 
 Interface
@@ -40,8 +34,6 @@ Interface
 
 -Load back values of scalars not as list
 
--Make Constant(value,name) parameter order consistent with other variable definitions.
-
 
 Robustness
 ----------
@@ -50,33 +42,21 @@ Robustness
 
 -if .dt() used and csv not provided, demand time variable
 
--check L1/L2 global with setting SP/SPHILO
-
 -"The value of MEAS is initialized to the initial model value. "
 
 -UPPER and LOWER matching UB and LB?
 
--Add check for FSTATUS on setting meas
-
--Confirm unique variables names
-
 -Confirm FV MV SV CV inputs
-
--what happens if a variable option gets set multiple times?
 
 -ujson for speed
 
 -pytest on tests http://pytest.readthedocs.io/en/latest/ 
-
--model validations: 1. invalid (reserved keywords) in variables 2. correct imode 
 
 -are results of FV/MV with STATUS = 0 in results.csv/json?
 
 -case-insensitive reading of json
 
 -Raise exception and direct to Equation() if the argument to Equations() is not a list
-
--python 3 has less sig figs in str() of values
 
 
 Code cleanup
@@ -96,11 +76,7 @@ Code cleanup
 
 -simplify the solve function (pre-solve, solve, post-solve)
 
--categorize and export functions from gekko.py to other files (pre-solve/solve/post-solve)
-
 -APM JSON input
-
--apm.get_file write file to script location -- either delete it or remove dependancy of APM pip package
 
 
 Questions
