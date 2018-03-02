@@ -103,7 +103,7 @@ class GEKKO(object):
         self._constants.append(const)
         return const
 
-    def Param(self, name=None, value=None):
+    def Param(self, value=None, name=None):
         """GK parameters can become MVs and FVs. Since GEKKO defines
         MVs and FVs directly, there's not much use for parameters. Parameters
         are effectively constants unless the resulting .spm model is used later
@@ -117,7 +117,7 @@ class GEKKO(object):
         self.parameters.append(parameter)
         return parameter
 
-    def FV(self, name=None,value=None, lb=None, ub=None, integer=False):
+    def FV(self, value=None, lb=None, ub=None, integer=False, name=None):
         """A manipulated variable that is fixed with time. Therefore it lacks
         time-based attributes."""
         if name is not None:
@@ -131,7 +131,7 @@ class GEKKO(object):
         self.parameters.append(parameter)
         return parameter
 
-    def MV(self, name=None, value=None, lb=None, ub=None, integer=False):
+    def MV(self, value=None, lb=None, ub=None, integer=False, name=None):
         """Change these variables optimally to meet objectives"""
         if name is not None:
             name = re.sub(r'\W+', '', name).lower()
@@ -144,7 +144,7 @@ class GEKKO(object):
         self.parameters.append(parameter)
         return parameter
 
-    def Var(self, name=None, value=None, lb=None, ub=None, integer=False):
+    def Var(self, value=None, lb=None, ub=None, integer=False, name=None):
         """Calculated by solver to meet constraints (Equations). The number of
         variables (including CVs and SVs) must equal the number of equations."""
         if name is not None:
@@ -158,7 +158,7 @@ class GEKKO(object):
         self.variables.append(variable)
         return variable
 
-    def SV(self, name=None, value=None, lb=None, ub=None, integer=False):
+    def SV(self, value=None, lb=None, ub=None, integer=False, name=None):
         """A variable that's special"""
         if name is not None:
             name = re.sub(r'\W+', '', name).lower()
@@ -171,7 +171,7 @@ class GEKKO(object):
         self.variables.append(variable)
         return variable
 
-    def CV(self, name=None, value=None, lb=None, ub=None, integer=False):
+    def CV(self, value=None, lb=None, ub=None, integer=False, name=None):
         """A variable with a setpoint. Reaching the setpoint is added to the
         objective."""
         if name is not None:
