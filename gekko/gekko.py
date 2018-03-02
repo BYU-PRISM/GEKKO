@@ -332,6 +332,8 @@ class GEKKO(object):
             return [init(sizes[1:], f) for i in xrange(sizes[0])]
     """
 
+    #%% Import functions from other scripts
+    from .gk_logic_tree import gk_option_check
     #%% Get a solution
     def solve(self,remote=True,disp=True,verify_input=False):
         """Solve the optimization problem.
@@ -514,6 +516,10 @@ class GEKKO(object):
             self.verify_input_options()
         if timing == True:
             print('compare options', time.time() - t)
+
+
+        self.gk_option_check()
+        
 
         if os.path.isfile(os.path.join(os.path.dirname(os.path.realpath(__file__)),'infeasibilities.txt')):
             raise StopIteration('Infeasible problem! Solution not trustworthy.')
