@@ -3,9 +3,8 @@
 import os
 import sys
 import subprocess
-import json
 import glob
-import csv
+import re
 import tempfile #making a temporary directory for all the files
 import numpy as np #to support initializing with numpy arrays
 
@@ -95,7 +94,7 @@ class GEKKO(object):
         this Const, a python variable or a magic number. However, this Const
         can be provided a name to make the .apm model more clear."""
         if name is not None:
-            name = ''.join(e for e in name if e.isalnum()).lower()
+            name = re.sub(r'\W+', '', name).lower()
             if name == '':
                 name = None
         if isinstance(value, (list,np.ndarray)):
@@ -104,13 +103,13 @@ class GEKKO(object):
         self._constants.append(const)
         return const
 
-    def Param(self, name=None, value=None, integer=False):
+    def Param(self, name=None, value=None):
         """GK parameters can become MVs and FVs. Since GEKKO defines
         MVs and FVs directly, there's not much use for parameters. Parameters
         are effectively constants unless the resulting .spm model is used later
         and the parameters can be set as MVs or FVs. """
         if name is not None:
-            name = ''.join(e for e in name if e.isalnum()).lower()
+            name = re.sub(r'\W+', '', name).lower()
         else:
             name = 'p' + str(len(self.parameters) + 1)
 
@@ -122,11 +121,11 @@ class GEKKO(object):
         """A manipulated variable that is fixed with time. Therefore it lacks
         time-based attributes."""
         if name is not None:
-            name = ''.join(e for e in name if e.isalnum()).lower()
+            name = re.sub(r'\W+', '', name).lower()
         else:
             name = 'p' + str(len(self.parameters) + 1)
-            if integer == True:
-                name = 'int_'+name
+        if integer == True:
+            name = 'int_'+name
 
         parameter = GK_FV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
         self.parameters.append(parameter)
@@ -135,11 +134,11 @@ class GEKKO(object):
     def MV(self, name=None, value=None, lb=None, ub=None, integer=False):
         """Change these variables optimally to meet objectives"""
         if name is not None:
-            name = ''.join(e for e in name if e.isalnum()).lower()
+            name = re.sub(r'\W+', '', name).lower()
         else:
             name = 'p' + str(len(self.parameters) + 1)
-            if integer == True:
-                name = 'int_'+name
+        if integer == True:
+            name = 'int_'+name
 
         parameter = GK_MV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
         self.parameters.append(parameter)
@@ -149,11 +148,11 @@ class GEKKO(object):
         """Calculated by solver to meet constraints (Equations). The number of
         variables (including CVs and SVs) must equal the number of equations."""
         if name is not None:
-            name = ''.join(e for e in name if e.isalnum()).lower()
+            name = re.sub(r'\W+', '', name).lower()
         else:
             name = 'v' + str(len(self.variables) + 1)
-            if integer == True:
-                name = 'int_'+name
+        if integer == True:
+            name = 'int_'+name
 
         variable = GKVariable(name, value, lb, ub)
         self.variables.append(variable)
@@ -162,11 +161,11 @@ class GEKKO(object):
     def SV(self, name=None, value=None, lb=None, ub=None, integer=False):
         """A variable that's special"""
         if name is not None:
-            name = ''.join(e for e in name if e.isalnum()).lower()
+            name = re.sub(r'\W+', '', name).lower()
         else:
             name = 'v' + str(len(self.variables) + 1)
-            if integer == True:
-                name = 'int_'+name
+        if integer == True:
+            name = 'int_'+name
 
         variable = GK_SV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
         self.variables.append(variable)
@@ -176,11 +175,11 @@ class GEKKO(object):
         """A variable with a setpoint. Reaching the setpoint is added to the
         objective."""
         if name is not None:
-            name = ''.join(e for e in name if e.isalnum()).lower()
+            name = re.sub(r'\W+', '', name).lower()
         else:
             name = 'v' + str(len(self.variables) + 1)
-            if integer == True:
-                name = 'int_'+name
+        if integer == True:
+            name = 'int_'+name
 
         variable = GK_CV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
         self.variables.append(variable)
@@ -188,7 +187,7 @@ class GEKKO(object):
 
     def Intermediate(self,equation,name=None):
         if name is not None:
-            name = ''.join(e for e in name if e.isalnum()).lower()
+            name = re.sub(r'\W+', '', name).lower()
             if name == '':
                 name = None
         inter = GK_Operators(name)
