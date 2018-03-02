@@ -1,5 +1,6 @@
 <template>
   <div>
+    <button type="button" class="btn btn-danger" @click="removePlot">X</button>
     <div :id="id"></div>
   </div>
 </template>
@@ -13,6 +14,7 @@ window.onresize = () => {
 
 export default {
   name: 'Plot',
+  props: ['externalId'],
   data () {
     return {
       id: Math.random().toString(36).substring(7)
@@ -25,6 +27,9 @@ export default {
     plotlyResize () {
       console.log('handling resize for:', this.id)
       Plotly.Plots.resize(this.id)
+    },
+    removePlot () {
+      this.$emit('plot-removed', this.externalId)
     }
   },
   mounted () {
