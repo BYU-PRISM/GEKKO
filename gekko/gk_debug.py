@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Mar  1 17:06:26 2018
 
-@author: scd
-"""
+import os
+import json
+
+from .properties import parameter_options, variable_options
+
+
+#%% Look for logic gotchas
 
 def gk_logic_tree(self):
     #%% Global options
@@ -70,3 +73,76 @@ def gk_logic_tree(self):
             if vp.MEAS is not None:
                 if vp.FSTATUS == 0:
                     print("Warning: MEAS not used when FSTATUS = 0")
+                    
+                    
+                    
+
+#%% Compare GEKKO and APM
+
+
+#define comparison of options between APM and GEKKO
+#to avoid false positive when floats are off by a little
+def like(self,one,two):
+    if isinstance(one,str): #string are compared directly
+        return one==two
+    else:
+        return (one+self.options.OTOL >= two and one-self.options.OTOL <= two)
+
+def verify_input_options(self):
+    ## Load data
+    f = open(os.path.join(self.path,'options.json'))
+    data = json.load(f)
+    f.close()
+    ## Global Options
+    for o in self.options._input_option_list: #for each global input option
+        if o == 'CSV_READ' and self.csv_status == 'none':
+            continue
+        if self.options.__dict__[o] != data['APM'][o]: #compare APM to GK
+            print(str(o)+" was not written correctly") #give message if they don't match
+    ## Local Options
+    for vp in self.parameters:
+        if vp.type != None: #(FV/MV/SV/CV) not Param or Var
+            for o in parameter_options[vp.type]['inputs']:
+                if o not in ['LB','UB']: #TODO: for o in data[vp.name] to avoid this check
+                    if vp.__dict__[o] is not None and not self.like(vp.__dict__[o], data[vp.name][o]):
+                        print(str(vp)+'.'+str(o)+" was not written correctly") #give message if they don't match
+
+    for vp in self.variables:
+        if vp.type != None: #(FV/MV/SV/CV) not Param or Var
+            for o in variable_options[vp.type]['inputs']:
+                if o not in ['LB','UB']:
+                    if vp.__dict__[o] is not None and not self.like(vp.__dict__[o], data[vp.name][o]):
+                        print(str(vp)+'.'+str(o)+" was not written correctly") #give message if they don't match
+                        
+#%% Name Check
+# Default GEKKO names are unique and valid by nature of their assignment. 
+# User-defined names may not be unique or valid. Since the use must deliberately set names,
+# this function exists of them to check but is not run by default.
+
+def name_check(self):
+    all_names = set() #build the set of all variables names to check for uniqueness
+    #illegal names (reserved for functions)
+    illegal_3 = set(['abs','exp','log','sin','cos','tan','erf'])
+    illegal_4 = set(['sqrt','asin','acos','atan'])
+    
+    for x in self._constants+self.parameters+self.variables+self.intermediates+self._objects:
+        #unique names
+        if x.name not in all_names:
+            all_names.add(x.name)
+        else:
+            raise NameError(x.name+" is used multiple times")
+        #reserved functions
+        if len(x.name) >=3:
+            if x.name[0:3] in illegal_3: 
+                raise NameError(x.name+" is an illegal name (reserved function name)")
+            if len(x.name) >=4:
+                if x.name[0:4] in illegal_4:
+                    raise NameError(x.name+" is an illegal name (reserved function name)")
+        
+        #special names
+        if len(x.name) >=3:
+            if x.name[0:3] == 'obj':
+                print("Warning: "+x.name+" is added to the objective function (name starts with 'obj')")
+            if x.name[0:3] == 'slk':
+                print("Warning: "+x.name+" is a slack variable (name starts with 'slk') -- lower bound of zero")
+       
