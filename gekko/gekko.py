@@ -475,10 +475,6 @@ class GEKKO(object):
                     return byte
 
             try:
-                results = byte2str(get_file(self.server,self.model_name,'results.csv'))
-                f = open(os.path.join(self.path,'results.csv'), 'w')
-                f.write(str(results))
-                f.close()
                 results = byte2str(get_file(self.server,self.model_name,'results.json'))
                 f = open(os.path.join(self.path,'results.json'), 'w')
                 f.write(str(results))
@@ -487,10 +483,14 @@ class GEKKO(object):
                 f = open(os.path.join(self.path,'options.json'), 'w')
                 f.write(str(options))
                 f.close()
-                if self.options.CSV_WRITE == 2:
-                    results_all = byte2str(get_file(self.server,self.model_name,'results_all.csv'))
-                    with open(os.path.join(self.path,'results_all.csv'), 'w') as f:
-                        f.write(str(results_all))
+                if self.options.CSV_WRITE >= 1:
+                    results = byte2str(get_file(self.server,self.model_name,'results.csv'))
+                    with open(os.path.join(self.path,'results.csv'), 'w') as f:
+                        f.write(str(results))
+                    if self.options.CSV_WRITE >1:
+                        results_all = byte2str(get_file(self.server,self.model_name,'results_all.csv'))
+                        with open(os.path.join(self.path,'results_all.csv'), 'w') as f:
+                            f.write(str(results_all))
             except:
                 raise ImportError('Results files not found. APM did not find a solution or the server is unreachable.')
 
@@ -1102,5 +1102,5 @@ class GEKKO(object):
         return GK_Operators('atan('+str(other) + ')')
 
     def GUI(self, **kwargs):
-        gui = GK_GUI(**kwargs)
+        gui = GK_GUI(self.path,**kwargs)
         gui.display()
