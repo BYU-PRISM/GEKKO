@@ -333,9 +333,9 @@ class GEKKO(object):
     """
 
     #%% Import functions from other scripts
-    from .gk_logic_tree import gk_option_check
+    from .gk_debug import gk_logic_tree
     #%% Get a solution
-    def solve(self,remote=True,disp=True,verify_input=False):
+    def solve(self,remote=True,disp=True,debug=False):
         """Solve the optimization problem.
 
         This function has these substeps:
@@ -512,13 +512,13 @@ class GEKKO(object):
 
         if timing == True:
             t = time.time()
-        if verify_input == True:
+        if debug == True:
             self.verify_input_options()
+            self.gk_logic_tree()
         if timing == True:
             print('compare options', time.time() - t)
 
 
-        self.gk_option_check()
         
 
         if os.path.isfile(os.path.join(os.path.dirname(os.path.realpath(__file__)),'infeasibilities.txt')):
@@ -743,6 +743,8 @@ class GEKKO(object):
         ## SS data
         else:
             first_array = False
+            if self.time is not None:
+                print("Warning: model time only used for dynamic modes (IMODE>3)")
 
         #check all parameters and arrays
         for vp in self.variables+self.parameters:
@@ -789,7 +791,9 @@ class GEKKO(object):
                     if vp.MEAS != None:
                         #vp.VALUE = np.array(vp.VALUE).astype(object)
                         if self.options.IMODE in [5,8]:
-                            t[-1] = 'measurement'
+                            #measurements in estimation go at the end of the horizon
+                            #FDELAY shifts the location of the measurement
+                            t[-1-vp.FDELAY] = 'measurement'
                         else:
                             t[1] = "measurement"
 
