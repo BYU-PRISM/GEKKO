@@ -4,100 +4,9 @@ import numpy as np
 import os
 
 from .properties import global_options, parameter_options, variable_options
+from .gk_operators import GK_Operators
 
 #%% Write files
-
-def jsonify(self,data): #This function was mostly copied from SO
-    if type(data).__module__=='numpy': # if value is numpy.*: > to python list
-        json_data = data.tolist()
-    elif isinstance(data, dict): # for nested lists
-        json_data = dict()
-        for key, value in data.iteritems():
-            if isinstance(value, list): # for lists
-                value = [ self.jsonify(item) if isinstance(item, dict) else item for item in value ]
-            if isinstance(value, dict): # for nested lists
-                value = self.jsonify(value)
-            if isinstance(key, int): # if key is integer: > to string
-                key = str(key)
-            if type(value).__module__=='numpy': # if value is numpy.*: > to python list
-                value = value.tolist()
-            json_data[key] = value
-    else:
-        json_data = data
-    return json_data
-
-
-def to_JSON(self): #JSON input to APM not currently supported -- this function isn't tested
-    """
-    include in JSON:
-    global options
-    variables (const,param,inter,var)
-        name
-        value
-        type
-        option_list
-    """
-    json_data = dict()
-    #global options
-    o_dict = dict()
-    for o in global_options['inputs']+global_options['inout']:
-        o_dict[o] = getattr(self.options,o)
-    json_data['global options'] = o_dict
-
-    if self.time is not None:
-        json_data['time'] = self.jsonify(self.time)
-    #Constants can't and won't change so there's no reason to pass them in the JSON
-    #constant values must be given in the model file. Changing constant values requires recompiling the model.
-#        #constants
-#        if self._constants:
-#            const_dict = dict()
-#            for const in self._constants:
-#                const_dict['value'] = self.jsonify(const.value)
-#            const_dict[const.name] = const_dict
-
-    if self.parameters:
-        p_dict = dict()
-        for parameter in self.parameters:
-            o_dict = dict()
-            for o in parameter_options[parameter.type]['inputs']+parameter_options[parameter.type]['inout']:
-                if o == 'VALUE':
-                    o_dict['VALUE'] = self.jsonify(parameter.value)
-                else:
-                    o_dict[o] = getattr(parameter,o)
-            o_dict['type'] = parameter.type
-            p_dict[parameter.name] = o_dict
-        json_data['parameters'] = p_dict
-
-    if self.variables:
-        p_dict = dict()
-        for parameter in self.variables:
-            o_dict = dict()
-            for o in variable_options[parameter.type]['inputs']+variable_options[parameter.type]['inout']:
-                if o == 'VALUE':
-                    o_dict['VALUE'] = self.jsonify(parameter.value)
-                else:
-                    o_dict[o] = getattr(parameter,o)
-            o_dict['type'] = parameter.type
-            p_dict[parameter.name] = o_dict
-        json_data['variables'] = p_dict
-
-    """
-    if self.intermediates:
-        temp_dict = dict()
-        for intermediate in self.intermediates:
-            temp_dict['name'] = {'value':self.jsonify(intermediate.value)}
-        json_data['intermediates'] = temp_dict
-    """
-    f = open(os.path.join(self.path,'jsontest.json'), 'w')
-    #f.write(json.dumps(self, default=lambda o: _try(o), sort_keys=True, indent=2, separators=(',',':')).replace('\n', ''))
-    json.dump(json_data,f, indent=2,separators=(',', ':'))
-    f.close()
-    #return json.dumps(self, default=lambda o: _try(o), sort_keys=True, indent=0, separators=(',',':')).replace('\n', '')
-    #load JSON to dictionary:
-    #with open(os.path.join(self.path,'jsontest.json')) as json_file:
-    #   data = json.load(json_file)
-
-
 
 def build_model(self):
     ''' Write model to apm file.
@@ -239,6 +148,13 @@ def write_csv(self):
                     raise Exception('This steady-state IMODE only allows scalar values.')
 
             if vp.value.change is True: #Save the entire array of values
+                #skip variable if its value is a string (ie symbolic initialization)
+                if isinstance(vp.VALUE.value,GK_Operators):
+                    #reset change indicator
+                    vp.value.change = False
+                    #do nothing else, go to next variable
+                    continue
+                
                 #discretize all values to arrays
                 if not isinstance(vp.VALUE.value, (list,np.ndarray)):
                     vp.VALUE = np.ones(length)*vp.VALUE
@@ -383,4 +299,97 @@ def write_solver_options(self,remote):
     opt_file += 'End File\n'
     return opt_file
 
+
+#%% Not currently used
+
+
+def jsonify(self,data): #This function was mostly copied from SO
+    if type(data).__module__=='numpy': # if value is numpy.*: > to python list
+        json_data = data.tolist()
+    elif isinstance(data, dict): # for nested lists
+        json_data = dict()
+        for key, value in data.iteritems():
+            if isinstance(value, list): # for lists
+                value = [ self.jsonify(item) if isinstance(item, dict) else item for item in value ]
+            if isinstance(value, dict): # for nested lists
+                value = self.jsonify(value)
+            if isinstance(key, int): # if key is integer: > to string
+                key = str(key)
+            if type(value).__module__=='numpy': # if value is numpy.*: > to python list
+                value = value.tolist()
+            json_data[key] = value
+    else:
+        json_data = data
+    return json_data
+
+
+def to_JSON(self): #JSON input to APM not currently supported -- this function isn't tested
+    """
+    include in JSON:
+    global options
+    variables (const,param,inter,var)
+        name
+        value
+        type
+        option_list
+    """
+    json_data = dict()
+    #global options
+    o_dict = dict()
+    for o in global_options['inputs']+global_options['inout']:
+        o_dict[o] = getattr(self.options,o)
+    json_data['global options'] = o_dict
+
+    if self.time is not None:
+        json_data['time'] = self.jsonify(self.time)
+    #Constants can't and won't change so there's no reason to pass them in the JSON
+    #constant values must be given in the model file. Changing constant values requires recompiling the model.
+#        #constants
+#        if self._constants:
+#            const_dict = dict()
+#            for const in self._constants:
+#                const_dict['value'] = self.jsonify(const.value)
+#            const_dict[const.name] = const_dict
+
+    if self.parameters:
+        p_dict = dict()
+        for parameter in self.parameters:
+            o_dict = dict()
+            for o in parameter_options[parameter.type]['inputs']+parameter_options[parameter.type]['inout']:
+                if o == 'VALUE':
+                    o_dict['VALUE'] = self.jsonify(parameter.value)
+                else:
+                    o_dict[o] = getattr(parameter,o)
+            o_dict['type'] = parameter.type
+            p_dict[parameter.name] = o_dict
+        json_data['parameters'] = p_dict
+
+    if self.variables:
+        p_dict = dict()
+        for parameter in self.variables:
+            o_dict = dict()
+            for o in variable_options[parameter.type]['inputs']+variable_options[parameter.type]['inout']:
+                if o == 'VALUE':
+                    o_dict['VALUE'] = self.jsonify(parameter.value)
+                else:
+                    o_dict[o] = getattr(parameter,o)
+            o_dict['type'] = parameter.type
+            p_dict[parameter.name] = o_dict
+        json_data['variables'] = p_dict
+
+    """
+    if self.intermediates:
+        temp_dict = dict()
+        for intermediate in self.intermediates:
+            temp_dict['name'] = {'value':self.jsonify(intermediate.value)}
+        json_data['intermediates'] = temp_dict
+    """
+    f = open(os.path.join(self.path,'jsontest.json'), 'w')
+    #f.write(json.dumps(self, default=lambda o: _try(o), sort_keys=True, indent=2, separators=(',',':')).replace('\n', ''))
+    json.dump(json_data,f, indent=2,separators=(',', ':'))
+    f.close()
+    #return json.dumps(self, default=lambda o: _try(o), sort_keys=True, indent=0, separators=(',',':')).replace('\n', '')
+    #load JSON to dictionary:
+    #with open(os.path.join(self.path,'jsontest.json')) as json_file:
+    #   data = json.load(json_file)
 
