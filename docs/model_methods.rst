@@ -67,28 +67,30 @@ Model Building
 	Create an n-dimensional array (as defined in tuple input `dimension`) of GEKKO variables of type `type`.
 
 
-.. py:classmethod:: m.solve(remote=True,disp=True,verify_input=False)
+.. py:classmethod:: m.solve(remote=True,disp=True,debug=False)
 
 
 	Solve the optimization problem.
 	
-	If `remote` is `True`, the problem is sent to `self.server` to be solved. If `False`, GEKKO looks for local binaries of APMonitor.
-	
-	If disp is `True`, APM and solve output are printed.
-	
-	If `verify_input` is `True`, user-defined and default input options are compared against options used by APM. This is useful in debugging strange results.
-
 	This function has these substeps:
 
-	* Validates the model and write .apm file (if .apm not supplied)
+	* Validates the model and write .apm file 
 
-	* Validate and write .csv file (if none provided)
+	* Validate and write .csv file 
 
 	* Write options to overrides.dbs
 
 	* Solve the problem using the apm.exe commandline interface.
 
 	* Load results into python variables.
+
+
+	If `remote` is `True`, the problem is sent to `self.server` to be solved. If `False`, GEKKO looks for local binaries of APMonitor.
+	
+	If disp is `True`, APM and solve output are printed.
+	
+	If `debug` is `True`, variable names are checked for problems, tuning parameters are checked for common errors, and user-defined input options are compared against options used by APM. This is useful in debugging strange results.
+
 
 
 .. py:classmethod:: m.Connection(var1,var2,pos1=None,pos2=None,node1='end',node2='end')
@@ -103,7 +105,7 @@ Model Building
     Once the variable is connected to another, the variable is only listed as an alias.
     Any other references to the connected value are referred to the principal variable (`var1`).
     The alias variable (`var2`) can be referenced in other parts of the model,
-    but will not appear in the solution files. ::
+    but will not appear in the solution files. 
 
 
 .. py:classmethod:: m.fix(var,pos,val)
@@ -119,26 +121,28 @@ Model Building
 		m.solver_options = ['max_iter 100','max_cpu_time 100']
 		
 		
-.. py.classmethod:: m.cspline(x,y,x_data,y_data,bound_x=False):
+.. py:classmethod:: m.cspline(x,y,x_data,y_data,bound_x=False):
         
-		Generate a 1d cubic spline with continuous first and seconds derivatives
-        from arrays of x and y data which link to GEKKO variables x and y with a 
-        constraint that y=f(x).
-        
-        Inputs: 
-		
-		x: GEKKO variable 
-		
-		y: GEKKO variable
-		
-		x_data: array of x data
-		
-        y_data: array of y data that matches x_data
+	Generate a 1d cubic spline with continuous first and seconds derivatives
+    from arrays of x and y data which link to GEKKO variables x and y with a 
+    constraint that y=f(x).
 
-		bound_x: boolean to state that x should be bounded at the upper and lower bounds of x_data to avoid
-        extrapolation error of the cspline. 
-		
-		
+    This function is currently only available through remote solves to the default server.
+    
+    Inputs: 
+	
+	x: GEKKO variable 
+	
+	y: GEKKO variable
+	
+	x_data: array of x data
+	
+    y_data: array of y data that matches x_data
+
+	bound_x: boolean to state that x should be bounded at the upper and lower bounds of x_data to avoid
+    extrapolation error of the cspline. 
+
+
 .. _valid_eq_funcs:
 
 Equation Functions
@@ -191,7 +195,7 @@ Pre-Defined Models
 
 .. py:function:: m,x,y,u = SS(A,B,C,[D])
 
-For State Space models, input SS matricies A,B,C, and optionally D. Returns a GEKKO model `m`, array of states `x`, array of outputs `y` and array of inputs `u`.
+For State Space models, input SS matricies A,B,C, and optionally D. Returns a GEKKO model `m`, array of states `x`, array of outputs `y` and array of inputs `u`. A,B,C and D must be 2-dimensional matricies of the appropriate size.
 
 Available by::
 
@@ -269,7 +273,7 @@ These are GEKKO model attributes used internally. They are not intended for exte
 
     A python list of objective.
 
-.. py.attribute::   _connections
+.. py:attribute::   _connections
 
     A python list of connections
 

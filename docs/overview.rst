@@ -14,31 +14,31 @@ GEKKO is a high-level abstraction of mathematical optimization problems. Values 
 
 The APMonitor executable on the back-end compiles a model to byte-code and performs model reduction based on analysis of the sparsity structure (incidence of variables in equations or objective function) of the model. For differential and algebraic equation systems, orthogonal collocation on finite elements is used to transcribe the problem into a purely algebraic system of equations. APMonitor has several modes of operation, adjustable with the imode parameter. The core of all modes is the nonlinear model.  Each mode interacts with the nonlinear model to receive or provide information.  The 9 modes of operation are:
 
-Steady-state simulation (SS)
-Model parameter update (MPU)
-Real-time optimization (RTO)
-Dynamic simulation (SIM)
-Moving horizon estimation (EST)
-Nonlinear control / dynamic optimization (CTL)
-Sequential dynamic simulation (SQS)
-Sequential dynamic estimation (SQE)
-Sequential dynamic optimization (SQO)
+1. Steady-state simulation (SS)
+2. Model parameter update (MPU)
+3. Real-time optimization (RTO)
+4. Dynamic simulation (SIM)
+5. Moving horizon estimation (EST)
+6. Nonlinear control / dynamic optimization (CTL)
+7. Sequential dynamic simulation (SQS)
+8. Sequential dynamic estimation (SQE)
+9. Sequential dynamic optimization (SQO)
 
 Modes 1-3 are steady state modes with all derivatives set equal to zero.  Modes 4-6 are dynamic modes where the differential equations define how the variables change with time.  Modes 7-9 are the same as 4-6 except the solution is performed with a sequential versus a simultaneous approach. Each mode for simulation, estimation, and optimization has a steady state and dynamic option.
 
 APMonitor provides the following to a Nonlinear Programming Solver (APOPT, BPOPT, IPOPT, MINOS, SNOPT) in sparse form:
 
-Variables with default values and constraints
-Objective function
-Equations
-Evaluation of equation residuals
-Sparsity structure
-Gradients (1st derivatives)
-Gradient of the equations
-Gradient of the objective function
-Hessian of the Lagrangian (2nd derivatives)
-2nd Derivative of the equations
-2nd Derivative of the objective function
+    * Variables with default values and constraints
+    * Objective function
+    * Equations
+    * Evaluation of equation residuals
+    * Sparsity structure
+    * Gradients (1st derivatives)
+    * Gradient of the equations
+    * Gradient of the objective function
+    * Hessian of the Lagrangian (2nd derivatives)
+    * 2nd Derivative of the equations
+    * 2nd Derivative of the objective function
 
 Once the solution is complete, APMonitor writes the results in results.csv that is loaded back into the python variables by GEKKO
 

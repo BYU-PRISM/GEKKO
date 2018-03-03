@@ -120,11 +120,16 @@ CSV_READ
 
 Type: Integer, Input
 
-Default Value: 1
+Default Value: 2
 
 Description: CSV read: 0=Off, 1=Batch, 2=Sequential
 
-Explanation: CSV_READ indicates whether a comma separated value data file should be used by the application as part of initializing a problem and loading data. The name of the CSV file is the same as the name of the model file. GEKKO writes the model time array and any new user-defined values of GEKKO variables to the csv file. The csv file is the primary method of passing values to APMonitor.
+Explanation: CSV_READ indicates whether a comma separated value data file should be used by the application as part of initializing a problem and loading data. The name of the CSV file is the same as the name of the model file. 
+
+Values assigned to GEKKO variables and the model time are primarily communicated to APMonitor through the csv file. If CSV_READ=0, only scalar values of parameters and variables are read through the .apm file. If CSV_READ=1, all parameter values are also read in. If CSV_READ=2, all parameter and (initial) variable values are loaded.
+
+Only values defined by the user since model initialization or the last solve are written to the csv. All other values are loaded back from the APM internal .t0 database files and timeshifted according to the TIME_SHIFT option.
+If a measurement (.MEAS) is defined, the associated variable value is not written to the csv. Also, if a variable value is fixed with the fix() command, the fixed value is written in the csv file.
 
 
 CSV_WRITE

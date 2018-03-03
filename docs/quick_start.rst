@@ -38,8 +38,9 @@ These attributes are discussed in :doc:`MV_options` and :doc:`CV_options`.
 
 All of these variable types have the optional argument 'name'. The name is used
 on the back-end to write the model file and is only useful if the user intends to
-manually use the model file later. If a name is not provided, one is automatically assigned
-a letter and number (c#/p#/v#/i#).
+manually use the model file later. Names are case-insensitive, must begin with a letter,
+and can only contain alphanumeric characters and underscores. If a name is not provided, 
+one is automatically assigned a unique letter/number (c#/p#/v#/i#).
 
 
 Constants
@@ -60,7 +61,7 @@ Parameters are capable of becoming MVs and FVs. Since GEKKO defines
 MVs and FVs directly, parameters just serve as constant values. However, Parameters
 (unlike Constants) can be (and usually are) arrays.::
 
-	p = m.Param([name], [value])
+	p = m.Param([value], [name])
 
 * The value can be a python scalar, python list of numpy array. If the value is a scalar, it will be used throughout the horizon.
 
@@ -70,7 +71,7 @@ Variable
 
 Calculated by solver to meet constraints (Equations)::
 
-	v = m.Var([name], [value], [lb], [ub]):
+	v = m.Var([value], [lb], [ub], [name]):
 
 
 * 'lb' and 'ub' provide lower and upper variable bounds, respectively, to the solver.
@@ -99,7 +100,7 @@ Fixed Variable
 Fixed Variables (FV) inherit Parameters, but potentially add a degree of freedom and are always fixed
 throughout the horizon (i.e. they are not discretized in dynamic modes).::
 
-	f = m.FV([name], [value], [lb], [ub])
+	f = m.FV([value], [lb], [ub], [name])
 
 * 'lb' and 'ub' provide lower and upper variable bounds, respectively, to the solver.
 
@@ -109,7 +110,7 @@ Manipulated Variable
 
 Manipulated Variables (MV) inherit FVs but are discretized throughout the horizon and have time-dependent attributes::
 
-	m = m.MV([name], [value], [lb], [ub])
+	m = m.MV([value], [lb], [ub], [name])
 
 * 'lb' and 'ub' provide lower and upper variable bounds, respectively, to the solver.
 
@@ -119,7 +120,7 @@ State Variable
 
 State Variables (SV) inherit Variables with just a couple extra attributes::
 
-    s =  m.SV([name], [value], [lb], [ub])
+    s =  m.SV([value], [lb], [ub], [name])
 
 
 Controlled Variable
@@ -129,7 +130,7 @@ Controlled Variables (CV) inherit SVs but potentially add an objective (such as
 reaching a setpoint in control applications or matching model and measured values
 in estimation)::
 
-    c = m.CV([name], [value], [lb], [ub])
+    c = m.CV([value], [lb], [ub], [name])
 
 
 
