@@ -1,6 +1,6 @@
 <template>
   <div>
-    <button type="button" class="btn btn-danger" @click="removePlot">X</button>
+    <button v-if="!onlyPlot" type="button" class="btn btn-danger" @click="removePlot">X</button>
     <div :id="id"></div>
   </div>
 </template>
@@ -14,7 +14,7 @@ window.onresize = () => {
 
 export default {
   name: 'Plot',
-  props: ['externalId'],
+  props: ['externalId', 'onlyPlot'],
   data () {
     return {
       id: Math.random().toString(36).substring(7)

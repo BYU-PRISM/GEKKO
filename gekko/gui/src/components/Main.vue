@@ -7,7 +7,7 @@
       <div class="col-sm-9">
         <div class="plots-div">
           <div v-for="value in plotArray" :key="value">
-            <plot :externalId="value" v-on:plot-removed="removePlot"/>
+            <plot :externalId="value" v-on:plot-removed="removePlot" :onlyPlot="plotArray.length === 1 ? true : false"/>
           </div>
         </div>
         <button type="button" class="btn btn-primary" @click="addPlot" style="margin-top:10px;">Add Plot</button>
