@@ -146,6 +146,11 @@ def write_csv(self):
                 length = np.size(np.array(vp.value).flatten())
                 if self.options.IMODE in (1,3) and length > 1:
                     raise Exception('This steady-state IMODE only allows scalar values.')
+                elif self.options.IMODE == 2 and length == 1:
+                    #in MPU, the first vp checked could be a scalar value (FV, param, var initial guess)
+                    #but the CV is likely longer so skip scalar values (they will be set in the APM file)
+                    continue
+                    
 
             if vp.value.change is True: #Save the entire array of values
                 #skip variable if its value is a string (ie symbolic initialization)
