@@ -1,16 +1,27 @@
 <template>
   <div class="mainDiv">
-    <div class="row">
+    <div
+      class="row"
+      style="margin-right:0px;">
       <div class="col-sm-3">
         <tabs/>
       </div>
       <div class="col-sm-9">
         <div class="plots-div">
-          <div v-for="value in plotArray" :key="value">
-            <plot :externalId="value" v-on:plot-removed="removePlot" :onlyPlot="plotArray.length === 1 ? true : false"/>
+          <div
+            v-for="value in plotArray"
+            :key="value">
+            <plot
+              :external-id="value"
+              @:plot-removed="removePlot"
+              :num-plots="plotArray.length"/>
           </div>
         </div>
-        <button type="button" class="btn btn-primary" @click="addPlot" style="margin-top:10px;">Add Plot</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          @click="addPlot"
+          style="margin-top:10px;">Add Plot</button>
       </div>
     </div>
   </div>
@@ -25,7 +36,6 @@ export default {
   components: {'plot': Plot, 'tabs': Tabs},
   data () {
     return {
-      activeTab: 'Model',
       plotArray: [1],
       idCounter: 2
     }
@@ -48,6 +58,7 @@ export default {
   overflow-y: auto;
   border: 1px blue;
   border-style: solid;
+  padding-right: 15px;
   border-radius: 10px;
 }
 </style>

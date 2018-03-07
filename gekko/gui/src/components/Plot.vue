@@ -1,7 +1,11 @@
 <template>
-  <div>
-    <button v-if="!onlyPlot" type="button" class="btn btn-danger" @click="removePlot">X</button>
-    <div :id="id"></div>
+  <div class="plot-div">
+    <button
+      v-if="numPlots > 1"
+      type="button"
+      class="btn btn-sm btn-danger plot-close"
+      @click="removePlot">X</button>
+    <div :id="id"/>
   </div>
 </template>
 
@@ -10,14 +14,30 @@ import Plotly from 'plotly.js/dist/plotly.min'
 
 // Resizes the plots whenever the size of the window changes
 window.onresize = () => {
+  this.plotlyResize // eslint-disable-line
 }
 
 export default {
   name: 'Plot',
-  props: ['externalId', 'onlyPlot'],
+  props: {
+    externalId: {
+      type: Number,
+      default: 1
+    },
+    numPlots: {
+      type: Number,
+      default: 1
+    }
+  },
   data () {
     return {
       id: Math.random().toString(36).substring(7)
+    }
+  },
+  watch: {
+    numPlots: () => {
+      console.log('numPlots changed, resizing plot')
+      this.plotlyResize // eslint-disable-line
     }
   },
   beforeDestroy: function () {
@@ -59,7 +79,11 @@ export default {
 </script>
 
 <style lang="css">
-.error{
-    color: red;
+.plot-div {
+  position: relative;
+}
+.plot-close {
+  position: absolute;
+  z-index: 1;
 }
 </style>

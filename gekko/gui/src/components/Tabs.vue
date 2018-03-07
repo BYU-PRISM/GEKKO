@@ -2,14 +2,16 @@
   <div>
     <ul class="nav nav-tabs">
       <li class="nav-item tab">
-        <a class="nav-link "
+        <a
+          class="nav-link "
           @click="activeTab = 'Model'"
           :class="{ active: activeTab == 'Model'}">Model</a>
       </li>
       <li class="nav-item tab">
-        <a class="nav-link"
-        @click="activeTab = 'Variables'"
-        :class="{ active: activeTab == 'Variables'}">Variables</a>
+        <a
+          class="nav-link"
+          @click="activeTab = 'Variables'"
+          :class="{ active: activeTab == 'Variables'}">Variables</a>
       </li>
     </ul>
     <div class="tab-div">
@@ -23,18 +25,25 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(value, prop) in modelData" :key="prop.id">
-                <td>{{prop}}</td>
-                <td>{{value}}</td>
+              <tr
+                v-for="(value, prop) in modelData"
+                :key="prop.id">
+                <td>{{ prop }}</td>
+                <td>{{ value }}</td>
               </tr>
             </tbody>
           </table>
         </div>
       </template>
       <template v-if="activeTab === 'Variables'">
-        <div v-if="varsData" class="tab-table">
+        <div
+          v-if="varsData"
+          class="tab-table">
           <div style="overflow-y:auto; max-height:inherit">
-            <ul v-for="(v, key) in varsData" :key="v.id" class="tab-table-item">
+            <ul
+              v-for="(v, key) in varsData"
+              :key="v.id"
+              class="tab-table-item">
               <a>
                 {{ key }}
               </a>
@@ -47,9 +56,11 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(value, prop) in v" :key="prop.id">
-                      <td>{{prop}}</td>
-                      <td>{{value}}</td>
+                    <tr
+                      v-for="(value, prop) in v"
+                      :key="prop.id">
+                      <td>{{ prop }}</td>
+                      <td>{{ value }}</td>
                     </tr>
                   </tbody>
                 </table>
