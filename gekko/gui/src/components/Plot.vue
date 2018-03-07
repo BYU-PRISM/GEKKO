@@ -43,15 +43,6 @@ export default {
   beforeDestroy: function () {
     window.removeEventListener('resize', this.plotlyResize)
   },
-  methods: {
-    plotlyResize () {
-      console.log('handling resize for:', this.id)
-      Plotly.Plots.resize(this.id)
-    },
-    removePlot () {
-      this.$emit('plot-removed', this.externalId)
-    }
-  },
   mounted () {
     window.addEventListener('resize', this.plotlyResize)
     this.$http.headers.common['Access-Control-Allow-Origin'] = '*'
@@ -74,7 +65,17 @@ export default {
         }
         Plotly.newPlot(this.id, plotArray)
       })
+  },
+  methods: {
+    plotlyResize () {
+      console.log('handling resize for:', this.id)
+      Plotly.Plots.resize(this.id)
+    },
+    removePlot () {
+      this.$emit('plot-removed', this.externalId)
+    }
   }
+
 }
 </script>
 
