@@ -33,7 +33,7 @@ class GK_Operators:
         elif name.lower() in self.__dict__:
             return self.__dict__[name.lower()]
         else: 
-            raise AttributeError
+            raise AttributeError(name)
     #%%Operator overloading for building functions
     #comparisons
     def __lt__(self,other): #less than
@@ -144,6 +144,11 @@ class GK_Value(list):
     
     def __array__(self):
         return np.array(self.value)
+
+    def __iter__(self):
+        for v in self.value:
+            yield v
+        
             
         #%%Operator overloading for building functions
     #comparisons
