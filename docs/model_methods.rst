@@ -62,21 +62,22 @@ Model Building
 
     Sets the time array indicating the discrete elements of time discretization for dynamic modes (`IMODE > 3`). Accepts a python list of a numpy array.
 
-.. py:classmethod::    a = m.Array(type,dimension)
+.. py:classmethod::    a = m.Array(type,dimension,**args)
 
 	Create an n-dimensional array (as defined in tuple input `dimension`) of GEKKO variables of type `type`.
+    The optional keyword arguments (`**args`) are applied to each element of the array.
 
 
 .. py:classmethod:: m.solve(remote=True,disp=True,debug=False)
 
 
 	Solve the optimization problem.
-	
+
 	This function has these substeps:
 
-	* Validates the model and write .apm file 
+	* Validates the model and write .apm file
 
-	* Validate and write .csv file 
+	* Validate and write .csv file
 
 	* Write options to overrides.dbs
 
@@ -86,9 +87,9 @@ Model Building
 
 
 	If `remote` is `True`, the problem is sent to `self.server` to be solved. If `False`, GEKKO looks for local binaries of APMonitor.
-	
+
 	If disp is `True`, APM and solve output are printed.
-	
+
 	If `debug` is `True`, variable names are checked for problems, tuning parameters are checked for common errors, and user-defined input options are compared against options used by APM. This is useful in debugging strange results.
 
 
@@ -105,42 +106,42 @@ Model Building
     Once the variable is connected to another, the variable is only listed as an alias.
     Any other references to the connected value are referred to the principal variable (`var1`).
     The alias variable (`var2`) can be referenced in other parts of the model,
-    but will not appear in the solution files. 
+    but will not appear in the solution files.
 
 
 .. py:classmethod:: m.fix(var,pos,val)
 
     This function facilitates the `Connection` function when `var2` is a static value (`val`).
 
-	
+
 .. py:attribute::   m.solver_options
 
     A list of strings to pass to the solver; one string for each option name and value. For example::
-		
+
 		m = GEKKO()
 		m.solver_options = ['max_iter 100','max_cpu_time 100']
-		
-		
+
+
 .. py:classmethod:: m.cspline(x,y,x_data,y_data,bound_x=False):
-        
+
 	Generate a 1d cubic spline with continuous first and seconds derivatives
-    from arrays of x and y data which link to GEKKO variables x and y with a 
+    from arrays of x and y data which link to GEKKO variables x and y with a
     constraint that y=f(x).
 
     This function is currently only available through remote solves to the default server.
-    
-    Inputs: 
-	
-	x: GEKKO variable 
-	
+
+    Inputs:
+
+	x: GEKKO variable
+
 	y: GEKKO variable
-	
+
 	x_data: array of x data
-	
+
     y_data: array of y data that matches x_data
 
 	bound_x: boolean to state that x should be bounded at the upper and lower bounds of x_data to avoid
-    extrapolation error of the cspline. 
+    extrapolation error of the cspline.
 
 
 .. _valid_eq_funcs:
