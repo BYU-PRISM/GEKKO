@@ -12,15 +12,15 @@ from gekko import gekko
 
 
 # Steady State Initial Condition
-u_ss = 300.0
+u_ss = 280.0
 # Feed Temperature (K)
 Tf = 350
 # Feed Concentration (mol/m^3)
 Caf = 1
 
 # Steady State Initial Conditions for the States
-Ca_ss = 0.87725294608097
-T_ss = 324.475443431599
+Ca_ss = 1
+T_ss = 304
 x0 = np.empty(2)
 x0[0] = Ca_ss
 x0[1] = T_ss
@@ -29,30 +29,32 @@ x0[1] = T_ss
 
 m = gekko()
 
-m.time = [0,.1,.2,.3,.4,.5,.75,1,1.5]
+m.time = [0,.1,.2,.3,.4,.5,.75,1,1.5,2,3,4,5]
 
 # initial conditions
 Tc0 = 280
-T0 = 310
+T0 = 304
 Ca0 = 1.0
 
 tau = m.Const(value = 0.5)
-Kp = m.Const(value = 2.0)
+Kp = m.Const(value = 1)
 
 m.Tc = m.MV(value = Tc0,lb=250,ub=350)
-
 m.T = m.CV(value = T_ss,ub=400)
-#Ca = m.SV(value = Ca_ss)
 
 m.Equation(tau * m.T.dt() == -(m.T - T0) + Kp * (m.Tc - Tc0))
 
+#MV tuning
 m.Tc.STATUS = 1
+m.Tc.FSTATUS = 0
+m.Tc.DMAX = 10
+#CV tuning
 m.T.STATUS = 1
-m.T.SPHI = 366
-m.T.SPLO = 364
+m.T.FSTATUS = 1
+m.T.SP = 330
 m.T.TR_INIT = 2
-m.T.TAU = 10
-m.options.CV_TYPE = 1
+m.T.TAU = 3
+m.options.CV_TYPE = 2
 m.options.IMODE = 6
 
 
@@ -107,10 +109,10 @@ def cstr(x,t,u,Tf,Caf):
     return xdot
 
 
-
+#%% simulation loop
 
 # Time Interval (min)
-t = np.linspace(0,35,351)
+t = np.linspace(0,15,151)
 
 # Store results for plotting
 Ca = np.ones(len(t)) * Ca_ss
@@ -131,7 +133,7 @@ for i in range(len(t)-1):
     u[i+1] = m.Tc.NEWVAL
 
 
-# Plot the results
+#%% Plot the results
 plt.figure()
 plt.subplot(3,1,1)
 plt.plot(t,u,'b--',linewidth=3)
