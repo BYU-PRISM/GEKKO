@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Feb 12 13:48:26 2018
-
-@author: Brandon
-"""
 
 from gekko import GEKKO
 import numpy as np
@@ -17,7 +12,7 @@ nt = 101
 m.time = np.linspace(0,1.5,nt)
 
 #Parameters
-u = m.MV(value =0, lb = -1, ub = 1) 
+u = m.Var(value =0, lb = -1, ub = 1) 
 
 #Variables
 x1 = m.Var(value=0.5)
@@ -29,8 +24,23 @@ m.Equation(myObj.dt() == 0.5*x1**2)
 m.Equation(x1.dt() == u + x2)
 m.Equation(x2.dt() == -u)
 
-m.fix(x1,nt-1,0)
-m.fix(x2,nt-1,0)
+f = np.zeros(nt)
+f[-1] = 1
+final = m.Param(value=f)
+
+option = 4
+if option == 1: #most likely to cause DOF issues
+    m.Equation(final*x1 == 0)
+    m.Equation(final*x2 == 0) 
+elif option == 2:
+    m.Equation( (final*x1)**2 <= 0)
+    m.Equation( (final*x2)**2 <= 0)
+elif option == 3: #requires GEKKO version >= 0.0.3a2
+    m.fix(x1,nt-1,0)
+    m.fix(x2,nt-1,0)
+else: #penalty method ("soft constraint")
+    m.Obj(1000*(final*x1)**2)
+    m.Obj(1000*(final*x2)**2)
 
 m.Obj(myObj)
 
@@ -42,11 +52,12 @@ m.options.MV_TYPE = 1
 m.options.SOLVER = 3
 #################################################################
 #Set local options
-u.STATUS = 1
-u.DCOST = 0.0001
+if hasattr(u,'STATUS'):
+    u.STATUS = 1
+    u.DCOST = 0.0001
 ################################################################
 #Solve
-m.solve()
+m.solve(remote=False)
 
 
 #################################################################
