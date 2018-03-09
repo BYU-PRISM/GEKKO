@@ -35,11 +35,17 @@ IMODE
 Dynamics
 --------
 
-Non-Dynamic modes sets all differential terms to zero to calculate steady-state conditions.
+Ordinary differential equations are specified by differentiation a variable with the `dt()` method. For example, velocity `v` is the derivative of position `x`::
+
+    m.Equation( v == x.dt() )
+
+Discretization is determined by the model `time` attribute. For example, `m.time = [0,1,2,3]` will discretize all equations and variable at the 4 points specified. Only ordinary differential equations discretized by time are available internally. Other discretization must be performed manually.
 
 Simultaneous methods use orthogonal collocation on finite elements to implicitly solve the DAE system. Non-simulation simultaneous methods (modes 5 and 6) simultaneously optimize the objective and implicitly calculate the model/constraints. Simultaneous methods tend to perform better for problems with many degrees of freedom.
 
-Sequential methods separate the NLP optimizer and the DAE simulator.
+Sequential methods separate the NLP optimizer and the DAE simulator. Sequential methods will satisfy the differential equations, even when the solver is unable to find a feasible optimal solution.
+
+Non-Dynamic modes sets all differential terms to zero to calculate steady-state conditions.
 
 
 Simulation

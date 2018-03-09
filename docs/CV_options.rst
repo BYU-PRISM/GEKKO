@@ -65,7 +65,7 @@ This is a list of all available options for CVs and their default values:
 
     :ref:`tier` = 1
 
-    :ref:`tr_init` = 1
+    :ref:`tr_init` = 0
 
     :ref:`tr_open` = 1.0
 
@@ -86,8 +86,3 @@ This is a list of all available options for CVs and their default values:
     :ref:`wsphi` = 20.0
 
     :ref:`wsplo` = 20.0
-
-
-
-
-
