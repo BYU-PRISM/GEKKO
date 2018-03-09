@@ -56,7 +56,7 @@ export default {
               plotArray.push({
                 x: data.time,
                 y: data[key],
-                mode: 'lines+markers',
+                mode: 'lines',
                 type: 'scatter',
                 name: key
               })
