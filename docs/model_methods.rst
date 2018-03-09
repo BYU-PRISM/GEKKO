@@ -23,22 +23,22 @@ Model Building
 .. py:classmethod::    c =  m.Const(value, [name]):
 
 
-.. py:classmethod::	   p = m.Param([name], [value])
+.. py:classmethod::	   p = m.Param([value], [name])
 
 
-.. py:classmethod::	   v = m.Var([name], [value], [lb], [ub], [integer])
+.. py:classmethod::	   v = m.Var([value], [lb], [ub], [integer], [name])
 
 
-.. py:classmethod::    m = m.MV([name], [value], [lb], [ub], [integer])
+.. py:classmethod::    m = m.MV([value], [lb], [ub], [integer], [name])
 
 
-.. py:classmethod::	   f = m.FV([name], [value], [lb], [ub], [integer])
+.. py:classmethod::	   f = m.FV([value], [lb], [ub], [integer], [name])
 
 
-.. py:classmethod::    s =  m.SV([name], [value] [lb], [ub], [integer])
+.. py:classmethod::    s =  m.SV([value] [lb], [ub], [integer], [name])
 
 
-.. py:classmethod::    c = m.CV([name], [value] [lb], [ub], [integer])
+.. py:classmethod::    c = m.CV([value] [lb], [ub], [integer], [name])
 
 
 .. py:classmethod::    i = m.Intermediate(equation, [name])
@@ -61,6 +61,14 @@ Model Building
 .. py:attribute::   m.time
 
     Sets the time array indicating the discrete elements of time discretization for dynamic modes (`IMODE > 3`). Accepts a python list of a numpy array.
+
+.. py:classmethod:: dt()
+
+    Ordinary differential equations are specified by differentiation a variable with the `dt()` method. For example, velocity `v` is the derivative of position `x`::
+
+        m.Equation( v == x.dt() )
+
+    Discretization is determined by the model `time` attribute. For example, `m.time = [0,1,2,3]` will discretize all equations and variable at the 4 points specified. Only ordinary differential equations discretized by time are available internally. Other discretization must be performed manually.
 
 .. py:classmethod::    a = m.Array(type,dimension,**args)
 

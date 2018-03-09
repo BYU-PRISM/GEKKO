@@ -192,7 +192,7 @@ def write_csv(self):
             if hasattr(vp,'MEAS'):
                 if vp.MEAS != None:
                     #vp.VALUE = np.array(vp.VALUE).astype(object)
-                    if self.options.IMODE in [5,8]:
+                    if self.options.IMODE in [5,8] and vp.type=='CV':
                         #measurements in estimation go at the end of the horizon
                         #FDELAY shifts the location of the measurement
                         t[-1-vp.FDELAY] = 'measurement'

@@ -15,11 +15,11 @@ Examples
 
 .. math::
 
-   min 	& x_1 x_4 (x_1 + x_2 + x_3) + x_3 \\
-   s.t. & x_1 x_2 x_3 x_4 >= 25 \\
-   		& x_1^2 + x_2^2 + x_3^2 + x_4^2 = 40 \\
-	    & 1 <= x_1,x_2,x_3,x_4 <= 5 \\
-	    & x_0 = (1,5,5,1)
+   min 	& & x_1 x_4 (x_1 + x_2 + x_3) + x_3 \\
+   s.t. & & x_1 x_2 x_3 x_4 >= 25 \\
+   		& & x_1^2 + x_2^2 + x_3^2 + x_4^2 = 40 \\
+	    & & 1 <= x_1,x_2,x_3,x_4 <= 5 \\
+	    & & x_0 = (1,5,5,1)
 
 This example demonstrates how to solve the HS71 benchmark problem using GEKKO::
 

@@ -175,7 +175,7 @@ class GK_CV(GK_SV):
         self.BIAS = None
         self.COST = None
         self.CRITICAL = None
-        self.FDELAY = None
+        self.FDELAY = 0
         self.LSTVAL = None
         self.MEAS_GAP = None
         self.PSTATUS = None
