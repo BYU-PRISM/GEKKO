@@ -44,10 +44,12 @@
               v-for="(v, key) in varsData"
               :key="v.id"
               class="tab-table-item">
-              <a>
-                {{ key }}
+              <a @click="toggle(v, key)">
+                {{ key }} {{ v.ishidden ? '►' : '&#9660;' }}
               </a>
-              <div class="table-responsive">
+              <div
+                class="table-responsive"
+                v-if="!v.ishidden">
                 <table class="table table-striped table-sm">
                   <thead>
                     <tr>
@@ -59,8 +61,8 @@
                     <tr
                       v-for="(value, prop) in v"
                       :key="prop.id">
-                      <td>{{ prop }}</td>
-                      <td>{{ value }}</td>
+                      <td v-if="prop != 'ishidden'">{{ prop }}</td>
+                      <td v-if="prop != 'ishidden'">{{ value }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -99,6 +101,7 @@ export default {
         keys.forEach(key => {
           console.log(options)
           this.varsData[key] = options[key]
+          this.varsData[key].ishidden = true
           return null
         })
       }).then(() => {
@@ -113,8 +116,10 @@ export default {
   },
 
   methods: {
-    toggle: function () {
-      this.open = !this.open
+    toggle: function (v, prop) {
+      v.ishidden = !v.ishidden
+      // FIXME: Should try and find a softer way of getting the DOM to update
+      this.$forceUpdate()
     }
   }
 }
