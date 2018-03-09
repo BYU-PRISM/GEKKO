@@ -18,7 +18,7 @@ The following is a list of parameters that may be found in the DBS file for vari
 
 .. _aws:
 
-AWS 
+AWS
 ----
 Local Options |  Global Options
 
@@ -34,7 +34,7 @@ Explanation: Anti-Windup Status (AWS) is terminology borrowed from classical con
 
 .. _bias:
 
-BIAS 
+BIAS
 -------
 
 Type: Floating Point, Input/Output
@@ -47,13 +47,13 @@ BIAS is additive factor that incorporates the difference between the current mea
 	BIAS = MEAS - Model_u
 
 The BIAS is added to each point in the horizon and the controller objective function drives the biased model (Model_b) to the requested set point range.
-	
+
 	Model_b = Model_u + BIAS
 
 The value of BIAS can also be set to an external value by setting the option apm_option(s,a,'cv.BIAS',value) and setting FSTATUS to 0 (OFF).
 
 
-.. _cost: 
+.. _cost:
 
 COST
 -----------
@@ -90,7 +90,7 @@ Default Value: 0.00001
 
 Description: Delta cost penalty for MV movement
 
-Explanation: Adds a term to the objective function that gives a minor penalty for changing the MV. The weight of the penalty is adjusted with the input value. This is useful for systems where excessive movement to the MV causes damage to equipment or undesirable results. By assigning a weight that is small in comparison to the objective function value, optimal performance is achieved while changing the MV only 
+Explanation: Adds a term to the objective function that gives a minor penalty for changing the MV. The weight of the penalty is adjusted with the input value. This is useful for systems where excessive movement to the MV causes damage to equipment or undesirable results. By assigning a weight that is small in comparison to the objective function value, optimal performance is achieved while changing the MV only
 when necessary.
 
 .. _dmax:
@@ -430,7 +430,7 @@ Explanation: The time constant is a tuning parameter for the speed of response o
 .. _tier:
 
 TIER
--------  
+-------
 Type: Integer, Input
 
 Default Value: 1
@@ -461,7 +461,7 @@ TR_INIT
 
 Type: Integer, Input
 
-Default Value: 2
+Default Value: 0
 
 Description: Traj initialization (0=dead-band, 1=re-center with coldstart/out-of-service, 2=re-center always)
 
@@ -605,13 +605,3 @@ Default Value: 1.0
 Description: Objective function weight on lower set point for linear error model
 
 Explanation: A weighting factor to penalize deviation below the lower setpoint trajectory with final target SPLO. If there is no penalty to cross the lower setpoint trajectory, WSPLO can be set to zero.
-
-
-
-
-
-
-
-
-
-
