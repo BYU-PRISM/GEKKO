@@ -23,22 +23,22 @@ Model Building
 .. py:classmethod::    c =  m.Const(value, [name]):
 
 
-.. py:classmethod::	   p = m.Param([name], [value])
+.. py:classmethod::	   p = m.Param([value], [name])
 
 
-.. py:classmethod::	   v = m.Var([name], [value], [lb], [ub], [integer])
+.. py:classmethod::	   v = m.Var([value], [lb], [ub], [integer], [name])
 
 
-.. py:classmethod::    m = m.MV([name], [value], [lb], [ub], [integer])
+.. py:classmethod::    m = m.MV([value], [lb], [ub], [integer], [name])
 
 
-.. py:classmethod::	   f = m.FV([name], [value], [lb], [ub], [integer])
+.. py:classmethod::	   f = m.FV([value], [lb], [ub], [integer], [name])
 
 
-.. py:classmethod::    s =  m.SV([name], [value] [lb], [ub], [integer])
+.. py:classmethod::    s =  m.SV([value] [lb], [ub], [integer], [name])
 
 
-.. py:classmethod::    c = m.CV([name], [value] [lb], [ub], [integer])
+.. py:classmethod::    c = m.CV([value] [lb], [ub], [integer], [name])
 
 
 .. py:classmethod::    i = m.Intermediate(equation, [name])
