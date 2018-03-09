@@ -13,7 +13,7 @@
             :key="value">
             <plot
               :external-id="value"
-              @:plot-removed="removePlot"
+              @plot-removed="removePlot"
               :num-plots="plotArray.length"/>
           </div>
         </div>
