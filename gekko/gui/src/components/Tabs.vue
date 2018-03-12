@@ -68,7 +68,7 @@
                           v-for="(value, prop) in v"
                           :key="prop.id">
                           <td v-if="prop != 'ishidden'">{{ prop }}</td>
-                          <td v-if="prop != 'ishidden'">{{ (Number.isInteger(value) && value <= 100000 && value > -100000) ? value : value.toExponential(4) }}</td>
+                          <td v-if="prop != 'ishidden'">{{ (Number.isInteger(value) && value <= 100000 && value > -100000) ? value : value.toExponential(4) /*eslint-disable-line*/}}</td>
                         </tr>
                       </tbody>
                     </table>
