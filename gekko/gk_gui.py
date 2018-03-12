@@ -28,7 +28,7 @@ class GK_GUI:
         self.model = {}                    # APM model information
         self.info = {}
         self.vars_map = self.get_script_vars()  # map of model vars to script vars
-        print('vars_map:', end='')
+        print('vars_map:')
         pprint(self.vars_map)
         self.get_script_data()
 
@@ -107,6 +107,10 @@ class GK_GUI:
             sock.bind(('127.0.0.1', port))
             sock.close()
         except OSError as e:   # Find an open port if :8050 is taken
+            sock.bind(('127.0.0.1', 0))
+            port = sock.getsockname()[1]
+            sock.close()
+        except socket.error as e:
             sock.bind(('127.0.0.1', 0))
             port = sock.getsockname()[1]
             sock.close()

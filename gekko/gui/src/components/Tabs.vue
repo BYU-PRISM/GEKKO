@@ -15,62 +15,70 @@
       </li>
     </ul>
     <div class="tab-div">
-      <template v-if="activeTab === 'Model'">
-        <div class="table-responsive tab-table">
-          <table class="table table-striped table-sm">
-            <thead>
-              <tr>
-                <th>Property</th>
-                <th>Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(value, prop) in modelData"
-                :key="prop.id">
-                <td>{{ prop }}</td>
-                <td>{{ value }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </template>
-      <template v-if="activeTab === 'Variables'">
-        <div
-          v-if="varsData"
-          class="tab-table">
-          <div style="overflow-y:auto; max-height:inherit">
-            <ul
-              v-for="(v, key) in varsData"
-              :key="v.id"
-              class="tab-table-item">
-              <a @click="toggle(v, key)">
-                {{ key }} {{ v.ishidden ? '►' : '&#9660;' }}
-              </a>
-              <div
-                class="table-responsive"
-                v-if="!v.ishidden">
-                <table class="table table-striped table-sm">
-                  <thead>
-                    <tr>
-                      <th>Property</th>
-                      <th>Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      v-for="(value, prop) in v"
-                      :key="prop.id">
-                      <td v-if="prop != 'ishidden'">{{ prop }}</td>
-                      <td v-if="prop != 'ishidden'">{{ value }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </ul>
+      <transition name="fade">
+        <template v-if="activeTab === 'Model'">
+          <div class="table-responsive tab-table">
+            <table class="table table-striped table-sm">
+              <thead>
+                <tr>
+                  <th>Property</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(value, prop) in modelData"
+                  :key="prop.id">
+                  <td>{{ prop }}</td>
+                  <td>{{ value }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-        </div>
-      </template>
+        </template>
+      </transition>
+      <transition name="fade">
+        <template v-if="activeTab === 'Variables'">
+          <div
+            v-if="varsData"
+            class="tab-table">
+            <div style="overflow-y:auto; max-height:inherit">
+              <ul
+                v-for="(v, key) in varsData"
+                :key="v.id"
+                class="tab-table-item">
+                <a
+                  class="var-dropdown"
+                  @click="toggle(v, key)">
+                  {{ key }} {{ v.ishidden ? '►' : '&#9660;' }}
+                </a>
+                <transition name="fade">
+                  <div
+                    class="table-responsive"
+                    v-if="!v.ishidden">
+                    <table class="table table-striped table-sm">
+                      <thead>
+                        <tr>
+                          <th>Property</th>
+                          <th>Value</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr
+                          v-for="(value, prop) in v"
+                          :key="prop.id">
+                          <td v-if="prop != 'ishidden'">{{ prop }}</td>
+                          <td v-if="prop != 'ishidden'">{{ (Number.isInteger(value) && value <= 100000 && value > -100000) ? value : value.toExponential(4) }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </transition>
+              </ul>
+            </div>
+          </div>
+        </template>
+      </transition>
     </div>
   </div>
 </template>
@@ -133,5 +141,16 @@ export default {
 }
 .tab-table-item {
   padding-left: 0px;
+}
+
+.var-dropdown {
+  cursor: pointer;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 </style>
