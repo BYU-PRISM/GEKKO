@@ -409,9 +409,9 @@ class GEKKO(object):
             # Calls apmonitor through the command line
             if os.name == 'nt': #Windows
                 apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm.exe')
-                app = subprocess.Popen([apm_exe, self.model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self.path, env = {"PATH" : self.path }, universal_newlines=True)
-                if disp == True:
-                    for line in iter(app.stdout.readline, ""):
+                app = subprocess.Popen([apm_exe, self.model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self.path, env = {"PATH" : self.path }, universal_newlines=True)                
+                for line in iter(app.stdout.readline, ""):
+                    if disp == True:
                         try:
                             print(line.replace('\n', ''))
                         except:
