@@ -6,8 +6,7 @@ Created on Mon Dec 18 13:06:45 2017
 """
 
 from __future__ import division
-
-from gekko import SS
+from gekko import GEKKO
 import numpy as np
 
 ## Linear model of a Boeing 747
@@ -45,11 +44,15 @@ C = np.array([[1, 0, 0, 0],
 
 
 #%% Build ThunderSnow model
-m,x,y,u = SS(A,B,C)
+m = GEKKO()
+
+x,y,u = m.state_space(A,B,C)
 
 m.time = [0, 0.1, 0.2, 0.4, 1, 1.5, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15]
+m.time = np.linspace(0,10,11)
 m.options.imode = 6
-m.options.nodes = 3
+m.options.nodes = 2
+m.options.DIAGLEVEL = 0
 
 
 ## MV tuning
@@ -83,28 +86,28 @@ y[0].status = 1
 y[1].status = 1
 
 
-m.solve()
-m.GUI()
+m.solve(remote=False,debug=False,disp=True)
+#m.GUI()
 
-# #%% plot results
-# import matplotlib.pyplot as plt
-# plt.figure(1)
-# plt.subplot(311)
-# plt.plot(m.time,u[0],'r-',linewidth=2.0)
-# plt.plot(m.time,u[1],'k:',linewidth=2.0)
-# plt.legend(['Elevator','Thrust'])
-# plt.ylabel('MV Action')
-#
-# plt.subplot(312)
-# plt.plot(m.time,y[0],'b:',linewidth=2.0)
-# #plt.plot(m.time,y[0].tr_hi,'k-')
-# #plt.plot(m.time,y[0].tr_lo,'k-')
-# plt.legend(['Air Speed','Upper Trajectory','Lower Trajectory'])
-#
-# plt.subplot(313)
-# plt.plot(m.time,y[1],'g--',linewidth=2.0)
-# #plt.plot(m.time,y[1].tr_hi,'k-')
-# #plt.plot(m.time,y[1].tr_lo,'k-')
-# plt.legend(['Climb Rate','Upper Trajectory','Lower Trajectory'])
-#
-# plt.show()
+#%% plot results
+import matplotlib.pyplot as plt
+plt.figure(1)
+plt.subplot(311)
+plt.plot(m.time,u[0],'r-',linewidth=2.0)
+plt.plot(m.time,u[1],'k:',linewidth=2.0)
+plt.legend(['Elevator','Thrust'])
+plt.ylabel('MV Action')
+
+plt.subplot(312)
+plt.plot(m.time,y[0],'b:',linewidth=2.0)
+#plt.plot(m.time,y[0].tr_hi,'k-')
+#plt.plot(m.time,y[0].tr_lo,'k-')
+plt.legend(['Air Speed','Upper Trajectory','Lower Trajectory'])
+
+plt.subplot(313)
+plt.plot(m.time,y[1],'g--',linewidth=2.0)
+#plt.plot(m.time,y[1].tr_hi,'k-')
+#plt.plot(m.time,y[1].tr_lo,'k-')
+plt.legend(['Climb Rate','Upper Trajectory','Lower Trajectory'])
+
+plt.show()

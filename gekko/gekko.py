@@ -40,7 +40,7 @@ def _try(o):
 
 #%% Equation Object Class, to allow referencing equation later
 class EquationObj(object):
-    def __init__(self,value):
+    def __init__(self, value):
         self.value = str(value)
     def __str__(self):
         return self.value
@@ -313,7 +313,92 @@ class GEKKO(object):
             x.ub = x_data[-1]
 
 
-
+    ## State Space
+    def state_space(self,A,B,C,D=None,discrete=False):
+        """
+        Build a GEKKO from SS representation.
+        Give A,B,C and D, returns:
+        m (GEKKO model)
+        x (states)
+        y (outputs)
+        u (inputs)
+        """
+        
+        #set all matricies to numpy
+        A = np.array(A)
+        B = np.array(B)
+        C = np.array(C)
+        if D != None: #D is supplied
+            D = np.array(D)
+            
+        # dx/dt = A * x + B * u
+        #     y = C * x + D * u
+        #
+        # dimensions
+        # (nx1) = (nxn)*(nx1) + (nxm)*(mx1)
+        # (px1) = (pxn)*(nx1) + (pxm)*(mx1)
+        
+        #count number of states, inputs and outputs
+        n = A.shape[0]
+        m = B.shape[1]
+        p = C.shape[0]
+        
+        #verify that all inputs are 2D of appropriate size
+        if A.shape[1] != n or B.shape[0] != n or C.shape[1] != n:
+            raise Exception("Inconsistent matrix sizes.")
+        if D is not None:
+            if D.shape[0] != p or D.shape[1] != m:
+                raise Exception("Inconsistent matrix sizes (D).")
+                
+        
+        # build lti object with unique object name
+        SS_name = 'statespace' + str(len(self._objects) + 1)
+        self._objects.append(SS_name + ' = lti')
+        
+        # write lti object config file objectname.txt
+        file_name = SS_name + '.txt'
+        file_data = 'dense, '
+        if discrete is False:
+            file_data += 'continuous \n'
+        else:
+            file_data += 'discrete \n'
+        file_data += str(m) + ' !inputs \n'
+        file_data += str(n) + ' !states \n'
+        file_data += str(p) + ' !outputs \n'
+        with open(os.path.join(self.path,file_name), 'w+') as f:
+            f.write(file_data)
+        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+        
+        #write A,B,C,[D] matricies to objectname.A/B/C/D.txt
+        file_name = SS_name + '.A.txt'
+        np.savetxt(os.path.join(self.path,file_name), A, delimiter=" ", fmt='%1.25s')
+        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+        file_name = SS_name + '.B.txt'
+        np.savetxt(os.path.join(self.path,file_name), B, delimiter=" ", fmt='%1.25s')
+        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+        file_name = SS_name + '.C.txt'
+        np.savetxt(os.path.join(self.path,file_name), C, delimiter=" ", fmt='%1.25s')
+        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+        if D is not None:
+            file_name = SS_name + '.D.txt'
+            np.savetxt(os.path.join(self.path,file_name), D, delimiter=" ", fmt='%1.25s')
+            self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+    
+        #define arrays of states, outputs and inputs
+        x = [self.SV() for i in np.arange(n)]
+        y = [self.CV() for i in np.arange(p)]
+        u = [self.MV() for i in np.arange(m)]
+    
+        
+        #Add connections between u, x and y with lti object 
+        for i in range(n):
+            self._connections.append(x[i].name + ' = ' + SS_name+'.x['+str(i+1)+']')
+        for i in range(m):
+            self._connections.append(u[i].name + ' = ' + SS_name+'.u['+str(i+1)+']')
+        for i in range(p):
+            self._connections.append(y[i].name + ' = ' + SS_name+'.y['+str(i+1)+']')
+            
+        return x,y,u
 
 
     #%% Add array functionality to all types
@@ -426,7 +511,7 @@ class GEKKO(object):
                     else:
                         pass
                 app.wait()
-            out, errs = app.communicate()
+            _, errs = app.communicate()
             # print(out)
             if errs:
                 print("Error:", errs)
