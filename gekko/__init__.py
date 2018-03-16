@@ -10,4 +10,3 @@ from .gekko import GEKKO
 Gekko = GEKKO
 gekko = GEKKO
 
-from .SS import SS
