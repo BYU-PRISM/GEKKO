@@ -2,12 +2,14 @@ import socket
 import webbrowser
 import json
 import os
-
+import signal
+import sys
 from .gk_variable import GKVariable
+
 from .gk_parameter import GKParameter
 import __main__ as main
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 from pprint import pprint
 
@@ -15,6 +17,12 @@ from pprint import pprint
 dev = False
 
 app = Flask(__name__, static_url_path='/gui/dist')
+
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Failed shutting down webserver. Please report any related errors at https://github.com/BYU-PRISM/GEKKO')
+    func()
 
 class GK_GUI:
     """GUI class for GEKKO
@@ -69,34 +77,52 @@ class GK_GUI:
 
     def set_endpoints(self):
         """Sets the flask API endpoints"""
-        @app.route('/get_data')
-        def get_data():
-            resp = jsonify(self.vars_dict)
-            resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
-            return resp
+        try:
+            @app.route('/get_data')
+            def get_data():
+                resp = jsonify(self.vars_dict)
+                resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
+                return resp
 
-        @app.route('/get_options')
-        def get_options():
-            resp = jsonify(self.options_dict)
-            resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
-            return resp
+            @app.route('/get_options')
+            def get_options():
+                resp = jsonify(self.options_dict)
+                resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
+                return resp
 
-        @app.route('/get_model')
-        def get_model():
-            resp = jsonify(self.model)
-            resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
-            return resp
+            @app.route('/get_model')
+            def get_model():
+                resp = jsonify(self.model)
+                resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
+                return resp
 
-        @app.route('/get_info')
-        def get_info():
-            resp =  jsonify(self.info)
-            resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
-            return resp
+            @app.route('/get_info')
+            def get_info():
+                resp =  jsonify(self.info)
+                resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
+                return resp
 
-        @app.route('/<path:path>')
-        def static_file(path):
-            print("Handling request for:", path)
-            return app.send_static_file(path)
+            @app.route('/shutdown')
+            def shutdown():
+                print("Browser tab closed. Shutting down server.")
+                shutdown_server()
+                resp = jsonify({"mesg": "shutdown"})
+                resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
+                return resp
+
+
+            @app.route('/<path:path>')
+            def static_file(path):
+                return app.send_static_file(path)
+
+        except AssertionError as e:
+            # This try/except is because ipython keeps the endpoints in
+            # memory between runs. This will simply not set the endpoints if they
+            # are already there.
+            pass
+
+        except Exception as e:
+            raise e
 
     def display(self):
         """Finds the appropriate port starts the api and opens the webbrowser"""
