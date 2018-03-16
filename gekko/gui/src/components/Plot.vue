@@ -50,16 +50,20 @@ export default {
       .then(response => response.json())
       .then(data => {
         var plotArray = []
+        console.log(data)
+        const isMuchData = Object.keys(data).length > 5
         for (var key in data) {
           if (data.hasOwnProperty(key)) {
             if (key !== 'time') {
-              plotArray.push({
+              const trace = {
                 x: data.time,
                 y: data[key],
                 mode: 'lines',
                 type: 'scatter',
-                name: key
-              })
+                name: key,
+                visible: isMuchData ? 'legendonly' : 'true'
+              }
+              plotArray.push(trace)
             }
           }
         }

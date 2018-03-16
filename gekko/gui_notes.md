@@ -35,18 +35,14 @@
 - I just added all the dash dependencies to setup.py. Is that what you want?
   - yes.
 
-## For Alpha release
-- Map python vars to the chart labels
-- Clean up the options.json display into pretty tabs
-
 ## Todo
-- Organize tables into tabs
 - Pretty up the graph
   - add log scale options
-  - Get it to autoscale to 100%
 - Decide what to put on each graph or at least what to display by default
-- Find a good way of displaying var name if there is only one
-- Figure out what should be displayed for `hw_estimator.py` test and bug fix
+- implement a polling mechanism with variable timing.
+  - allows backend to know when to shutdown (when it has not been polled for a period)
+  - allows frontend to check for updates if running dynamically
+- check for memory leaks (could cause serious problems for operators where it may be running for months on end)
 
 ## Bugs
 - When DASH renders it somehow triggers a rerender that even makes GEKKO
