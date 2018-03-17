@@ -1,28 +1,33 @@
-import socket
-import webbrowser
 import json
+import logging
 import os
 import signal
+import socket
 import sys
-from .gk_variable import GKVariable
-
-from .gk_parameter import GKParameter
-import __main__ as main
+import webbrowser
 
 from flask import Flask, jsonify, request
 
-from pprint import pprint
+from .gk_parameter import GKParameter
+from .gk_variable import GKVariable
+import __main__ as main
 
 # Toggle dev and production modes
 dev = False
 
+if dev:
+    log = logging.getLogger('werkzeug')
+    # This little nugget sets flask to only log http errors, very important when
+    # we are polling every second.
+    log.setLevel(logging.ERROR)
+
+
 app = Flask(__name__, static_url_path='/gui/dist')
 
-def shutdown_server():
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Failed shutting down webserver. Please report any related errors at https://github.com/BYU-PRISM/GEKKO')
-    func()
+# This acts as a watchdog timer. If the front-end does not make a call at least
+# every 3 seconds then the process is stopped. Every time this method is called
+# the timer gets reset
+signal.alarm(5)
 
 class GK_GUI:
     """GUI class for GEKKO
@@ -36,8 +41,6 @@ class GK_GUI:
         self.model = {}                    # APM model information
         self.info = {}
         self.vars_map = self.get_script_vars()  # map of model vars to script vars
-        print('vars_map:')
-        pprint(self.vars_map)
         self.get_script_data()
 
     def get_script_vars(self):
@@ -75,41 +78,36 @@ class GK_GUI:
             #if var[0] == 'v':
             #    self.options_dict[self.vars_map[var]] = self.options[var]
 
+    def handle_api_call(self, data):
+        resp = jsonify(data)
+        resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
+        # This resets the watchdog timer
+        signal.alarm(10)
+        return resp
+
+
     def set_endpoints(self):
         """Sets the flask API endpoints"""
         try:
             @app.route('/get_data')
             def get_data():
-                resp = jsonify(self.vars_dict)
-                resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
-                return resp
+                return self.handle_api_call(self.vars_dict)
 
             @app.route('/get_options')
             def get_options():
-                resp = jsonify(self.options_dict)
-                resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
-                return resp
+                return self.handle_api_call(self.options_dict)
 
             @app.route('/get_model')
             def get_model():
-                resp = jsonify(self.model)
-                resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
-                return resp
+                return self.handle_api_call(self.model)
 
             @app.route('/get_info')
             def get_info():
-                resp =  jsonify(self.info)
-                resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
-                return resp
+                return self.handle_api_call(self.info)
 
-            @app.route('/shutdown')
-            def shutdown():
-                print("Browser tab closed. Shutting down server.")
-                shutdown_server()
-                resp = jsonify({"mesg": "shutdown"})
-                resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
-                return resp
-
+            @app.route('/poll')
+            def get_poll():
+                return self.handle_api_call({'updates': False})
 
             @app.route('/<path:path>')
             def static_file(path):

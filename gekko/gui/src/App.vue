@@ -7,7 +7,19 @@
 
 <script>
 export default {
-  name: 'App'
+  name: 'App',
+  mounted () {
+    setTimeout(this.poll, 1000)
+  },
+  methods: {
+    poll () {
+      this.$http.headers.common['Access-Control-Allow-Origin'] = '*'
+      this.$http.get('poll')
+        .then(resp => resp.json())
+        .then(resp => console.log(resp))
+      setTimeout(this.poll, 1000)
+    }
+  }
 }
 </script>
 
