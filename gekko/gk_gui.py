@@ -1,10 +1,10 @@
 import json
 import logging
 import os
-import signal
 import socket
 import sys
 import webbrowser
+import threading
 
 from flask import Flask, jsonify, request
 
@@ -12,22 +12,28 @@ from .gk_parameter import GKParameter
 from .gk_variable import GKVariable
 import __main__ as main
 
-# Toggle dev and production modes
-dev = False
+# Toggle development and production modes
+DEV = False
+WATCHDOG_TIME_LENGTH = 0
 
-if dev:
+if DEV:
+    WATCHDOG_TIME_LENGTH = 10
+else:
+    WATCHDOG_TIME_LENGTH = 2
     log = logging.getLogger('werkzeug')
     # This little nugget sets flask to only log http errors, very important when
     # we are polling every second.
     log.setLevel(logging.ERROR)
 
-
 app = Flask(__name__, static_url_path='/gui/dist')
 
 # This acts as a watchdog timer. If the front-end does not make a call at least
-# every 3 seconds then the process is stopped. Every time this method is called
+# every timeout seconds then the main process is stopped. Every time this method is called
 # the timer gets reset
-signal.alarm(5)
+# Could normally use signal.alarm, but need to support windows
+def watchdog_timer():
+    print('Browser display closed. Exiting...')
+    os._exit(0)
 
 class GK_GUI:
     """GUI class for GEKKO
@@ -42,6 +48,8 @@ class GK_GUI:
         self.info = {}
         self.vars_map = self.get_script_vars()  # map of model vars to script vars
         self.get_script_data()
+        self.alarm = threading.Timer(WATCHDOG_TIME_LENGTH, watchdog_timer)
+        self.alarm.start()
 
     def get_script_vars(self):
         vars_map = {}
@@ -81,8 +89,10 @@ class GK_GUI:
     def handle_api_call(self, data):
         resp = jsonify(data)
         resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
-        # This resets the watchdog timer
-        signal.alarm(10)
+        # This resets the watchdog timer, kind of a hack, but it works
+        self.alarm.cancel()
+        self.alarm = threading.Timer(WATCHDOG_TIME_LENGTH, watchdog_timer)
+        self.alarm.start()
         return resp
 
 
@@ -140,7 +150,8 @@ class GK_GUI:
             sock.close()
 
         # Open the browser to the page and launch the app
-        if dev:
+        print('Opening display in default webbrowser. Close display tab or type CTRL+C to exit.')
+        if DEV:
             app.run(debug=True, port=8050)
         else:
             webbrowser.open("http://localhost:" + str(port) + "/index.html")
