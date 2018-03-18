@@ -1,52 +1,12 @@
 # Notes on Gekko Gui development
 
-## Questions
-- With the Vue app:
-  - Would you like to have the whole dev project stored in the Gekko project or just the built version?
-    - We could split it out to a different repo and then just include the built files
-- What about if someone is running more than one gekko app at a time?
-  - `options.json` and `results.json` keep getting overwritten by each other
-  - Gui will handle the ports just fine
-
-## Answered Questions  
-- How to pass in the local vars to GUI?
-  ```python
-  import __main__ as main
-  vars_dict = vars(main)
-  ```
-- Are the JSON structures pretty static or will there be field that only appear
-  depending on what the user chooses? If not, can it be made static
-  - pretty static. We can deal with exceptions as they come
-- I managed to remove the Plotly logo. Do you have an opinion on this?
-  - Either way. We should make sure to give them credit somewhere.
-- Do you already have a debug or dev/production variables? Auto opening the webpage
-  works great with flask in `DEBUG=False`, but double loads the page in `DEBUG=True`.
-  - No existing variable. Just use one for the GUI
-- Any thoughts on including dimensions into the variables somehow so they can be displayed?
-  - Total units integration is a future idea. Nothing for right now.
-- Any Ideas on how to determine which lines to display by default. 70B vs 0.01?
-  - Parameters and Variables
-- Do you have a problem using bootstrap? What about using it from a CDN?
-  - resolved. added flask route to serve bootstrap locally
-- How do you work with a dev version of gekko?
-  - `pip install -e .`
-- What would be the best method to call `display_results()`?
-  - `m.GUI()`
-- I just added all the dash dependencies to setup.py. Is that what you want?
-  - yes.
-
 ## Todo
 - Pretty up the graph
   - add log scale options
 - Decide what to put on each graph or at least what to display by default
-- implement a polling mechanism with variable timing.
-  - allows backend to know when to shutdown (when it has not been polled for a period)
-  - allows frontend to check for updates if running dynamically
 - check for memory leaks (could cause serious problems for operators where it may be running for months on end)
-
-## Bugs
-- When DASH renders it somehow triggers a rerender that even makes GEKKO
-  reoptimize the whole model.
-  - RESOLVED: It looks like this is actually due to Flask being in `DEBUG=True`. For some
-    reason this causes a complete rerender. If this is a problem then simply set
-    `DEBUG=False`
+- add fullscreen modal window option for each chart
+- add polling checks to frontend
+  - if backend does not respond open error window
+- Get tabs col ready to be used interactively
+- Look into real-time plotting
