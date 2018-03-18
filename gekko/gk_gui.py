@@ -17,7 +17,7 @@ DEV = False
 WATCHDOG_TIME_LENGTH = 0
 
 if DEV:
-    WATCHDOG_TIME_LENGTH = 10
+    WATCHDOG_TIME_LENGTH = 1000
 else:
     WATCHDOG_TIME_LENGTH = 2
     log = logging.getLogger('werkzeug')
