@@ -314,7 +314,7 @@ class GEKKO(object):
 
 
     ## State Space
-    def state_space(self,A,B,C,D=None,discrete=False):
+    def state_space(self,A,B,C,D=None,discrete=False,dense=False):
         """
         Build a GEKKO from SS representation.
         Give A,B,C and D, returns:
@@ -357,7 +357,10 @@ class GEKKO(object):
         
         # write lti object config file objectname.txt
         file_name = SS_name + '.txt'
-        file_data = 'dense, '
+        if dense is True:
+            file_data = 'dense, '
+        else: 
+            file_data = 'sparse, '
         if discrete is False:
             file_data += 'continuous \n'
         else:
@@ -369,20 +372,53 @@ class GEKKO(object):
             f.write(file_data)
         self._extra_files.append(file_name) #add csv file to list of extra file to send to server
         
-        #write A,B,C,[D] matricies to objectname.A/B/C/D.txt
-        file_name = SS_name + '.A.txt'
-        np.savetxt(os.path.join(self.path,file_name), A, delimiter=" ", fmt='%1.25s')
-        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
-        file_name = SS_name + '.B.txt'
-        np.savetxt(os.path.join(self.path,file_name), B, delimiter=" ", fmt='%1.25s')
-        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
-        file_name = SS_name + '.C.txt'
-        np.savetxt(os.path.join(self.path,file_name), C, delimiter=" ", fmt='%1.25s')
-        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
-        if D is not None:
-            file_name = SS_name + '.D.txt'
-            np.savetxt(os.path.join(self.path,file_name), D, delimiter=" ", fmt='%1.25s')
+        if dense is True:
+            #write A,B,C,[D] matricies to objectname.A/B/C/D.txt
+            file_name = SS_name + '.A.txt'
+            np.savetxt(os.path.join(self.path,file_name), A, delimiter=" ", fmt='%1.25s')
             self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+            file_name = SS_name + '.B.txt'
+            np.savetxt(os.path.join(self.path,file_name), B, delimiter=" ", fmt='%1.25s')
+            self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+            file_name = SS_name + '.C.txt'
+            np.savetxt(os.path.join(self.path,file_name), C, delimiter=" ", fmt='%1.25s')
+            self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+            if D is not None:
+                file_name = SS_name + '.D.txt'
+                np.savetxt(os.path.join(self.path,file_name), D, delimiter=" ", fmt='%1.25s')
+                self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+        else: #sparse form
+        # (nx1) = (nxn)*(nx1) + (nxm)*(mx1)
+        # (px1) = (pxn)*(nx1) + (pxm)*(mx1)
+            file_name = SS_name + '.A.txt'
+            sparse_matrix = []
+            for j in range(n):
+                for i in range(n):
+                    if A[i,j] != 0: 
+                        sparse_matrix.append([i,j,A[i,j]])
+            np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
+            file_name = SS_name + '.B.txt'
+            sparse_matrix = []
+            for j in range(m):
+                for i in range(n):
+                    if B[i,j] != 0: 
+                        sparse_matrix.append([i,j,B[i,j]])
+            np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
+            file_name = SS_name + '.C.txt'
+            sparse_matrix = []
+            for j in range(n):
+                for i in range(p):
+                    if C[i,j] != 0: 
+                        sparse_matrix.append([i,j,C[i,j]])
+            np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
+            if D is not None:
+                file_name = SS_name + '.D.txt'
+                sparse_matrix = []
+                for j in range(m):
+                    for i in range(p):
+                        if D[i,j] != 0: 
+                            sparse_matrix.append([i,j,D[i,j]])
+                np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
     
         #define arrays of states, outputs and inputs
         x = [self.SV() for i in np.arange(n)]
