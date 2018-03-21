@@ -1,5 +1,8 @@
 <template class="tab-div">
   <div>
+    <img
+      src="/static/GekkoLogo.png"
+      height="65px">
     <ul class="nav nav-tabs">
       <li class="nav-item tab">
         <a

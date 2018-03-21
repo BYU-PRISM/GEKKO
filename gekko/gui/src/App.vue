@@ -37,9 +37,6 @@
         </div>
       </div>
     </transition>
-    <img
-      src="/static/GekkoLogo.png"
-      height="80px">
     <router-view/>
   </div>
 </template>
@@ -73,7 +70,9 @@ export default {
           if (error.status === 0) {
             this.httpError.header = 'Internal Communication Error'
             this.httpError.body = `We seem to have lost communication with your
-                                  Gekko script. Did you stop the script or did
+                                  Gekko script. This means that we cannot get
+                                  any updates from your Gekko model.
+                                  Did you stop the script or did
                                   it crash? If so, close this window and restart
                                   it.`
           } else {

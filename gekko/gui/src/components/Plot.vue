@@ -27,6 +27,14 @@ export default {
     numPlots: {
       type: Number,
       default: 1
+    },
+    layout: {
+      type: Object,
+      default: () => {
+        return {
+          'height': 500
+        }
+      }
     }
   },
   data () {
@@ -45,6 +53,7 @@ export default {
   },
   mounted () {
     window.addEventListener('resize', this.plotlyResize)
+    console.log('plot layout', this.layout)
     this.$http.headers.common['Access-Control-Allow-Origin'] = '*'
     this.$http.get('get_data')
       .then(response => response.json())
@@ -67,7 +76,7 @@ export default {
             }
           }
         }
-        Plotly.newPlot(this.id, plotArray)
+        Plotly.newPlot(this.id, plotArray, this.layout)
       })
   },
   methods: {
