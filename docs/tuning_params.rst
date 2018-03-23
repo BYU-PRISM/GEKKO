@@ -30,7 +30,7 @@ Description: Anti-Windup Status for a Manipulated Variable
 0: Not at a limit
 1: An upper or lower bound is reached
 
-Explanation: Anti-Windup Status (AWS) is terminology borrowed from classical controls such as Proportional Integral Derivative (PID) controllers. Anti-Windup refers to the integral action that is paused when the controller reaches a saturation limit. An example of a saturation limit is a valve that is limited to 0-100% open. If the controller requests -10%, the valve is still limited to 0%. The AWS indication is useful to show when a controller is being driven by an optimization objective versus constraints that limit movement. A Key Performance Indicator (KPI) of many controllers is the fraction of time that a MV is not at an upper or lower bound limit.
+Explanation: Anti-Windup Status (`AWS`) is terminology borrowed from classical controls such as Proportional Integral Derivative (PID) controllers. Anti-Windup refers to the integral action that is paused when the controller reaches a saturation limit. An example of a saturation limit is a valve that is limited to 0-100% open. If the controller requests -10%, the valve is still limited to 0%. The AWS indication is useful to show when a controller is being driven by an optimization objective versus constraints that limit movement. A Key Performance Indicator (KPI) of many controllers is the fraction of time that a MV is not at an upper or lower bound limit.
 
 .. _bias:
 
@@ -42,15 +42,19 @@ Type: Floating Point, Input/Output
 Default Value: 0.0
 
 Description: Additive correction factor to align measurement and model values for Controlled Variables (CVs)
-BIAS is additive factor that incorporates the difference between the current measured value and the initial condition of the controller. FSTATUS determines how much of the raw measurement is used to update the value of MEAS. A feedback status of 0 indicates that the measurement should not be used and the BIAS value is kept at the initial value of 0. A feedback status of 1 uses all of the measurement in updating MEAS. A feedback status in between 0 and 1 updates MEAS with a fractional contribution from LSTVAL and the new measurement. The value of BIAS is updated from MEAS and the unbiased model prediction (Model_u).
+`BIAS` is additive factor that incorporates the difference between the current measured value and the initial condition of the controller. :ref:`fstatus` determines how much of the raw measurement is used to update the value of :ref:`meas`. A feedback status of 0 indicates that the measurement should not be used and the `BIAS` value is kept at the initial value of 0. A feedback status of 1 uses all of the measurement in updating `MEAS`. A feedback status in between 0 and 1 updates `MEAS` with a fractional contribution from :ref:`lstval` and the new measurement. The value of `BIAS` is updated from `MEAS` and the unbiased model prediction (`Model_u`).
+
+.. math::
 
 	BIAS = MEAS - Model_u
 
-The BIAS is added to each point in the horizon and the controller objective function drives the biased model (Model_b) to the requested set point range.
+The `BIAS` is added to each point in the horizon and the controller objective function drives the biased model (`Model_b`) to the requested set point range.
+
+.. math::
 
 	Model_b = Model_u + BIAS
 
-The value of BIAS can also be set to an external value by setting the option apm_option(s,a,'cv.BIAS',value) and setting FSTATUS to 0 (OFF).
+The value of BIAS can also be set to an external value by setting the option `BIAS` option directly and setting `FSTATUS` to 0 (OFF).
 
 
 .. _cost:
@@ -64,7 +68,7 @@ Default Value: 0.0
 
 Description: Cost weight: (+)=minimize, (-)=maximize
 
-Explanation: Multiplies the parameter by the COST value specified. This is used to scale the terms in the objective function. It is important that each term in the objective function is scaled to be of the same order of magnitude to ensure that the optimizer considers each of them (unless different weighting is specifically desired).
+Explanation: Multiplies the parameter by the `COST` value specified. This is used to scale the terms in the objective function. It is important that each term in the objective function is scaled to be of the same order of magnitude to ensure that the optimizer considers each of them (unless different weighting is specifically desired).
 
 .. _critical:
 
@@ -92,6 +96,13 @@ Description: Delta cost penalty for MV movement
 
 Explanation: Adds a term to the objective function that gives a minor penalty for changing the MV. The weight of the penalty is adjusted with the input value. This is useful for systems where excessive movement to the MV causes damage to equipment or undesirable results. By assigning a weight that is small in comparison to the objective function value, optimal performance is achieved while changing the MV only
 when necessary.
+
+.. math::
+
+	objective \mathrel{+}= \sum_{i=1} \left\Vert x_{i-1} - x_i \right\Vert _p
+
+Where `p` is equal to :ref:`ev_type` (for `IMODE=5or8`) or :ref:`cv_type` (for `IMODE=6or9`).
+
 
 .. _dmax:
 
@@ -451,7 +462,7 @@ Default Value: 1.0
 
 Description: Initial trajectory opening ratio (0=ref traj, 1=tunnel, 2=funnel)
 
-Explanation: TR_OPEN controls the trajectory opening for APM.CV_TYPE = 1. It is the ratio of opening gap to the final gap of SPHI - SPLO. A value of TR_OPEN = 2 means that the initial trajectory is twice the width of the final gap of SPHI - SPLO. With TR_OPEN = 0, the initial trajectory starts at the same point and widens with a first order response as specified by TAU to final destinations of SPHI and SPLO. Each CV can have a different TR_OPEN.
+Explanation: TR_OPEN controls the trajectory opening for :ref:`cv_type` = 1. It is the ratio of opening gap to the final gap of :ref:`sphi` - :ref:`splo`. A value of `TR_OPEN = 2` means that the initial trajectory is twice the width of the final gap of `SPHI - SPLO`. With `TR_OPEN = 0`, the initial trajectory starts at the same point and widens with a first order response as specified by :ref:`tau` to final destinations of SPHI and SPLO. Each CV can have a different TR_OPEN.
 
 
 .. _tr_init:
@@ -463,9 +474,9 @@ Type: Integer, Input
 
 Default Value: 0
 
-Description: Traj initialization (0=dead-band, 1=re-center with coldstart/out-of-service, 2=re-center always)
+Description: Setpoint trajectory initialization (0=dead-band, 1=re-center with coldstart/out-of-service, 2=re-center always)
 
-Explanation: TR_INIT is an option to specify how the initial conditions of the reference trajectory should change with each cycle. An option of 0 specifies that the initial conditions should start at SPHI and SPLO, creating an unchanging target over the horizon. An option of 1 makes the initial conditions equal to the current process variable value only on coldstart (APM.COLDSTART>=1) or with CTRLMODE <=2 when the controller is out of service. Otherwise, the reference trajectory is updated from the first step of the prior solution. When TR_INIT=2, the reference trajectory realigns to the controlled variable (CV) initial condition with each cycle. Each CV can have a different TR_INIT.
+Explanation: `TR_INIT` is an option to specify how the initial conditions of the controlled variable's (CV) setpoint reference trajectory should change with each cycle. The trajectory is set by :ref:`tau`. An option of 0 specifies that the initial conditions should start at SPHI and SPLO, creating an unchanging target over the horizon. An option of 1 makes the initial conditions equal to the current process variable value only on coldstart (:ref:`coldstart`>=1) or with :ref:`ctrlmode` <=2 when the controller is out of service. Otherwise, the reference trajectory is updated from the first step of the prior solution. When `TR_INIT=2`, the reference trajectory realigns to the variable's initial condition with each cycle. Each CV can have a different `TR_INIT`. The trajectory is also influenced by :ref:`tr_open`.
 
 
 .. _upper:
@@ -479,7 +490,7 @@ Default Value: 1.0e20
 
 Description: Upper bound
 
-Explanation: UPPER is the the upper limit of a variable. If the variable guess value is above the upper limit, it is adjusted to the upper limit before it is given to the solver. The upper limit is also checked with the lower limit to ensure that it is greater than or equal to the lower limit. If the upper limit is equal to the lower limit, the variable is fixed at that value.
+Explanation: `UPPER` is the the upper limit of a variable. If the variable guess value is above the upper limit, it is adjusted to the upper limit before it is given to the solver. The upper limit is also checked with the lower limit (:ref:`lower`) to ensure that it is greater than or equal to the lower limit. If the upper limit is equal to the lower limit, the variable is fixed at that value.
 
 
 .. _vdvl:
@@ -493,7 +504,7 @@ Default Value: 1.0e20
 
 Description: Delta validity limit
 
-Explanation: VDVL is the maximum change of a measured value before it is considered an unrealistic change. The change in measured values is recorded at every cycle of the application and compared to the VDVL limit. Validity limits are placed to catch instrument errors that may otherwise create bad inputs to the application. If a delta validity limit is exceeded, the action is to either freeze the measured value at the last good value (VLACTION=0) or change the measured value by a maximum of VDVL in the direction of the bad measurement (VLACTION=1). Another way to minimize the impact of unrealistic changes in measurements is to set FSTATUS between 0 and 1 with values closer to 0 becoming insensitive to measurement changes.
+Explanation: `VDVL` is the maximum change of a measured value before it is considered an unrealistic change. The change in measured values is recorded at every cycle of the application and compared to the `VDVL` limit. Validity limits are placed to catch instrument errors that may otherwise create bad inputs to the application. If a delta validity limit is exceeded, the action is to either freeze the measured value at the last good value (:ref:`vlaction`=0) or change the measured value by a maximum of `VDVL` in the direction of the bad measurement (:ref:`vlaction`=1). Another way to minimize the impact of unrealistic changes in measurements is to set :ref:`fstatus` between 0 and 1 with values closer to 0 becoming insensitive to measurement changes.
 
 
 .. _vlaction:
@@ -507,7 +518,7 @@ Default Value: 0
 
 Description: Validity Limit Action
 
-Explanation: VLACTION is the validity limit action when VDVL is exceeded. The change in measured values is recorded at every cycle of the application and compared to the VDVL limit. Validity limits are placed to catch instrument errors that may otherwise create bad inputs to the application. If a delta validity limit is exceeded, the action is to either freeze the measured value at the last good value (VLACTION=0) or change the measured value by a maximum of VDVL in the direction of the bad measurement (VLACTION=1).
+Explanation: `VLACTION` is the validity limit action when :ref:`vdvl` is exceeded. The change in measured values is recorded at every cycle of the application and compared to the `VDVL` limit. Validity limits are placed to catch instrument errors that may otherwise create bad inputs to the application. If a delta validity limit is exceeded, the action is to either freeze the measured value at the last good value (`VLACTION=0`) or change the measured value by a maximum of `VDVL` in the direction of the bad measurement (`VLACTION=1`).
 
 
 .. _vlhi:
@@ -521,7 +532,7 @@ Default Value: 1.0e20
 
 Description: Upper validity limit
 
-Explanation: VLHI is the upper validity limit for a measured value. Validity limits are one way to protect an application against bad measurements. This gross error detection relies on a combination of change values and absolute limits to determine when a measurement should be rejected. If VLHI is exceeded, the measured value is placed at VLHI or the maximum move allowed by VDVL when VLACTION=1. If VLACTION=0, there is no change in the measured value when a limit (VDVL, VLHI, VLLO) is exceeded.
+Explanation: `VLHI` is the upper validity limit for a measured value. Validity limits are one way to protect an application against bad measurements. This gross error detection relies on a combination of change values and absolute limits to determine when a measurement should be rejected. If `VLHI` is exceeded, the measured value is placed at `VLHI` or the maximum move allowed by :ref:`vdvl` when :ref:`vlaction`=1. If :ref:`vlaction`=0, there is no change in the measured value when a limit (:ref:`vdvl`, :ref:`vlhi`, :ref:`vllo`) is exceeded.
 
 
 .. _vllo:
@@ -549,7 +560,7 @@ Default Value: 20.0
 
 Description: Objective function weight on measured value
 
-Explanation: A weighting factor to penalize deviation of current model predictions from measured values. This is used in estimation applications (APM.IMODE=2, 5, or 8) where the penalty. The infinite estimation horizon approximation is especially useful for systems that have weakly observable or unobservable states. A higher WMODEL can also help to reduce the aggressiveness of the estimator in aligning with the measurements by balancing with a penalty against shifting too far from the prior predictions. The WMODEL value should never be equal to or larger than the WMEAS value for APM.EV_TYPE=1 (l1-norm). A WMODEL value higher than WMEAS will ignore measured values in favor of matching prior model predictions.
+Explanation: A weighting factor to penalize deviation of current model predictions from measured values. This is used in estimation applications (:ref:`imode`=2, 5, or 8) where the penalty. The infinite estimation horizon approximation is especially useful for systems that have weakly observable or unobservable states. A higher `WMODEL` can also help to reduce the aggressiveness of the estimator in aligning with the measurements by balancing with a penalty against shifting too far from the prior predictions. The :ref:`wmodel` value should never be equal to or larger than the `WMEAS` value for :ref:`ev_type`=1 (l1-norm). A `WMODEL` value higher than `WMEAS` will ignore measured values in favor of matching prior model predictions.
 
 
 .. _wmodel:
