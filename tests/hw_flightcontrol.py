@@ -6,8 +6,7 @@ Created on Mon Dec 18 13:06:45 2017
 """
 
 from __future__ import division
-
-from gekko import SS
+from gekko import GEKKO
 import numpy as np
 
 ## Linear model of a Boeing 747
@@ -34,7 +33,7 @@ A = np.array([[-.003, 0.039, 0, -0.322],
               [-0.065, -0.319, 7.74, 0],
               [0.020, -0.101, -0.429, 0],
               [0, 0, 1, 0]])
-            
+
 B = np.array([[0.01, 1],
               [-0.18, -0.04],
               [-1.16, 0.598],
@@ -45,11 +44,15 @@ C = np.array([[1, 0, 0, 0],
 
 
 #%% Build ThunderSnow model
-m,x,y,u = SS(A,B,C)
+m = GEKKO()
+
+x,y,u = m.state_space(A,B,C)
 
 m.time = [0, 0.1, 0.2, 0.4, 1, 1.5, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15]
+m.time = np.linspace(0,10,11)
 m.options.imode = 6
-m.options.nodes = 3
+m.options.nodes = 2
+m.options.DIAGLEVEL = 0
 
 
 ## MV tuning
@@ -83,8 +86,8 @@ y[0].status = 1
 y[1].status = 1
 
 
-m.solve()
-
+m.solve(remote=False,debug=False,disp=True)
+#m.GUI()
 
 #%% plot results
 import matplotlib.pyplot as plt

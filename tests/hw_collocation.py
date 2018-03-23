@@ -148,7 +148,8 @@ for nodes in range(2,7):
 print(sol_py)
 print(sol_apm)
 
-# show plot
-plt.ylabel('x(t)')
-plt.xlabel('time')
-plt.show()
+m.GUI()
+# # show plot
+# plt.ylabel('x(t)')
+# plt.xlabel('time')
+# plt.show()

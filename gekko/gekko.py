@@ -16,6 +16,7 @@ from .gk_parameter import GKParameter, GK_MV, GK_FV
 from .gk_variable import GKVariable, GK_CV, GK_SV
 from .gk_operators import GK_Operators
 from itertools import count
+from .gk_gui import GK_GUI
 
 #%% Python version compatibility
 ver = sys.version_info[0]
@@ -39,7 +40,7 @@ def _try(o):
 
 #%% Equation Object Class, to allow referencing equation later
 class EquationObj(object):
-    def __init__(self,value):
+    def __init__(self, value):
         self.value = str(value)
     def __str__(self):
         return self.value
@@ -312,7 +313,129 @@ class GEKKO(object):
             x.ub = x_data[-1]
 
 
-
+    ## State Space
+    def state_space(self,A,B,C,D=None,discrete=False,dense=False):
+        """
+        Build a GEKKO from SS representation.
+        Give A,B,C and D, returns:
+        m (GEKKO model)
+        x (states)
+        y (outputs)
+        u (inputs)
+        """
+        #TODO add support for E matrix
+        
+        #set all matricies to numpy
+        A = np.array(A)
+        B = np.array(B)
+        C = np.array(C)
+        if D != None: #D is supplied
+            D = np.array(D)
+            
+        # dx/dt = A * x + B * u
+        #     y = C * x + D * u
+        #
+        # dimensions
+        # (nx1) = (nxn)*(nx1) + (nxm)*(mx1)
+        # (px1) = (pxn)*(nx1) + (pxm)*(mx1)
+        
+        #count number of states, inputs and outputs
+        n = A.shape[0]
+        m = B.shape[1]
+        p = C.shape[0]
+        
+        #verify that all inputs are 2D of appropriate size
+        if A.shape[1] != n or B.shape[0] != n or C.shape[1] != n:
+            raise Exception("Inconsistent matrix sizes.")
+        if D is not None:
+            if D.shape[0] != p or D.shape[1] != m:
+                raise Exception("Inconsistent matrix sizes (D).")
+                
+        
+        # build lti object with unique object name
+        SS_name = 'statespace' + str(len(self._objects) + 1)
+        self._objects.append(SS_name + ' = lti')
+        
+        # write lti object config file objectname.txt
+        file_name = SS_name + '.txt'
+        if dense is True:
+            file_data = 'dense, '
+        else: 
+            file_data = 'sparse, '
+        if discrete is False:
+            file_data += 'continuous \n'
+        else:
+            file_data += 'discrete \n'
+        file_data += str(m) + ' !inputs \n'
+        file_data += str(n) + ' !states \n'
+        file_data += str(p) + ' !outputs \n'
+        with open(os.path.join(self.path,file_name), 'w+') as f:
+            f.write(file_data)
+        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+        
+        if dense is True:
+            #write A,B,C,[D] matricies to objectname.A/B/C/D.txt
+            file_name = SS_name + '.a.txt'
+            np.savetxt(os.path.join(self.path,file_name), A, delimiter=" ", fmt='%1.25s')
+            self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+            file_name = SS_name + '.b.txt'
+            np.savetxt(os.path.join(self.path,file_name), B, delimiter=" ", fmt='%1.25s')
+            self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+            file_name = SS_name + '.c.txt'
+            np.savetxt(os.path.join(self.path,file_name), C, delimiter=" ", fmt='%1.25s')
+            self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+            if D is not None:
+                file_name = SS_name + '.d.txt'
+                np.savetxt(os.path.join(self.path,file_name), D, delimiter=" ", fmt='%1.25s')
+                self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+        else: #sparse form
+        # (nx1) = (nxn)*(nx1) + (nxm)*(mx1)
+        # (px1) = (pxn)*(nx1) + (pxm)*(mx1)
+            file_name = SS_name + '.a.txt'
+            sparse_matrix = []
+            for j in range(n):
+                for i in range(n):
+                    if A[i,j] != 0: 
+                        sparse_matrix.append([i+1,j+1,A[i,j]])
+            np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
+            file_name = SS_name + '.b.txt'
+            sparse_matrix = []
+            for j in range(m):
+                for i in range(n):
+                    if B[i,j] != 0: 
+                        sparse_matrix.append([i+1,j+1,B[i,j]])
+            np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
+            file_name = SS_name + '.c.txt'
+            sparse_matrix = []
+            for j in range(n):
+                for i in range(p):
+                    if C[i,j] != 0: 
+                        sparse_matrix.append([i+1,j+1,C[i,j]])
+            np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
+            if D is not None:
+                file_name = SS_name + '.d.txt'
+                sparse_matrix = []
+                for j in range(m):
+                    for i in range(p):
+                        if D[i,j] != 0: 
+                            sparse_matrix.append([i+1,j+1,D[i,j]])
+                np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
+    
+        #define arrays of states, outputs and inputs
+        x = [self.SV() for i in np.arange(n)]
+        y = [self.CV() for i in np.arange(p)]
+        u = [self.MV() for i in np.arange(m)]
+    
+        
+        #Add connections between u, x and y with lti object 
+        for i in range(n):
+            self._connections.append(x[i].name + ' = ' + SS_name+'.x['+str(i+1)+']')
+        for i in range(m):
+            self._connections.append(u[i].name + ' = ' + SS_name+'.u['+str(i+1)+']')
+        for i in range(p):
+            self._connections.append(y[i].name + ' = ' + SS_name+'.y['+str(i+1)+']')
+            
+        return x,y,u
 
 
     #%% Add array functionality to all types
@@ -334,8 +457,8 @@ class GEKKO(object):
     from .gk_debug import gk_logic_tree, verify_input_options, like, name_check
     from .gk_write_files import write_solver_options, generate_overrides_dbs_file, write_info, write_csv, build_model
     from .gk_post_solve import load_JSON, load_results
-    
-    
+
+
     #%% Get a solution
     def solve(self,remote=True,disp=True,debug=False):
         """Solve the optimization problem.
@@ -392,7 +515,7 @@ class GEKKO(object):
         self.write_info()
         if timing == True:
             print('write info', time.time() - t)
-        
+
         if debug == True:
             self.name_check()
 
@@ -408,9 +531,9 @@ class GEKKO(object):
             # Calls apmonitor through the command line
             if os.name == 'nt': #Windows
                 apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm.exe')
-                app = subprocess.Popen([apm_exe, self.model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self.path, env = {"PATH" : self.path }, universal_newlines=True)
-                if disp == True:
-                    for line in iter(app.stdout.readline, ""):
+                app = subprocess.Popen([apm_exe, self.model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self.path, env = {"PATH" : self.path }, universal_newlines=True)                
+                for line in iter(app.stdout.readline, ""):
+                    if disp == True:
                         try:
                             print(line.replace('\n', ''))
                         except:
@@ -425,7 +548,7 @@ class GEKKO(object):
                     else:
                         pass
                 app.wait()
-            out, errs = app.communicate()
+            _, errs = app.communicate()
             # print(out)
             if errs:
                 print("Error:", errs)
@@ -480,10 +603,6 @@ class GEKKO(object):
                     return byte
 
             try:
-                results = byte2str(get_file(self.server,self.model_name,'results.csv'))
-                f = open(os.path.join(self.path,'results.csv'), 'w')
-                f.write(str(results))
-                f.close()
                 results = byte2str(get_file(self.server,self.model_name,'results.json'))
                 f = open(os.path.join(self.path,'results.json'), 'w')
                 f.write(str(results))
@@ -492,10 +611,14 @@ class GEKKO(object):
                 f = open(os.path.join(self.path,'options.json'), 'w')
                 f.write(str(options))
                 f.close()
-                if self.options.CSV_WRITE == 2:
-                    results_all = byte2str(get_file(self.server,self.model_name,'results_all.csv'))
-                    with open(os.path.join(self.path,'results_all.csv'), 'w') as f:
-                        f.write(str(results_all))
+                if self.options.CSV_WRITE >= 1:
+                    results = byte2str(get_file(self.server,self.model_name,'results.csv'))
+                    with open(os.path.join(self.path,'results.csv'), 'w') as f:
+                        f.write(str(results))
+                    if self.options.CSV_WRITE >1:
+                        results_all = byte2str(get_file(self.server,self.model_name,'results_all.csv'))
+                        with open(os.path.join(self.path,'results_all.csv'), 'w') as f:
+                            f.write(str(results_all))
             except:
                 raise ImportError('Results files not found. APM did not find a solution or the server is unreachable.')
 
@@ -523,13 +646,13 @@ class GEKKO(object):
             print('debug', time.time() - t)
 
 
-    
 
-    
+
+
 
 
     #%% Cleanup functions (use with caution)
-    
+
     def clear(self):
         files = glob.glob(os.path.join(self.path,'*'))
         for f in files:
@@ -574,3 +697,7 @@ class GEKKO(object):
         return GK_Operators('acos('+str(other) + ')')
     def atan(self,other):
         return GK_Operators('atan('+str(other) + ')')
+
+    def GUI(self, **kwargs):
+        gui = GK_GUI(self.path,**kwargs)
+        gui.display()

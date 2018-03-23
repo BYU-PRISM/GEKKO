@@ -91,16 +91,17 @@ Ca.STATUS = 1
 Ca.TR_INIT = 0
 
 m.solve()
+m.GUI()
 
-plt.close('all')
-plt.figure(1)
-plt.subplot(3,1,1)
-plt.plot(m.time, Tc.value)
-plt.subplot(3,1,2)
-plt.plot(m.time, T.value)
-plt.subplot(3,1,3)
-plt.plot(m.time, Ca.value)
-plt.show()
+# plt.close('all')
+# plt.figure(1)
+# plt.subplot(3,1,1)
+# plt.plot(m.time, Tc.value)
+# plt.subplot(3,1,2)
+# plt.plot(m.time, T.value)
+# plt.subplot(3,1,3)
+# plt.plot(m.time, Ca.value)
+# plt.show()
 
 
 #%% Solve test problem hs23
@@ -201,15 +202,15 @@ model.options.IMODE = 6
 model.options.MAX_ITER = 500
 
 model.solve()
+model.GUI()
 
-
-plt.figure(2)
-plt.subplot(4,1,1)
-plt.plot(model.time*tf.value, s.value)
-plt.subplot(4,1,2)
-plt.plot(model.time*tf.value, u.value)
-plt.subplot(4,1,3)
-plt.plot(model.time*tf.value, m.value)
-plt.subplot(4,1,4)
-plt.plot(model.time*tf.value, v.value)
-plt.show()
+# plt.figure(2)
+# plt.subplot(4,1,1)
+# plt.plot(model.time*tf.value, s.value)
+# plt.subplot(4,1,2)
+# plt.plot(model.time*tf.value, u.value)
+# plt.subplot(4,1,3)
+# plt.plot(model.time*tf.value, m.value)
+# plt.subplot(4,1,4)
+# plt.plot(model.time*tf.value, v.value)
+# plt.show()

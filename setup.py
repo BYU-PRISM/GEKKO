@@ -9,6 +9,18 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
+def package_files(directory):
+    paths = []
+    for (path, directories, filenames) in os.walk(directory):
+        for filename in filenames:
+            paths.append(os.path.join('..', path, filename))
+    return paths
+
+#gather all files for GUI support
+gui_files = package_files('gekko/static')
+#add APM executable file
+extra_files = gui_files + ['bin/apm.exe']
+
 #APM binaries based on OS (currently only available for Windows)
 #if os.name == 'nt':
 #    apm_binary = {'gekko': ['bin/apm.exe']}
@@ -18,7 +30,7 @@ with open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
 #   apm_binary = ['gekko/bin/apmonitor' AND LA libaries]
 
 setup(name='gekko',
-    version='0.0.4a2',
+    version='0.0.4b2',
     description='Optimization software for differential algebraic equations',
     long_description=long_description,
     #url="https://readthedocsurl",
@@ -38,11 +50,14 @@ setup(name='gekko',
     license='MIT',
     packages=find_packages(),
     install_requires=[
-        #'APMonitor>=0.34',
-        'numpy~=1.8'#,
+        # 'APMonitor>=0.33',
+        'flask',
+        'numpy>=1.8'#,
         #'ujson',
     ],
-#    package_data=apm_binary,
+#    include_package_data=True,
+#    package_dir={'':'gekko'},
+    package_data={'gekko': extra_files},#['bin/apm.exe','static/*']},
 #   TODO add testing
 #    test_suite='pytest.collector',
 #    tests_require=['pytest'],

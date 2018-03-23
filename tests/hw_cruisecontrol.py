@@ -48,6 +48,7 @@ v.TAU = 5 #time constant of setpoint trajectory
 #%% Solve
 
 m.solve()
+m.GUI()
 
 #%% Plot solution
 plt.figure()

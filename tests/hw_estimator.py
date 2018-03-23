@@ -50,7 +50,7 @@ m.x = m.SV() #state variable
 m.y = m.CV() #measurement
 
 #Equations
-m.Equations([m.tau * m.x.dt() == -m.x + m.u, 
+m.Equations([m.tau * m.x.dt() == -m.x + m.u,
              m.y == m.K * m.x])
 
 
@@ -104,32 +104,33 @@ tau_est = np.empty(cycles)
 for i in range(cycles):
     # process simulator
     p.u.MEAS = u_meas[i]
-    p.solve(remote=False)
+    p.solve(remote=True)
     y_meas[i] = p.y.MODEL + (random()-0.5)*noise
-    
+
     # estimator
     m.u.MEAS = u_meas[i]
     m.y.MEAS = y_meas[i]
-    m.solve(remote=False)
-    y_est[i] = m.y.MODEL 
-    k_est[i] = m.K.NEWVAL 
-    tau_est[i] = m.tau.NEWVAL 
-    
+    m.solve(remote=True,verify_input=True)
+    y_est[i] = m.y.MODEL
+    k_est[i] = m.K.NEWVAL
+    tau_est[i] = m.tau.NEWVAL
 
-#%% Plot results
-plt.figure()
-plt.subplot(4,1,1)
-plt.plot(y_meas)
-plt.plot(y_est)
-plt.legend(('meas','pred'))
-plt.subplot(4,1,2)
-plt.plot(np.ones(cycles)*p.K.value[0])
-plt.plot(k_est)
-plt.legend(('actual','pred'))
-plt.subplot(4,1,3)
-plt.plot(np.ones(cycles)*p.tau.value[0])
-plt.plot(tau_est)
-plt.legend(('actual','pred'))
-plt.subplot(4,1,4)
-plt.plot(u_meas)
-plt.legend('u')
+m.GUI()
+
+# #%% Plot results
+# plt.figure()
+# plt.subplot(4,1,1)
+# plt.plot(y_meas)
+# plt.plot(y_est)
+# plt.legend(('meas','pred'))
+# plt.subplot(4,1,2)
+# plt.plot(np.ones(cycles)*p.K.value[0])
+# plt.plot(k_est)
+# plt.legend(('actual','pred'))
+# plt.subplot(4,1,3)
+# plt.plot(np.ones(cycles)*p.tau.value[0])
+# plt.plot(tau_est)
+# plt.legend(('actual','pred'))
+# plt.subplot(4,1,4)
+# plt.plot(u_meas)
+# plt.legend('u')
