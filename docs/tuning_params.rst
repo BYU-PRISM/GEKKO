@@ -81,7 +81,7 @@ Default Value: 0
 
 Description: Critical: 0=OFF, 1=ON
 
-Explanation: Turns the application off (:ref:`reqctrlmode`=1) if the instrument that provides the measurement has a :ref:`pstatus`=0 (bad measurement). A critical measurement has this flag on to give control back to the operator if the measurement fails to deliver a good value.
+Explanation: Turns the application off ( :ref:`reqctrlmode` =1) if the instrument that provides the measurement has a :ref:`pstatus` =0 (bad measurement). A critical measurement has this flag on to give control back to the operator if the measurement fails to deliver a good value.
 
 .. _dcost:
 
@@ -167,7 +167,7 @@ Default Value: 1.0
 
 Description: Feedback status: 1=ON, 0=OFF
 
-Explanation: Determines how much of the measurement (:ref:`meas`) to use in updating the values in the model. A feedback status of 0 indicates that the measurement should not be used either in estimation or in updating a parameter in the model. A feedback status of 1 uses all of the measurement. A feedback status in between updates the model OR parameter value (x) according to the formula:
+Explanation: Determines how much of the measurement ( :ref:`meas`) to use in updating the values in the model. A feedback status of 0 indicates that the measurement should not be used either in estimation or in updating a parameter in the model. A feedback status of 1 uses all of the measurement. A feedback status in between updates the model OR parameter value (x) according to the formula:
 
 .. math::
 
@@ -236,7 +236,7 @@ Default Value: 1.0
 
 Description: Deadband for noise rejection of measurements in MHE
 
-Explanation: Used in estimation problems with :ref:`ev_type`=1 (l1-norm objective). The measurement gap (`MEAS_GAP`) defines a dead-band region around the measurement. If the model prediction is within that dead-band, there is no objective function penalty. Outside of that region, there is a linear penalty specified with the :ref:`wmeas` parameter. The :ref:`wmodel` parameter is the weighting given to deviation from the prior model prediction but does not have a deadband around the prior model prediction. The gap is only around the measured values.
+Explanation: Used in estimation problems with :ref:`ev_type` =1 (l1-norm objective). The measurement gap (`MEAS_GAP`) defines a dead-band region around the measurement. If the model prediction is within that dead-band, there is no objective function penalty. Outside of that region, there is a linear penalty specified with the :ref:`wmeas` parameter. The :ref:`wmodel` parameter is the weighting given to deviation from the prior model prediction but does not have a deadband around the prior model prediction. The gap is only around the measured values.
 
 .. _model:
 
@@ -480,7 +480,7 @@ Default Value: 0
 
 Description: Setpoint trajectory initialization (0=dead-band, 1=re-center with coldstart/out-of-service, 2=re-center always)
 
-Explanation: `TR_INIT` is an option to specify how the initial conditions of the controlled variable's (CV) setpoint reference trajectory should change with each cycle. The trajectory is set by :ref:`tau`. An option of 0 specifies that the initial conditions should start at SPHI and SPLO, creating an unchanging target over the horizon. An option of 1 makes the initial conditions equal to the current process variable value only on coldstart (:ref:`coldstart`>=1) or with :ref:`ctrlmode` <=2 when the controller is out of service. Otherwise, the reference trajectory is updated from the first step of the prior solution. When `TR_INIT=2`, the reference trajectory realigns to the variable's initial condition with each cycle. Each CV can have a different `TR_INIT`. The trajectory is also influenced by :ref:`tr_open`.
+Explanation: `TR_INIT` is an option to specify how the initial conditions of the controlled variable's (CV) setpoint reference trajectory should change with each cycle. The trajectory is set by :ref:`tau`. An option of 0 specifies that the initial conditions should start at SPHI and SPLO, creating an unchanging target over the horizon. An option of 1 makes the initial conditions equal to the current process variable value only on coldstart ( :ref:`coldstart`>=1) or with :ref:`ctrlmode` <=2 when the controller is out of service. Otherwise, the reference trajectory is updated from the first step of the prior solution. When `TR_INIT=2`, the reference trajectory realigns to the variable's initial condition with each cycle. Each CV can have a different `TR_INIT`. The trajectory is also influenced by :ref:`tr_open`.
 
 
 .. _upper:
@@ -494,7 +494,7 @@ Default Value: 1.0e20
 
 Description: Upper bound
 
-Explanation: `UPPER` is the the upper limit of a variable. If the variable guess value is above the upper limit, it is adjusted to the upper limit before it is given to the solver. The upper limit is also checked with the lower limit (:ref:`lower`) to ensure that it is greater than or equal to the lower limit. If the upper limit is equal to the lower limit, the variable is fixed at that value.
+Explanation: `UPPER` is the the upper limit of a variable. If the variable guess value is above the upper limit, it is adjusted to the upper limit before it is given to the solver. The upper limit is also checked with the lower limit ( :ref:`lower`) to ensure that it is greater than or equal to the lower limit. If the upper limit is equal to the lower limit, the variable is fixed at that value.
 
 
 .. _vdvl:
@@ -508,7 +508,7 @@ Default Value: 1.0e20
 
 Description: Delta validity limit
 
-Explanation: `VDVL` is the maximum change of a measured value before it is considered an unrealistic change. The change in measured values is recorded at every cycle of the application and compared to the `VDVL` limit. Validity limits are placed to catch instrument errors that may otherwise create bad inputs to the application. If a delta validity limit is exceeded, the action is to either freeze the measured value at the last good value (:ref:`vlaction`=0) or change the measured value by a maximum of `VDVL` in the direction of the bad measurement (:ref:`vlaction`=1). Another way to minimize the impact of unrealistic changes in measurements is to set :ref:`fstatus` between 0 and 1 with values closer to 0 becoming insensitive to measurement changes.
+Explanation: `VDVL` is the maximum change of a measured value before it is considered an unrealistic change. The change in measured values is recorded at every cycle of the application and compared to the `VDVL` limit. Validity limits are placed to catch instrument errors that may otherwise create bad inputs to the application. If a delta validity limit is exceeded, the action is to either freeze the measured value at the last good value ( :ref:`vlaction` =0) or change the measured value by a maximum of `VDVL` in the direction of the bad measurement ( :ref:`vlaction` =1). Another way to minimize the impact of unrealistic changes in measurements is to set :ref:`fstatus` between 0 and 1 with values closer to 0 becoming insensitive to measurement changes.
 
 
 .. _vlaction:
@@ -536,7 +536,7 @@ Default Value: 1.0e20
 
 Description: Upper validity limit
 
-Explanation: `VLHI` is the upper validity limit for a measured value. Validity limits are one way to protect an application against bad measurements. This gross error detection relies on a combination of change values and absolute limits to determine when a measurement should be rejected. If `VLHI` is exceeded, the measured value is placed at `VLHI` or the maximum move allowed by :ref:`vdvl` when :ref:`vlaction`=1. If :ref:`vlaction`=0, there is no change in the measured value when a limit (:ref:`vdvl`, :ref:`vlhi`, :ref:`vllo`) is exceeded.
+Explanation: `VLHI` is the upper validity limit for a measured value. Validity limits are one way to protect an application against bad measurements. This gross error detection relies on a combination of change values and absolute limits to determine when a measurement should be rejected. If `VLHI` is exceeded, the measured value is placed at `VLHI` or the maximum move allowed by :ref:`vdvl` when :ref:`vlaction` =1. If :ref:`vlaction` =0, there is no change in the measured value when a limit ( :ref:`vdvl`, :ref:`vlhi`, :ref:`vllo`) is exceeded.
 
 
 .. _vllo:
@@ -564,7 +564,7 @@ Default Value: 20.0
 
 Description: Objective function weight on measured value
 
-Explanation: A weighting factor to penalize deviation of current model predictions from measured values. This is used in estimation applications (:ref:`imode`=2, 5, or 8) where the penalty. The infinite estimation horizon approximation is especially useful for systems that have weakly observable or unobservable states. A higher `WMODEL` can also help to reduce the aggressiveness of the estimator in aligning with the measurements by balancing with a penalty against shifting too far from the prior predictions. The :ref:`wmodel` value should never be equal to or larger than the `WMEAS` value for :ref:`ev_type`=1 (l1-norm). A `WMODEL` value higher than `WMEAS` will ignore measured values in favor of matching prior model predictions.
+Explanation: A weighting factor to penalize deviation of current model predictions from measured values. This is used in estimation applications ( :ref:`imode` =2, 5, or 8) where the penalty. The infinite estimation horizon approximation is especially useful for systems that have weakly observable or unobservable states. A higher `WMODEL` can also help to reduce the aggressiveness of the estimator in aligning with the measurements by balancing with a penalty against shifting too far from the prior predictions. The :ref:`wmodel` value should never be equal to or larger than the `WMEAS` value for :ref:`ev_type` =1 (l1-norm). A `WMODEL` value higher than `WMEAS` will ignore measured values in favor of matching prior model predictions.
 
 
 .. _wmodel:
