@@ -81,7 +81,7 @@ Default Value: 0
 
 Description: Critical: 0=OFF, 1=ON
 
-Explanation: Turns the application off (REQCTRLMODE=1) if the instrument that provides the measurement has a PSTATUS=0 (bad measurement). A critical measurement has this flag on to give control back to the operator if the measurement fails to deliver a good value.
+Explanation: Turns the application off (:ref:`reqctrlmode`=1) if the instrument that provides the measurement has a :ref:`pstatus`=0 (bad measurement). A critical measurement has this flag on to give control back to the operator if the measurement fails to deliver a good value.
 
 .. _dcost:
 
@@ -154,7 +154,7 @@ Default Value: 0.0
 
 Description: Delta prediction changes for each step'
 
-Explanation: Changes in the manipulated variables (MVs) are listed for the first 10 steps of the horizon including DPRED[1], DPRED[2], etc. Values of zero indicate that there are no changes. With REQCTRLMODE=1 (COLD), all DPRED values are zero. With REQCTRLMODE=2 (WARM), only DPRED[1] is required to be zero but the other segments may be non-zero. With REQCTRLMODE=3 (CONTROL), the first DPRED value is changing.
+Explanation: Changes in the manipulated variables (MVs) are listed for the first 10 steps of the horizon including `DPRED[1]`, `DPRED[2]`, etc. Values of zero indicate that there are no changes. With `REQCTRLMODE=1` (COLD), all :ref:`dpred` values are zero. With `REQCTRLMODE=2` (WARM), only `DPRED[1]` is required to be zero but the other segments may be non-zero. With `REQCTRLMODE=3` (CONTROL), the first `DPRED` value is changing.
 
 .. _fstatus:
 
@@ -167,7 +167,11 @@ Default Value: 1.0
 
 Description: Feedback status: 1=ON, 0=OFF
 
-Explanation: Determines how much of the measurement (MEAS) to use in updating the values in the model. A feedback status of 0 indicates that the measurement should not be used either in estimation or in updating a parameter in the model. A feedback status of 1 uses all of the measurement. A feedback status in between updates the model OR parameter value (x) according to the formula: x = LSTVAL * (1-FSTATUS) + MEAS * FSTATUS.
+Explanation: Determines how much of the measurement (:ref:`meas`) to use in updating the values in the model. A feedback status of 0 indicates that the measurement should not be used either in estimation or in updating a parameter in the model. A feedback status of 1 uses all of the measurement. A feedback status in between updates the model OR parameter value (x) according to the formula:
+
+.. math::
+
+	x = LSTVAL * (1-FSTATUS) + MEAS * FSTATUS
 
 .. _fdelay:
 
@@ -180,7 +184,7 @@ Default Value: 0
 
 Description: Feedback delay: 0=No Delay, >=1 horizon steps for delay
 
-Explanation: The feedback delay places the measurement at the appropriate point in the horizon for dynamic estimation. Typical examples are laboratory measurement or gas chromatographs that report measurements that were taken in the past, usually with a 10 min - 2 hour delay. When the new value is reported, it should be placed at the appropriate point in the data time horizon. FDELAY is the number of horizon steps in the past where the measurement was actually taken.
+Explanation: The feedback delay places the measurement at the appropriate point in the horizon for dynamic estimation. Typical examples are laboratory measurement or gas chromatographs that report measurements that were taken in the past, usually with a 10 min - 2 hour delay. When the new value is reported, it should be placed at the appropriate point in the data time horizon. `FDELAY` is the number of horizon steps in the past where the measurement was actually taken.
 
 .. _lower:
 
@@ -193,7 +197,7 @@ Default Value: -1.0e20
 
 Description: Lower bound
 
-Explanation: LOWER is the the lower limit of a variable. If the variable guess value is below the lower limit, it is adjusted to the lower limit. The lower limit is also checked with the upper limit to ensure that it is less than or equal to the upper limit. If the lower limit is equal to the upper limit, the variable is fixed at that value.
+Explanation: `LOWER` is the lower limit of a variable. If the variable guess value is below the lower limit, it is adjusted to the lower limit. The lower limit is also checked with the upper limit to ensure that it is less than or equal to the upper limit. If the lower limit is equal to the upper limit, the variable is fixed at that value.
 
 .. _lstval:
 
@@ -206,7 +210,7 @@ Default Value: 1.0
 
 Description: Last value from previous solution
 
-Explanation: The last value (LSTVAL) is the value from the prior solution of the optimization problem or simulation.
+Explanation: The last value (`LSTVAL`) is the value from the prior solution of the optimization problem or simulation.
 
 .. _meas:
 
@@ -219,7 +223,7 @@ Default Value: 1.0
 
 Description: Measured value
 
-Explanation: The measurement of a variable or parameter. The value of MEAS is initialized to the initial model value. The MEAS value is used in the application if FSTATUS is >0 but not when FSTATUS=0.
+Explanation: The measurement of a variable or parameter. The value of `MEAS` is initialized to the initial model value. The `MEAS` value is used in the application if :ref:`fstatus` is greater than zero, but not when `FSTATUS=0`.
 
 .. _meas_gap:
 
@@ -232,7 +236,7 @@ Default Value: 1.0
 
 Description: Deadband for noise rejection of measurements in MHE
 
-Explanation: Used in estimation problems with APM.EV_TYPE=1 (l1-norm objective). The measurement gap (MEAS_GAP) defines a dead-band region around the measurement. If the model prediction is within that dead-band, there is no objective function penalty. Outside of that region, there is a linear penalty specified with the WMEAS parameter. The WMODEL parameter is the weighting given to deviation from the prior model prediction but does not have a deadband around the prior model prediction. The gap is only around the measured values.
+Explanation: Used in estimation problems with :ref:`ev_type`=1 (l1-norm objective). The measurement gap (`MEAS_GAP`) defines a dead-band region around the measurement. If the model prediction is within that dead-band, there is no objective function penalty. Outside of that region, there is a linear penalty specified with the :ref:`wmeas` parameter. The :ref:`wmodel` parameter is the weighting given to deviation from the prior model prediction but does not have a deadband around the prior model prediction. The gap is only around the measured values.
 
 .. _model:
 
