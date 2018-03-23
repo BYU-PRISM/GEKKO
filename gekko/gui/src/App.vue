@@ -57,6 +57,7 @@ export default {
   },
   mounted () {
     setTimeout(this.poll, 1000)
+    this.$store.dispatch('updatePlotDataAsync')
   },
   methods: {
     poll () {
@@ -65,6 +66,7 @@ export default {
         .then(resp => {
           // Will implement updating here
           this.showModal = false
+          setTimeout(this.poll, 1000)
         }, error => {
           console.log('HTTP Polling Error, Status:', error.status, 'Message:', error.statusText)
           if (error.status === 0) {
@@ -83,7 +85,6 @@ export default {
           }
           this.showModal = true
         })
-      setTimeout(this.poll, 1000)
     }
   }
 }

@@ -8,6 +8,7 @@ import Tabs from './components/Tabs'
 import VueResource from 'vue-resource'
 import router from './router'
 import { Observable } from 'rxjs/Observable'
+import store from './store/index.js'
 
 Vue.use(VueRx, { Observable })
 Vue.use(VueResource)
@@ -23,6 +24,7 @@ if (process.env.NODE_ENV === 'development') {
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
+  store,
   router,
   components: { App, Plot, Tabs },
   template: '<App/>'

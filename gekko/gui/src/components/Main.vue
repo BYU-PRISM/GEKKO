@@ -1,8 +1,8 @@
 <template>
   <div class="mainDiv">
     <modalPlot
-      v-if="showModalPlot"
-      @close="showModalPlot = false"/>
+      v-if="$store.state.fullscreenPlot"
+      @close="hideModalPlot"/>
     <div
       class="row"
       style="margin-right:0px;">
@@ -28,8 +28,13 @@
         <button
           type="button"
           class="btn btn-secondary"
-          @click="showModalPlot = true"
+          @click="showModalPlot"
           style="margin-top:10px;">Fullscreen plot</button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          @click="$store.dispatch('updatePlotDataAsync')"
+          style="margin-top:10px;">Test data fetch</button>
       </div>
     </div>
   </div>
@@ -45,20 +50,21 @@ export default {
   components: {'plot': Plot, 'tabs': Tabs, 'modalPlot': ModalPlot},
   data () {
     return {
-      plotArray: [1],
-      idCounter: 2,
-      showModalPlot: false
+    }
+  },
+  computed: {
+    plotArray () {
+      return this.$store.state.plots
     }
   },
   methods: {
-    addPlot () {
-      this.plotArray.push(this.idCounter)
-      ++this.idCounter
-    },
+    addPlot () { this.$store.commit('addPlot') },
     removePlot (id) {
       console.log('Removing plot', id)
       this.plotArray = this.plotArray.filter(val => val !== id)
-    }
+    },
+    hideModalPlot () { this.$store.commit('hideFullscreenPlot') },
+    showModalPlot () { this.$store.commit('showFullscreenPlot') }
   }
 }
 </script>

@@ -42,6 +42,11 @@ export default {
       id: Math.random().toString(36).substring(7)
     }
   },
+  computed: {
+    plotData () {
+      return this.$store.state.plotData
+    }
+  },
   watch: {
     numPlots: () => {
       console.log('numPlots changed, resizing plot')
@@ -54,30 +59,7 @@ export default {
   mounted () {
     window.addEventListener('resize', this.plotlyResize)
     console.log('plot layout', this.layout)
-    this.$http.headers.common['Access-Control-Allow-Origin'] = '*'
-    this.$http.get('get_data')
-      .then(response => response.json())
-      .then(data => {
-        var plotArray = []
-        console.log(data)
-        const isMuchData = Object.keys(data).length > 5
-        for (var key in data) {
-          if (data.hasOwnProperty(key)) {
-            if (key !== 'time') {
-              const trace = {
-                x: data.time,
-                y: data[key],
-                mode: 'lines',
-                type: 'scatter',
-                name: key,
-                visible: isMuchData ? 'legendonly' : 'true'
-              }
-              plotArray.push(trace)
-            }
-          }
-        }
-        Plotly.newPlot(this.id, plotArray, this.layout)
-      })
+    Plotly.newPlot(this.id, this.plotData, this.layout)
   },
   methods: {
     plotlyResize () {
