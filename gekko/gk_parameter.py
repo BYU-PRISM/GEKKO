@@ -6,7 +6,7 @@ Param_inout_options = ['VALUE']
 Param_output_options = []
 
 
-FV_input_options = Param_input_options+['LB','UB','CRITICAL', 'DMAX', 'DMAXHI', 
+FV_input_options = Param_input_options+['CRITICAL', 'DMAX', 'DMAXHI', 
                                         'DMAXLO', 'FSTATUS', 'LOWER','MEAS', 
                                         'PSTATUS','STATUS', 'UPPER', 'VDVL', 
                                         'VLACTION', 'VLHI', 'VLLO']
@@ -123,10 +123,6 @@ class GK_FV(GKParameter):
         self.model_name = gk_model
         #self.path = os.path.join(os.path.dirname(os.path.realpath(__file__)), self.model_name) OLD from when model file were in the same directory; now using temp files
         self.path = model_path #use the same path as the model 
-        
-        #Unlike variables, parameters don't need bounds unless they are special (MV,FV)
-        self.LB = lb #lower bound
-        self.UB = ub #upper bound
         
         # FV options
         self.CRITICAL = None

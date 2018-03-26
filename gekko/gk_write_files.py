@@ -32,16 +32,16 @@ def build_model(self):
                 i = 1
                 model += ' = %s' % parameter.VALUE
             if parameter.type != None: #Only FV/MV have bounds
-                if parameter.UB is not None:
+                if parameter.UPPER is not None:
                     if i == 1:
                         model += ', '
                     i = 1
-                    model += '<= %s' % parameter.UB
-                if parameter.LB is not None:
+                    model += '<= %s' % parameter.UPPER
+                if parameter.LOWER is not None:
                     if i == 1:
                         model += ', '
                     i = 1
-                    model += '>= %s' % parameter.LB
+                    model += '>= %s' % parameter.LOWER
             model += '\n'
         model += 'End Parameters\n'
 
@@ -53,16 +53,16 @@ def build_model(self):
             if not isinstance(parameter.VALUE.value, (list,np.ndarray)):
                 i = 1
                 model += ' = %s' % parameter.VALUE
-            if parameter.UB is not None:
+            if parameter.UPPER is not None:
                 if i == 1:
                     model += ', '
                 i = 1
-                model += '<= %s' % parameter.UB
-            if parameter.LB is not None:
+                model += '<= %s' % parameter.UPPER
+            if parameter.LOWER is not None:
                 if i == 1:
                     model += ', '
                 i = 1
-                model += '>= %s' % parameter.LB
+                model += '>= %s' % parameter.LOWER
             model += '\n'
         model += 'End Variables\n'
 

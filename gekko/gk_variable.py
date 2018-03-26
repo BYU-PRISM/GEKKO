@@ -3,7 +3,7 @@ from .gk_operators import GK_Operators
 
 
 """
-Var_input_options = ['LB','UB']
+Var_input_options = []
 Var_inout_options = ['VALUE']
 Var_output_options = []
 
@@ -57,8 +57,6 @@ class GKVariable(GK_Operators):
             self.UPPER = ub
         else:
             self.UPPER = None
-        self.LB = lb #lower bound
-        self.UB = ub #upper bound
         
         #register fixed values through connections to ensure consistency in the 
         #csv file, otherwise the requested fixed value will be overridden by
