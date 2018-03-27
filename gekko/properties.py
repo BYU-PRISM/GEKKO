@@ -62,11 +62,11 @@ parameter_options = {'FV':{'inputs':FV_input_options, 'outputs':FV_output_option
 
 
 #%% Variable options
-Var_input_options = []
+Var_input_options = ['LOWER', 'UPPER']
 Var_inout_options = ['VALUE']
 Var_output_options = []
 
-SV_input_options = Var_input_options+['FSTATUS', 'LOWER', 'MEAS', 'UPPER']
+SV_input_options = Var_input_options+['FSTATUS', 'MEAS']
 SV_inout_options = Var_inout_options+[]
 SV_output_options = Var_output_options+['MODEL', 'PRED']
 
