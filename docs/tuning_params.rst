@@ -435,7 +435,7 @@ TAU
 
 Type: Real, Input
 
-Default Value: 60.0
+Default Value: 1.0
 
 Description: Time constant for controlled variable response
 
