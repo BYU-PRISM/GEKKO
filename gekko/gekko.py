@@ -459,7 +459,7 @@ class GEKKO(object):
 
     #%% Import functions from other scripts
     from .gk_debug import gk_logic_tree, verify_input_options, like, name_check
-    from .gk_write_files import write_solver_options, generate_overrides_dbs_file, write_info, write_csv, build_model
+    from .gk_write_files import write_solver_options, generate_dbs_file, write_info, write_csv, build_model
     from .gk_post_solve import load_JSON, load_results
 
 
@@ -470,7 +470,7 @@ class GEKKO(object):
         This function has these substeps:
         -Validates the model and write .apm file (if .apm not supplied)
         -Validate and write .csv file (if none provided)
-        -Write options to overrides.dbs
+        -Write options to dbs file
         -Solve the problem using the apm.exe commandline interface.
         -Load results into python variables.
         """
@@ -503,9 +503,9 @@ class GEKKO(object):
 
         if timing == True:
             t = time.time()
-        self.generate_overrides_dbs_file()
+        self.generate_dbs_file()
         if timing == True:
-            print('build overrides', time.time() - t)
+            print('build dbs', time.time() - t)
 
 
         if timing == True:
@@ -581,7 +581,7 @@ class GEKKO(object):
             #send info file
             send_if_exists('info')
             #send dbs file
-            with open(os.path.join(self.path,'overrides.dbs')) as f:
+            with open(os.path.join(self.path,'measurements.dbs')) as f:
                 dbs = f.read()
             cmd(self.server, self.model_name, 'option '+dbs)
             #solver options

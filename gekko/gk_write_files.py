@@ -32,16 +32,16 @@ def build_model(self):
                 i = 1
                 model += ' = %s' % parameter.VALUE
             if parameter.type != None: #Only FV/MV have bounds
-                if parameter.UB is not None:
+                if parameter.UPPER is not None:
                     if i == 1:
                         model += ', '
                     i = 1
-                    model += '<= %s' % parameter.UB
-                if parameter.LB is not None:
+                    model += '<= %s' % parameter.UPPER
+                if parameter.LOWER is not None:
                     if i == 1:
                         model += ', '
                     i = 1
-                    model += '>= %s' % parameter.LB
+                    model += '>= %s' % parameter.LOWER
             model += '\n'
         model += 'End Parameters\n'
 
@@ -53,16 +53,16 @@ def build_model(self):
             if not isinstance(parameter.VALUE.value, (list,np.ndarray)):
                 i = 1
                 model += ' = %s' % parameter.VALUE
-            if parameter.UB is not None:
+            if parameter.UPPER is not None:
                 if i == 1:
                     model += ', '
                 i = 1
-                model += '<= %s' % parameter.UB
-            if parameter.LB is not None:
+                model += '<= %s' % parameter.UPPER
+            if parameter.LOWER is not None:
                 if i == 1:
                     model += ', '
                 i = 1
-                model += '>= %s' % parameter.LB
+                model += '>= %s' % parameter.LOWER
             model += '\n'
         model += 'End Variables\n'
 
@@ -230,25 +230,31 @@ def write_csv(self):
 
 
 def write_info(self):
-    #Classify variable in .info file
-    filename = self.model_name+'.info'
+    #since there is currently no way to change variable classification after
+    #declaration, rewriting the info file is redundant and makes the server info
+    #file on remote solves large
+    #avoid this problem by only writing the info file for the first successful solve
+    if self.options.CYCLECOUNT < 1:
+        #Classify variable in .info file
+        filename = self.model_name+'.info'
+    
+        #Create and open configuration files
+        with open(os.path.join(self.path,filename), 'w+') as f:
+            #check each Var and Param for FV/MV/SV/CV
+            for vp in self.variables+self.parameters:
+                if vp.type is not None:
+                    f.write(vp.type+', '+vp.name+'\n')
 
-    #Create and open configuration files
-    with open(os.path.join(self.path,filename), 'w+') as f:
-        #check each Var and Param for FV/MV/SV/CV
-        for vp in self.variables+self.parameters:
-            if vp.type is not None:
-                f.write(vp.type+', '+vp.name+'\n')
 
-
-def generate_overrides_dbs_file(self):
-    '''Write options to overrides.dbs file
+def generate_dbs_file(self):
+    '''Write options to measurements.dbs file so it gets automatically deleted
+    to prevent file build-up on the server
 
     Returns:
         Does not return
     '''
     #set filename
-    filename = 'overrides.dbs'
+    filename = 'measurements.dbs'
     #print all global options
     file_content = self.options.getOverridesString()
     #cycle through all Params and Vars to find set options
