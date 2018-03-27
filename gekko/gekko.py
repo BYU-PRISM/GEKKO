@@ -398,6 +398,7 @@ class GEKKO(object):
                     if A[i,j] != 0: 
                         sparse_matrix.append([i+1,j+1,A[i,j]])
             np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
+            self._extra_files.append(file_name) #add csv file to list of extra file to send to server
             file_name = SS_name + '.b.txt'
             sparse_matrix = []
             for j in range(m):
@@ -405,6 +406,7 @@ class GEKKO(object):
                     if B[i,j] != 0: 
                         sparse_matrix.append([i+1,j+1,B[i,j]])
             np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
+            self._extra_files.append(file_name) #add csv file to list of extra file to send to server
             file_name = SS_name + '.c.txt'
             sparse_matrix = []
             for j in range(n):
@@ -412,6 +414,7 @@ class GEKKO(object):
                     if C[i,j] != 0: 
                         sparse_matrix.append([i+1,j+1,C[i,j]])
             np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
+            self._extra_files.append(file_name) #add csv file to list of extra file to send to server
             if D is not None:
                 file_name = SS_name + '.d.txt'
                 sparse_matrix = []
@@ -420,6 +423,7 @@ class GEKKO(object):
                         if D[i,j] != 0: 
                             sparse_matrix.append([i+1,j+1,D[i,j]])
                 np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
+                self._extra_files.append(file_name) #add csv file to list of extra file to send to server
     
         #define arrays of states, outputs and inputs
         x = [self.SV() for i in np.arange(n)]
