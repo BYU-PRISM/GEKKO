@@ -442,6 +442,28 @@ class GEKKO(object):
         return x,y,u
 
 
+    def periodic(self,v):
+        """ Makes the variable argument periodic by adding an equation to
+        constrains v[end] = v[0]. This does not affect the default behavior of
+        fixing initial conditions (v[0]).
+        """
+        
+        #Verify that v is calculated (MV,SV,CV,Var)
+        if not isinstance(v,(GKVariable,GKParameter)):
+            raise TypeError("Variable must be calculated and dynamic (Var,SV,CV,MV)")
+        if isinstance(v,(GKParameter)):
+            if v.type != 'MV':
+                raise TypeError("Variable must be calculated and dynamic (Var,SV,CV,MV)")
+            
+        #build periodic object with unique object name
+        periodic_name = 'periodic_obj_' + str(len(self._objects) + 1)
+        self._objects.append(periodic_name + ' = periodic')
+
+        #Add connections between v and periodic object attribute x
+        self._connections.append(v.name + ' = ' + periodic_name+'.x')
+        
+        
+
     #%% Add array functionality to all types
     def Array(self,f,dim,**args):
         x = np.ndarray(dim,dtype=object)

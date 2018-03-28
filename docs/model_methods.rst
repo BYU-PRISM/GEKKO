@@ -72,7 +72,7 @@ Model Building
 
 .. py:classmethod::    a = m.Array(type,dimension,**args)
 
-	Create an n-dimensional array (as defined in tuple input `dimension`) of GEKKO variables of type `type`.
+	Create an n-dimensional array (as defined in tuple input `dimension` ) of GEKKO variables of type `type` .
     The optional keyword arguments (`**args`) are applied to each element of the array.
 
 
@@ -188,7 +188,7 @@ Pre-built Objects
     The `discrete` Boolean parameter indicates a discrete-time model, which requires constant time steps and 2 :ref:`nodes`.
     The `dense` Boolean parameter indicates if A,B,C,D should be written as dense or sparse matrices. Sparse matricies will be faster unless it is known that the matricies are very dense.
 
-.. py:classmethod:: m.cspline(x,y,x_data,y_data,bound_x=False):
+.. py:classmethod:: m.cspline(x,y,x_data,y_data,bound_x=False)
 
 	Generate a 1d cubic spline with continuous first and seconds derivatives
     from arrays of x and y data which link to GEKKO variables x and y with a
@@ -208,6 +208,12 @@ Pre-built Objects
 
 	bound_x: boolean to state that x should be bounded at the upper and lower bounds of x_data to avoid
     extrapolation error of the cspline.
+
+
+.. py:classmethod:: periodic(v)
+
+    Makes the variable argument periodic by adding an equation to constrains v[end] = v[0]. 
+    This does not affect the default behavior of fixing initial conditions (v[0]).
 
 
 
