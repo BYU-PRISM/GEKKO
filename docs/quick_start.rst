@@ -39,7 +39,7 @@ These attributes are discussed in :doc:`MV_options` and :doc:`CV_options`.
 All of these variable types have the optional argument 'name'. The name is used
 on the back-end to write the model file and is only useful if the user intends to
 manually use the model file later. Names are case-insensitive, must begin with a letter,
-and can only contain alphanumeric characters and underscores. If a name is not provided, 
+and can only contain alphanumeric characters and underscores. If a name is not provided,
 one is automatically assigned a unique letter/number (c#/p#/v#/i#).
 
 
@@ -74,7 +74,7 @@ Calculated by solver to meet constraints (Equations)::
 	v = m.Var([value], [lb], [ub], [name]):
 
 
-* 'lb' and 'ub' provide lower and upper variable bounds, respectively, to the solver.
+* `lb` and `ub` provide lower and upper variable bounds, respectively, to the solver.
 
 
 Intermediates
@@ -102,7 +102,7 @@ throughout the horizon (i.e. they are not discretized in dynamic modes).::
 
 	f = m.FV([value], [lb], [ub], [name])
 
-* 'lb' and 'ub' provide lower and upper variable bounds, respectively, to the solver.
+* `lb` and `ub` provide lower and upper variable bounds, respectively, to the solver.
 
 
 Manipulated Variable
@@ -112,7 +112,7 @@ Manipulated Variables (MV) inherit FVs but are discretized throughout the horizo
 
 	m = m.MV([value], [lb], [ub], [name])
 
-* 'lb' and 'ub' provide lower and upper variable bounds, respectively, to the solver.
+* `lb` and `ub` provide lower and upper variable bounds, respectively, to the solver.
 
 
 State Variable

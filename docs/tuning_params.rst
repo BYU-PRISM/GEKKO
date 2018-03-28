@@ -128,7 +128,7 @@ Default Value: 1.0e20
 
 Description: Delta MV positive maximum step per horizon interval
 
-Explanation: Applies a hard constraint that prevents the MV from being changed by more than the specified value in one time step, but this constraint only applies to increases in the MV value. This can be used to prevent large jumps in the MV value in the case where that is either undesirable or infeasible.
+Explanation: Like :ref:`dmax`, but only with positive changes. Applies a hard constraint that prevents the MV from being changed by more than the specified value in one time step, but this constraint only applies to increases in the MV value. This can be used to prevent large jumps in the MV value in the case where that is either undesirable or infeasible.
 
 .. _dmaxlo:
 
@@ -141,7 +141,7 @@ Default Value: -1.0e20
 
 Description: Delta MV negative maximum step per horizon interval
 
-Explanation: Applies a hard constraint that prevents the MV from being changed by more than the specified value in one time step, but this constraint only applies to decreases in the MV value. This can be used to prevent large jumps in the MV value in the case where that is either undesirable or infeasible.
+Explanation: Like :ref:`dmax`, but only with negative changes. Applies a hard constraint that prevents the MV from being changed by more than the specified value in one time step, but this constraint only applies to decreases in the MV value. This can be used to prevent large jumps in the MV value in the case where that is either undesirable or infeasible.
 
 .. _dpred:
 
@@ -435,7 +435,7 @@ TAU
 
 Type: Real, Input
 
-Default Value: 1.0
+Default Value: 60.0
 
 Description: Time constant for controlled variable response
 
