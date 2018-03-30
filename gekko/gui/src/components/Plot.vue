@@ -1,7 +1,7 @@
 <template>
   <div class="plot-div">
     <button
-      v-if="numPlots > 1"
+      v-if="$store.state.plots.length > 2 && externalId != 0"
       type="button"
       class="btn btn-sm btn-danger plot-close"
       @click="removePlot">X</button>
@@ -20,55 +20,38 @@ window.onresize = () => {
 export default {
   name: 'Plot',
   props: {
+    // This is passed in and is used for looking up the other props from the global store
     externalId: {
       type: Number,
       default: 1
-    },
-    numPlots: {
-      type: Number,
-      default: 1
-    },
-    layout: {
-      type: Object,
-      default: () => {
-        return {
-          'height': 500
-        }
-      }
     }
   },
   data () {
     return {
+      // This id is simply for handling window updates and is soley internal state
       id: Math.random().toString(36).substring(7)
     }
   },
   computed: {
-    plotData () {
-      return this.$store.state.plotData
-    }
+    data () { return this.$store.state.plots.filter(plot => plot.id === this.externalId)[0].data },
+    layout () { return this.$store.state.plots.filter(plot => plot.id === this.externalId)[0].layout }
   },
   watch: {
     numPlots: () => {
       console.log('numPlots changed, resizing plot')
       this.plotlyResize // eslint-disable-line
-    }
+    },
+    plotData: (val) => { Plotly.newPlot(this.id, val, this.layout) }
   },
-  beforeDestroy: function () {
-    window.removeEventListener('resize', this.plotlyResize)
-  },
+  beforeDestroy () { window.removeEventListener('resize', this.plotlyResize) },
   mounted () {
     window.addEventListener('resize', this.plotlyResize)
     console.log('plot layout', this.layout)
-    Plotly.newPlot(this.id, this.plotData, this.layout)
+    Plotly.newPlot(this.id, this.data, this.layout)
   },
   methods: {
-    plotlyResize () {
-      console.log('handling resize for:', this.id)
-      Plotly.Plots.resize(this.id)
-    },
-    removePlot () {
-      this.$emit('plot-removed', this.externalId)
-    }
+    plotlyResize () { Plotly.Plots.resize(this.id) },
+    removePlot () { this.$store.commit('removePlot', this.externalId) }
   }
 
 }

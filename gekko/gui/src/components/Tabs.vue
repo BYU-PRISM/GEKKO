@@ -91,41 +91,13 @@ export default {
   data () {
     return {
       activeTab: 'Model',
-      modelData: {},
-      varsData: {},
       open: false
     }
   },
-
-  created () {
-    const ignoredProps = ['INFO', 'APM']
-    let options
-    this.$http.get('get_options')
-      .then(response => response.json())
-      .then(obj => {
-        options = obj
-        console.log('obj:', obj)
-        this.modelData = obj['APM']
-        return Object.keys(obj).filter(key => !ignoredProps.includes(key))
-      })
-      .then(keys => {
-        keys.forEach(key => {
-          console.log(options)
-          this.varsData[key] = options[key]
-          this.varsData[key].ishidden = true
-          return null
-        })
-      }).then(() => {
-        console.log('varsData:', this.varsData)
-      })
-    this.$http.get('get_model')
-      .then(response => response.json())
-      .then(model => {
-        this.modelData = model
-        console.log('model:', this.modelData)
-      })
+  computed: {
+    modelData () { return this.$store.state.modelData },
+    varsData () { return this.$store.state.varsData }
   },
-
   methods: {
     toggle: function (v, prop) {
       v.ishidden = !v.ishidden
@@ -140,7 +112,7 @@ export default {
   cursor: pointer;
 }
 .tab-table {
-  max-height: 87vh;
+  max-height: 83vh;
 }
 .tab-table-item {
   padding-left: 0px;

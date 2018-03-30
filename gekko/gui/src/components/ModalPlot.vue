@@ -5,7 +5,7 @@
         <div class="modal-fullscreen-container">
           <div class="modal-body">
             <slot name="body">
-              <plot :layout="layout"/>
+              <plot :external-id="0"/>
             </slot>
           </div>
           <div class="modal-footer">
@@ -24,11 +24,7 @@ import Plot from './Plot'
 export default {
   components: { 'plot': Plot },
   data () {
-    return {
-      layout: {
-        'height': window.innerHeight - 150
-      }
-    }
+    return { }
   }
 }
 </script>

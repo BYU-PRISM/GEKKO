@@ -11,9 +11,10 @@ from flask import Flask, jsonify, request
 from .gk_parameter import GKParameter
 from .gk_variable import GKVariable
 import __main__ as main
+from flask_cors import CORS
 
 # Toggle development and production modes
-DEV = True
+DEV = False
 WATCHDOG_TIME_LENGTH = 0
 
 if DEV:
@@ -27,6 +28,7 @@ else:
     log.setLevel(logging.ERROR)
 
 app = Flask(__name__, static_url_path='/gui/dist')
+CORS(app)
 
 # This acts as a watchdog timer. If the front-end does not make a call at least
 # every timeout seconds then the main process is stopped. Every time this method is called

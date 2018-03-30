@@ -12,12 +12,9 @@
       <div class="col-sm-9">
         <div class="plots-div">
           <div
-            v-for="value in plotArray"
-            :key="value">
-            <plot
-              :external-id="value"
-              @plot-removed="removePlot"
-              :num-plots="plotArray.length"/>
+            v-for="plot in displayPlots"
+            :key="plot.id">
+            <plot :external-id="plot.id"/>
           </div>
         </div>
         <button
@@ -30,13 +27,14 @@
           class="btn btn-secondary"
           @click="showModalPlot"
           style="margin-top:10px;">Fullscreen plot</button>
-        <button
-          type="button"
-          class="btn btn-secondary"
-          @click="$store.dispatch('updatePlotDataAsync')"
-          style="margin-top:10px;">Test data fetch</button>
       </div>
     </div>
+    <!-- Can add this if we want a little status updater -->
+    <!-- <div
+      class="communication-status"
+      :style="statusStyle">
+      <p>Status: {{ $store.state.communicationError ? 'Error' : 'Good' }}</p>
+    </div> -->
   </div>
 </template>
 
@@ -49,19 +47,31 @@ export default {
   name: 'Main',
   components: {'plot': Plot, 'tabs': Tabs, 'modalPlot': ModalPlot},
   data () {
-    return {
-    }
+    return { }
   },
   computed: {
     plotArray () {
       return this.$store.state.plots
+    },
+    displayPlots () {
+      return this.plotArray.filter((plot) => plot.id !== 0)
+    },
+    statusStyle () {
+      return {
+        border: this.$store.state.communicationError ? 'red 2px' : 'green 2px',
+        padding: '3px',
+        borderTopLeftRadius: '2px',
+        borderStyle: 'solid',
+        color: this.$store.state.communicationError ? 'red' : 'green'
+      }
     }
   },
+  mounted () { },
   methods: {
     addPlot () { this.$store.commit('addPlot') },
     removePlot (id) {
       console.log('Removing plot', id)
-      this.plotArray = this.plotArray.filter(val => val !== id)
+      this.$store.commit('removePlot', id)
     },
     hideModalPlot () { this.$store.commit('hideFullscreenPlot') },
     showModalPlot () { this.$store.commit('showFullscreenPlot') }
@@ -77,5 +87,13 @@ export default {
   border-style: solid;
   padding-right: 15px;
   border-radius: 10px;
+}
+
+.communication-status {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  height: 30px;
+  width: 100px;
 }
 </style>

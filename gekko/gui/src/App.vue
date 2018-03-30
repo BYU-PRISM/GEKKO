@@ -42,6 +42,8 @@
 </template>
 
 <script>
+// import { HTTP } from './http'
+
 export default {
   name: 'App',
   data () {
@@ -57,15 +59,16 @@ export default {
   },
   mounted () {
     setTimeout(this.poll, 1000)
-    this.$store.dispatch('updatePlotDataAsync')
+    this.$store.dispatch('initialize')
   },
   methods: {
     poll () {
-      this.$http.headers.common['Access-Control-Allow-Origin'] = '*'
+      // this.$http.headers.common['Access-Control-Allow-Origin'] = '*'
       this.$http.get('poll')
         .then(resp => {
           // Will implement updating here
           this.showModal = false
+          this.$store.commit('setCommunicationError', false)
           setTimeout(this.poll, 1000)
         }, error => {
           console.log('HTTP Polling Error, Status:', error.status, 'Message:', error.statusText)
@@ -84,6 +87,7 @@ export default {
                                   ${error.status}, Error: ${error.statusText}`
           }
           this.showModal = true
+          this.$store.commit('setCommunicationError', true)
         })
     }
   }
