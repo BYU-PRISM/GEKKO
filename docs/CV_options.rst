@@ -43,13 +43,19 @@ This is a list of all available options for CVs and their default values:
 
     :ref:`fdelay` = 0
 
+	:ref:`fstatus` = 0
+
+	:ref:`lower` = -1.0e20
+
     :ref:`lstval` = 1.0
+
+	:ref:`meas` = 1.0
 
     :ref:`meas_gap` = 1.0e-3
 
-    :ref:`ostatus` = 0
+	:ref:`model` = 1.0
 
-    :ref:`ostatuschg` = 0
+	:ref:`pred` = 1.0
 
     :ref:`pstatus` = 1
 
@@ -68,6 +74,8 @@ This is a list of all available options for CVs and their default values:
     :ref:`tr_init` = 0
 
     :ref:`tr_open` = 1.0
+
+	:ref:`upper` = 1.0e20
 
     :ref:`vdvl` = 1.0e20
 

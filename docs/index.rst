@@ -32,7 +32,7 @@ A pip package is available::
 
 	pip install gekko
 
-The most recent version is 0.0.4a1. You can upgrade from the commandline with the upgrade flag::
+The most recent version is 0.0.4rc2. You can upgrade from the command line with the upgrade flag::
 
     pip install --upgrade gekko
 
@@ -56,10 +56,10 @@ Contents
 	overview
 	quick_start
 	imode
+	global
 	tuning_params
 	MV_options
 	CV_options
-	global
 	model_methods
 	examples
 	support

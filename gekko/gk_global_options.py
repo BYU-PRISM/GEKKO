@@ -112,7 +112,7 @@ class GKGlobalOptions():
         self._initialized = True
 
     def getOverridesString(self):
-        ''' Returns string to go in overrides.dbs
+        ''' Returns string to go in dbs file
 
             Example return value:
                 NLC.APPINFO = 0

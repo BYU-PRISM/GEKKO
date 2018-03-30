@@ -72,7 +72,7 @@ Model Building
 
 .. py:classmethod::    a = m.Array(type,dimension,**args)
 
-	Create an n-dimensional array (as defined in tuple input `dimension`) of GEKKO variables of type `type`.
+	Create an n-dimensional array (as defined in tuple input `dimension` ) of GEKKO variables of type `type` .
     The optional keyword arguments (`**args`) are applied to each element of the array.
 
 
@@ -130,27 +130,6 @@ Model Building
 		m.solver_options = ['max_iter 100','max_cpu_time 100']
 
 
-.. py:classmethod:: m.cspline(x,y,x_data,y_data,bound_x=False):
-
-	Generate a 1d cubic spline with continuous first and seconds derivatives
-    from arrays of x and y data which link to GEKKO variables x and y with a
-    constraint that y=f(x).
-
-    This function is currently only available through remote solves to the default server.
-
-    Inputs:
-
-	x: GEKKO variable
-
-	y: GEKKO variable
-
-	x_data: array of x data
-
-    y_data: array of y data that matches x_data
-
-	bound_x: boolean to state that x should be bounded at the upper and lower bounds of x_data to avoid
-    extrapolation error of the cspline.
-
 
 .. _valid_eq_funcs:
 
@@ -180,7 +159,7 @@ Special function besides algebraic operators are available through GEKKO functio
 .. py:classmethod:: m.sinh(other)
 
 
-.. py:classmethod:: m.cosh(other)
+.. py:classmethod:: m.mcosh(other)
 
 
 .. py:classmethod:: m.tanh(other)
@@ -199,16 +178,43 @@ Special function besides algebraic operators are available through GEKKO functio
 
 
 
-Pre-Defined Models
+Pre-built Objects
 ------------------
 
-.. py:function:: m,x,y,u = SS(A,B,C,[D])
+.. py:classmethod:: x,y,u = state_space(A,B,C,D=None,discrete=False,dense=False)
 
-For State Space models, input SS matricies A,B,C, and optionally D. Returns a GEKKO model `m`, array of states `x`, array of outputs `y` and array of inputs `u`. A,B,C and D must be 2-dimensional matricies of the appropriate size.
+    For State Space models, input SS matricies A,B,C, and optionally D. Returns a GEKKO array of states (SV) `x`, array of outputs (CV) `y` and array of inputs (MV) `u`. A,B,C and D must be 2-dimensional matricies of the appropriate size.
 
-Available by::
+    The `discrete` Boolean parameter indicates a discrete-time model, which requires constant time steps and 2 :ref:`nodes`.
+    The `dense` Boolean parameter indicates if A,B,C,D should be written as dense or sparse matrices. Sparse matricies will be faster unless it is known that the matricies are very dense.
 
-    from gekko import SS
+.. py:classmethod:: m.cspline(x,y,x_data,y_data,bound_x=False)
+
+	Generate a 1d cubic spline with continuous first and seconds derivatives
+    from arrays of x and y data which link to GEKKO variables x and y with a
+    constraint that y=f(x).
+
+    This function is currently only available through remote solves to the default server.
+
+    Inputs:
+
+	x: GEKKO variable
+
+	y: GEKKO variable
+
+	x_data: array of x data
+
+    y_data: array of y data that matches x_data
+
+	bound_x: boolean to state that x should be bounded at the upper and lower bounds of x_data to avoid
+    extrapolation error of the cspline.
+
+
+.. py:classmethod:: periodic(v)
+
+    Makes the variable argument periodic by adding an equation to constrains v[end] = v[0]. 
+    This does not affect the default behavior of fixing initial conditions (v[0]).
+
 
 
 Internal Methods

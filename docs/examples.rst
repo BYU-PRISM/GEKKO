@@ -43,16 +43,16 @@ This example demonstrates how to solve the HS71 benchmark problem using GEKKO::
 	x4.value = 1
 
 	#lower bounds
-	x1.lb = 1
-	x2.lb = 1
-	x3.lb = 1
-	x4.lb = 1
+	x1.lower = 1
+	x2.lower = 1
+	x3.lower = 1
+	x4.lower = 1
 
 	#upper bounds
-	x1.ub = 5
-	x2.ub = 5
-	x3.ub = 5
-	x4.ub = 5
+	x1.upper = 5
+	x2.upper = 5
+	x3.upper = 5
+	x4.upper = 5
 
 	#Equations
 	m.Equation(x1*x2*x3*x4>=25)

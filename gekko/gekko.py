@@ -323,6 +323,7 @@ class GEKKO(object):
         y (outputs)
         u (inputs)
         """
+        #TODO add support for E matrix
         
         #set all matricies to numpy
         A = np.array(A)
@@ -374,51 +375,55 @@ class GEKKO(object):
         
         if dense is True:
             #write A,B,C,[D] matricies to objectname.A/B/C/D.txt
-            file_name = SS_name + '.A.txt'
+            file_name = SS_name + '.a.txt'
             np.savetxt(os.path.join(self.path,file_name), A, delimiter=" ", fmt='%1.25s')
             self._extra_files.append(file_name) #add csv file to list of extra file to send to server
-            file_name = SS_name + '.B.txt'
+            file_name = SS_name + '.b.txt'
             np.savetxt(os.path.join(self.path,file_name), B, delimiter=" ", fmt='%1.25s')
             self._extra_files.append(file_name) #add csv file to list of extra file to send to server
-            file_name = SS_name + '.C.txt'
+            file_name = SS_name + '.c.txt'
             np.savetxt(os.path.join(self.path,file_name), C, delimiter=" ", fmt='%1.25s')
             self._extra_files.append(file_name) #add csv file to list of extra file to send to server
             if D is not None:
-                file_name = SS_name + '.D.txt'
+                file_name = SS_name + '.d.txt'
                 np.savetxt(os.path.join(self.path,file_name), D, delimiter=" ", fmt='%1.25s')
                 self._extra_files.append(file_name) #add csv file to list of extra file to send to server
         else: #sparse form
         # (nx1) = (nxn)*(nx1) + (nxm)*(mx1)
         # (px1) = (pxn)*(nx1) + (pxm)*(mx1)
-            file_name = SS_name + '.A.txt'
+            file_name = SS_name + '.a.txt'
             sparse_matrix = []
             for j in range(n):
                 for i in range(n):
                     if A[i,j] != 0: 
-                        sparse_matrix.append([i,j,A[i,j]])
+                        sparse_matrix.append([i+1,j+1,A[i,j]])
             np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
-            file_name = SS_name + '.B.txt'
+            self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+            file_name = SS_name + '.b.txt'
             sparse_matrix = []
             for j in range(m):
                 for i in range(n):
                     if B[i,j] != 0: 
-                        sparse_matrix.append([i,j,B[i,j]])
+                        sparse_matrix.append([i+1,j+1,B[i,j]])
             np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
-            file_name = SS_name + '.C.txt'
+            self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+            file_name = SS_name + '.c.txt'
             sparse_matrix = []
             for j in range(n):
                 for i in range(p):
                     if C[i,j] != 0: 
-                        sparse_matrix.append([i,j,C[i,j]])
+                        sparse_matrix.append([i+1,j+1,C[i,j]])
             np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
+            self._extra_files.append(file_name) #add csv file to list of extra file to send to server
             if D is not None:
-                file_name = SS_name + '.D.txt'
+                file_name = SS_name + '.d.txt'
                 sparse_matrix = []
                 for j in range(m):
                     for i in range(p):
                         if D[i,j] != 0: 
-                            sparse_matrix.append([i,j,D[i,j]])
+                            sparse_matrix.append([i+1,j+1,D[i,j]])
                 np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
+                self._extra_files.append(file_name) #add csv file to list of extra file to send to server
     
         #define arrays of states, outputs and inputs
         x = [self.SV() for i in np.arange(n)]
@@ -437,6 +442,28 @@ class GEKKO(object):
         return x,y,u
 
 
+    def periodic(self,v):
+        """ Makes the variable argument periodic by adding an equation to
+        constrains v[end] = v[0]. This does not affect the default behavior of
+        fixing initial conditions (v[0]).
+        """
+        
+        #Verify that v is calculated (MV,SV,CV,Var)
+        if not isinstance(v,(GKVariable,GKParameter)):
+            raise TypeError("Variable must be calculated and dynamic (Var,SV,CV,MV)")
+        if isinstance(v,(GKParameter)):
+            if v.type != 'MV':
+                raise TypeError("Variable must be calculated and dynamic (Var,SV,CV,MV)")
+            
+        #build periodic object with unique object name
+        periodic_name = 'periodic_obj_' + str(len(self._objects) + 1)
+        self._objects.append(periodic_name + ' = periodic')
+
+        #Add connections between v and periodic object attribute x
+        self._connections.append(v.name + ' = ' + periodic_name+'.x')
+        
+        
+
     #%% Add array functionality to all types
     def Array(self,f,dim,**args):
         x = np.ndarray(dim,dtype=object)
@@ -454,7 +481,7 @@ class GEKKO(object):
 
     #%% Import functions from other scripts
     from .gk_debug import gk_logic_tree, verify_input_options, like, name_check
-    from .gk_write_files import write_solver_options, generate_overrides_dbs_file, write_info, write_csv, build_model
+    from .gk_write_files import write_solver_options, generate_dbs_file, write_info, write_csv, build_model
     from .gk_post_solve import load_JSON, load_results
 
 
@@ -465,7 +492,7 @@ class GEKKO(object):
         This function has these substeps:
         -Validates the model and write .apm file (if .apm not supplied)
         -Validate and write .csv file (if none provided)
-        -Write options to overrides.dbs
+        -Write options to dbs file
         -Solve the problem using the apm.exe commandline interface.
         -Load results into python variables.
         """
@@ -498,9 +525,9 @@ class GEKKO(object):
 
         if timing == True:
             t = time.time()
-        self.generate_overrides_dbs_file()
+        self.generate_dbs_file()
         if timing == True:
-            print('build overrides', time.time() - t)
+            print('build dbs', time.time() - t)
 
 
         if timing == True:
@@ -576,7 +603,7 @@ class GEKKO(object):
             #send info file
             send_if_exists('info')
             #send dbs file
-            with open(os.path.join(self.path,'overrides.dbs')) as f:
+            with open(os.path.join(self.path,'measurements.dbs')) as f:
                 dbs = f.read()
             cmd(self.server, self.model_name, 'option '+dbs)
             #solver options
