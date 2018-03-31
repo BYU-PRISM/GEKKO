@@ -3,13 +3,13 @@ import Vuex from 'vuex'
 import { HTTP } from '../http'
 
 Vue.use(Vuex)
-
+/* eslint-disable no-multi-spaces */
 const store = new Vuex.Store({
   state: {
-    numPlots: 0, // id: 0 is always the fullscreen plot
-    communicationError: false,
-    fullscreenPlot: false,
-    plotIdCounter: 0,
+    numPlots: 0,                  // id: 0 is always the fullscreen plot
+    communicationError: false,    // Whether there is a communication error with the backend
+    fullscreenPlot: false,        // Whether the fullscreen plot should be displayed
+    plotIdCounter: 0,             // Used for giving new plots externalIds
     plots: [
       // id: number
       // data: Object
@@ -26,6 +26,7 @@ const store = new Vuex.Store({
       // list of gekko variable objects
     },
     showErrorModal: false,
+    // Object describing communication errors with the backend
     httpError: {
       header: '',
       body: '',
@@ -41,7 +42,7 @@ const store = new Vuex.Store({
     addPlot (state, data) {
       state.plots.push({
         id: state.plotIdCounter,
-        data: state.plotData,
+        data: JSON.parse(JSON.stringify(state.plotData)),
         layout: {}
       })
       state.plotIdCounter++

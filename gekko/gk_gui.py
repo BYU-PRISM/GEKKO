@@ -90,7 +90,8 @@ class GK_GUI:
                         try:
                             self.options_dict[self.vars_map[var]] = self.options[var]
                         except:
-                            print(str(var)+' not in options.json')
+                            if DEV == True:
+                                print(str(var)+' not in options.json')
                             # FIXME: Find a better way to only try to add the vars, params
                             #if var[0] == 'v':
                             #    self.options_dict[self.vars_map[var]] = self.options[var]

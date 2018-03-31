@@ -101,7 +101,6 @@ export default {
   methods: {
     toggle: function (v, prop) {
       v.ishidden = !v.ishidden
-      // FIXME: Should try and find a softer way of getting the DOM to update
       this.$forceUpdate()
     }
   }
