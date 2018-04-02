@@ -60,6 +60,7 @@ export default {
   mounted () {
     setTimeout(this.poll, 1000)
     this.$store.dispatch('initialize')
+    this.test()
   },
   methods: {
     poll () {
@@ -89,6 +90,11 @@ export default {
           this.showModal = true
           this.$store.commit('setCommunicationError', true)
         })
+    },
+    test () {
+      this.$http.get('data')
+        .then(resp => resp.json())
+        .then(data => console.log('New data format:', data))
     }
   }
 }

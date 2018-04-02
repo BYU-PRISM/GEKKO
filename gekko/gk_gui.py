@@ -13,8 +13,10 @@ from .gk_variable import GKVariable
 import __main__ as main
 from flask_cors import CORS
 
+import pprint
+
 # Toggle development and production modes
-DEV = False
+DEV = True
 WATCHDOG_TIME_LENGTH = 0
 
 if DEV:
@@ -44,31 +46,25 @@ class GK_GUI:
     data from options.json and results.json and displays using DASH.
     """
     def __init__(self, path):
-        self.has_model_data = False
-        self.path = path
+        self.has_data = False           # Variable defines if the Gekko data is loaded
+        self.path = path                # Path to tmp dir where Gekko output is
+
+        self.gekko_data = {}            # Combined, final Gekko data object
+
         self.vars_dict = {}                     # vars dict with script names as keys
         self.options_dict = {}                  # options dict with script names as keys
         self.model = {}                         # APM model information
         self.info = {}
-        self.vars_map = self.get_script_vars()  # map of model vars to script vars
         self.get_script_data()
 
         # This is used for the polling between the api and the Vue app
         self.alarm = threading.Timer(WATCHDOG_TIME_LENGTH, watchdog_timer)
         self.alarm.start()
 
-    def get_script_vars(self):
-        vars_map = {}
-        main_dict = vars(main)
-        for var in main_dict:
-            if isinstance(main_dict[var], (GKVariable,GKParameter)):
-                vars_map[main_dict[var].name] = var
-            if isinstance(main_dict[var], list):
-                list_var = main_dict[var]
-                for i in range(len(list_var)):
-                    if isinstance(list_var[i], (GKVariable,GKParameter)):
-                        vars_map[list_var[i].name] = var+'['+str(i)+']'
-        return vars_map
+    # def get_script_vars(self):
+        # """Generates a map of script variable names to APM model names"""
+
+        # return vars_map
 
     def get_script_data(self):
         """Gather the data that GEKKO returns from the run and process it into
@@ -77,24 +73,66 @@ class GK_GUI:
         # `m.solve()` is ever called, so the files might not be there.
         try:
             # Load options.json
-            self.options = json.loads(open(os.path.join(self.path,'options.json')).read())
+            options = json.loads(open(os.path.join(self.path,'options.json')).read())
             # Load results.json
-            self.results = json.loads(open(os.path.join(self.path,"results.json")).read())
-            self.vars_dict['time'] = self.results['time']
-            self.model = self.options['APM']
-            self.info = self.options['INFO']
-            for var in self.vars_map:
+            results = json.loads(open(os.path.join(self.path,"results.json")).read())
+            self.gekko_data['model'] = options['APM']
+            self.gekko_data['info'] = options['INFO']
+            self.gekko_data['time'] = results['time']
+            self.gekko_data['vars'] = {}
+            self.gekko_data['vars']['variables'] = []
+            self.gekko_data['vars']['parameters'] = []
+            self.gekko_data['vars']['constants'] = []
+            self.gekko_data['vars']['intermediates'] = []
+
+            self.vars_dict['time'] = results['time']
+            self.model = options['APM']
+
+            main_dict = vars(main)
+            for var in main_dict:
+                if (var != 'time') and isinstance(main_dict[var], (GKVariable, GKParameter)):
+                    print(var, 'is of type', type(main_dict[var]))
+                    try:
+                        var_dict = {
+                            'name': var,
+                            'data': results[main_dict[var].name],
+                            'options': options[main_dict[var].name]
+                        }
+                    except Exception as e:
+                        var_dict = {
+                            'name': var,
+                            'data': results[main_dict[var].name],
+                            'options': {}
+                        }
+                    if isinstance(main_dict[var], GKVariable):
+                        self.gekko_data['vars']['variables'].append(var_dict)
+                    elif isinstance(main_dict[var], GKParameter):
+                        self.gekko_data['vars']['parameters'].append(var_dict)
+                    # elif isinstance(main_dict[var], GKIntermediate):
+                        # Add to intermediate list
+                        # pass
+
+            vars_map = {}
+            main_dict = vars(main)
+            for var in main_dict:
+                if isinstance(main_dict[var], (GKVariable,GKParameter)):
+                    vars_map[main_dict[var].name] = var
+                if isinstance(main_dict[var], list):
+                    list_var = main_dict[var]
+                    for i in range(len(list_var)):
+                        if isinstance(list_var[i], (GKVariable,GKParameter)):
+                            vars_map[list_var[i].name] = var+'['+str(i)+']'
+
+            for var in vars_map:
                 if var != 'time':
-                    self.vars_dict[self.vars_map[var]] = self.results[var]
-                    for var in self.vars_map:
+                    self.vars_dict[vars_map[var]] = results[var]
+                    for var in vars_map:
                         try:
-                            self.options_dict[self.vars_map[var]] = self.options[var]
+                            self.options_dict[vars_map[var]] = options[var]
                         except:
                             if DEV == True:
                                 print(str(var)+' not in options.json')
-                            # FIXME: Find a better way to only try to add the vars, params
-                            #if var[0] == 'v':
-                            #    self.options_dict[self.vars_map[var]] = self.options[var]
+
             self.has_model_data = True
         except FileNotFoundError as e:
             self.has_model_data = False
@@ -124,6 +162,10 @@ class GK_GUI:
             @app.route('/get_data')
             def get_data():
                 return self.handle_api_call(self.vars_dict)
+
+            @app.route('/data')
+            def get_data2():
+                return self.handle_api_call(self.gekko_data)
 
             @app.route('/get_options')
             def get_options():

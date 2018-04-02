@@ -60,25 +60,32 @@ const store = new Vuex.Store({
   },
   actions: {
     initialize ({commit, state}) {
-      HTTP.get('/get_data')
+      HTTP.get('/data')
         .then(data => data.data)
         .then(data => {
+          console.log('new data obj:', data)
+          commit('setModelData', data.model)
           var plotArray = []
-          console.log('get_data data:', data)
-          const isMuchData = Object.keys(data).length > 5
-          for (var key in data) {
-            if (data.hasOwnProperty(key)) {
-              if (key !== 'time') {
-                const trace = {
-                  x: data.time,
-                  y: data[key],
-                  mode: 'lines',
-                  type: 'scatter',
-                  name: key,
-                  visible: isMuchData ? 'legendonly' : 'true'
-                }
-                plotArray.push(trace)
+          const isMuchData = (
+            data.vars.variables.length + data.vars.parameters.length +
+            data.vars.intermediates.length + data.vars.constants.length
+          ) > 5
+          const v = data.vars
+          console.log(v)
+          for (var set in data.vars) {
+            console.log('set', set, v[set])
+            for (var variable in v[set]) {
+              console.log(v[set][variable])
+              const trace = {
+                x: data.time,
+                y: v[set][variable].data,
+                mode: 'lines',
+                type: 'scatter',
+                name: v[set][variable].name,
+                visible: isMuchData ? 'legendonly' : 'true'
               }
+              console.log('trace for:', variable.name, trace)
+              plotArray.push(trace)
             }
           }
           commit('updatePlotData', plotArray)
@@ -108,12 +115,6 @@ const store = new Vuex.Store({
         }).then(() => {
           commit('setVarsData', varsData)
           console.log('varsData:', varsData)
-        })
-      HTTP.get('get_model')
-        .then(data => data.data)
-        .then(model => {
-          commit('setModelData', model)
-          console.log('model:', model)
         })
     }
   }
