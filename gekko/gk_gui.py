@@ -5,6 +5,7 @@ import socket
 import sys
 import webbrowser
 import threading
+import threading
 
 from flask import Flask, jsonify, request
 
@@ -13,10 +14,8 @@ from .gk_variable import GKVariable
 import __main__ as main
 from flask_cors import CORS
 
-import pprint
-
 # Toggle development and production modes
-DEV = True
+DEV = False
 WATCHDOG_TIME_LENGTH = 0
 
 if DEV:
@@ -39,6 +38,15 @@ CORS(app)
 def watchdog_timer():
     print('Browser display closed. Exiting...')
     os._exit(0)
+
+class FlaskThread(threading.Thread):
+    def __init__(self, debug, port):
+        threading.Thread.__init__(self)
+        self.debug = debug
+        self.port = port
+    def run(self):
+        app.run(debug=self.debug, port=self.port)
+
 
 class GK_GUI:
     """GUI class for GEKKO
@@ -91,7 +99,7 @@ class GK_GUI:
             main_dict = vars(main)
             for var in main_dict:
                 if (var != 'time') and isinstance(main_dict[var], (GKVariable, GKParameter)):
-                    print(var, 'is of type', type(main_dict[var]))
+                    # print(var, 'is of type', type(main_dict[var]))
                     try:
                         var_dict = {
                             'name': var,
@@ -216,10 +224,17 @@ class GK_GUI:
         # Open the browser to the page and launch the app
         print('Opening display in default webbrowser. Close display tab or type CTRL+C to exit.')
         if DEV:
-            app.run(debug=True, port=8050)
+            # app.run(debug=True, port=8050)
+            flaskThread = FlaskThread(True, port)
+            flaskThread.start()
         else:
             webbrowser.open("http://localhost:" + str(port) + "/index.html")
-            app.run(debug=False, port=port)
+            flaskThread = FlaskThread(False, port)
+            flaskThread.start()
+            # app.run(debug=False, port=port)
+
+    def update(self):
+        print("update command recieved")
 
 if __name__ == '__main__':
     gui = GK_GUI()
