@@ -29,12 +29,11 @@
           style="margin-top:10px;">Fullscreen plot</button>
       </div>
     </div>
-    <!-- Can add this if we want a little status updater -->
-    <!-- <div
+    <div
       class="communication-status"
       :style="statusStyle">
       <p>Status: {{ $store.state.communicationError ? 'Error' : 'Good' }}</p>
-    </div> -->
+    </div>
   </div>
 </template>
 
@@ -81,7 +80,7 @@ export default {
 
 <style>
 .plots-div {
-  max-height: 93vh;
+  max-height: 91vh;
   overflow-y: auto;
   border: 1px blue;
   border-style: solid;
