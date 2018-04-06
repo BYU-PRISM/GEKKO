@@ -102,6 +102,10 @@ class GK_Operators:
     def __rxor__(self,other): # ^
         return GK_Operators('(' + str(other) + '^' + str(self) + ')')
     """
+
+class GK_Intermediate(GK_Operators):
+    def __init__(self, name, value=None):
+        GK_Operators.__init__(self,name, value=None)
     
 class GK_Value(list):
     def __init__(self,value):
