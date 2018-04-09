@@ -5,14 +5,14 @@ import socket
 import sys
 import webbrowser
 import threading
-import threading
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, redirect
+from flask_cors import CORS
 
 from .gk_parameter import GKParameter
 from .gk_variable import GKVariable
+
 import __main__ as main
-from flask_cors import CORS
 
 # Toggle development and production modes
 DEV = False
@@ -39,23 +39,20 @@ def watchdog_timer():
     print('Browser display closed. Exiting...')
     os._exit(0)
 
+
+
 class FlaskThread(threading.Thread):
-    def __init__(self, debug, port):
+    """
+    Flask API thread. Pulls the required data from options.json and
+    results.json and displays by opening the local browser to the Vue app.
+    """
+    def __init__(self, path, debug, port):
         threading.Thread.__init__(self)
+        self.has_data = False           # Variable defines if the Gekko data is loaded
+        self.has_new_update = False
+        self.path = path                # Path to tmp dir where Gekko output is
         self.debug = debug
         self.port = port
-    def run(self):
-        app.run(debug=self.debug, port=self.port)
-
-
-class GK_GUI:
-    """GUI class for GEKKO
-    This class handles creation and management of the gui. It pulls the required
-    data from options.json and results.json and displays using DASH.
-    """
-    def __init__(self, path):
-        self.has_data = False           # Variable defines if the Gekko data is loaded
-        self.path = path                # Path to tmp dir where Gekko output is
 
         self.gekko_data = {}            # Combined, final Gekko data object
 
@@ -67,12 +64,6 @@ class GK_GUI:
 
         # This is used for the polling between the api and the Vue app
         self.alarm = threading.Timer(WATCHDOG_TIME_LENGTH, watchdog_timer)
-        self.alarm.start()
-
-    # def get_script_vars(self):
-        # """Generates a map of script variable names to APM model names"""
-
-        # return vars_map
 
     def get_script_data(self):
         """Gather the data that GEKKO returns from the run and process it into
@@ -189,11 +180,18 @@ class GK_GUI:
 
             @app.route('/poll')
             def get_poll():
-                return self.handle_api_call({'updates': False})
+                return self.handle_api_call({'updates': self.has_new_update})
+                self.has_new_update = False
+
 
             @app.route('/<path:path>')
             def static_file(path):
                 return app.send_static_file(path)
+
+            @app.route('/')
+            def redirect_to_index():
+                newPath = 'http://localhost:' + str(self.port) + '/index.html'
+                return redirect(newPath)
 
         except AssertionError as e:
             # This try/except is because ipython keeps the endpoints in
@@ -204,10 +202,33 @@ class GK_GUI:
         except Exception as e:
             raise e
 
+    def run(self):
+        self.set_endpoints()
+        # Debug in flask does not work when run on a separate thread
+        app.run(debug=False, port=self.port)
+        self.alarm.start()
+
+    def update(self):
+        print("Can you see me? I just got an update!")
+        self.get_script_data()
+        self.has_new_update = True
+
+
+class GK_GUI:
+    """GUI class for GEKKO
+    Creates and manages the FlaskThread that actually runs the API.
+    """
+    def __init__(self, path):
+        self.path = path
+
+
     def display(self):
         """Finds the appropriate port starts the api and opens the webbrowser"""
-        self.set_endpoints()
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # It is necessary to have a reference like this as flaskThread cannot
+        # be part of self when `flaskThread.start()` is called for reasons I
+        # do not fully understand. Improve on this if you can.
+        self.apiRef = "This is a reference to the Flask API thread"
         port = 8050
         try:    # Check to see if :8050 is already bound
             sock.bind(('127.0.0.1', port))
@@ -222,19 +243,25 @@ class GK_GUI:
             sock.close()
 
         # Open the browser to the page and launch the app
-        print('Opening display in default webbrowser. Close display tab or type CTRL+C to exit.')
+        print('Opening display in default webbrowser at http://localhost:' + str(port) + '/index.html. \nClose display tab or type CTRL+C to exit.')
         if DEV:
-            # app.run(debug=True, port=8050)
-            flaskThread = FlaskThread(True, port)
+            flaskThread = FlaskThread(self.path, True, port)
+            # flaskThread.daemon = True
             flaskThread.start()
+            self.apiRef = flaskThread
         else:
             webbrowser.open("http://localhost:" + str(port) + "/index.html")
-            flaskThread = FlaskThread(False, port)
+            flaskThread = FlaskThread(self.path, False, port)
+            # flaskThread.daemon = True
             flaskThread.start()
+            self.apiRef = flaskThread
+            # Non-threaded way, only works for non-dynamic GUI display
             # app.run(debug=False, port=port)
 
     def update(self):
-        print("update command recieved")
+        # self.apiRef.update()
+        pass
+
 
 if __name__ == '__main__':
     gui = GK_GUI()

@@ -54,6 +54,7 @@ class GEKKO(object):
         self.server = compatible_string_strip(server)
         self.options = GKGlobalOptions()
         self.id = next(self._ids) #instance count of class
+        self.gui_open = False
 
         #keep a list of constants, params, vars, eqs, etc associated with this model
         self._constants = []
@@ -671,14 +672,12 @@ class GEKKO(object):
         if timing == True:
             print('debug', time.time() - t)
 
-        if GUI:
-            try:
-                gui.update()
-            except:
-                gui = GK_GUI(self.path)
-                gui.display()
-
-
+        if self.gui_open:
+            self.gui.update()
+        else:
+            self.gui_open = True
+            self.gui = GK_GUI(self.path)
+            self.gui.display()
 
 
 
