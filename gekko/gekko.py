@@ -119,7 +119,7 @@ class GEKKO(object):
         self.parameters.append(parameter)
         return parameter
 
-    def FV(self, value=None, lb=None, ub=None, integer=False, name=None):
+    def FV(self, value=None, lb=None, ub=None, integer=False, fixed_initial=True, name=None):
         """A manipulated variable that is fixed with time. Therefore it lacks
         time-based attributes."""
         if name is not None:
@@ -131,9 +131,11 @@ class GEKKO(object):
 
         parameter = GK_FV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
         self.parameters.append(parameter)
+        if fixed_initial is False:
+            self.Connection(parameter,'CALCULATED',pos1=1,node1=1)
         return parameter
 
-    def MV(self, value=None, lb=None, ub=None, integer=False, name=None):
+    def MV(self, value=None, lb=None, ub=None, integer=False, fixed_initial=True, name=None):
         """Change these variables optimally to meet objectives"""
         if name is not None:
             name = re.sub(r'\W+', '', name).lower()
@@ -144,9 +146,11 @@ class GEKKO(object):
 
         parameter = GK_MV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
         self.parameters.append(parameter)
+        if fixed_initial is False:
+            self.Connection(parameter,'CALCULATED',pos1=1,node1=1)
         return parameter
 
-    def Var(self, value=None, lb=None, ub=None, integer=False, name=None):
+    def Var(self, value=None, lb=None, ub=None, integer=False, fixed_initial=True, name=None):
         """Calculated by solver to meet constraints (Equations). The number of
         variables (including CVs and SVs) must equal the number of equations."""
         if name is not None:
@@ -158,9 +162,11 @@ class GEKKO(object):
 
         variable = GKVariable(name, value, lb, ub)
         self.variables.append(variable)
+        if fixed_initial is False:
+            self.Connection(variable,'CALCULATED',pos1=1,node1=1)
         return variable
 
-    def SV(self, value=None, lb=None, ub=None, integer=False, name=None):
+    def SV(self, value=None, lb=None, ub=None, integer=False, fixed_initial=True, name=None):
         """A variable that's special"""
         if name is not None:
             name = re.sub(r'\W+', '', name).lower()
@@ -171,9 +177,11 @@ class GEKKO(object):
 
         variable = GK_SV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
         self.variables.append(variable)
+        if fixed_initial is False:
+            self.Connection(variable,'CALCULATED',pos1=1,node1=1)
         return variable
 
-    def CV(self, value=None, lb=None, ub=None, integer=False, name=None):
+    def CV(self, value=None, lb=None, ub=None, integer=False, fixed_initial=True, name=None):
         """A variable with a setpoint. Reaching the setpoint is added to the
         objective."""
         if name is not None:
@@ -185,6 +193,8 @@ class GEKKO(object):
 
         variable = GK_CV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
         self.variables.append(variable)
+        if fixed_initial is False:
+            self.Connection(variable,'CALCULATED',pos1=1,node1=1)
         return variable
 
     def Intermediate(self,equation,name=None):
@@ -246,7 +256,7 @@ class GEKKO(object):
         self._connections.append(var1_str+'='+var2_str)
 
         #for fixing to constants
-        if not isinstance(var2,(GKVariable,GKParameter)):
+        if isinstance(var2,(int,float)):
             self._connections.append(var1_str + ' = FIXED')
             var1.__dict__['_fixed_values'].append((pos1,var2))
 

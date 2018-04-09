@@ -24,13 +24,7 @@ Functionality
 Interface
 ---------
 
--Consider new names for FV/MV/Param/Const and CV/SV/Var for user simplicity
-
--Consolidate lb/LOWER and ub/UPPER (add LOWER and UPPER to Var)
-
 -do intermediates need a value property? they are not initialized or passed in by csv, but are they read back from the solution?
-
--Load back FV MV SV CV outputs
 
 -Load back values of scalars not as list
 
@@ -84,9 +78,6 @@ Questions
 
 -what var types can have a measurement?
 
--what the differnce between variable.meas = 1 and measurements.dbs?
-
--Do CVs have DCOST? See bad_data homework. Dr H has dcost for CV 'flow'
 
 
 
