@@ -8,6 +8,7 @@ from .properties import parameter_options, variable_options
 
 #%% Post-solve processing
 
+## options.JSON has all APM options
 def load_JSON(self):
     f = open(os.path.join(self.path,'options.json'))
     data = json.load(f)
@@ -69,6 +70,8 @@ def load_JSON(self):
                     vp.__dict__[o] = data[vp.name][o]
     return data
 
+
+## results.json has variable value results
 def load_results(self):
     if (os.path.isfile(os.path.join(self.path, 'results.json'))):
         f = open(os.path.join(self.path,'results.json'))
@@ -82,6 +85,12 @@ def load_results(self):
                     vp.value.change = False
                 except Exception:
                     print(vp.name+ " not found in results file")
+        for i in self.intermediates:
+            try:
+                i.VALUE = data[i.name]
+                i.value.change = False
+            except Exception:
+                print(i.name+ " not found in results file")
         for vp in self.variables:
             try:
                 vp.VALUE = data[vp.name]
@@ -103,8 +112,8 @@ def load_results(self):
 
 
 
+## No longer used -- reading results.json instead of results.csv
 def load_csv_results(self):
-
     # Load results.csv into a dictionary keyed with variable names
     if (os.path.isfile(os.path.join(self.path, 'results.csv'))):
         with open(os.path.join(self.path,'results.csv')) as f:

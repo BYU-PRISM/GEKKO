@@ -14,7 +14,7 @@ from .apm import cmd, get_file
 from .gk_global_options import GKGlobalOptions
 from .gk_parameter import GKParameter, GK_MV, GK_FV
 from .gk_variable import GKVariable, GK_CV, GK_SV
-from .gk_operators import GK_Operators
+from .gk_operators import GK_Operators, GK_Intermediate
 from itertools import count
 from .gk_gui import GK_GUI
 
@@ -201,7 +201,7 @@ class GEKKO(object):
             name = re.sub(r'\W+', '', name).lower()
             if name == '':
                 name = None
-        inter = GK_Operators(name)
+        inter = GK_Intermediate(name)
         self.intermediates.append(inter)
         self.inter_equations.append(str(equation))
         return inter
