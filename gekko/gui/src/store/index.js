@@ -59,7 +59,15 @@ const store = new Vuex.Store({
     sethttpError (state, data) { state.httpError = data },
     showFullscreenPlot (state) { state.fullscreenPlot = true },
     hideFullscreenPlot (state) { state.fullscreenPlot = false },
-    updatePlotData (state, data) { state.plotData = data },
+    setPlotData (state, data) {
+      state.plotData = data
+    },
+    updatePlots (state) {
+      for (var i = 0; i < state.plots.length; i++) {
+        // Find a clever way to hot reload the plot data here
+        console.log(state.plots[i].data)
+      }
+    },
     updatePlotLayout (state, data) { state.plots.filter(p => p.id === data.id)[0].layout = data.layout },
     setModelData (state, data) { state.modelData = data },
     setVarsData (state, data) { state.varsData = data },
@@ -92,7 +100,7 @@ const store = new Vuex.Store({
               plotArray.push(trace)
             }
           }
-          commit('updatePlotData', plotArray)
+          commit('setPlotData', plotArray)
         })
         .catch(err => {
           console.log('Error fetching from get_data:', err)
@@ -125,8 +133,7 @@ const store = new Vuex.Store({
     },
     update ({commit, dispatch}) {
       dispatch('get_data').then(() => {
-        // Trigger plot rerenders here
-        console.log('Rerender plots here')
+        commit('updatePlots')
       })
     },
     poll ({commit, dispatch}) {
