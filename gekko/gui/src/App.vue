@@ -42,8 +42,6 @@
 </template>
 
 <script>
-// import { HTTP } from './http'
-
 export default {
   name: 'App',
   data () {
@@ -60,7 +58,6 @@ export default {
   mounted () {
     setTimeout(this.poll, 1000)
     this.$store.dispatch('initialize')
-    this.test()
   },
   methods: {
     poll () {
@@ -68,6 +65,12 @@ export default {
       this.$http.get('poll')
         .then(resp => {
           // Will implement updating here
+          const body = JSON.parse(resp.body)
+          console.log('resp', body)
+          if (body.Updates === true) {
+            console.log('updating')
+            this.$store.dispatch('update')
+          }
           this.showModal = false
           this.$store.commit('setCommunicationError', false)
           setTimeout(this.poll, 1000)
@@ -90,11 +93,6 @@ export default {
           this.showModal = true
           this.$store.commit('setCommunicationError', true)
         })
-    },
-    test () {
-      this.$http.get('data')
-        .then(resp => resp.json())
-        .then(data => console.log('New data format:', data))
     }
   }
 }

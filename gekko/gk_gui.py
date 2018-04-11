@@ -130,7 +130,8 @@ class FlaskThread(threading.Thread):
                             self.options_dict[vars_map[var]] = options[var]
                         except:
                             if DEV == True:
-                                print(str(var)+' not in options.json')
+                                # print(str(var)+' not in options.json')
+                                pass
 
             self.has_model_data = True
         except FileNotFoundError as e:
@@ -158,31 +159,18 @@ class FlaskThread(threading.Thread):
     def set_endpoints(self):
         """Sets the flask API endpoints"""
         try:
-            @app.route('/get_data')
-            def get_data():
-                return self.handle_api_call(self.vars_dict)
-
             @app.route('/data')
-            def get_data2():
+            def get_data():
                 return self.handle_api_call(self.gekko_data)
 
             @app.route('/get_options')
             def get_options():
                 return self.handle_api_call(self.options_dict)
 
-            @app.route('/get_model')
-            def get_model():
-                return self.handle_api_call(self.model)
-
-            @app.route('/get_info')
-            def get_info():
-                return self.handle_api_call(self.info)
-
             @app.route('/poll')
             def get_poll():
                 return self.handle_api_call({'updates': self.has_new_update})
                 self.has_new_update = False
-
 
             @app.route('/<path:path>')
             def static_file(path):
@@ -209,7 +197,6 @@ class FlaskThread(threading.Thread):
         self.alarm.start()
 
     def update(self):
-        print("Can you see me? I just got an update!")
         self.get_script_data()
         self.has_new_update = True
 
@@ -259,8 +246,8 @@ class GK_GUI:
             # app.run(debug=False, port=port)
 
     def update(self):
-        # self.apiRef.update()
-        pass
+        self.apiRef.update()
+        # pass
 
 
 if __name__ == '__main__':

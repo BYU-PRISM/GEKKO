@@ -59,11 +59,11 @@ const store = new Vuex.Store({
     hideErrorModal (state, data) { state.showErrorModal = false }
   },
   actions: {
-    initialize ({commit, state}) {
+    get_data ({commit, state}) {
       HTTP.get('/data')
         .then(data => data.data)
         .then(data => {
-          console.log('new data obj:', data)
+          console.log('data:', data)
           commit('setModelData', data.model)
           var plotArray = []
           const isMuchData = (
@@ -71,11 +71,8 @@ const store = new Vuex.Store({
             data.vars.intermediates.length + data.vars.constants.length
           ) > 5
           const v = data.vars
-          console.log(v)
           for (var set in data.vars) {
-            console.log('set', set, v[set])
             for (var variable in v[set]) {
-              console.log(v[set][variable])
               const trace = {
                 x: data.time,
                 y: v[set][variable].data,
@@ -84,14 +81,10 @@ const store = new Vuex.Store({
                 name: v[set][variable].name,
                 visible: isMuchData ? 'legendonly' : 'true'
               }
-              console.log('trace for:', variable.name, trace)
               plotArray.push(trace)
             }
           }
           commit('updatePlotData', plotArray)
-          commit('addPlot') // First plot added is the hidden fullscreen plot
-          commit('updatePlotLayout', {id: 0, layout: {'height': window.innerHeight - 150}})
-          commit('addPlot') // Second plot is the one shown on the main page
         })
         .catch(err => {
           console.log('Error fetching from get_data:', err)
@@ -103,7 +96,6 @@ const store = new Vuex.Store({
         .then(data => data.data)
         .then(obj => {
           options = obj
-          console.log('options:', obj)
           return Object.keys(obj).filter(key => !ignoredProps.includes(key))
         })
         .then(keys => {
@@ -114,8 +106,20 @@ const store = new Vuex.Store({
           })
         }).then(() => {
           commit('setVarsData', varsData)
-          console.log('varsData:', varsData)
         })
+    },
+    initialize ({commit, dispatch}) {
+      dispatch('get_data').then(() => {
+        commit('addPlot') // First plot added is the hidden fullscreen plot
+        commit('updatePlotLayout', {id: 0, layout: {'height': window.innerHeight - 150}})
+        commit('addPlot') // Second plot is the one shown on the main page
+      })
+    },
+    update ({commit, dispatch}) {
+      dispatch('get_data').then(() => {
+        // Trigger plot rerenders here
+        console.log('Rerender plots here')
+      })
     }
   }
 })

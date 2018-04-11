@@ -3,8 +3,6 @@
 ## Priorities
 - squish any bugs that may arise
   - backend tends to crash in Windows IPython env
-- get dynamic plotting working
-  - add `GUI=true` to `m.solve()` for both one-off and dynamic plotting
 
 ## Todo
 - check for memory leaks (serious problems for operators running it for months on end)
@@ -12,7 +10,6 @@
   - pretty much just wants an updated trace every time
 - refactor backend to send back a better formatted object
   - list of vars, params, intermediates...
-- Figure out how the update object should look
 
 ## Ideas
 - a 'selected plot' allowing sidebar to contain options that update that selected plot
