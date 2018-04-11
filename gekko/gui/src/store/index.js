@@ -25,7 +25,7 @@ const store = new Vuex.Store({
       // list of gekko variable objects
     },
     showErrorModal: false,
-    // Object describing communication errors with the backend
+    // Object deupdatePlotsscribing communication errors with the backend
     httpError: {
       header: '',
       body: '',
@@ -61,11 +61,17 @@ const store = new Vuex.Store({
     hideFullscreenPlot (state) { state.fullscreenPlot = false },
     setPlotData (state, data) {
       state.plotData = data
-    },
-    updatePlots (state) {
       for (var i = 0; i < state.plots.length; i++) {
         // Find a clever way to hot reload the plot data here
-        console.log(state.plots[i].data)
+        var plotData = state.plots[i].data
+        console.log('plotData', plotData)
+        for (var j = 0; j < plotData.length; j++) {
+          var trace = plotData[j]
+          var updatedTrace = state.plotData.filter((t) => t.name === trace.name)[0]
+          trace.x = updatedTrace.x
+          trace.y = updatedTrace.y
+        }
+        console.log('updated plots', state.plots)
       }
     },
     updatePlotLayout (state, data) { state.plots.filter(p => p.id === data.id)[0].layout = data.layout },
@@ -131,18 +137,13 @@ const store = new Vuex.Store({
         commit('addPlot') // Second plot is the one shown on the main page
       })
     },
-    update ({commit, dispatch}) {
-      dispatch('get_data').then(() => {
-        commit('updatePlots')
-      })
-    },
     poll ({commit, dispatch}) {
       fetch(`${this.state.httpRoot}/poll`)
         .then(resp => resp.json())
         .then(body => {
-          if (body.Updates === true) {
-            console.log('updating')
-            dispatch('update')
+          if (body.updates === true) {
+            console.log('Updating...')
+            dispatch('get_data')
           }
           this.showModal = false
           commit('setCommunicationError', false)

@@ -15,7 +15,7 @@ from .gk_variable import GKVariable
 import __main__ as main
 
 # Toggle development and production modes
-DEV = True
+DEV = False
 WATCHDOG_TIME_LENGTH = 0
 
 if DEV:
@@ -161,6 +161,7 @@ class FlaskThread(threading.Thread):
         try:
             @app.route('/data')
             def get_data():
+                self.has_new_update = False
                 return self.handle_api_call(self.gekko_data)
 
             @app.route('/get_options')
@@ -193,7 +194,7 @@ class FlaskThread(threading.Thread):
     def run(self):
         self.set_endpoints()
         # Debug in flask does not work when run on a separate thread
-        app.run(debug=False, port=self.port)
+        app.run(debug=False, port=self.port, threaded=True)
         self.alarm.start()
 
     def update(self):
