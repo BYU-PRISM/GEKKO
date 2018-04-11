@@ -28,7 +28,7 @@
               <slot name="footer">
                 <button
                   class="modal-default-button"
-                  @click="showModal = false">
+                  @click="$store.commit('hideErrorModal')">
                   OK
                 </button>
               </slot>
@@ -45,56 +45,17 @@
 export default {
   name: 'App',
   data () {
-    return {
-      showModal: false,
-      httpError: {
-        header: '',
-        body: '',
-        report: `Please report any Gekko project errors as
-          issues at https://github.com/BYU-PRISM/GEKKO`
-      }
-    }
+    return {}
+  },
+  computed: {
+    showModal () { return this.$store.state.showErrorModal },
+    httpError () { return this.$store.state.httpError }
   },
   mounted () {
-    setTimeout(this.poll, 1000)
     this.$store.dispatch('initialize')
+    this.$store.dispatch('poll')
   },
-  methods: {
-    poll () {
-      // this.$http.headers.common['Access-Control-Allow-Origin'] = '*'
-      this.$http.get('poll')
-        .then(resp => {
-          // Will implement updating here
-          const body = JSON.parse(resp.body)
-          console.log('resp', body)
-          if (body.Updates === true) {
-            console.log('updating')
-            this.$store.dispatch('update')
-          }
-          this.showModal = false
-          this.$store.commit('setCommunicationError', false)
-          setTimeout(this.poll, 1000)
-        }, error => {
-          console.log('HTTP Polling Error, Status:', error.status, 'Message:', error.statusText)
-          if (error.status === 0) {
-            this.httpError.header = 'Internal Communication Error'
-            this.httpError.body = `We seem to have lost communication with your
-                                  Gekko script. This means that we cannot get
-                                  any updates from your Gekko model.
-                                  Did you stop the script or did
-                                  it crash? If so, close this window and restart
-                                  it.`
-          } else {
-            this.httpError.header = 'Internal Communication Error'
-            this.httpError.body = `Please copy these details in an error report
-                                  to the Gekko developers. Error Code:
-                                  ${error.status}, Error: ${error.statusText}`
-          }
-          this.showModal = true
-          this.$store.commit('setCommunicationError', true)
-        })
-    }
-  }
+  methods: { }
 }
 </script>
 

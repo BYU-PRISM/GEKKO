@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { HTTP } from '../http'
 
 Vue.use(Vuex)
 /* eslint-disable no-multi-spaces */
@@ -32,7 +31,8 @@ const store = new Vuex.Store({
       body: '',
       report: `Please report any Gekko project errors as
         issues at https://github.com/BYU-PRISM/GEKKO`
-    }
+    },
+    httpRoot: process.env.NODE_ENV === 'development' ? 'http://localhost:8050' : 'http://' + location.hostname + ':' + location.port
   },
   mutations: {
     removePlot: (state, data) => {
@@ -48,7 +48,15 @@ const store = new Vuex.Store({
       state.plotIdCounter++
       state.numPlots++
     },
-    setCommunicationError (state, data) { state.communicationError = data },
+    setCommunicationError (state, data) {
+      if (!state.communicationError) {
+        if (!state.showErrorModal) {
+          state.showErrorModal = data
+        }
+        state.communicationError = data
+      }
+    },
+    sethttpError (state, data) { state.httpError = data },
     showFullscreenPlot (state) { state.fullscreenPlot = true },
     hideFullscreenPlot (state) { state.fullscreenPlot = false },
     updatePlotData (state, data) { state.plotData = data },
@@ -60,8 +68,8 @@ const store = new Vuex.Store({
   },
   actions: {
     get_data ({commit, state}) {
-      HTTP.get('/data')
-        .then(data => data.data)
+      fetch(`${this.state.httpRoot}/data`)
+        .then(data => data.json())
         .then(data => {
           console.log('data:', data)
           commit('setModelData', data.model)
@@ -92,8 +100,8 @@ const store = new Vuex.Store({
       const ignoredProps = ['INFO', 'APM']
       let options
       let varsData = {}
-      HTTP.get('get_options')
-        .then(data => data.data)
+      fetch(`${this.state.httpRoot}/get_options`)
+        .then(data => data.json())
         .then(obj => {
           options = obj
           return Object.keys(obj).filter(key => !ignoredProps.includes(key))
@@ -120,6 +128,46 @@ const store = new Vuex.Store({
         // Trigger plot rerenders here
         console.log('Rerender plots here')
       })
+    },
+    poll ({commit, dispatch}) {
+      fetch(`${this.state.httpRoot}/poll`)
+        .then(resp => resp.json())
+        .then(body => {
+          if (body.Updates === true) {
+            console.log('updating')
+            dispatch('update')
+          }
+          this.showModal = false
+          commit('setCommunicationError', false)
+          setTimeout(() => {
+            dispatch('poll')
+          }, 1000)
+        }, error => {
+          console.log('HTTP Polling Error, Status:', error.status, 'Message:', error.statusText)
+          if (error.status === 0) {
+            commit('sethttpError', {
+              header: 'Internal Communication Error',
+              body: `We seem to have lost communication with your
+                    Gekko script. This means that we cannot get
+                    any updates from your Gekko model.
+                    Did you stop the script or did
+                    it crash? If so, close this window and restart
+                    it.`,
+              report: `Please report any Gekko project errors as
+                issues at https://github.com/BYU-PRISM/GEKKO`
+            })
+          } else {
+            commit('sethttpError', {
+              header: 'Internal Communication Error',
+              body: `Please copy these details in an error report
+                    to the Gekko developers. Error Code:
+                    ${error.status}, Error: ${error.statusText}`,
+              report: `Please report any Gekko project errors as
+                issues at https://github.com/BYU-PRISM/GEKKO`
+            })
+          }
+          commit('setCommunicationError', true)
+        })
     }
   }
 })

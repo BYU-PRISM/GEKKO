@@ -15,7 +15,7 @@ from .gk_variable import GKVariable
 import __main__ as main
 
 # Toggle development and production modes
-DEV = False
+DEV = True
 WATCHDOG_TIME_LENGTH = 0
 
 if DEV:
@@ -232,7 +232,8 @@ class GK_GUI:
         # Open the browser to the page and launch the app
         print('Opening display in default webbrowser at http://localhost:' + str(port) + '/index.html. \nClose display tab or type CTRL+C to exit.')
         if DEV:
-            flaskThread = FlaskThread(self.path, True, port)
+            # The dev version of the
+            flaskThread = FlaskThread(self.path, True, 8050)
             # flaskThread.daemon = True
             flaskThread.start()
             self.apiRef = flaskThread
