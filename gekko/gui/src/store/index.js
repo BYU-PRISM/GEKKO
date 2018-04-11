@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { HTTP } from '../http'
 
 Vue.use(Vuex)
 /* eslint-disable no-multi-spaces */
@@ -26,13 +25,14 @@ const store = new Vuex.Store({
       // list of gekko variable objects
     },
     showErrorModal: false,
-    // Object describing communication errors with the backend
+    // Object deupdatePlotsscribing communication errors with the backend
     httpError: {
       header: '',
       body: '',
       report: `Please report any Gekko project errors as
         issues at https://github.com/BYU-PRISM/GEKKO`
-    }
+    },
+    httpRoot: process.env.NODE_ENV === 'development' ? 'http://localhost:8050' : 'http://' + location.hostname + ':' + location.port
   },
   mutations: {
     removePlot: (state, data) => {
@@ -48,10 +48,32 @@ const store = new Vuex.Store({
       state.plotIdCounter++
       state.numPlots++
     },
-    setCommunicationError (state, data) { state.communicationError = data },
+    setCommunicationError (state, data) {
+      if (!state.communicationError) {
+        if (!state.showErrorModal) {
+          state.showErrorModal = data
+        }
+        state.communicationError = data
+      }
+    },
+    sethttpError (state, data) { state.httpError = data },
     showFullscreenPlot (state) { state.fullscreenPlot = true },
     hideFullscreenPlot (state) { state.fullscreenPlot = false },
-    updatePlotData (state, data) { state.plotData = data },
+    setPlotData (state, data) {
+      state.plotData = data
+      for (var i = 0; i < state.plots.length; i++) {
+        // Find a clever way to hot reload the plot data here
+        var plotData = state.plots[i].data
+        console.log('plotData', plotData)
+        for (var j = 0; j < plotData.length; j++) {
+          var trace = plotData[j]
+          var updatedTrace = state.plotData.filter((t) => t.name === trace.name)[0]
+          trace.x = updatedTrace.x
+          trace.y = updatedTrace.y
+        }
+        console.log('updated plots', state.plots)
+      }
+    },
     updatePlotLayout (state, data) { state.plots.filter(p => p.id === data.id)[0].layout = data.layout },
     setModelData (state, data) { state.modelData = data },
     setVarsData (state, data) { state.varsData = data },
@@ -59,32 +81,32 @@ const store = new Vuex.Store({
     hideErrorModal (state, data) { state.showErrorModal = false }
   },
   actions: {
-    initialize ({commit, state}) {
-      HTTP.get('/get_data')
-        .then(data => data.data)
+    get_data ({commit, state}) {
+      fetch(`${this.state.httpRoot}/data`)
+        .then(data => data.json())
         .then(data => {
+          console.log('data:', data)
+          commit('setModelData', data.model)
           var plotArray = []
-          console.log('get_data data:', data)
-          const isMuchData = Object.keys(data).length > 5
-          for (var key in data) {
-            if (data.hasOwnProperty(key)) {
-              if (key !== 'time') {
-                const trace = {
-                  x: data.time,
-                  y: data[key],
-                  mode: 'lines',
-                  type: 'scatter',
-                  name: key,
-                  visible: isMuchData ? 'legendonly' : 'true'
-                }
-                plotArray.push(trace)
+          const isMuchData = (
+            data.vars.variables.length + data.vars.parameters.length +
+            data.vars.intermediates.length + data.vars.constants.length
+          ) > 5
+          const v = data.vars
+          for (var set in data.vars) {
+            for (var variable in v[set]) {
+              const trace = {
+                x: data.time,
+                y: v[set][variable].data,
+                mode: 'lines',
+                type: 'scatter',
+                name: v[set][variable].name,
+                visible: isMuchData ? 'legendonly' : 'true'
               }
+              plotArray.push(trace)
             }
           }
-          commit('updatePlotData', plotArray)
-          commit('addPlot') // First plot added is the hidden fullscreen plot
-          commit('updatePlotLayout', {id: 0, layout: {'height': window.innerHeight - 150}})
-          commit('addPlot') // Second plot is the one shown on the main page
+          commit('setPlotData', plotArray)
         })
         .catch(err => {
           console.log('Error fetching from get_data:', err)
@@ -92,11 +114,10 @@ const store = new Vuex.Store({
       const ignoredProps = ['INFO', 'APM']
       let options
       let varsData = {}
-      HTTP.get('get_options')
-        .then(data => data.data)
+      fetch(`${this.state.httpRoot}/get_options`)
+        .then(data => data.json())
         .then(obj => {
           options = obj
-          console.log('options:', obj)
           return Object.keys(obj).filter(key => !ignoredProps.includes(key))
         })
         .then(keys => {
@@ -107,13 +128,53 @@ const store = new Vuex.Store({
           })
         }).then(() => {
           commit('setVarsData', varsData)
-          console.log('varsData:', varsData)
         })
-      HTTP.get('get_model')
-        .then(data => data.data)
-        .then(model => {
-          commit('setModelData', model)
-          console.log('model:', model)
+    },
+    initialize ({commit, dispatch}) {
+      dispatch('get_data').then(() => {
+        commit('addPlot') // First plot added is the hidden fullscreen plot
+        commit('updatePlotLayout', {id: 0, layout: {'height': window.innerHeight - 150}})
+        commit('addPlot') // Second plot is the one shown on the main page
+      })
+    },
+    poll ({commit, dispatch}) {
+      fetch(`${this.state.httpRoot}/poll`)
+        .then(resp => resp.json())
+        .then(body => {
+          if (body.updates === true) {
+            console.log('Updating...')
+            dispatch('get_data')
+          }
+          this.showModal = false
+          commit('setCommunicationError', false)
+          setTimeout(() => {
+            dispatch('poll')
+          }, 1000)
+        }, error => {
+          console.log('HTTP Polling Error, Status:', error.status, 'Message:', error.statusText)
+          if (error.status === 0) {
+            commit('sethttpError', {
+              header: 'Internal Communication Error',
+              body: `We seem to have lost communication with your
+                    Gekko script. This means that we cannot get
+                    any updates from your Gekko model.
+                    Did you stop the script or did
+                    it crash? If so, close this window and restart
+                    it.`,
+              report: `Please report any Gekko project errors as
+                issues at https://github.com/BYU-PRISM/GEKKO`
+            })
+          } else {
+            commit('sethttpError', {
+              header: 'Internal Communication Error',
+              body: `Please copy these details in an error report
+                    to the Gekko developers. Error Code:
+                    ${error.status}, Error: ${error.statusText}`,
+              report: `Please report any Gekko project errors as
+                issues at https://github.com/BYU-PRISM/GEKKO`
+            })
+          }
+          commit('setCommunicationError', true)
         })
     }
   }

@@ -1,7 +1,7 @@
 <template>
   <div class="mainDiv">
     <modalPlot
-      v-if="$store.state.fullscreenPlot"
+      :hidden="!$store.state.fullscreenPlot"
       @close="hideModalPlot"/>
     <div
       class="row"

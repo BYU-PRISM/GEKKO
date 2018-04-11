@@ -29,7 +29,8 @@ export default {
   data () {
     return {
       // This id is simply for handling window updates and is soley internal state
-      id: Math.random().toString(36).substring(7)
+      id: Math.random().toString(36).substring(7),
+      plotInitialized: false
     }
   },
   computed: {
@@ -38,15 +39,15 @@ export default {
   },
   watch: {
     numPlots: () => {
-      console.log('numPlots changed, resizing plot')
-      this.plotlyResize // eslint-disable-line
+        this.plotlyResize // eslint-disable-line
     },
-    plotData: (val) => { Plotly.newPlot(this.id, val, this.layout) }
+    data: () => {
+      Plotly.newPlot(this.id, this.data, this.layout)
+    }
   },
   beforeDestroy () { window.removeEventListener('resize', this.plotlyResize) },
   mounted () {
     window.addEventListener('resize', this.plotlyResize)
-    console.log('plot layout', this.layout)
     Plotly.newPlot(this.id, this.data, this.layout)
   },
   methods: {

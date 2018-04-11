@@ -6,12 +6,13 @@ import sys
 import webbrowser
 import threading
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, redirect
+from flask_cors import CORS
 
 from .gk_parameter import GKParameter
 from .gk_variable import GKVariable
+
 import __main__ as main
-from flask_cors import CORS
 
 # Toggle development and production modes
 DEV = False
@@ -38,37 +39,31 @@ def watchdog_timer():
     print('Browser display closed. Exiting...')
     os._exit(0)
 
-class GK_GUI:
-    """GUI class for GEKKO
-    This class handles creation and management of the gui. It pulls the required
-    data from options.json and results.json and displays using DASH.
+
+
+class FlaskThread(threading.Thread):
     """
-    def __init__(self, path):
-        self.has_model_data = False
-        self.path = path
+    Flask API thread. Pulls the required data from options.json and
+    results.json and displays by opening the local browser to the Vue app.
+    """
+    def __init__(self, path, debug, port):
+        threading.Thread.__init__(self)
+        self.has_data = False           # Variable defines if the Gekko data is loaded
+        self.has_new_update = False
+        self.path = path                # Path to tmp dir where Gekko output is
+        self.debug = debug
+        self.port = port
+
+        self.gekko_data = {}            # Combined, final Gekko data object
+
         self.vars_dict = {}                     # vars dict with script names as keys
         self.options_dict = {}                  # options dict with script names as keys
         self.model = {}                         # APM model information
         self.info = {}
-        self.vars_map = self.get_script_vars()  # map of model vars to script vars
         self.get_script_data()
 
         # This is used for the polling between the api and the Vue app
         self.alarm = threading.Timer(WATCHDOG_TIME_LENGTH, watchdog_timer)
-        self.alarm.start()
-
-    def get_script_vars(self):
-        vars_map = {}
-        main_dict = vars(main)
-        for var in main_dict:
-            if isinstance(main_dict[var], (GKVariable,GKParameter)):
-                vars_map[main_dict[var].name] = var
-            if isinstance(main_dict[var], list):
-                list_var = main_dict[var]
-                for i in range(len(list_var)):
-                    if isinstance(list_var[i], (GKVariable,GKParameter)):
-                        vars_map[list_var[i].name] = var+'['+str(i)+']'
-        return vars_map
 
     def get_script_data(self):
         """Gather the data that GEKKO returns from the run and process it into
@@ -77,24 +72,67 @@ class GK_GUI:
         # `m.solve()` is ever called, so the files might not be there.
         try:
             # Load options.json
-            self.options = json.loads(open(os.path.join(self.path,'options.json')).read())
+            options = json.loads(open(os.path.join(self.path,'options.json')).read())
             # Load results.json
-            self.results = json.loads(open(os.path.join(self.path,"results.json")).read())
-            self.vars_dict['time'] = self.results['time']
-            self.model = self.options['APM']
-            self.info = self.options['INFO']
-            for var in self.vars_map:
+            results = json.loads(open(os.path.join(self.path,"results.json")).read())
+            self.gekko_data['model'] = options['APM']
+            self.gekko_data['info'] = options['INFO']
+            self.gekko_data['time'] = results['time']
+            self.gekko_data['vars'] = {}
+            self.gekko_data['vars']['variables'] = []
+            self.gekko_data['vars']['parameters'] = []
+            self.gekko_data['vars']['constants'] = []
+            self.gekko_data['vars']['intermediates'] = []
+
+            self.vars_dict['time'] = results['time']
+            self.model = options['APM']
+
+            main_dict = vars(main)
+            for var in main_dict:
+                if (var != 'time') and isinstance(main_dict[var], (GKVariable, GKParameter)):
+                    # print(var, 'is of type', type(main_dict[var]))
+                    try:
+                        var_dict = {
+                            'name': var,
+                            'data': results[main_dict[var].name],
+                            'options': options[main_dict[var].name]
+                        }
+                    except Exception as e:
+                        var_dict = {
+                            'name': var,
+                            'data': results[main_dict[var].name],
+                            'options': {}
+                        }
+                    if isinstance(main_dict[var], GKVariable):
+                        self.gekko_data['vars']['variables'].append(var_dict)
+                    elif isinstance(main_dict[var], GKParameter):
+                        self.gekko_data['vars']['parameters'].append(var_dict)
+                    # elif isinstance(main_dict[var], GKIntermediate):
+                        # Add to intermediate list
+                        # pass
+
+            vars_map = {}
+            main_dict = vars(main)
+            for var in main_dict:
+                if isinstance(main_dict[var], (GKVariable,GKParameter)):
+                    vars_map[main_dict[var].name] = var
+                if isinstance(main_dict[var], list):
+                    list_var = main_dict[var]
+                    for i in range(len(list_var)):
+                        if isinstance(list_var[i], (GKVariable,GKParameter)):
+                            vars_map[list_var[i].name] = var+'['+str(i)+']'
+
+            for var in vars_map:
                 if var != 'time':
-                    self.vars_dict[self.vars_map[var]] = self.results[var]
-                    for var in self.vars_map:
+                    self.vars_dict[vars_map[var]] = results[var]
+                    for var in vars_map:
                         try:
-                            self.options_dict[self.vars_map[var]] = self.options[var]
+                            self.options_dict[vars_map[var]] = options[var]
                         except:
                             if DEV == True:
-                                print(str(var)+' not in options.json')
-                            # FIXME: Find a better way to only try to add the vars, params
-                            #if var[0] == 'v':
-                            #    self.options_dict[self.vars_map[var]] = self.options[var]
+                                # print(str(var)+' not in options.json')
+                                pass
+
             self.has_model_data = True
         except FileNotFoundError as e:
             self.has_model_data = False
@@ -121,29 +159,28 @@ class GK_GUI:
     def set_endpoints(self):
         """Sets the flask API endpoints"""
         try:
-            @app.route('/get_data')
+            @app.route('/data')
             def get_data():
-                return self.handle_api_call(self.vars_dict)
+                self.has_new_update = False
+                return self.handle_api_call(self.gekko_data)
 
             @app.route('/get_options')
             def get_options():
                 return self.handle_api_call(self.options_dict)
 
-            @app.route('/get_model')
-            def get_model():
-                return self.handle_api_call(self.model)
-
-            @app.route('/get_info')
-            def get_info():
-                return self.handle_api_call(self.info)
-
             @app.route('/poll')
             def get_poll():
-                return self.handle_api_call({'updates': False})
+                return self.handle_api_call({'updates': self.has_new_update})
+                self.has_new_update = False
 
             @app.route('/<path:path>')
             def static_file(path):
                 return app.send_static_file(path)
+
+            @app.route('/')
+            def redirect_to_index():
+                newPath = 'http://localhost:' + str(self.port) + '/index.html'
+                return redirect(newPath)
 
         except AssertionError as e:
             # This try/except is because ipython keeps the endpoints in
@@ -154,10 +191,32 @@ class GK_GUI:
         except Exception as e:
             raise e
 
+    def run(self):
+        self.set_endpoints()
+        # Debug in flask does not work when run on a separate thread
+        app.run(debug=False, port=self.port, threaded=True)
+        self.alarm.start()
+
+    def update(self):
+        self.get_script_data()
+        self.has_new_update = True
+
+
+class GK_GUI:
+    """GUI class for GEKKO
+    Creates and manages the FlaskThread that actually runs the API.
+    """
+    def __init__(self, path):
+        self.path = path
+
+
     def display(self):
         """Finds the appropriate port starts the api and opens the webbrowser"""
-        self.set_endpoints()
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # It is necessary to have a reference like this as flaskThread cannot
+        # be part of self when `flaskThread.start()` is called for reasons I
+        # do not fully understand. Improve on this if you can.
+        self.apiRef = "This is a reference to the Flask API thread"
         port = 8050
         try:    # Check to see if :8050 is already bound
             sock.bind(('127.0.0.1', port))
@@ -172,12 +231,26 @@ class GK_GUI:
             sock.close()
 
         # Open the browser to the page and launch the app
-        print('Opening display in default webbrowser. Close display tab or type CTRL+C to exit.')
+        print('Opening display in default webbrowser at http://localhost:' + str(port) + '/index.html. \nClose display tab or type CTRL+C to exit.')
         if DEV:
-            app.run(debug=True, port=8050)
+            # The dev version of the
+            flaskThread = FlaskThread(self.path, True, 8050)
+            # flaskThread.daemon = True
+            flaskThread.start()
+            self.apiRef = flaskThread
         else:
             webbrowser.open("http://localhost:" + str(port) + "/index.html")
-            app.run(debug=False, port=port)
+            flaskThread = FlaskThread(self.path, False, port)
+            # flaskThread.daemon = True
+            flaskThread.start()
+            self.apiRef = flaskThread
+            # Non-threaded way, only works for non-dynamic GUI display
+            # app.run(debug=False, port=port)
+
+    def update(self):
+        self.apiRef.update()
+        # pass
+
 
 if __name__ == '__main__':
     gui = GK_GUI()

@@ -52,6 +52,7 @@ setup(name='gekko',
     install_requires=[
         # 'APMonitor>=0.33',
         'flask',
+        'flask_cors',
         'numpy>=1.8'#,
         #'ujson',
     ],
