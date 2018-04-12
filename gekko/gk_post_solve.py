@@ -17,7 +17,7 @@ def load_JSON(self):
     for o in self.options._output_option_list+self.options._inout_option_list:
         self.options.__dict__[o] = data['APM'][o]
     #Variable options (FV/MV/SV/CV)
-    for vp in self.parameters:
+    for vp in self._parameters:
         if vp.type != None: #(FV/MV/SV/CV) not Param or Var
             for o in parameter_options[vp.type]['outputs']+parameter_options[vp.type]['inout']:
                 if o == 'VALUE':
@@ -48,7 +48,7 @@ def load_JSON(self):
                             vp.__dict__[o] = dpred
                 else: #everything besides value, dpred and pred
                     vp.__dict__[o] = data[vp.name][o]
-    for vp in self.variables:
+    for vp in self._variables:
         if vp.type != None: #(FV/MV/SV/CV) not Param or Var
             for o in variable_options[vp.type]['outputs']+variable_options[vp.type]['inout']:
 
@@ -78,20 +78,20 @@ def load_results(self):
         data = json.load(f)
         f.close()
 
-        for vp in self.parameters:
+        for vp in self._parameters:
             if vp.type is not None:
                 try:
                     vp.VALUE = data[vp.name]
                     vp.value.change = False
                 except Exception:
                     print(vp.name+ " not found in results file")
-        for i in self.intermediates:
+        for i in self._intermediates:
             try:
                 i.VALUE = data[i.name]
                 i.value.change = False
             except Exception:
                 print(i.name+ " not found in results file")
-        for vp in self.variables:
+        for vp in self._variables:
             try:
                 vp.VALUE = data[vp.name]
                 vp.value.change = False
@@ -125,7 +125,7 @@ def load_csv_results(self):
                 else:
                     y[row[0]] = [float(col) for col in row[1:]]
         # Load variable values into their respective objects from the dictionary
-        for vp in self.parameters+self.variables:
+        for vp in self._parameters+self._variables:
             try:
                 vp.VALUE = y[str(vp)]
             except Exception:

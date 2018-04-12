@@ -23,9 +23,9 @@ def build_model(self):
         for const in self._constants:
             model += '\t%s = %s\n' % (const, const.value)
         model += 'End Constants\n'
-    if self.parameters:
+    if self._parameters:
         model += 'Parameters\n'
-        for parameter in self.parameters:
+        for parameter in self._parameters:
             i = 0
             model += '\t%s' % parameter
             if not isinstance(parameter.VALUE.value, (list,np.ndarray)):
@@ -66,19 +66,19 @@ def build_model(self):
             model += '\n'
         model += 'End Variables\n'
 
-    if self.intermediates:
+    if self._intermediates:
         model += 'Intermediates\n'
-        for i in range(len(self.inter_equations)):
-            model += '\t%s=%s\n' % (str(self.intermediates[i]), str(self.inter_equations[i]))
+        for i in range(len(self._inter_equations)):
+            model += '\t%s=%s\n' % (str(self._intermediates[i]), str(self._inter_equations[i]))
         model += 'End Intermediates\n'
 
-    if self.equations or self.objectives:
+    if self._equations or self._objectives:
         model += 'Equations\n'
-        if self.equations:
-            for equation in self.equations:
+        if self._equations:
+            for equation in self._equations:
                 model += '\t%s\n' % equation
-        if self.objectives:
-            for o in self.objectives:
+        if self._objectives:
+            for o in self._objectives:
                 model += '\t%s\n' % o
         model += 'End Equations\n'
 
@@ -137,7 +137,7 @@ def write_csv(self):
             print("Warning: model time only used for dynamic modes (IMODE>3)")
 
     #check all parameters and arrays
-    for vp in self.variables+self.parameters:
+    for vp in self.variables+self._parameters:
         #Only save csv data if the user changed the value (changes registered in vp.value.change)
         if vp.value.change is False:
             continue
@@ -241,7 +241,7 @@ def write_info(self):
         #Create and open configuration files
         with open(os.path.join(self.path,filename), 'w+') as f:
             #check each Var and Param for FV/MV/SV/CV
-            for vp in self.variables+self.parameters:
+            for vp in self.variables+self._parameters:
                 if vp.type is not None:
                     f.write(vp.type+', '+vp.name+'\n')
 
@@ -261,7 +261,7 @@ def generate_dbs_file(self):
     with open(os.path.join(self.path,filename), 'w+') as f:
         f.write(file_content)
         #check for set options of each Var and Param
-        for vp in self.parameters:
+        for vp in self._parameters:
             if vp.type is not None: #(FV/MV/SV/CV) not Param or Var
                 for o in parameter_options[vp.type]['inputs']+parameter_options[vp.type]['inout']:
                     if o == 'VALUE':
@@ -362,9 +362,9 @@ def to_JSON(self): #JSON input to APM not currently supported -- this function i
 #                const_dict['value'] = self.jsonify(const.value)
 #            const_dict[const.name] = const_dict
 
-    if self.parameters:
+    if self._parameters:
         p_dict = dict()
-        for parameter in self.parameters:
+        for parameter in self._parameters:
             o_dict = dict()
             for o in parameter_options[parameter.type]['inputs']+parameter_options[parameter.type]['inout']:
                 if o == 'VALUE':
@@ -389,9 +389,9 @@ def to_JSON(self): #JSON input to APM not currently supported -- this function i
         json_data['variables'] = p_dict
 
     """
-    if self.intermediates:
+    if self._intermediates:
         temp_dict = dict()
-        for intermediate in self.intermediates:
+        for intermediate in self._intermediates:
             temp_dict['name'] = {'value':self.jsonify(intermediate.value)}
         json_data['intermediates'] = temp_dict
     """

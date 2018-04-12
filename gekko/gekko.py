@@ -58,12 +58,12 @@ class GEKKO(object):
 
         #keep a list of constants, params, vars, eqs, etc associated with this model
         self._constants = []
-        self.parameters = []
-        self.variables = []
-        self.intermediates = []
-        self.inter_equations = []
-        self.equations = []
-        self.objectives = []
+        self._parameters = []
+        self._variables = []
+        self._intermediates = []
+        self._inter_equations = []
+        self._equations = []
+        self._objectives = []
         self._connections = []
         self._objects = []
 
@@ -113,10 +113,10 @@ class GEKKO(object):
         if name is not None:
             name = re.sub(r'\W+', '', name).lower()
         else:
-            name = 'p' + str(len(self.parameters) + 1)
+            name = 'p' + str(len(self._parameters) + 1)
 
         parameter = GKParameter(name, value)
-        self.parameters.append(parameter)
+        self._parameters.append(parameter)
         return parameter
 
     def FV(self, value=None, lb=None, ub=None, integer=False, fixed_initial=True, name=None):
@@ -125,12 +125,12 @@ class GEKKO(object):
         if name is not None:
             name = re.sub(r'\W+', '', name).lower()
         else:
-            name = 'p' + str(len(self.parameters) + 1)
+            name = 'p' + str(len(self._parameters) + 1)
         if integer == True:
             name = 'int_'+name
 
         parameter = GK_FV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
-        self.parameters.append(parameter)
+        self._parameters.append(parameter)
         if fixed_initial is False:
             self.Connection(parameter,'CALCULATED',pos1=1,node1=1)
         return parameter
@@ -140,12 +140,12 @@ class GEKKO(object):
         if name is not None:
             name = re.sub(r'\W+', '', name).lower()
         else:
-            name = 'p' + str(len(self.parameters) + 1)
+            name = 'p' + str(len(self._parameters) + 1)
         if integer == True:
             name = 'int_'+name
 
         parameter = GK_MV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
-        self.parameters.append(parameter)
+        self._parameters.append(parameter)
         if fixed_initial is False:
             self.Connection(parameter,'CALCULATED',pos1=1,node1=1)
         return parameter
@@ -156,12 +156,12 @@ class GEKKO(object):
         if name is not None:
             name = re.sub(r'\W+', '', name).lower()
         else:
-            name = 'v' + str(len(self.variables) + 1)
+            name = 'v' + str(len(self._variables) + 1)
         if integer == True:
             name = 'int_'+name
 
         variable = GKVariable(name, value, lb, ub)
-        self.variables.append(variable)
+        self._variables.append(variable)
         if fixed_initial is False:
             self.Connection(variable,'CALCULATED',pos1=1,node1=1)
         return variable
@@ -171,12 +171,12 @@ class GEKKO(object):
         if name is not None:
             name = re.sub(r'\W+', '', name).lower()
         else:
-            name = 'v' + str(len(self.variables) + 1)
+            name = 'v' + str(len(self._variables) + 1)
         if integer == True:
             name = 'int_'+name
 
         variable = GK_SV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
-        self.variables.append(variable)
+        self._variables.append(variable)
         if fixed_initial is False:
             self.Connection(variable,'CALCULATED',pos1=1,node1=1)
         return variable
@@ -187,12 +187,12 @@ class GEKKO(object):
         if name is not None:
             name = re.sub(r'\W+', '', name).lower()
         else:
-            name = 'v' + str(len(self.variables) + 1)
+            name = 'v' + str(len(self._variables) + 1)
         if integer == True:
             name = 'int_'+name
 
         variable = GK_CV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
-        self.variables.append(variable)
+        self._variables.append(variable)
         if fixed_initial is False:
             self.Connection(variable,'CALCULATED',pos1=1,node1=1)
         return variable
@@ -203,13 +203,13 @@ class GEKKO(object):
             if name == '':
                 name = None
         inter = GK_Intermediate(name)
-        self.intermediates.append(inter)
-        self.inter_equations.append(str(equation))
+        self._intermediates.append(inter)
+        self._inter_equations.append(str(equation))
         return inter
 
     def Equation(self,equation):
         EqObj = EquationObj(equation)
-        self.equations.append(EqObj)
+        self._equations.append(EqObj)
         return EqObj
 
     def Equations(self,eqs):
@@ -220,7 +220,7 @@ class GEKKO(object):
         return l
 
     def Obj(self,obj):
-        self.objectives.append('minimize ' + str(obj))
+        self._objectives.append('minimize ' + str(obj))
 
     #%% Connections
 
