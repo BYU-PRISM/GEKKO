@@ -89,6 +89,7 @@ ENV/
 
 # Spyder project settings
 .spyderproject
+gekko/.spyproject
 
 # Rope project settings
 .ropeproject
