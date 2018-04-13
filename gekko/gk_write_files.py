@@ -45,9 +45,9 @@ def build_model(self):
             model += '\n'
         model += 'End Parameters\n'
 
-    if self.variables:
+    if self._variables:
         model += 'Variables\n'
-        for parameter in self.variables:
+        for parameter in self._variables:
             i = 0
             model += '\t%s' % parameter
             if not isinstance(parameter.VALUE.value, (list,np.ndarray)):
@@ -137,7 +137,7 @@ def write_csv(self):
             print("Warning: model time only used for dynamic modes (IMODE>3)")
 
     #check all parameters and arrays
-    for vp in self.variables+self._parameters:
+    for vp in self._variables+self._parameters:
         #Only save csv data if the user changed the value (changes registered in vp.value.change)
         if vp.value.change is False:
             continue
@@ -150,7 +150,7 @@ def write_csv(self):
                     #in MPU, the first vp checked could be a scalar value (FV, param, var initial guess)
                     #but the CV is likely longer so skip scalar values (they will be set in the APM file)
                     continue
-                    
+
 
             if vp.value.change is True: #Save the entire array of values
                 #skip variable if its value is a string (ie symbolic initialization)
@@ -159,7 +159,7 @@ def write_csv(self):
                     vp.value.change = False
                     #do nothing else, go to next variable
                     continue
-                
+
                 #discretize all values to arrays
                 if not isinstance(vp.VALUE.value, (list,np.ndarray)):
                     vp.VALUE = np.ones(length)*vp.VALUE
@@ -237,11 +237,11 @@ def write_info(self):
     if self.options.CYCLECOUNT < 1:
         #Classify variable in .info file
         filename = self.model_name+'.info'
-    
+
         #Create and open configuration files
         with open(os.path.join(self.path,filename), 'w+') as f:
             #check each Var and Param for FV/MV/SV/CV
-            for vp in self.variables+self._parameters:
+            for vp in self._variables+self._parameters:
                 if vp.type is not None:
                     f.write(vp.type+', '+vp.name+'\n')
 
@@ -270,7 +270,7 @@ def generate_dbs_file(self):
                         if vp.__dict__[o] is not None:
                             f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
 
-        for vp in self.variables:
+        for vp in self._variables:
             if vp.type is not None: #(FV/MV/SV/CV) not Param or Var
                 for o in variable_options[vp.type]['inputs']+variable_options[vp.type]['inout']:
                     if o == 'VALUE':
@@ -375,9 +375,9 @@ def to_JSON(self): #JSON input to APM not currently supported -- this function i
             p_dict[parameter.name] = o_dict
         json_data['parameters'] = p_dict
 
-    if self.variables:
+    if self._variables:
         p_dict = dict()
-        for parameter in self.variables:
+        for parameter in self._variables:
             o_dict = dict()
             for o in variable_options[parameter.type]['inputs']+variable_options[parameter.type]['inout']:
                 if o == 'VALUE':
@@ -403,4 +403,3 @@ def to_JSON(self): #JSON input to APM not currently supported -- this function i
     #load JSON to dictionary:
     #with open(os.path.join(self.path,'jsontest.json')) as json_file:
     #   data = json.load(json_file)
-
