@@ -50,7 +50,8 @@ class GEKKO(object):
     """Create a model object. This is the basic object for solving optimization problems"""
     _ids = count(0) #keep track of number of active class instances to not overwrite eachother with default model name
 
-    def __init__(self, server='http://byu.apmonitor.com', name=None):
+    def __init__(self, remote=True, server='http://byu.apmonitor.com', name=None):
+        self.remote = remote
         self.server = compatible_string_strip(server)
         self.options = GKGlobalOptions()
         self.id = next(self._ids) #instance count of class
@@ -87,7 +88,8 @@ class GEKKO(object):
         self.solver_options = []
 
         #clear anything already on the server
-        cmd(self.server,self.model_name,'clear all')
+        if self.remote:
+            cmd(self.server,self.model_name,'clear all')
 
 
     #%% Parts of the model
@@ -497,7 +499,7 @@ class GEKKO(object):
 
 
     #%% Get a solution
-    def solve(self,remote=True,disp=True,debug=False,GUI=False):
+    def solve(self,disp=True,debug=False,GUI=False):
         """Solve the optimization problem.
 
         This function has these substeps:
@@ -543,7 +545,7 @@ class GEKKO(object):
 
         if timing == True:
             t = time.time()
-        self.write_solver_options(remote)
+        self.write_solver_options()
         if timing == True:
             print('build solver options', time.time() - t)
 
@@ -556,7 +558,7 @@ class GEKKO(object):
         if debug == True:
             self.name_check()
 
-        if remote == False:#local_solve
+        if self.remote == False:#local_solve
             if timing == True:
                 t = time.time()
 
@@ -619,7 +621,7 @@ class GEKKO(object):
             cmd(self.server, self.model_name, 'option '+dbs)
             #solver options
             if self.solver_options:
-                opt_file=self.write_solver_options(remote)
+                opt_file=self.write_solver_options()
                 cmd(self.server,self.model_name, ' '+opt_file)
 
             #extra files (eg solver.opt, cspline.data)

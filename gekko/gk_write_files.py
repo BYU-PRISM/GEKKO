@@ -280,7 +280,7 @@ def generate_dbs_file(self):
                             f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
 
 
-def write_solver_options(self,remote):
+def write_solver_options(self):
     opt_file = ''
     if self.solver_options:
         #determine filename from solver number
@@ -296,7 +296,7 @@ def write_solver_options(self,remote):
             opt_file += option + '\n'
 
         #If remote solve, pass string to append to .apm file
-        if remote is True:
+        if self.remote is True:
             return 'File ' + filename + '\n' + opt_file + 'End File\n'
         #write file for local solve
         else:
