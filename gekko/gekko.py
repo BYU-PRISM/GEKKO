@@ -686,7 +686,7 @@ class GEKKO(object):
 
         if self.gui_open:
             self.gui.update()
-        else:
+        elif GUI is True:
             self.gui_open = True
             self.gui = GK_GUI(self.path)
             self.gui.display()
