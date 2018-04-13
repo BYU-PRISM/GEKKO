@@ -37,8 +37,8 @@ CORS(app)
 # Could normally use signal.alarm, but need to support windows
 def watchdog_timer():
     print('Browser display closed. Exiting...')
-    os._exit(0)
-
+    #os._exit(0)
+    sys.exit()
 
 
 class FlaskThread(threading.Thread):
