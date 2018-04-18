@@ -2,7 +2,7 @@
   <div class="mainDiv">
     <modalPlot
       :hidden="!$store.state.fullscreenPlot"
-      @close="hideModalPlot"/>
+      @close="showModalPlot(false)"/>
     <div
       class="row"
       style="margin-right:0px;">
@@ -25,7 +25,7 @@
         <button
           type="button"
           class="btn btn-secondary"
-          @click="showModalPlot"
+          @click="showModalPlot(true)"
           style="margin-top:10px;">Fullscreen plot</button>
       </div>
     </div>
@@ -72,8 +72,7 @@ export default {
       console.log('Removing plot', id)
       this.$store.commit('removePlot', id)
     },
-    hideModalPlot () { this.$store.commit('hideFullscreenPlot') },
-    showModalPlot () { this.$store.commit('showFullscreenPlot') }
+    showModalPlot (data) { this.$store.commit('showFullscreenPlot', data) }
   }
 }
 </script>

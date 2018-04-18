@@ -57,8 +57,7 @@ const store = new Vuex.Store({
       }
     },
     sethttpError (state, data) { state.httpError = data },
-    showFullscreenPlot (state) { state.fullscreenPlot = true },
-    hideFullscreenPlot (state) { state.fullscreenPlot = false },
+    showFullscreenPlot (state, data) { state.fullscreenPlot = data },
     setPlotData (state, data) {
       state.plotData = data
       for (var i = 0; i < state.plots.length; i++) {
@@ -81,10 +80,9 @@ const store = new Vuex.Store({
   },
   actions: {
     get_data ({commit, state}) {
-      fetch(`${this.state.httpRoot}/data`)
+      var api1 = fetch(`${this.state.httpRoot}/data`)
         .then(data => data.json())
         .then(data => {
-          console.log('data:', data)
           commit('setModelData', data.model)
           var plotArray = []
           const isMuchData = (
@@ -113,7 +111,7 @@ const store = new Vuex.Store({
       const ignoredProps = ['INFO', 'APM']
       let options
       let varsData = {}
-      fetch(`${this.state.httpRoot}/get_options`)
+      var api2 = fetch(`${this.state.httpRoot}/get_options`)
         .then(data => data.json())
         .then(obj => {
           options = obj
@@ -128,8 +126,10 @@ const store = new Vuex.Store({
         }).then(() => {
           commit('setVarsData', varsData)
         })
+      return Promise.all([api1, api2])
     },
     initialize ({commit, dispatch}) {
+      // FIXME: Error on below line. `.then` is actually called before the action returns
       dispatch('get_data').then(() => {
         commit('addPlot') // First plot added is the hidden fullscreen plot
         commit('updatePlotLayout', {id: 0, layout: {'height': window.innerHeight - 150}})
