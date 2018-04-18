@@ -126,10 +126,10 @@ const store = new Vuex.Store({
         }).then(() => {
           commit('setVarsData', varsData)
         })
+      // This ensures .then on this action is only called after both return
       return Promise.all([api1, api2])
     },
     initialize ({commit, dispatch}) {
-      // FIXME: Error on below line. `.then` is actually called before the action returns
       dispatch('get_data').then(() => {
         commit('addPlot') // First plot added is the hidden fullscreen plot
         commit('updatePlotLayout', {id: 0, layout: {'height': window.innerHeight - 150}})
@@ -150,29 +150,19 @@ const store = new Vuex.Store({
             dispatch('poll')
           }, 1000)
         }, error => {
-          console.log('HTTP Polling Error, Status:', error.status, 'Message:', error.statusText)
-          if (error.status === 0) {
-            commit('sethttpError', {
-              header: 'Internal Communication Error',
-              body: `We seem to have lost communication with your
-                    Gekko script. This means that we cannot get
-                    any updates from your Gekko model.
-                    Did you stop the script or did
-                    it crash? If so, close this window and restart
-                    it.`,
-              report: `Please report any Gekko project errors as
-                issues at https://github.com/BYU-PRISM/GEKKO`
-            })
-          } else {
-            commit('sethttpError', {
-              header: 'Internal Communication Error',
-              body: `Please copy these details in an error report
-                    to the Gekko developers. Error Code:
-                    ${error.status}, Error: ${error.statusText}`,
-              report: `Please report any Gekko project errors as
-                issues at https://github.com/BYU-PRISM/GEKKO`
-            })
-          }
+          console.log('HTTP Polling Error, Status:', error)
+          commit('sethttpError', {
+            header: 'Internal Communication Error',
+            body: `This most often happens when the Gekko script
+                crashes or exits for some reason. If this happens
+                we cannot get any updates from your Gekko model.
+                Please close this window and restart the script
+                if this is the problem, otherwise report the
+                following error.
+                  ${error}`,
+            report: `Please report any Gekko project errors as
+              issues at https://github.com/BYU-PRISM/GEKKO`
+          })
           commit('setCommunicationError', true)
         })
     }

@@ -23,32 +23,39 @@ export default {
     // This is passed in and is used for looking up the other props from the global store
     externalId: {
       type: Number,
-      default: 1
+      required: true
     }
   },
   data () {
     return {
       // This id is simply for handling window updates and is soley internal state
-      id: Math.random().toString(36).substring(7),
-      plotInitialized: false
+      id: Math.random().toString(36).substring(7)
     }
   },
   computed: {
-    data () { return this.$store.state.plots.filter(plot => plot.id === this.externalId)[0].data },
+    data () {
+      if (this.$store.state.plots.length > 0) {
+        return this.$store.state.plots.filter(plot => plot.id === this.externalId)[0].data
+      } else {
+        return false
+      }
+    },
     layout () { return this.$store.state.plots.filter(plot => plot.id === this.externalId)[0].layout }
   },
   watch: {
-    numPlots: () => {
+    numPlots () {
         this.plotlyResize // eslint-disable-line
     },
-    data: () => {
+    data () {
       Plotly.newPlot(this.id, this.data, this.layout)
     }
   },
   beforeDestroy () { window.removeEventListener('resize', this.plotlyResize) },
   mounted () {
     window.addEventListener('resize', this.plotlyResize)
-    Plotly.newPlot(this.id, this.data, this.layout)
+    if (this.data) {
+      Plotly.newPlot(this.id, this.data, this.layout)
+    }
   },
   methods: {
     plotlyResize () { Plotly.Plots.resize(this.id) },
