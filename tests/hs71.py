@@ -42,7 +42,7 @@ m.Obj(x1*x4*(x1+x2+x3)+x3)
 m.options.IMODE = 3 #steady state optimization
 
 #Solve simulation
-m.solve(remote=True) # solve on public server
+m.solve(GUI=True) # solve on public server
 
 #Results
 print('')

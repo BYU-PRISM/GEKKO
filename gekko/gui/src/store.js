@@ -95,7 +95,7 @@ const store = new Vuex.Store({
               const trace = {
                 x: data.time,
                 y: v[set][variable].data,
-                mode: 'lines',
+                mode: v[set][variable].data.length > 1 ? 'lines' : 'markers',
                 type: 'scatter',
                 name: v[set][variable].name,
                 visible: isMuchData ? 'legendonly' : 'true'

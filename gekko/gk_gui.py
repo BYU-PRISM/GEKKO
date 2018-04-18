@@ -15,7 +15,7 @@ from .gk_variable import GKVariable
 import __main__ as main
 
 # Toggle development and production modes
-DEV = True
+DEV = False
 WATCHDOG_TIME_LENGTH = 0
 
 if DEV:
