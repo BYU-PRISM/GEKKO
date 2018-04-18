@@ -77,8 +77,7 @@ const store = new Vuex.Store({
     updatePlotLayout (state, data) { state.plots.filter(p => p.id === data.id)[0].layout = data.layout },
     setModelData (state, data) { state.modelData = data },
     setVarsData (state, data) { state.varsData = data },
-    showErrorModal (state, data) { state.showErrorModal = true },
-    hideErrorModal (state, data) { state.showErrorModal = false }
+    showErrorModal (state, data) { state.showErrorModal = data }
   },
   actions: {
     get_data ({commit, state}) {

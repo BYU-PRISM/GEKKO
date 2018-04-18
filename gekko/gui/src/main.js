@@ -4,8 +4,8 @@ import Vue from 'vue'
 import App from './App'
 import Plot from './components/Plot'
 import Tabs from './components/Tabs'
-import router from './router'
-import store from './store/index.js'
+import router from './router.js'
+import store from './store.js'
 
 Vue.config.productionTip = false
 

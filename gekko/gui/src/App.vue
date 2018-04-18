@@ -28,7 +28,7 @@
               <slot name="footer">
                 <button
                   class="modal-default-button"
-                  @click="$store.commit('hideErrorModal')">
+                  @click="$store.commit('showErrorModal', false)">
                   OK
                 </button>
               </slot>

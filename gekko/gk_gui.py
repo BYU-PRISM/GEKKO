@@ -6,7 +6,7 @@ import sys
 import webbrowser
 import threading
 
-from flask import Flask, jsonify, request, redirect
+from flask import Flask, jsonify, redirect
 from flask_cors import CORS
 
 from .gk_parameter import GKParameter
@@ -15,7 +15,7 @@ from .gk_variable import GKVariable
 import __main__ as main
 
 # Toggle development and production modes
-DEV = False
+DEV = True
 WATCHDOG_TIME_LENGTH = 0
 
 if DEV:
@@ -97,7 +97,7 @@ class FlaskThread(threading.Thread):
                             'data': results[main_dict[var].name],
                             'options': options[main_dict[var].name]
                         }
-                    except Exception as e:
+                    except Exception:
                         var_dict = {
                             'name': var,
                             'data': results[main_dict[var].name],
@@ -134,7 +134,7 @@ class FlaskThread(threading.Thread):
                                 pass
 
             self.has_model_data = True
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             self.has_model_data = False
             print('GUI could not find solution files. Assuming solution in a loop.')
 
@@ -221,11 +221,11 @@ class GK_GUI:
         try:    # Check to see if :8050 is already bound
             sock.bind(('127.0.0.1', port))
             sock.close()
-        except OSError as e:   # Find an open port if :8050 is taken
+        except OSError:   # Find an open port if :8050 is taken
             sock.bind(('127.0.0.1', 0))
             port = sock.getsockname()[1]
             sock.close()
-        except socket.error as e:
+        except socket.error:
             sock.bind(('127.0.0.1', 0))
             port = sock.getsockname()[1]
             sock.close()
