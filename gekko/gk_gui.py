@@ -11,11 +11,12 @@ from flask_cors import CORS
 
 from .gk_parameter import GKParameter
 from .gk_variable import GKVariable
+from .gk_operators import GK_Intermediate
 
 import __main__ as main
 
 # Toggle development and production modes
-DEV = False
+DEV = True
 WATCHDOG_TIME_LENGTH = 0
 
 if DEV:
@@ -37,6 +38,7 @@ CORS(app)
 # Could normally use signal.alarm, but need to support windows
 def watchdog_timer():
     print('Browser display closed. Exiting...')
+    print('If not running in an interactive shell you made need to exit with ^C.')
     #os._exit(0)
     sys.exit()
 
@@ -89,8 +91,8 @@ class FlaskThread(threading.Thread):
 
             main_dict = vars(main)
             for var in main_dict:
-                if (var != 'time') and isinstance(main_dict[var], (GKVariable, GKParameter)):
-                    # print(var, 'is of type', type(main_dict[var]))
+                if (var != 'time') and isinstance(main_dict[var], (GKVariable, GKParameter, GK_Intermediate)):
+                    print(var, 'is of type', type(main_dict[var]))
                     try:
                         var_dict = {
                             'name': var,
@@ -107,9 +109,8 @@ class FlaskThread(threading.Thread):
                         self.gekko_data['vars']['variables'].append(var_dict)
                     elif isinstance(main_dict[var], GKParameter):
                         self.gekko_data['vars']['parameters'].append(var_dict)
-                    # elif isinstance(main_dict[var], GKIntermediate):
-                        # Add to intermediate list
-                        # pass
+                    elif isinstance(main_dict[var], GK_Intermediate):
+                        self.gekko_data['vars']['intermediates'].append(var_dict)
 
             vars_map = {}
             main_dict = vars(main)
@@ -137,6 +138,8 @@ class FlaskThread(threading.Thread):
         except FileNotFoundError:
             self.has_model_data = False
             print('GUI could not find solution files. Assuming solution in a loop.')
+        except Exception as e:
+            raise e
 
     def handle_api_call(self, data):
         """Handles the generic aspects of all incoming API calls"""

@@ -24,8 +24,9 @@ p = m.MV(value=0, lb=0, ub=100)
 #Controlled Variable
 v = m.CV(value=0)
 
+i = m.Intermediate(-v*b)
 #Equations
-m.Equation(mass*v.dt() == -v*b + K*b*p)
+m.Equation(mass*v.dt() == i + K*b*p)
 
 #%% Tuning
 
@@ -47,8 +48,8 @@ v.TAU = 5 #time constant of setpoint trajectory
 
 #%% Solve
 
-m.solve()
-m.GUI()
+m.solve(GUI=True)
+# m.GUI()
 
 #%% Plot solution
 plt.figure()

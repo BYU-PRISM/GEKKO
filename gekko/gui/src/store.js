@@ -83,6 +83,7 @@ const store = new Vuex.Store({
       var api1 = fetch(`${this.state.httpRoot}/data`)
         .then(data => data.json())
         .then(data => {
+          console.log('Data', data)
           commit('setModelData', data.model)
           var plotArray = []
           const isMuchData = (
@@ -98,7 +99,7 @@ const store = new Vuex.Store({
                 mode: v[set][variable].data.length > 1 ? 'lines' : 'markers',
                 type: 'scatter',
                 name: v[set][variable].name,
-                visible: isMuchData ? 'legendonly' : 'true'
+                visible: isMuchData || set === 'intermediates' ? 'legendonly' : 'true'
               }
               plotArray.push(trace)
             }
