@@ -6,7 +6,6 @@
 
 ## Todo
 - check for memory leaks (serious problems for operators running it for months on end)
-- Add intermediates properly into api
 - Get dynamic plotting working
 - Get some initial figures to Dr. Hedengren
 - Integrate in a `hist_hor` optional parameter for API, default to 50-100
