@@ -149,7 +149,7 @@ for i in range(cycles):
     T_mhe.MEAS = T_meas[i] #CV
 
     # solve process model, 1 time step
-    m.solve()
+    m.solve(GUI=True)
     # check if successful
     if m.options.APPSTATUS == 1:
         # retrieve solution
@@ -167,7 +167,7 @@ for i in range(cycles):
         ' UA (estimated)=' + str(UA_mhe_store[i]) + \
         ' UA (actual)=50000')
 
-m.GUI()
+# m.GUI()
 
 # #%% plot results
 # plt.figure()

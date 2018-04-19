@@ -57,6 +57,8 @@ class FlaskThread(threading.Thread):
         self.port = port
 
         self.gekko_data = {}            # Combined, final Gekko data object
+        self.options = {}               # Dict loaded from options.json
+        self.results = {}               # Dict loaded from results.json
 
         self.vars_dict = {}                     # vars dict with script names as keys
         self.options_dict = {}                  # options dict with script names as keys
@@ -67,6 +69,28 @@ class FlaskThread(threading.Thread):
         # This is used for the polling between the api and the Vue app
         self.alarm = threading.Timer(WATCHDOG_TIME_LENGTH, watchdog_timer)
 
+    def get_var_from_main(self, var):
+        main_dict = vars(main)
+        print(var, 'is of type', type(main_dict[var]))
+        try:
+            var_dict = {
+                'name': var,
+                'data': self.results[main_dict[var].name],
+                'options': self.options[main_dict[var].name]
+            }
+        except Exception:
+            var_dict = {
+                'name': var,
+                'data': self.results[main_dict[var].name],
+                'options': {}
+            }
+        if isinstance(main_dict[var], GKVariable):
+            self.gekko_data['vars']['variables'].append(var_dict)
+        elif isinstance(main_dict[var], GKParameter):
+            self.gekko_data['vars']['parameters'].append(var_dict)
+        elif isinstance(main_dict[var], GK_Intermediate):
+            self.gekko_data['vars']['intermediates'].append(var_dict)
+
     def get_script_data(self):
         """Gather the data that GEKKO returns from the run and process it into
         the objects that the GUI can handle"""
@@ -74,70 +98,48 @@ class FlaskThread(threading.Thread):
         # `m.solve()` is ever called, so the files might not be there.
         try:
             # Load options.json
-            options = json.loads(open(os.path.join(self.path,'options.json')).read())
+            self.options = json.loads(open(os.path.join(self.path,'options.json')).read())
             # Load results.json
-            results = json.loads(open(os.path.join(self.path,"results.json")).read())
-            self.gekko_data['model'] = options['APM']
-            self.gekko_data['info'] = options['INFO']
-            self.gekko_data['time'] = results['time']
+            self.results = json.loads(open(os.path.join(self.path,"results.json")).read())
+            self.gekko_data['model'] = self.options['APM']
+            self.gekko_data['info'] = self.options['INFO']
+            self.gekko_data['time'] = self.results['time']
             self.gekko_data['vars'] = {}
             self.gekko_data['vars']['variables'] = []
             self.gekko_data['vars']['parameters'] = []
             self.gekko_data['vars']['constants'] = []
             self.gekko_data['vars']['intermediates'] = []
 
-            self.vars_dict['time'] = results['time']
-            self.model = options['APM']
+            self.vars_dict['time'] = self.results['time']
+            self.model = self.options['APM']
 
             main_dict = vars(main)
             for var in main_dict:
                 if (var != 'time') and isinstance(main_dict[var], (GKVariable, GKParameter, GK_Intermediate)):
-                    print(var, 'is of type', type(main_dict[var]))
-                    try:
-                        var_dict = {
-                            'name': var,
-                            'data': results[main_dict[var].name],
-                            'options': options[main_dict[var].name]
-                        }
-                    except Exception:
-                        var_dict = {
-                            'name': var,
-                            'data': results[main_dict[var].name],
-                            'options': {}
-                        }
-                    if isinstance(main_dict[var], GKVariable):
-                        self.gekko_data['vars']['variables'].append(var_dict)
-                    elif isinstance(main_dict[var], GKParameter):
-                        self.gekko_data['vars']['parameters'].append(var_dict)
-                    elif isinstance(main_dict[var], GK_Intermediate):
-                        self.gekko_data['vars']['intermediates'].append(var_dict)
+                    self.get_var_from_main(var)
 
             vars_map = {}
             main_dict = vars(main)
             for var in main_dict:
-                if isinstance(main_dict[var], (GKVariable,GKParameter)):
+                if isinstance(main_dict[var], (GKVariable,GKParameter,GK_Intermediate)):
                     vars_map[main_dict[var].name] = var
                 if isinstance(main_dict[var], list):
                     list_var = main_dict[var]
                     for i in range(len(list_var)):
-                        if isinstance(list_var[i], (GKVariable,GKParameter)):
+                        if isinstance(list_var[i], (GKVariable,GKParameter,GK_Intermediate)):
                             vars_map[list_var[i].name] = var+'['+str(i)+']'
 
             for var in vars_map:
                 if var != 'time':
-                    self.vars_dict[vars_map[var]] = results[var]
+                    print('Mapped', var, 'to', vars_map[var])
+                    self.vars_dict[vars_map[var]] = self.results[var]
                     for var in vars_map:
                         try:
-                            self.options_dict[vars_map[var]] = options[var]
+                            self.options_dict[vars_map[var]] = self.options[var]
                         except:
-                            if DEV == True:
-                                # print(str(var)+' not in options.json')
-                                pass
-
+                            pass
             self.has_model_data = True
-        except FileNotFoundError:
-            self.has_model_data = False
-            print('GUI could not find solution files. Assuming solution in a loop.')
+
         except Exception as e:
             raise e
 

@@ -1,6 +1,5 @@
 #%%Import packages
 import numpy as np
-from random import random
 from gekko import GEKKO
 import matplotlib.pyplot as plt
 
