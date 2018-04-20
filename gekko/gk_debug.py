@@ -63,9 +63,8 @@ def gk_logic_tree(self):
             if v.type == 'CV':
                 if v.STATUS == 1:
                     print("Warning: STATUS of CVs has no effect in estimation. Use FSTATUS.")
-                    
-        if self.options.MEAS_GAP is not None and self.options.EV_TYPE != 1:
-            print("Warning: MEAS_GAP only for EV_TYPE=1")
+                if self.options.MEAS_GAP is not None and self.options.EV_TYPE != 1:
+                    print("Warning: MEAS_GAP only for EV_TYPE=1")
     
     #%% Measurements
     for vp in self._variables+self._parameters:
