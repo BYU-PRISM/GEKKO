@@ -1,6 +1,5 @@
 #%%Import packages
 import numpy as np
-from random import random
 from gekko import GEKKO
 import matplotlib.pyplot as plt
 
@@ -24,8 +23,9 @@ p = m.MV(value=0, lb=0, ub=100)
 #Controlled Variable
 v = m.CV(value=0)
 
+i = m.Intermediate(-v*b)
 #Equations
-m.Equation(mass*v.dt() == -v*b + K*b*p)
+m.Equation(mass*v.dt() == i + K*b*p)
 
 #%% Tuning
 

@@ -6,10 +6,10 @@
 
 ## Todo
 - check for memory leaks (serious problems for operators running it for months on end)
-- Look into real-time plotting
-  - pretty much just wants an updated trace every time
-- refactor backend to send back a better formatted object
-  - list of vars, params, intermediates...
+- Get dynamic plotting working
+- Get some initial figures to Dr. Hedengren
+- Integrate in a `hist_hor` optional parameter for API, default to 50-100
+- Break up tab into variables, intermediates, and parameters
 
 ## Ideas
 - a 'selected plot' allowing sidebar to contain options that update that selected plot
@@ -17,3 +17,7 @@
   - wait on Logan to distinguish between intermediates and constants
 - could add any extra settings like poll rate to a `tools` tab
 - add trajectory hi and lo traces, default to hidden
+
+
+## Notes
+- Made intermediates hidden by default
