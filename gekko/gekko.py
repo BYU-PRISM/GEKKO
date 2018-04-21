@@ -693,7 +693,30 @@ class GEKKO(object):
 
 
 
+    #%% Name matching
+    
+    def get_names(self):
+        """ Matches names of constants, parameters, intermediates and variables
+        to the python name from scope __main__. Name is converted to lowercase.
+        The function cannot be used after a variable is used (including in 
+        defining intermediate equations). USE WITH CAUTION. """
+        import __main__ as main
+        main_dict = vars(main)
+        print(main_dict)
+        for var in main_dict:
+            if isinstance(main_dict[var], GK_Operators):
+                main_dict[var].__dict__['name'] = re.sub(r'\W+', '', var).lower()
+                print('Found ' + var)
+            if isinstance(main_dict[var], list):
+                list_var = main_dict[var]
+                for i in range(len(list_var)):
+                    if isinstance(list_var[i], GK_Operators):
+                        list_var[i].__dict__['name'] = re.sub(r'\W+', '', var).lower()+'['+str(i)+']'
+                        print('Found ' + var+'['+str(i)+']')
 
+
+            
+            
 
     #%% Cleanup functions (use with caution)
 
