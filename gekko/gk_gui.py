@@ -61,6 +61,7 @@ class FlaskThread(threading.Thread):
         self.results = {}               # Dict loaded from results.json
 
         self.vars_dict = {}                     # vars dict with script names as keys
+        self.make_vars_map()                    # sets map of script names to apmonitor names
         self.options_dict = {}                  # options dict with script names as keys
         self.model = {}                         # APM model information
         self.info = {}
@@ -91,6 +92,19 @@ class FlaskThread(threading.Thread):
         elif isinstance(main_dict[var], GK_Intermediate):
             self.gekko_data['vars']['intermediates'].append(var_dict)
 
+    def make_vars_map(self):
+        vars_map = {}
+        main_dict = vars(main)
+        for var in main_dict:
+            if isinstance(main_dict[var], (GKVariable,GKParameter,GK_Intermediate)):
+                vars_map[main_dict[var].name] = var
+            if isinstance(main_dict[var], list):
+                list_var = main_dict[var]
+                for i in range(len(list_var)):
+                    if isinstance(list_var[i], (GKVariable,GKParameter,GK_Intermediate)):
+                        vars_map[list_var[i].name] = var+'['+str(i)+']'
+        self.vars_map = vars_map
+
     def get_script_data(self):
         """Gather the data that GEKKO returns from the run and process it into
         the objects that the GUI can handle"""
@@ -118,24 +132,15 @@ class FlaskThread(threading.Thread):
                 if (var != 'time') and isinstance(main_dict[var], (GKVariable, GKParameter, GK_Intermediate)):
                     self.get_var_from_main(var)
 
-            vars_map = {}
-            main_dict = vars(main)
-            for var in main_dict:
-                if isinstance(main_dict[var], (GKVariable,GKParameter,GK_Intermediate)):
-                    vars_map[main_dict[var].name] = var
-                if isinstance(main_dict[var], list):
-                    list_var = main_dict[var]
-                    for i in range(len(list_var)):
-                        if isinstance(list_var[i], (GKVariable,GKParameter,GK_Intermediate)):
-                            vars_map[list_var[i].name] = var+'['+str(i)+']'
 
-            for var in vars_map:
+
+            for var in self.vars_map:
                 if var != 'time':
-                    print('Mapped', var, 'to', vars_map[var])
-                    self.vars_dict[vars_map[var]] = self.results[var]
-                    for var in vars_map:
+                    print('Mapped', var, 'to', self.vars_map[var])
+                    self.vars_dict[self.vars_map[var]] = self.results[var]
+                    for var in self.vars_map:
                         try:
-                            self.options_dict[vars_map[var]] = self.options[var]
+                            self.options_dict[self.vars_map[var]] = self.options[var]
                         except:
                             pass
             self.has_model_data = True
@@ -145,15 +150,18 @@ class FlaskThread(threading.Thread):
 
     def handle_api_call(self, data):
         """Handles the generic aspects of all incoming API calls"""
-        # When solved in a loop there might not be any data to send.
-        if self.has_model_data:
-            resp = jsonify(data)
-            resp.headers.add('Access-Control-Allow-Origin', '*')
-            # resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
-        else:
-            # This will let the Vue app know that no data has arrived yet
-            resp = jsonify({'dataAvailable': False})
-            resp.headers.add('Access-Control-Allow-Origin', '*')
+        try:
+            # When solved in a loop there might not be any data to send.
+            if self.has_model_data:
+                resp = jsonify(data)
+                resp.headers.add('Access-Control-Allow-Origin', '*')
+                # resp.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
+            else:
+                # This will let the Vue app know that no data has arrived yet
+                resp = jsonify({'dataAvailable': False})
+                resp.headers.add('Access-Control-Allow-Origin', '*')
+        except Exception as e:
+            app.unhandled_error(e)
 
         # This resets the watchdog timer, kind of a hack, but it works
         self.alarm.cancel()
@@ -186,6 +194,14 @@ class FlaskThread(threading.Thread):
             def redirect_to_index():
                 newPath = 'http://localhost:' + str(self.port) + '/index.html'
                 return redirect(newPath)
+
+            @app.errorhandler(404)
+            def endpoint_not_found(error):
+                return jsonify(error=404, text='Endpoint not found')
+
+            @app.errorhandler(Exception)
+            def unhandled_error(e):
+                return jsonify(error=500, text='Internal API Error')
 
         except AssertionError as e:
             # This try/except is because ipython keeps the endpoints in
