@@ -105,6 +105,23 @@ class FlaskThread(threading.Thread):
                         vars_map[list_var[i].name] = var+'['+str(i)+']'
         self.vars_map = vars_map
 
+    def get_options(self):
+        for var in self.vars_map:
+            if var != 'time':
+                print('Mapped', var, 'to', self.vars_map[var])
+                self.vars_dict[self.vars_map[var]] = self.results[var]
+                for var in self.vars_map:
+                    try:
+                        self.options_dict[self.vars_map[var]] = self.options[var]
+                    except:
+                        pass
+        # Check to see if the options are actually being updated in the GUI
+        # if DEV:
+        #     try:
+        #         self.options_dict['Ca_mhe']['FSTATUS'] = time.localtime().tm_sec
+        #     except Exception as e:
+        #         pprint('Error:', e)
+
     def get_script_data(self):
         """Gather the data that GEKKO returns from the run and process it into
         the objects that the GUI can handle"""
@@ -131,18 +148,8 @@ class FlaskThread(threading.Thread):
             for var in main_dict:
                 if (var != 'time') and isinstance(main_dict[var], (GKVariable, GKParameter, GK_Intermediate)):
                     self.get_var_from_main(var)
+            self.get_options()
 
-
-
-            for var in self.vars_map:
-                if var != 'time':
-                    print('Mapped', var, 'to', self.vars_map[var])
-                    self.vars_dict[self.vars_map[var]] = self.results[var]
-                    for var in self.vars_map:
-                        try:
-                            self.options_dict[self.vars_map[var]] = self.options[var]
-                        except:
-                            pass
             self.has_model_data = True
 
         except Exception as e:
@@ -219,7 +226,15 @@ class FlaskThread(threading.Thread):
         self.alarm.start()
 
     def update(self):
-        self.get_script_data()
+        try:
+            # Load options.json
+            self.options = json.loads(open(os.path.join(self.path,'options.json')).read())
+            # Load results.json
+            self.results = json.loads(open(os.path.join(self.path,"results.json")).read())
+        except Exception as e:
+            raise e
+        self.get_options()
+        # Append new vars data here
         self.has_new_update = True
 
 
