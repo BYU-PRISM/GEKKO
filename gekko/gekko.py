@@ -764,6 +764,10 @@ class GEKKO(object):
         return GK_Operators('acos('+str(other) + ')')
     def atan(self,other):
         return GK_Operators('atan('+str(other) + ')')
+    def erf(self,other):
+        return GK_Operators('erf('+str(other) + ')')
+    def erfc(self,other):
+        return GK_Operators('erfc('+str(other) + ')')
 
     def GUI(self):
         if not self.gui_open:
