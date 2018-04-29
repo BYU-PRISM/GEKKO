@@ -29,14 +29,22 @@ else:
     # we are polling every second.
     log.setLevel(logging.ERROR)
 
+# Initialize the flask api
 app = Flask(__name__, static_url_path='/gui/dist')
+
+# Disable CORS as we are just communicating with localhost on different ports
 CORS(app)
 
-# This acts as a watchdog timer. If the front-end does not make a call at least
-# every timeout seconds then the main process is stopped. Every time this method is called
-# the timer gets reset
-# Could normally use signal.alarm, but need to support windows
+
 def watchdog_timer():
+    """
+    Exit the process. Used if watchdog timer expires.
+
+    This acts as a watchdog timer. If the front-end does not make a call at least
+    every timeout seconds then the main process is stopped. Every time this method is called
+    the timer gets reset
+    Could normally use signal.alarm, but need to support windows
+    """
     print('Browser display closed. Exiting...')
     print('If not running in an interactive shell you made need to exit with ^C.')
     #os._exit(0)
@@ -50,6 +58,7 @@ class FlaskThread(threading.Thread):
     """
     def __init__(self, path, debug, port):
         threading.Thread.__init__(self)
+        self.history_horizon = 5       # History horizon that will be displayed on the plot
         self.has_data = False           # Variable defines if the Gekko data is loaded
         self.has_new_update = False
         self.path = path                # Path to tmp dir where Gekko output is
@@ -60,39 +69,58 @@ class FlaskThread(threading.Thread):
         self.options = {}               # Dict loaded from options.json
         self.results = {}               # Dict loaded from results.json
 
-        self.vars_dict = {}                     # vars dict with script names as keys
-        self.make_vars_map()                    # sets map of script names to apmonitor names
-        self.options_dict = {}                  # options dict with script names as keys
-        self.model = {}                         # APM model information
+        self.vars_dict = {}             # vars dict with script names as keys
+        self.make_vars_map()            # sets map of script names to apmonitor names
+        self.options_dict = {}          # options dict with script names as keys
+        self.model = {}                 # APM model information
         self.info = {}
         self.get_script_data()
+        self.has_data = True
 
         # This is used for the polling between the api and the Vue app
         self.alarm = threading.Timer(WATCHDOG_TIME_LENGTH, watchdog_timer)
 
     def get_var_from_main(self, var):
+        """Gets data about a variable and packs it into gekko_data"""
         main_dict = vars(main)
-        print(var, 'is of type', type(main_dict[var]))
-        try:
-            var_dict = {
-                'name': var,
-                'data': self.results[main_dict[var].name],
-                'options': self.options[main_dict[var].name]
-            }
-        except Exception:
-            var_dict = {
-                'name': var,
-                'data': self.results[main_dict[var].name],
-                'options': {}
-            }
-        if isinstance(main_dict[var], GKVariable):
-            self.gekko_data['vars']['variables'].append(var_dict)
-        elif isinstance(main_dict[var], GKParameter):
-            self.gekko_data['vars']['parameters'].append(var_dict)
-        elif isinstance(main_dict[var], GK_Intermediate):
-            self.gekko_data['vars']['intermediates'].append(var_dict)
+        # Update the variable if the data has been loaded before
+        if self.has_data:
+            data = False
+            if isinstance(main_dict[var], GKVariable):
+                data = filter(lambda d: d['name'] == var, self.gekko_data['vars']['variables']).next()
+            elif isinstance(main_dict[var], GKParameter):
+                data = filter(lambda d: d['name'] == var, self.gekko_data['vars']['parameters']).next()
+            elif isinstance(main_dict[var], GK_Intermediate):
+                data = filter(lambda d: d['name'] == var, self.gekko_data['vars']['intermediates']).next
+            try:
+                data['data'] = data['data'] + self.results[main_dict[var].name]
+                data['options'] = self.options[main_dict[var].name]
+
+            except Exception as e:
+                raise e
+        # Set the variable dict if this is the first time
+        else:
+            try:
+                var_dict = {
+                    'name': var,
+                    'data': self.results[main_dict[var].name],
+                    'options': self.options[main_dict[var].name]
+                }
+            except Exception:
+                var_dict = {
+                    'name': var,
+                    'data': self.results[main_dict[var].name],
+                    'options': {}
+                }
+            if isinstance(main_dict[var], GKVariable):
+                self.gekko_data['vars']['variables'].append(var_dict)
+            elif isinstance(main_dict[var], GKParameter):
+                self.gekko_data['vars']['parameters'].append(var_dict)
+            elif isinstance(main_dict[var], GK_Intermediate):
+                self.gekko_data['vars']['intermediates'].append(var_dict)
 
     def make_vars_map(self):
+        """Maps python script names to APMonitor names"""
         vars_map = {}
         main_dict = vars(main)
         for var in main_dict:
@@ -106,6 +134,7 @@ class FlaskThread(threading.Thread):
         self.vars_map = vars_map
 
     def get_options(self):
+        """Generates options_dict from results and options"""
         for var in self.vars_map:
             if var != 'time':
                 print('Mapped', var, 'to', self.vars_map[var])
@@ -118,6 +147,7 @@ class FlaskThread(threading.Thread):
         # Check to see if the options are actually being updated in the GUI
         # if DEV:
         #     try:
+        #         import time
         #         self.options_dict['Ca_mhe']['FSTATUS'] = time.localtime().tm_sec
         #     except Exception as e:
         #         pprint('Error:', e)
@@ -220,12 +250,25 @@ class FlaskThread(threading.Thread):
             raise e
 
     def run(self):
+        """Starts up the Flask API
+
+        Called by FlaskThread.start() as that is how python threads work
+        """
         self.set_endpoints()
         # Debug in flask does not work when run on a separate thread
         app.run(debug=False, port=self.port, threaded=True)
         self.alarm.start()
 
+    def check_history_horizon(self):
+        """Checks if a Variable is overflowing the history_horizon and trims
+        it as necessary if it is."""
+        for var_list in self.gekko_data['vars']:
+            for var in var_list:
+                if len(var) >= self.history_horizon:
+                    self.gekko_data['vars'][var_list][var] = self.gekko_data['vars'][var_list][var][-self.history_horizon:]
+
     def update(self):
+        """Handle updated solution results"""
         try:
             # Load options.json
             self.options = json.loads(open(os.path.join(self.path,'options.json')).read())
@@ -233,8 +276,17 @@ class FlaskThread(threading.Thread):
             self.results = json.loads(open(os.path.join(self.path,"results.json")).read())
         except Exception as e:
             raise e
+        # Updates the options_dict
         self.get_options()
+        # Make sure we don't overflow the history_horizon
+        self.check_history_horizon()
         # Append new vars data here
+        main_dict = vars(main)
+        for var in main_dict:
+            if (var != 'time') and isinstance(main_dict[var], (GKVariable, GKParameter, GK_Intermediate)):
+                self.get_var_from_main(var)
+
+        # Let the GUI know the updates are ready
         self.has_new_update = True
 
 
@@ -244,7 +296,6 @@ class GK_GUI:
     """
     def __init__(self, path):
         self.path = path
-
 
     def display(self):
         """Finds the appropriate port starts the api and opens the webbrowser"""
@@ -284,8 +335,8 @@ class GK_GUI:
             # app.run(debug=False, port=port)
 
     def update(self):
+        """Alert the API of new solution results"""
         self.apiRef.update()
-        # pass
 
 
 if __name__ == '__main__':
