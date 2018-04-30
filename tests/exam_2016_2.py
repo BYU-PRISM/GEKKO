@@ -12,7 +12,7 @@ nt = 101
 m.time = np.linspace(0,1.5,nt)
 
 #Parameters
-u = m.Var(value =0, lb = -1, ub = 1) 
+u = m.Var(value =0, lb = -1, ub = 1)
 
 #Variables
 x1 = m.Var(value=0.5)
@@ -31,7 +31,7 @@ final = m.Param(value=f)
 option = 4
 if option == 1: #most likely to cause DOF issues
     m.Equation(final*x1 == 0)
-    m.Equation(final*x2 == 0) 
+    m.Equation(final*x2 == 0)
 elif option == 2:
     m.Equation( (final*x1)**2 <= 0)
     m.Equation( (final*x2)**2 <= 0)
@@ -57,7 +57,7 @@ if hasattr(u,'STATUS'):
     u.DCOST = 0.0001
 ################################################################
 #Solve
-m.solve(remote=False)
+m.solve()
 
 
 #################################################################

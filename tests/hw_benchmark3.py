@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from gekko import GEKKO 
+from gekko import GEKKO
 import matplotlib.pyplot as plt
 
 m = GEKKO()
 
 nt = 101
-m.time = np.linspace(0,1,nt) 
+m.time = np.linspace(0,1,nt)
 
 x1 = m.Var(value=1)
 x2 = m.Var(value=0)
@@ -25,6 +25,6 @@ m.Obj(-final*x2)
 
 m.options.IMODE = 6
 
-m.solve(remote=False)
+m.solve()
 
 print(x2.value[-1])

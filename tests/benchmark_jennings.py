@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from gekko import GEKKO 
+from gekko import GEKKO
 import matplotlib.pyplot as plt
 
 m = GEKKO()
 
 nt = 501
-m.time = np.linspace(0,1,nt) 
+m.time = np.linspace(0,1,nt)
 
 x1 = m.Var(value=3.1415/2)
 x2 = m.Var(value=4)
@@ -35,8 +35,7 @@ m.Obj(scale)
 m.options.ICD_CALC = 1
 m.options.IMODE = 6
 
-m.solve(remote=False)
+m.solve()
 
 plt.figure()
 plt.plot(m.time,x1.value,m.time,x2.value,m.time,x3.value)
-

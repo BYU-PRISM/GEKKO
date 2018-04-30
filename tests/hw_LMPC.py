@@ -127,7 +127,7 @@ for i in range(len(t)-1):
     Ca[i+1] = y[-1][0]
     T[i+1] = y[-1][1]
     m.T.MEAS = T[i+1]
-    m.solve(remote=False)
+    m.solve()
     x0[0] = Ca[i+1]
     x0[1] = T[i+1]
     u[i+1] = m.Tc.NEWVAL

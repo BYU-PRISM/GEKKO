@@ -34,7 +34,7 @@ m.options.IMODE = 6
 m.options.NODES = 3
 m.options.SOLVER = 3
 
-m.solve(remote=False,debug=True)
+m.solve(debug=True)
 
 #m.GUI()
 print(Jf.value[0])

@@ -136,38 +136,38 @@ u_cont = np.empty(cycles)
 
 for i in range(cycles):
     ## controller
-    #load 
-    c.tau.MEAS = m.tau.NEWVAL 
-    c.K.MEAS = m.K.NEWVAL 
+    #load
+    c.tau.MEAS = m.tau.NEWVAL
+    c.K.MEAS = m.K.NEWVAL
     if p.options.SOLVESTATUS == 1:
         c.y.MEAS = p.y.MODEL
     #change setpoint at time 25
     if i == 25:
         c.y.SPHI = 6.1
         c.y.SPLO = 5.9
-    c.solve(remote=False)
+    c.solve()
     u_cont[i] = c.u.NEWVAL
-    
+
     ## process simulator
     #load control move
     p.u.MEAS = u_cont[i]
     #simulate
-    p.solve(remote=False)
+    p.solve()
     #load output with white noise
     y_meas[i] = p.y.MODEL + (random()-0.5)*noise
-    
+
     ## estimator
     #load input and measured output
     m.u.MEAS = u_cont[i]
     m.y.MEAS = y_meas[i]
     #optimize parameters
-    m.solve(remote=False)
+    m.solve()
     #store results
-    y_est[i] = m.y.MODEL 
-    k_est[i] = m.K.NEWVAL 
-    tau_est[i] = m.tau.NEWVAL 
-    
-    
+    y_est[i] = m.y.MODEL
+    k_est[i] = m.K.NEWVAL
+    tau_est[i] = m.tau.NEWVAL
+
+
 
 #%% Plot results
 plt.figure()

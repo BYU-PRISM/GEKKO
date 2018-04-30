@@ -2,7 +2,6 @@
 import numpy as np
 from random import random
 from gekko import GEKKO
-import matplotlib.pyplot as plt
 
 
 #%% Process
@@ -104,13 +103,13 @@ tau_est = np.empty(cycles)
 for i in range(cycles):
     # process simulator
     p.u.MEAS = u_meas[i]
-    p.solve(remote=True)
+    p.solve()
     y_meas[i] = p.y.MODEL + (random()-0.5)*noise
 
     # estimator
     m.u.MEAS = u_meas[i]
     m.y.MEAS = y_meas[i]
-    m.solve(remote=True,verify_input=True)
+    m.solve(verify_input=True)
     y_est[i] = m.y.MODEL
     k_est[i] = m.K.NEWVAL
     tau_est[i] = m.tau.NEWVAL

@@ -47,7 +47,7 @@ m.options.IMODE = 6
 m.options.NODES = 4
 m.options.MV_TYPE = 1
 m.options.SOLVER = 3
-m.solve(remote=False)
+m.solve()
 
 print(m.path)
 

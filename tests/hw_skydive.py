@@ -51,7 +51,7 @@ m.Equation(v == (vx**2 + vy**2)**.5)
 m.options.IMODE = 4 #dynamic simulation
 
 #Solve simulation
-m.solve(remote=True)
+m.solve()
 
 m.GUI()
 # #%% Plot results

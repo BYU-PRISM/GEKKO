@@ -86,7 +86,7 @@ y[0].status = 1
 y[1].status = 1
 
 
-m.solve(remote=False,debug=False,disp=True)
+m.solve(debug=False,disp=True)
 #m.GUI()
 
 #%% plot results

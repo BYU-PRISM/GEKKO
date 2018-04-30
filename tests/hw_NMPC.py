@@ -137,7 +137,7 @@ for i in range(cycles):
 for i in range(cycles):
 
     # Nonlinear MPC Controller ######################
-    if (i==100):    
+    if (i==100):
         # widen temperature control and minimize concentration
         Ca.COST = 1
         delta = 20.0
@@ -153,23 +153,23 @@ for i in range(cycles):
     s.Tc.MEAS = Tc_store[i]
 
     # Simulate
-    s.solve(remote=False)
+    s.solve()
     # Read reactor temperature and concentration
     T_meas[i] = s.T.MODEL
-    Ca_meas[i] = s.Ca.MODEL 
+    Ca_meas[i] = s.Ca.MODEL
 
 
-    ## Control   
+    ## Control
     # Input setpoint and measurements
     Ca.MEAS = Ca_meas[i]
     T.MEAS = T_meas[i]
     Tsp = setpoints[i]
     T.SPHI = Tsp+delta
     T.SPLO = Tsp-delta
-    
+
     # Solve
-    m.solve(remote=False)
-    
+    m.solve()
+
     plt.figure()
     plt.subplot(3,1,1)
     plt.plot(m.time, Tc.value)
@@ -203,4 +203,3 @@ plt.plot(m.time, T.value)
 plt.subplot(3,1,3)
 plt.plot(m.time, Ca.value)
 plt.show()
-
