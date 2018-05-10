@@ -87,17 +87,22 @@ class FlaskThread(threading.Thread):
         if self.has_data:
             data = False
             if isinstance(main_dict[var], GKVariable):
-                data = filter(lambda d: d['name'] == var, self.gekko_data['vars']['variables']).next()
+                data = list(filter(lambda d: d['name'] == var, self.gekko_data['vars']['variables']))[0]
             elif isinstance(main_dict[var], GKParameter):
-                data = filter(lambda d: d['name'] == var, self.gekko_data['vars']['parameters']).next()
+                data = list(filter(lambda d: d['name'] == var, self.gekko_data['vars']['parameters']))[0]
             elif isinstance(main_dict[var], GK_Intermediate):
-                data = filter(lambda d: d['name'] == var, self.gekko_data['vars']['intermediates']).next
+                data = list(filter(lambda d: d['name'] == var, self.gekko_data['vars']['intermediates']))[0]
             try:
                 data['data'] = data['data'] + self.results[main_dict[var].name]
                 data['options'] = self.options[main_dict[var].name]
 
+            except KeyError:
+                # Some vars are not in options.json and so do not make it into self.options
+                # This case should be safe to ignore
+                pass
             except Exception as e:
                 raise e
+
         # Set the variable dict if this is the first time
         else:
             try:
@@ -143,6 +148,7 @@ class FlaskThread(threading.Thread):
                     try:
                         self.options_dict[self.vars_map[var]] = self.options[var]
                     except:
+                        # Some vars are not in options.json, but only have values in results.json
                         pass
         # Check to see if the options are actually being updated in the GUI
         # if DEV:
