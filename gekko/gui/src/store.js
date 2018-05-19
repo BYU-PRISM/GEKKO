@@ -25,7 +25,7 @@ const store = new Vuex.Store({
       // list of gekko variable objects
     },
     showErrorModal: false,
-    // Object deupdatePlotsscribing communication errors with the backend
+    // Object describing communication errors with the backend
     httpError: {
       header: '',
       body: '',
@@ -62,18 +62,19 @@ const store = new Vuex.Store({
       state.plotData = data
       for (var i = 0; i < state.plots.length; i++) {
         // Find a clever way to hot reload the plot data here
+        // Make sure to retain the state describing which traces are displayed
         var plotData = state.plots[i].data
         console.log('plotData', plotData)
         for (var j = 0; j < plotData.length; j++) {
           var trace = plotData[j]
-          var updatedTrace = state.plotData.filter((t) => t.name === trace.name)[0]
+          var updatedTrace = state.plotData.find((t) => t.name === trace.name)
           trace.x = updatedTrace.x
           trace.y = updatedTrace.y
         }
         console.log('updated plots', state.plots)
       }
     },
-    updatePlotLayout (state, data) { state.plots.filter(p => p.id === data.id)[0].layout = data.layout },
+    updatePlotLayout (state, data) { state.plots.find(p => p.id === data.id).layout = data.layout },
     setModelData (state, data) { state.modelData = data },
     setVarsData (state, data) { state.varsData = data },
     showErrorModal (state, data) { state.showErrorModal = data }
@@ -121,7 +122,7 @@ const store = new Vuex.Store({
         .then(keys => {
           keys.forEach(key => {
             varsData[key] = options[key]
-            varsData[key].ishidden = true
+            varsData[key].ishidden = state.varsData[key] ? state.varsData[key].ishidden : true
             return null
           })
         }).then(() => {
