@@ -33,28 +33,37 @@ export default {
     }
   },
   computed: {
-    data () {
+    updateNumber () {
+      return this.$state.updateNumber
+    },
+    plotData () {
       if (this.$store.state.plots.length > 0) {
-        return this.$store.state.plots.filter(plot => plot.id === this.externalId)[0].data
+        return this.$store.state.plots.find(plot => plot.id === this.externalId).data
       } else {
         return false
       }
     },
-    layout () { return this.$store.state.plots.filter(plot => plot.id === this.externalId)[0].layout }
+    layout () { return this.$store.state.plots.find(plot => plot.id === this.externalId).layout }
   },
   watch: {
     numPlots () {
         this.plotlyResize // eslint-disable-line
-    },
-    data () {
-      Plotly.newPlot(this.id, this.data, this.layout)
     }
+  },
+  created () {
+    this.$store.watch(
+      (state) => { return state.plots },
+      () => {
+        Plotly.react(this.id, this.plotData, this.layout)
+      },
+      {deep: true}
+    )
   },
   beforeDestroy () { window.removeEventListener('resize', this.plotlyResize) },
   mounted () {
     window.addEventListener('resize', this.plotlyResize)
-    if (this.data) {
-      Plotly.newPlot(this.id, this.data, this.layout)
+    if (this.plotData) {
+      Plotly.newPlot(this.id, this.plotData, this.layout)
     }
   },
   methods: {

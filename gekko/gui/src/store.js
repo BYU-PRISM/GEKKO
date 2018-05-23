@@ -32,7 +32,8 @@ const store = new Vuex.Store({
       report: `Please report any Gekko project errors as
         issues at https://github.com/BYU-PRISM/GEKKO`
     },
-    httpRoot: process.env.NODE_ENV === 'development' ? 'http://localhost:8050' : 'http://' + location.hostname + ':' + location.port
+    httpRoot: process.env.NODE_ENV === 'development' ? 'http://localhost:8050' : 'http://' + location.hostname + ':' + location.port,
+    updateNumber: 0
   },
   mutations: {
     removePlot: (state, data) => {
@@ -64,15 +65,14 @@ const store = new Vuex.Store({
         // Find a clever way to hot reload the plot data here
         // Make sure to retain the state describing which traces are displayed
         var plotData = state.plots[i].data
-        console.log('plotData', plotData)
         for (var j = 0; j < plotData.length; j++) {
           var trace = plotData[j]
           var updatedTrace = state.plotData.find((t) => t.name === trace.name)
           trace.x = updatedTrace.x
           trace.y = updatedTrace.y
         }
-        console.log('updated plots', state.plots)
       }
+      state.updateNumber++
     },
     updatePlotLayout (state, data) { state.plots.find(p => p.id === data.id).layout = data.layout },
     setModelData (state, data) { state.modelData = data },
@@ -84,7 +84,6 @@ const store = new Vuex.Store({
       var api1 = fetch(`${this.state.httpRoot}/data`)
         .then(data => data.json())
         .then(data => {
-          console.log('Data', data)
           commit('setModelData', data.model)
           var plotArray = []
           const isMuchData = (
@@ -143,7 +142,6 @@ const store = new Vuex.Store({
         .then(resp => resp.json())
         .then(body => {
           if (body.updates === true) {
-            console.log('Updating...')
             dispatch('get_data')
           }
           this.showModal = false
