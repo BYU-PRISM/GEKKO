@@ -87,7 +87,7 @@ def load_results(self):
                     print(vp.name+ " not found in results file")
         for i in self._intermediates:
             try:
-                i.VALUE = data[i.name]
+                i.value.value = data[i.name]
                 i.value.change = False
             except Exception:
                 print(i.name+ " not found in results file")
