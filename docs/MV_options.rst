@@ -59,11 +59,11 @@ This is a list of all available options for MVs and their default values:
 
     :ref:`cost` = 0.0
 
-	:ref:`critical` = 0
+    :ref:`critical` = 0
 
     :ref:`dcost` = 0.00001
 
-	:ref:`dmax` = 1.0e20
+    :ref:`dmax` = 1.0e20
 
     :ref:`dmaxhi` = 1.0e20
 
@@ -81,7 +81,7 @@ This is a list of all available options for MVs and their default values:
 
     :ref:`mv_step_hor` = 0
 
-	:ref:`newval` = 1.0
+    :ref:`newval` = 1.0
 
     :ref:`nxtval` = 1.0
 
@@ -91,7 +91,7 @@ This is a list of all available options for MVs and their default values:
 
     :ref:`reqonctrl` = 0
 
-	:ref:`status` = 1
+    :ref:`status` = 1
 
     :ref:`tier` = 1
 
