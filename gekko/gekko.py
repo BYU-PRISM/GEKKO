@@ -322,8 +322,8 @@ class GEKKO(object):
 
         #Bound x to x_data limits
         if bound_x is True:
-            x.lb = x_data[0]
-            x.ub = x_data[-1]
+            x.lower = x_data[0]
+            x.upper = x_data[-1]
 
 
     ## State Space
@@ -702,7 +702,6 @@ class GEKKO(object):
         defining intermediate equations). USE WITH CAUTION. """
         import __main__ as main
         main_dict = vars(main)
-        print(main_dict)
         for var in main_dict:
             if isinstance(main_dict[var], GK_Operators):
                 main_dict[var].__dict__['name'] = re.sub(r'\W+', '', var).lower()
