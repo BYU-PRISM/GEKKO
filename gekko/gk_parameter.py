@@ -209,5 +209,3 @@ class GK_MV(GK_FV):
         GK_FV.__init__(self, name=name, value=value, lb=lb, ub=ub, gk_model=gk_model, model_path=model_path, integer=integer)
 
         
-    def dt(self):
-        return GK_Operators('$' + self.name)
