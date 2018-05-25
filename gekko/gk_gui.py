@@ -142,7 +142,7 @@ class FlaskThread(threading.Thread):
         """Generates options_dict from results and options"""
         for var in self.vars_map:
             if var != 'time':
-                print('Mapped', var, 'to', self.vars_map[var])
+                # print('Mapped', var, 'to', self.vars_map[var])
                 self.vars_dict[self.vars_map[var]] = self.results[var]
                 for var in self.vars_map:
                     try:
@@ -160,7 +160,7 @@ class FlaskThread(threading.Thread):
 
     def get_script_data(self):
         """Gather the data that GEKKO returns from the run and process it into
-        the objects that the GUI can handle"""
+        the objects that the GUI can handle. Only run on initialization"""
         # When calling `m.solve()` in a loop the Gui will be initialized before
         # `m.solve()` is ever called, so the files might not be there.
         try:
@@ -227,7 +227,6 @@ class FlaskThread(threading.Thread):
             @app.route('/poll')
             def get_poll():
                 return self.handle_api_call({'updates': self.has_new_update})
-                self.has_new_update = False
 
             @app.route('/<path:path>')
             def static_file(path):
@@ -284,8 +283,17 @@ class FlaskThread(threading.Thread):
             raise e
         # Updates the options_dict
         self.get_options()
+
         # Make sure we don't overflow the history_horizon
         self.check_history_horizon()
+
+        time = self.gekko_data['time']
+        time_interval = time[1] - time[0]
+
+        # Update the time array here
+        if self.options['APM']['IMODE'] in (5, 6, 8, 9):
+            self.gekko_data['time'].append(time[-1] + time_interval)
+
         # Append new vars data here
         main_dict = vars(main)
         for var in main_dict:

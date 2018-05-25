@@ -10,7 +10,6 @@
 - Get some initial figures to Dr. Hedengren
 - Integrate in a `hist_hor` optional parameter for API, default to 50-100
 - Break up tab into variables, intermediates, and parameters
-- Make the GUI not shrink treeviews on every data update
 
 ## Ideas
 - a 'selected plot' allowing sidebar to contain options that update that selected plot
@@ -18,8 +17,6 @@
   - wait on Logan to distinguish between intermediates and constants
 - could add any extra settings like poll rate to a `tools` tab
 - add trajectory hi and lo traces, default to hidden
-- add better error handling to all the endpoints
-  - catch them and display them in the browser
 
-## Notes
-- Made intermediates hidden by default
+## Questions
+- We only need to worry about editing the time array for MHE and MPC? (IMODE 5,6,8,9)
