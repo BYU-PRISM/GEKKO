@@ -149,7 +149,7 @@ for i in range(cycles):
     T_mhe.MEAS = T_meas[i] #CV
 
     # solve process model, 1 time step
-    m.solve(GUI=True)
+    m.solve(GUI=True, disp=False)
     # check if successful
     if m.options.APPSTATUS == 1:
         # retrieve solution
