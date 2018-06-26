@@ -1,32 +1,36 @@
+import __main__ as main
+
 import json
 import logging
 import os
 import socket
 import sys
-import webbrowser
 import threading
+import webbrowser
+
 
 from flask import Flask, jsonify, redirect
+
 from flask_cors import CORS
 
-from .gk_parameter import GKParameter
-from .gk_variable import GKVariable
 from .gk_operators import GK_Intermediate
-
-import __main__ as main
+from .gk_parameter import GKParameter, GK_MV
+from .gk_variable import GKVariable
 
 # Toggle development and production modes
 DEV = False
 WATCHDOG_TIME_LENGTH = 0
 
 if DEV:
-    WATCHDOG_TIME_LENGTH = 10000000 # It will leave hanging processes if it gets killed in dev mode
-    # This command can be used in the event that there is a hanging process: sudo fuser -n tcp -k 8050
+    # It will leave hanging processes if it gets killed in dev mode
+    WATCHDOG_TIME_LENGTH = 10000000
+    # This command can be used in the event that there is a
+    # hanging process: sudo fuser -n tcp -k 8050
 else:
     WATCHDOG_TIME_LENGTH = 4
     log = logging.getLogger('werkzeug')
-    # This little nugget sets flask to only log http errors, very important when
-    # we are polling every second.
+    # This little nugget sets flask to only log http errors, very important
+    # when we are polling every second.
     log.setLevel(logging.ERROR)
 
 # Initialize the flask api
@@ -40,14 +44,14 @@ def watchdog_timer():
     """
     Exit the process. Used if watchdog timer expires.
 
-    This acts as a watchdog timer. If the front-end does not make a call at least
-    every timeout seconds then the main process is stopped. Every time this method is called
-    the timer gets reset
+    This acts as a watchdog timer. If the front-end does not make a call at
+    least every timeout seconds then the main process is stopped. Every time
+    this method is called the timer gets reset.
     Could normally use signal.alarm, but need to support windows
     """
     print('Browser display closed. Exiting...')
-    print('If not running in an interactive shell you made need to exit with ^C.')
-    #os._exit(0)
+    print('If not running in an interactive shell, exit with ^C.')
+    # os._exit(0)
     sys.exit()
 
 
@@ -58,21 +62,21 @@ class FlaskThread(threading.Thread):
     """
     def __init__(self, path, debug, port):
         threading.Thread.__init__(self)
-        self.history_horizon = 5       # History horizon that will be displayed on the plot
-        self.has_data = False           # Variable defines if the Gekko data is loaded
+        self.history_horizon = 5     # History horizon that will be displayed on the plot
+        self.has_data = False        # Variable defines if the Gekko data is loaded
         self.has_new_update = False
-        self.path = path                # Path to tmp dir where Gekko output is
+        self.path = path             # Path to tmp dir where Gekko output is
         self.debug = debug
         self.port = port
 
-        self.gekko_data = {}            # Combined, final Gekko data object
-        self.options = {}               # Dict loaded from options.json
-        self.results = {}               # Dict loaded from results.json
+        self.gekko_data = {}         # Combined, final Gekko data object
+        self.options = {}            # Dict loaded from options.json
+        self.results = {}            # Dict loaded from results.json
 
-        self.vars_dict = {}             # vars dict with script names as keys
-        self.make_vars_map()            # sets map of script names to apmonitor names
-        self.options_dict = {}          # options dict with script names as keys
-        self.model = {}                 # APM model information
+        self.vars_dict = {}          # vars dict with script names as keys
+        self.make_vars_map()         # sets map of script names to apmonitor names
+        self.options_dict = {}       # options dict with script names as keys
+        self.model = {}              # APM model information
         self.info = {}
         self.get_script_data()
         self.has_data = True
@@ -87,13 +91,17 @@ class FlaskThread(threading.Thread):
         if self.has_data:
             data = False
             if isinstance(main_dict[var], GKVariable):
-                data = list(filter(lambda d: d['name'] == var, self.gekko_data['vars']['variables']))[0]
+                # FIXME: Add try/excepts for checking for sp_hi, sp_lo,
+                data = list(filter(
+                    lambda d: d['name'] == var, self.gekko_data['vars']['variables']
+                ))[0]
             elif isinstance(main_dict[var], GKParameter):
                 data = list(filter(lambda d: d['name'] == var, self.gekko_data['vars']['parameters']))[0]
+                # if isinstance(main_dict[var], GK_MV)
             elif isinstance(main_dict[var], GK_Intermediate):
                 data = list(filter(lambda d: d['name'] == var, self.gekko_data['vars']['intermediates']))[0]
             try:
-                data['data'] = data['data'] + self.results[main_dict[var].name]
+                data['data'] = data['data'] + [self.results[main_dict[var].name][0]]
                 data['options'] = self.options[main_dict[var].name]
 
             except KeyError:
@@ -105,17 +113,22 @@ class FlaskThread(threading.Thread):
 
         # Set the variable dict if this is the first time
         else:
+            options = {}
+            try:
+                options = self.options[main_dict[var].name]
+            except:
+                options = {}
             try:
                 var_dict = {
                     'name': var,
                     'data': self.results[main_dict[var].name],
-                    'options': self.options[main_dict[var].name]
+                    'options': options
                 }
             except Exception:
                 var_dict = {
                     'name': var,
-                    'data': self.results[main_dict[var].name],
-                    'options': {}
+                    'data': [],
+                    'options': options
                 }
             if isinstance(main_dict[var], GKVariable):
                 self.gekko_data['vars']['variables'].append(var_dict)
@@ -142,21 +155,19 @@ class FlaskThread(threading.Thread):
         """Generates options_dict from results and options"""
         for var in self.vars_map:
             if var != 'time':
-                # print('Mapped', var, 'to', self.vars_map[var])
-                self.vars_dict[self.vars_map[var]] = self.results[var]
-                for var in self.vars_map:
+                if DEV:
+                    print('Mapped', var, 'to', self.vars_map[var])
+                try:
+                    self.vars_dict[self.vars_map[var]] = self.results[var]
+                except:
+                    # FIXME: Check to make sure passing this error will not cause unintended errors
+                    pass
+                for v in self.vars_map:
                     try:
-                        self.options_dict[self.vars_map[var]] = self.options[var]
+                        self.options_dict[self.vars_map[v]] = self.options[v]
                     except:
                         # Some vars are not in options.json, but only have values in results.json
                         pass
-        # Check to see if the options are actually being updated in the GUI
-        # if DEV:
-        #     try:
-        #         import time
-        #         self.options_dict['Ca_mhe']['FSTATUS'] = time.localtime().tm_sec
-        #     except Exception as e:
-        #         pprint('Error:', e)
 
     def get_script_data(self):
         """Gather the data that GEKKO returns from the run and process it into
@@ -288,11 +299,13 @@ class FlaskThread(threading.Thread):
         self.check_history_horizon()
 
         time = self.gekko_data['time']
-        time_interval = time[1] - time[0]
+        if len(time) > 1:
+            time_interval = time[1] - time[0]
 
         # Update the time array here
         if self.options['APM']['IMODE'] in (5, 6, 8, 9):
-            self.gekko_data['time'].append(time[-1] + time_interval)
+            if len(time) > 1:
+                self.gekko_data['time'].append(time[-1] + time_interval)
 
         # Append new vars data here
         main_dict = vars(main)
@@ -334,12 +347,13 @@ class GK_GUI:
         # Open the browser to the page and launch the app
         print('Opening display in default webbrowser at http://localhost:' + str(port) + '/index.html. \nClose display tab or type CTRL+C to exit.')
         if DEV:
-            # The dev version of the
+            print('Starting Flask Thread on port {}'.format(8050))
             flaskThread = FlaskThread(self.path, True, 8050)
             # flaskThread.daemon = True
             flaskThread.start()
             self.apiRef = flaskThread
         else:
+            print('Starting Flask Thread on port {}'.format(port))
             webbrowser.open("http://localhost:" + str(port) + "/index.html")
             flaskThread = FlaskThread(self.path, False, port)
             # flaskThread.daemon = True
@@ -350,6 +364,8 @@ class GK_GUI:
 
     def update(self):
         """Alert the API of new solution results"""
+        if DEV:
+            print('Handling update')
         self.apiRef.update()
 
 
