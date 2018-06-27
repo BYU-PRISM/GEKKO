@@ -84,6 +84,21 @@ class FlaskThread(threading.Thread):
         # This is used for the polling between the api and the Vue app
         self.alarm = threading.Timer(WATCHDOG_TIME_LENGTH, watchdog_timer)
 
+    # Parameters require a little special handling, only called from get_var_from_main
+    def get_parameter_from_main(self, param):
+        """Special handling for parameters"""
+        main_dict = vars(main)
+        data = list(filter(lambda d: d['name'] == param, self.gekko_data['vars']['parameters']))[0]
+        try:
+            data['data'] = data['data'] + [self.results[main_dict[param].name][0]]
+            data['options'] = self.options[main_dict[param].name]
+        except KeyError:
+            # Some vars are not in options.json and so do not make it into self.options
+            # This case should be safe to ignore
+            pass
+        except Exception as e:
+            raise e
+
     def get_var_from_main(self, var):
         """Gets data about a variable and packs it into gekko_data"""
         main_dict = vars(main)
@@ -96,8 +111,8 @@ class FlaskThread(threading.Thread):
                     lambda d: d['name'] == var, self.gekko_data['vars']['variables']
                 ))[0]
             elif isinstance(main_dict[var], GKParameter):
-                data = list(filter(lambda d: d['name'] == var, self.gekko_data['vars']['parameters']))[0]
-                # if isinstance(main_dict[var], GK_MV)
+                self.get_parameter_from_main(var)
+                return
             elif isinstance(main_dict[var], GK_Intermediate):
                 data = list(filter(lambda d: d['name'] == var, self.gekko_data['vars']['intermediates']))[0]
             try:
@@ -368,7 +383,3 @@ class GK_GUI:
             print('Handling update')
         self.apiRef.update()
 
-
-if __name__ == '__main__':
-    gui = GK_GUI()
-    gui.display()
