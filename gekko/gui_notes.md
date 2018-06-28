@@ -13,6 +13,8 @@
 - add trajectory hi and lo traces, default to hidden
 
 ## Questions
+- Currently the GUI has problems with `GK_Parameters` that are not `GK_MV`s. It does not find data for them after a few cycles. Is this what we want?
+- Should I just estimate the x values out into the future for the trajectories?
 
 
 ## Notes

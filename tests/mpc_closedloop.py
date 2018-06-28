@@ -2,7 +2,7 @@
 import numpy as np
 from random import random
 from gekko import GEKKO
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 # noise level
 # noise = 0.2

@@ -14,11 +14,11 @@ from flask import Flask, jsonify, redirect
 from flask_cors import CORS
 
 from .gk_operators import GK_Intermediate
-from .gk_parameter import GKParameter, GK_MV
-from .gk_variable import GKVariable
+from .gk_parameter import GKParameter, GK_MV, GK_FV
+from .gk_variable import GKVariable, GK_CV, GK_SV
 
 # Toggle development and production modes
-DEV = False
+DEV = True
 WATCHDOG_TIME_LENGTH = 0
 
 if DEV:
@@ -86,18 +86,49 @@ class FlaskThread(threading.Thread):
 
     # Parameters require a little special handling, only called from get_var_from_main
     def get_parameter_from_main(self, param):
-        """Special handling for parameters"""
+        """Special handling for GK_Parameters"""
         main_dict = vars(main)
         data = list(filter(lambda d: d['name'] == param, self.gekko_data['vars']['parameters']))[0]
         try:
-            data['data'] = data['data'] + [self.results[main_dict[param].name][0]]
-            data['options'] = self.options[main_dict[param].name]
+            if isinstance(main_dict[param], (GK_MV, GK_FV)):
+                data['data'] = data['data'] + [self.options[main_dict[param].name]['MEAS']]
+                data['options'] = self.options[main_dict[param].name]
         except KeyError:
             # Some vars are not in options.json and so do not make it into self.options
             # This case should be safe to ignore
             pass
-        except Exception as e:
-            raise e
+        except Exception:
+            print("Error getting data for: %s (%s)" % (param, main_dict[param].name))
+
+    def get_variable_fron_main(self, variable):
+        """Special handling for GK_Variables"""
+        main_dict = vars(main)
+        data = list(filter(lambda d: d['name'] == variable, self.gekko_data['vars']['variables']))[0]
+        try:
+            if isinstance(main_dict[variable], (GK_CV, GK_SV)):
+                data['data'] = data['data'] + [self.options[main_dict[variable].name]['MODEL']]
+                data['options'] = self.options[main_dict[variable].name]
+        except KeyError:
+            # Some vars are not in options.json and so do not make it into self.options
+            # This case should be safe to ignore
+            pass
+        except Exception:
+            print("Error getting data for: %s (%s)" % (variable, main_dict[variable].name))
+            
+        if main_dict[variable].name + '.tr_hi' in self.results:
+            data = list(filter(lambda d: d['name'] == variable + '(Tr_hi)', self.gekko_data['vars']['variables']))[0]
+            # Replace the list entirely as we want a new trajectory for each solve
+            data['data'] = self.results[main_dict[variable].name + '.tr_hi']
+
+        if main_dict[variable].name + '.tr_lo' in self.results:
+            data = list(filter(lambda d: d['name'] == variable + '(Tr_lo)', self.gekko_data['vars']['variables']))[0]
+            # Replace the list entirely as we want a new trajectory for each solve
+            data['data'] = self.results[main_dict[variable].name + '.tr_lo']
+
+        if main_dict[variable].name + '.bcv' in self.results:
+            data = list(filter(lambda d: d['name'] == variable + '(biased)', self.gekko_data['vars']['variables']))[0]
+            # Replace the list entirely as we want a new trajectory for each solve
+            data['data'] = data['data'] + self.results[main_dict[variable].name + '.bcv']
 
     def get_var_from_main(self, var):
         """Gets data about a variable and packs it into gekko_data"""
@@ -106,10 +137,8 @@ class FlaskThread(threading.Thread):
         if self.has_data:
             data = False
             if isinstance(main_dict[var], GKVariable):
-                # FIXME: Add try/excepts for checking for sp_hi, sp_lo,
-                data = list(filter(
-                    lambda d: d['name'] == var, self.gekko_data['vars']['variables']
-                ))[0]
+                self.get_variable_fron_main(var)
+                return
             elif isinstance(main_dict[var], GKParameter):
                 self.get_parameter_from_main(var)
                 return
@@ -147,6 +176,18 @@ class FlaskThread(threading.Thread):
                 }
             if isinstance(main_dict[var], GKVariable):
                 self.gekko_data['vars']['variables'].append(var_dict)
+                if main_dict[var].name + '.tr_hi' in self.results:
+                    d = var_dict.copy() 
+                    d['name'] = var + '(Tr_hi)'
+                    self.gekko_data['vars']['variables'].append(d)
+                if main_dict[var].name + '.tr_lo' in self.results:
+                    d = var_dict.copy()
+                    d['name'] = var + '(Tr_lo)'
+                    self.gekko_data['vars']['variables'].append(d) 
+                if main_dict[var].name + '.bcv' in self.results:
+                    d = var_dict.copy()
+                    d['name'] = var + '(biased)'
+                    self.gekko_data['vars']['variables'].append(d)
             elif isinstance(main_dict[var], GKParameter):
                 self.gekko_data['vars']['parameters'].append(var_dict)
             elif isinstance(main_dict[var], GK_Intermediate):
@@ -241,6 +282,7 @@ class FlaskThread(threading.Thread):
     def set_endpoints(self):
         """Sets the flask API endpoints"""
         try:
+            # pylint: disable=W0612
             @app.route('/data')
             def get_data():
                 self.has_new_update = False

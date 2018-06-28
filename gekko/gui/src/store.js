@@ -93,8 +93,20 @@ const store = new Vuex.Store({
           const v = data.vars
           for (var set in data.vars) {
             for (var variable in v[set]) {
+              let xArray
+              if (v[set][variable].name.includes('(Tr_hi)') || v[set][variable].name.includes('(Tr_lo)')) {
+                let timeStep = data.time[1] - data.time[0]
+                let tempArray = []
+                for (var i = 0; i < v[set][variable].data.length; i++) {
+                  tempArray.push(i)
+                }
+                xArray = tempArray.map(el => data.time[data.time.length - 1] + el * timeStep)
+                console.log('x arrray for:', variable, tempArray.length)
+              } else {
+                xArray = data.time
+              }
               const trace = {
-                x: data.time,
+                x: xArray,
                 y: v[set][variable].data,
                 mode: v[set][variable].data.length > 1 ? 'lines' : 'markers',
                 type: 'scatter',
