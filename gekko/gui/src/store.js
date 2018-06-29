@@ -94,7 +94,6 @@ const store = new Vuex.Store({
           const v = data.vars
           for (var set in data.vars) {
             for (var variable in v[set]) {
-              let xArray
               const trace = {
                 x: v[set][variable].x,
                 y: v[set][variable].data,
