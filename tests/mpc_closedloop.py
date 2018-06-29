@@ -61,6 +61,8 @@ y.SPHI = 3.1
 y.SPLO = 2.9
 #if CV_TYPE = 2, use SP
 y.SP = 3
+y.TAU = 1
+y.TR_INIT = 2
 
 u.STATUS = 1
 u.FSTATUS = 0

@@ -81,7 +81,7 @@ class FlaskThread(threading.Thread):
         self.get_script_data()
         self.has_data = True
 
-        # This is used for the polling between the api and the Vue app
+        # This is used for tvars_maphe polling between the api and the Vue app
         self.alarm = threading.Timer(WATCHDOG_TIME_LENGTH, watchdog_timer)
 
     # Parameters require a little special handling, only called from get_var_from_main
@@ -92,6 +92,8 @@ class FlaskThread(threading.Thread):
         try:
             if isinstance(main_dict[param], (GK_MV, GK_FV)):
                 data['data'] = data['data'] + [self.options[main_dict[param].name]['MEAS']]
+                timestep = self.results['time'][1] - self.results['time'][0]
+                data['x'] = [data['x'][0] - timestep] + data['x']
                 data['options'] = self.options[main_dict[param].name]
         except KeyError:
             # Some vars are not in options.json and so do not make it into self.options
@@ -106,7 +108,10 @@ class FlaskThread(threading.Thread):
         data = list(filter(lambda d: d['name'] == variable, self.gekko_data['vars']['variables']))[0]
         try:
             if isinstance(main_dict[variable], (GK_CV, GK_SV)):
-                data['data'] = data['data'] + [self.options[main_dict[variable].name]['MODEL']]
+                data['data'] = data['data'] + [self.results[main_dict[variable].name][0]]
+                timestep = self.results['time'][1] - self.results['time'][0]
+                data['x'] = [data['x'][0] - timestep] + data['x']
+                # data['data'] = data['data'] + [self.options[main_dict[variable].name]['MODEL'] + self.options[main_dict[variable].name]['BIAS']] 
                 data['options'] = self.options[main_dict[variable].name]
         except KeyError:
             # Some vars are not in options.json and so do not make it into self.options
@@ -119,16 +124,25 @@ class FlaskThread(threading.Thread):
             data = list(filter(lambda d: d['name'] == variable + '(Tr_hi)', self.gekko_data['vars']['variables']))[0]
             # Replace the list entirely as we want a new trajectory for each solve
             data['data'] = self.results[main_dict[variable].name + '.tr_hi']
+            data['x'] = self.results['time']
 
         if main_dict[variable].name + '.tr_lo' in self.results:
             data = list(filter(lambda d: d['name'] == variable + '(Tr_lo)', self.gekko_data['vars']['variables']))[0]
             # Replace the list entirely as we want a new trajectory for each solve
             data['data'] = self.results[main_dict[variable].name + '.tr_lo']
+            data['x'] = self.results['time']
 
         if main_dict[variable].name + '.bcv' in self.results:
-            data = list(filter(lambda d: d['name'] == variable + '(biased)', self.gekko_data['vars']['variables']))[0]
+            data1 = list(filter(
+                lambda d: d['name'] == variable + '(biased)', self.gekko_data['vars']['variables']))[0]
+            data2 = list(filter(
+                lambda d: d['name'] == variable + '(biased_history)', self.gekko_data['vars']['variables']))[0]
             # Replace the list entirely as we want a new trajectory for each solve
-            data['data'] = data['data'] + self.results[main_dict[variable].name + '.bcv']
+            data1['data'] = self.results[main_dict[variable].name + '.bcv']
+            data1['x'] = self.results['time']
+            data2['data'] = data2['data'] + [self.results[main_dict[variable].name + '.bcv'][0]]
+            timestep = self.results['time'][1] - self.results['time'][0]
+            data2['x'] = [data2['x'][0] - timestep] + data2['x']
 
     def get_var_from_main(self, var):
         """Gets data about a variable and packs it into gekko_data"""
@@ -165,13 +179,15 @@ class FlaskThread(threading.Thread):
             try:
                 var_dict = {
                     'name': var,
-                    'data': self.results[main_dict[var].name],
+                    'data': [self.results[main_dict[var].name][0]],
+                    'x': [self.results['time'][0]],
                     'options': options
                 }
             except Exception:
                 var_dict = {
                     'name': var,
                     'data': [],
+                    'x': [],
                     'options': options
                 }
             if isinstance(main_dict[var], GKVariable):
@@ -185,9 +201,12 @@ class FlaskThread(threading.Thread):
                     d['name'] = var + '(Tr_lo)'
                     self.gekko_data['vars']['variables'].append(d) 
                 if main_dict[var].name + '.bcv' in self.results:
-                    d = var_dict.copy()
-                    d['name'] = var + '(biased)'
-                    self.gekko_data['vars']['variables'].append(d)
+                    d1 = var_dict.copy()
+                    d1['name'] = var + '(biased)'
+                    self.gekko_data['vars']['variables'].append(d1)
+                    d2 = var_dict.copy()
+                    d2['name'] = var + '(biased_history)'
+                    self.gekko_data['vars']['variables'].append(d2)
             elif isinstance(main_dict[var], GKParameter):
                 self.gekko_data['vars']['parameters'].append(var_dict)
             elif isinstance(main_dict[var], GK_Intermediate):
@@ -425,3 +444,4 @@ class GK_GUI:
             print('Handling update')
         self.apiRef.update()
 
+    
