@@ -90,11 +90,9 @@ class FlaskThread(threading.Thread):
         main_dict = vars(main)
         data = list(filter(lambda d: d['name'] == param, self.gekko_data['vars']['parameters']))[0]
         try:
-            if isinstance(main_dict[param], (GK_MV, GK_FV)):
-                data['data'] = data['data'] + [self.options[main_dict[param].name]['MEAS']]
-                timestep = self.results['time'][1] - self.results['time'][0]
-                data['x'] = [data['x'][0] - timestep] + data['x']
-                data['options'] = self.options[main_dict[param].name]
+            data['data'] = self.results[main_dict[param].name]
+            data['x'] = self.results['time']
+            data['options'] = self.options[main_dict[param].name]
         except KeyError:
             # Some vars are not in options.json and so do not make it into self.options
             # This case should be safe to ignore
@@ -102,17 +100,52 @@ class FlaskThread(threading.Thread):
         except Exception:
             print("Error getting data for: %s (%s)" % (param, main_dict[param].name))
 
+        ## historical data
+        if isinstance(main_dict[param], (GK_MV, GK_FV)):
+            data_hist = list(filter(lambda d: d['name'] == param + '_hist', self.gekko_data['vars']['parameters']))[0]
+            data_hist['data'] = data_hist['data'] + [self.results[main_dict[param].name][0]]
+            timestep = self.results['time'][1] - self.results['time'][0]
+            data_hist['x'] = [data_hist['x'][0] - timestep] + data_hist['x']
+                
     def get_variable_fron_main(self, variable):
         """Special handling for GK_Variables"""
         main_dict = vars(main)
-        data = list(filter(lambda d: d['name'] == variable, self.gekko_data['vars']['variables']))[0]
+            
+        ## Store historical data
+        timestep = self.results['time'][1] - self.results['time'][0]
+        
+        if isinstance(main_dict[variable], (GK_CV, GK_SV)):
+            if main_dict[variable].name + '.bcv' in self.results:
+                #biased history
+                var_hist_bias = list(filter(
+                    lambda d: d['name'] == variable + '_hist(bias)', self.gekko_data['vars']['variables']))[0]
+                var_hist_bias['data'] = var_hist_bias['data'] + [self.results[main_dict[variable].name + '.bcv'][0]] #store data value
+                var_hist_bias['x'] = [var_hist_bias['x'][0] - timestep] + var_hist_bias['x']    #update time array
+                #unbiased history
+                var_hist_nobias = list(filter(
+                    lambda d: d['name'] == variable + '_hist(nobias)', self.gekko_data['vars']['variables']))[0]
+                var_hist_nobias['data'] = var_hist_nobias['data'] + [self.results[main_dict[variable].name][0]] #store data value
+                var_hist_nobias['x'] = [var_hist_nobias['x'][0] - timestep] + var_hist_nobias['x']    #update time array
+            
+        
+        ## Plot prediction from current solve
+        var = list(filter(lambda d: d['name'] == variable, self.gekko_data['vars']['variables']))[0]
         try:
             if isinstance(main_dict[variable], (GK_CV, GK_SV)):
-                data['data'] = data['data'] + [self.results[main_dict[variable].name][0]]
-                timestep = self.results['time'][1] - self.results['time'][0]
-                data['x'] = [data['x'][0] - timestep] + data['x']
-                # data['data'] = data['data'] + [self.options[main_dict[variable].name]['MODEL'] + self.options[main_dict[variable].name]['BIAS']] 
-                data['options'] = self.options[main_dict[variable].name]
+                if main_dict[variable].name + '.bcv' in self.results:
+                    var['data'] = self.results[main_dict[variable].name + '.bcv']
+                    var['x'] = self.results['time']
+                    var['options'] = self.options[main_dict[variable].name]
+                    
+                    var_nobias = list(filter(
+                    lambda d: d['name'] == variable + '(nobias)', self.gekko_data['vars']['variables']))[0]
+                    var_nobias['data'] = self.results[main_dict[variable].name]
+                    var_nobias['x'] = self.results['time']
+                
+                else:
+                    var['data'] = self.results[main_dict[variable].name]
+                    var['x'] = self.results['time']
+                    var['options'] = self.options[main_dict[variable].name]
         except KeyError:
             # Some vars are not in options.json and so do not make it into self.options
             # This case should be safe to ignore
@@ -120,29 +153,25 @@ class FlaskThread(threading.Thread):
         except Exception:
             print("Error getting data for: %s (%s)" % (variable, main_dict[variable].name))
             
+            
         if main_dict[variable].name + '.tr_hi' in self.results:
             data = list(filter(lambda d: d['name'] == variable + '(Tr_hi)', self.gekko_data['vars']['variables']))[0]
             # Replace the list entirely as we want a new trajectory for each solve
             data['data'] = self.results[main_dict[variable].name + '.tr_hi']
             data['x'] = self.results['time']
-
         if main_dict[variable].name + '.tr_lo' in self.results:
             data = list(filter(lambda d: d['name'] == variable + '(Tr_lo)', self.gekko_data['vars']['variables']))[0]
             # Replace the list entirely as we want a new trajectory for each solve
             data['data'] = self.results[main_dict[variable].name + '.tr_lo']
             data['x'] = self.results['time']
-
-        if main_dict[variable].name + '.bcv' in self.results:
-            data1 = list(filter(
-                lambda d: d['name'] == variable + '(biased)', self.gekko_data['vars']['variables']))[0]
-            data2 = list(filter(
-                lambda d: d['name'] == variable + '(biased_history)', self.gekko_data['vars']['variables']))[0]
+            
+        if main_dict[variable].name + '.tr' in self.results:
+            data = list(filter(lambda d: d['name'] == variable + '(Tr)', self.gekko_data['vars']['variables']))[0]
             # Replace the list entirely as we want a new trajectory for each solve
-            data1['data'] = self.results[main_dict[variable].name + '.bcv']
-            data1['x'] = self.results['time']
-            data2['data'] = data2['data'] + [self.results[main_dict[variable].name + '.bcv'][0]]
-            timestep = self.results['time'][1] - self.results['time'][0]
-            data2['x'] = [data2['x'][0] - timestep] + data2['x']
+            data['data'] = self.results[main_dict[variable].name + '.tr']
+            data['x'] = self.results['time']
+
+
 
     def get_var_from_main(self, var):
         """Gets data about a variable and packs it into gekko_data"""
@@ -200,15 +229,26 @@ class FlaskThread(threading.Thread):
                     d = var_dict.copy()
                     d['name'] = var + '(Tr_lo)'
                     self.gekko_data['vars']['variables'].append(d) 
+                if main_dict[var].name + '.tr' in self.results:
+                    d = var_dict.copy()
+                    d['name'] = var + '(Tr)'
+                    self.gekko_data['vars']['variables'].append(d) 
                 if main_dict[var].name + '.bcv' in self.results:
                     d1 = var_dict.copy()
-                    d1['name'] = var + '(biased)'
+                    d1['name'] = var + '_hist(bias)'
                     self.gekko_data['vars']['variables'].append(d1)
                     d2 = var_dict.copy()
-                    d2['name'] = var + '(biased_history)'
+                    d2['name'] = var + '_hist(nobias)'
                     self.gekko_data['vars']['variables'].append(d2)
+                    d3 = var_dict.copy()
+                    d3['name'] = var + '(nobias)'
+                    self.gekko_data['vars']['variables'].append(d3)
             elif isinstance(main_dict[var], GKParameter):
                 self.gekko_data['vars']['parameters'].append(var_dict)
+                if isinstance(main_dict[var], (GK_MV, GK_FV)):
+                    d = var_dict.copy()
+                    d['name'] = var + '_hist'
+                    self.gekko_data['vars']['parameters'].append(d)
             elif isinstance(main_dict[var], GK_Intermediate):
                 self.gekko_data['vars']['intermediates'].append(var_dict)
 
