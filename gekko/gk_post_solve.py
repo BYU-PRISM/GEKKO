@@ -110,29 +110,3 @@ def load_results(self):
     return data
 
 
-
-
-## No longer used -- reading results.json instead of results.csv
-def load_csv_results(self):
-    # Load results.csv into a dictionary keyed with variable names
-    if (os.path.isfile(os.path.join(self.path, 'results.csv'))):
-        with open(os.path.join(self.path,'results.csv')) as f:
-            reader = csv.reader(f, delimiter=',')
-            y={}
-            for row in reader:
-                if len(row)==2:
-                    y[row[0]] = float(row[1])
-                else:
-                    y[row[0]] = [float(col) for col in row[1:]]
-        # Load variable values into their respective objects from the dictionary
-        for vp in self._parameters+self._variables:
-            try:
-                vp.VALUE = y[str(vp)]
-            except Exception:
-                pass
-        # Return solution
-        return y
-
-    else:
-        print("Error: 'results.csv' not found. Check above for addition error details")
-        return {}
