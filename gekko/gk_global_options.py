@@ -169,5 +169,8 @@ class GKGlobalOptions():
 
     #make attributes case in-sensitive for reading too
     def __getattr__(self,name):
-        name = name.upper()
-        return self.__dict__[name]
+        name_upp = name.upper()
+        try:
+            return self.__dict__[name_upp]
+        except:
+            raise AttributeError(str(name)+ ' is not a valid model option')
