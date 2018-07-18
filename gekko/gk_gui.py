@@ -146,6 +146,10 @@ class FlaskThread(threading.Thread):
                     var['data'] = self.results[main_dict[variable].name]
                     var['x'] = self.results['time']
                     var['options'] = self.options[main_dict[variable].name]
+            else:
+                var['data'] = self.results[main_dict[variable].name]
+                var['x'] = self.results['time']
+                var['options'] = self.options[main_dict[variable].name]
         except KeyError:
             # Some vars are not in options.json and so do not make it into self.options
             # This case should be safe to ignore
@@ -176,30 +180,9 @@ class FlaskThread(threading.Thread):
     def get_var_from_main(self, var):
         """Gets data about a variable and packs it into gekko_data"""
         main_dict = vars(main)
-        # Update the variable if the data has been loaded before
-        if self.has_data:
-            data = False
-            if isinstance(main_dict[var], GKVariable):
-                self.get_variable_fron_main(var)
-                return
-            elif isinstance(main_dict[var], GKParameter):
-                self.get_parameter_from_main(var)
-                return
-            elif isinstance(main_dict[var], GK_Intermediate):
-                data = list(filter(lambda d: d['name'] == var, self.gekko_data['vars']['intermediates']))[0]
-            try:
-                data['data'] = data['data'] + [self.results[main_dict[var].name][0]]
-                data['options'] = self.options[main_dict[var].name]
-
-            except KeyError:
-                # Some vars are not in options.json and so do not make it into self.options
-                # This case should be safe to ignore
-                pass
-            except Exception as e:
-                raise e
 
         # Set the variable dict if this is the first time
-        else:
+        if not self.has_data:
             options = {}
             try:
                 options = self.options[main_dict[var].name]
@@ -252,6 +235,27 @@ class FlaskThread(threading.Thread):
             elif isinstance(main_dict[var], GK_Intermediate):
                 self.gekko_data['vars']['intermediates'].append(var_dict)
 
+        # Update the variable if the data has been loaded before
+        data = False
+        if isinstance(main_dict[var], GKVariable):
+            self.get_variable_fron_main(var)
+            return
+        elif isinstance(main_dict[var], GKParameter):
+            self.get_parameter_from_main(var)
+            return
+        elif isinstance(main_dict[var], GK_Intermediate):
+            data = list(filter(lambda d: d['name'] == var, self.gekko_data['vars']['intermediates']))[0]
+        try:
+            data['data'] = data['data'] + [self.results[main_dict[var].name][0]]
+            data['options'] = self.options[main_dict[var].name]
+
+        except KeyError:
+            # Some vars are not in options.json and so do not make it into self.options
+            # This case should be safe to ignore
+            pass
+        except Exception as e:
+            raise e
+                
     def make_vars_map(self):
         """Maps python script names to APMonitor names"""
         vars_map = {}
