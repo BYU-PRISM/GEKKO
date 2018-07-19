@@ -105,3 +105,4 @@ demo/plot.png
 #only include windows executable
 gekko/bin/lib/*
 gekko/bin/apmonitor*
+gekko/bin/lib_par/*

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 #%% Build model
 
 #initialize GEKKO model
-m = GEKKO()
+m = GEKKO(remote=False)
 
 #time
 m.time = np.linspace(0,7,71)

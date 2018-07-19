@@ -6,8 +6,18 @@ import os
 
 here = os.path.abspath(os.path.dirname(__file__))
 # Get the long description from the README file
-with open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
-    long_description = f.read()
+#with open(os.path.join(here, 'description.rst'), encoding='utf-8') as f:
+#    long_description = f.read()
+long_description = """GEKKO
+=====
+
+GEKKO is a python package for optimization, specializing in dynamic optimization
+of differential algebraic equations (DAE) systems. GEKKO provides a user-friendly
+interface to the powerful APMonitor optimization suite on the back end. It is
+coupled with large-scale solvers for linear, quadratic, nonlinear, and mixed
+integer programming (LP, QP, NLP, MILP, MINLP). Modes of operation include data
+reconciliation, real-time optimization, dynamic simulation, and nonlinear
+predictive control."""
 
 def package_files(directory):
     paths = []
@@ -30,12 +40,12 @@ extra_files = gui_files + ['bin/apm.exe']
 #   apm_binary = ['gekko/bin/apmonitor' AND LA libaries]
 
 setup(name='gekko',
-    version='0.0.4rc2',
+    version='0.1a2',
     description='Optimization software for differential algebraic equations',
     long_description=long_description,
     #url="https://readthedocsurl",
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',

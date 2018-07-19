@@ -44,7 +44,7 @@ C = np.array([[1, 0, 0, 0],
 
 
 #%% Build ThunderSnow model
-m = GEKKO()
+m = GEKKO(server='http://xps.apmonitor.com')
 
 x,y,u = m.state_space(A,B,C)
 

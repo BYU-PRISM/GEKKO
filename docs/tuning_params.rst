@@ -258,11 +258,11 @@ MV_STEP_HOR
 
 Type: Integer, Input
 
-Default Value: 0 (for APM.MV_STEP_HOR) or 1 (for MV(#).MV_STEP_HOR)
+Default Value: 0 (for global :ref:`mv_step_hor_global` ) or 1 (for MV(#).MV_STEP_HOR)
 
-Description: Step length for manipulated variables: 0 uses APM.MV_STEP_HOR as default
+Description: Step length for manipulated variables: 0 uses global :ref:`mv_step_hor_global` as default
 
-Explanation: The manipulated variable step horizon (MV_STEP_HOR) is by default to allow the MV to be adjusted every time set of the collocation. There are cases where the MV should not move every time step but should be constrained to move only a certain multiple of the collocation time step. With MV_STEP_HOR = 2, the manipulated variable is allowed to move on the first step and every other step thereafter. MV_STEP_HOR = 5, the manipulated variable is allowed to move on the first step and every 5th step thereafter. There is also a parameter APM.MV_STEP_HOR that is used as a global configuration for all MVs when the individual MV option is set to 0.
+Explanation: The manipulated variable step horizon (MV_STEP_HOR) is by default to allow the MV to be adjusted every time set of the collocation. There are cases where the MV should not move every time step but should be constrained to move only a certain multiple of the collocation time step. With MV_STEP_HOR = 2, the manipulated variable is allowed to move on the first step and every other step thereafter. MV_STEP_HOR = 5, the manipulated variable is allowed to move on the first step and every 5th step thereafter. There is also a global parameter :ref:`mv_step_hor_global` that is used as a global configuration for all MVs when the individual MV option is set to 0.
 
 .. _newval:
 
@@ -301,7 +301,7 @@ Default Value: 0.0
 
 Description: Percent of objective function contribution considering all SV and CV variables
 
-Explanation: The objective function percent is useful to see which controlled variables (CVs) are contributing the most to the controller overall objective function. If one of the CVs has a high OBJPCT, it may be dominating the controller action and the tuning factors WSP (APM.CV_TYPE=2) or WSPHI/WSPLO (APM.CV_TYPE=1) should be adjusted accordingly.
+Explanation: The objective function percent is useful to see which controlled variables (CVs) are contributing the most to the controller overall objective function. If one of the CVs has a high OBJPCT, it may be dominating the controller action and the tuning factors WSP (CV_TYPE=2) or WSPHI/WSPLO (CV_TYPE=1) should be adjusted accordingly.
 
 .. _ostatus:
 
@@ -578,7 +578,7 @@ Default Value: 2.0d0
 
 Description: Objective function weight on model value
 
-Explanation: A weighting factor to penalize deviation of current model predictions from prior model predictions. This is used in estimation applications (APM.IMODE=2, 5, or 8) where the penalty from a prior model prediction is a “forgetting factor” that approximates an infinite estimation horizon or favors prior predictions. The infinite estimation horizon approximation is especially useful for systems that have weakly observable or unobservable states. A higher WMODEL can also help to reduce the aggressiveness of the estimator in aligning with the measurements by balancing with a penalty against shifting too far from the prior predictions. The WMODEL value should never be equal to or larger than the WMEAS value for APM.EV_TYPE=1 (l1-norm). A WMODEL value higher than WMEAS will ignore measured values in favor of matching prior model predictions.
+Explanation: A weighting factor to penalize deviation of current model predictions from prior model predictions. This is used in estimation applications (IMODE=2, 5, or 8) where the penalty from a prior model prediction is a “forgetting factor” that approximates an infinite estimation horizon or favors prior predictions. The infinite estimation horizon approximation is especially useful for systems that have weakly observable or unobservable states. A higher WMODEL can also help to reduce the aggressiveness of the estimator in aligning with the measurements by balancing with a penalty against shifting too far from the prior predictions. The WMODEL value should never be equal to or larger than the WMEAS value for EV_TYPE=1 (l1-norm). A WMODEL value higher than WMEAS will ignore measured values in favor of matching prior model predictions.
 
 
 .. _wsp:

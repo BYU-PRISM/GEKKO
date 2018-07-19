@@ -19,7 +19,7 @@ x0[1] = T_ss
 
 #%% GEKKO nonlinear MPC
 m = gekko()
-mTime = [0,0.02,0.04,0.06,0.08,0.1,0.12,0.15,0.2]
+m.time = [0,0.02,0.04,0.06,0.08,0.1,0.12,0.15,0.2]
 
 # Volumetric Flowrate (m^3/sec)
 q = 100
@@ -158,7 +158,7 @@ for i in range(len(t)-1):
     # insert measurement
     mT.MEAS = T[i+1]
     # solve MPC
-    m.solve(GUI=True, disp=False) # remote=False for local solve
+    m.solve(disp=False,GUI=True) # remote=False for local solve
 
     mT.SPHI = Tsp[i+1] + DT
     mT.SPLO = Tsp[i+1] - DT

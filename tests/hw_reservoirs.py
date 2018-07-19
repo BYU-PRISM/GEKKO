@@ -63,32 +63,30 @@ m.options.imode = 4
 
 #Solve
 m.solve()
-m.GUI()
 
 #%% Plot results
-# time = [x * 12 for x in m.time]
+time = [x * 12 for x in m.time]
+# plot results
+plt.figure(1)
 
-# # plot results
-# plt.figure(1)
-#
-# plt.subplot(311)
-# plt.plot(time,h[0],'r-')
-# plt.plot(time,h[1],'b--')
-# plt.ylabel('Level (m)')
-# plt.legend(['Jordanelle Reservoir','Deer Creek Reservoir'])
-#
-# plt.subplot(312)
-# plt.plot(time,h[3],'g-')
-# plt.plot(time,h[2],'k:')
-# plt.ylabel('Level (m)')
-# plt.legend(['Great Salt Lake','Utah Lake'])
-#
-# plt.subplot(313)
-# plt.plot(time,Vin[0],'k-')
-# plt.plot(time,Vout[0],'r-')
-# plt.plot(time,Vout[1],'b--')
-# plt.plot(time,Vout[2],'g-')
-# plt.xlabel('Time (month)')
-# plt.ylabel('Flow (km3/yr)')
-# plt.legend(['Supply Flow','Upper Provo River','Lower Provo River','Jordan River'])
-# plt.show()
+plt.subplot(311)
+plt.plot(time,h[0],'r-')
+plt.plot(time,h[1],'b--')
+plt.ylabel('Level (m)')
+plt.legend(['Jordanelle Reservoir','Deer Creek Reservoir'])
+
+plt.subplot(312)
+plt.plot(time,h[3],'g-')
+plt.plot(time,h[2],'k:')
+plt.ylabel('Level (m)')
+plt.legend(['Great Salt Lake','Utah Lake'])
+
+plt.subplot(313)
+plt.plot(time,Vin[0],'k-')
+plt.plot(time,Vout[0],'r-')
+plt.plot(time,Vout[1],'b--')
+plt.plot(time,Vout[2],'g-')
+plt.xlabel('Time (month)')
+plt.ylabel('Flow (km3/yr)')
+plt.legend(['Supply Flow','Upper Provo River','Lower Provo River','Jordan River'])
+plt.show()

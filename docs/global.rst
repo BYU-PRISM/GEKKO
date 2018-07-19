@@ -119,7 +119,7 @@ Description: Bounds checking: 1=ON, 0=OFF
 Explanation: BNDS_CHK validates a measurement with VLHI, VLLO, and VDVL properties. When BNDS_CHK is OFF, there is no checking of the validity limits. Although an application may have specific validity limits set, it is occasionally desirable to take off the checks to observe raw data input to the model without error detection. All measurement validation actions are reported in the text file dbs_read.rpt. BNDS_CHK, FRZE_CHK, and MEAS_CHK are options regarding data cleansing before it enters the applications. When a measurement is bad, the LSTVAL is restored as the measured value or else LSTVAL+VDVL or LSTVAL-VDVL. The VDVL shift depends on whether VLACTION is 0 (keep LSTVAL) or else is 1 (step by VDVL towards measurement).
 
 
-.. _codlstart:
+.. _coldstart:
 
 COLDSTART
 ------------------------
@@ -296,13 +296,13 @@ Description: Database level limited to a subset of options
 0=Basic, Limited Options
 1=All Options
 
-Explanation: DBS_LEVEL is an input option to control what is written to the DBS (database) file. When DBS_LEVEL=0, only a subset of basic parameters are written to the DBS file. This is used for compatibility with some industrial control systems that only support a subset of parameters. The basic global parameters are the following.
+Explanation: DBS_LEVEL is an input option to control what is written to the DBS (database) file. When DBS_LEVEL=0, only a subset of basic parameters are written to the DBS file. This is used for compatibility with some industrial control systems that only support a subset of parameters. The basic global parameters are the following:
 
 APPINFO, APPINFOCHG, APPSTATUS, COLDSTART, CYCLECOUNT,
 DIAGLEVEL, ITERATIONS, OBJFCNVAL, REQCTRLMODE, SOLVESTATUS,
 SOLVETIME
 
-Local parameters that are designated as basic types are only used when DBS_LEVEL=0.
+Local parameters that are designated as basic types are only used when DBS_LEVEL=0:
 
 BIAS, COST, CRITICAL, DCOST, DMAX, DMAXHI, DMAXLO, FSTATUS,
 LOWER, LSTVAL, MEAS, MODEL, NEWVAL, NXTVAL, PSTATUS, REQONCTRL,
@@ -322,7 +322,7 @@ Default Value: 1
 
 Description: Database read: 0=OFF, 1={Name = Value, Status, Units}, 2={Name,Value}
 
-Explanation: DBS_READ specifies when to read the input DBS files with 0=OFF, 1=Read values with Units, and 2=Read values without Units. There are several text file database (DBS) files that are read at the start of an application for both configuring the problem as well as reading in measurements. The DBS files are skipped when DBS_READ=0 except for header parameters. The DBS files are read in the order of defaults.dbs, {problem name}.dbs, measurements.dbs (source is replay.csv when REPLAY>=1), and overrides.dbs. The overrides.dbs file contains options set by clients using the apm_option function. The measurements.dbs file contains options set by clients using the apm_meas function. The DBS files may be need to be skipped to re-initialize an application without feedback from the process.
+Explanation: DBS_READ specifies when to read the input DBS files with 0=OFF, 1=Read values with Units, and 2=Read values without Units. There are several text file database (DBS) files that are read at the start of an application for both configuring the problem as well as reading in measurements. The DBS files are skipped when DBS_READ=0 except for header parameters. The DBS files are read in the order of defaults.dbs, {problem name}.dbs, measurements.dbs (source is replay.csv when REPLAY>=1), and overrides.dbs. The DBS files may be need to be skipped to re-initialize an application without feedback from the process.
 
 
 .. _dbs_write:
@@ -404,7 +404,7 @@ Explanation: FILTER determines how much of the raw measurement is used to update
 
  MEAS =  MEAS * FILTER + LSTVAL * (1-FILTER)
 
-The FSTATUS parameter is used to adjust the fractional update from new measurements when using apm_meas(s,a,'name',value) but this only applies to a single entity at a time. FILTER applies globally to all inputs. Both FSTATUS and FILTER are useful to control the flow of information into the model. It is sometimes desirable to set FILTER or FSTATUS to a low value (close to 0) when the solver is not able to find a solution because of big input changes. A drawback of a filter on data is that raw inputs are not used in the application and it takes several cycles to reach true input values.
+The FSTATUS parameter is used to adjust the fractional update from new measurements, but this only applies to a single entity at a time. FILTER applies globally to all inputs. Both FSTATUS and FILTER are useful to control the flow of information into the model. It is sometimes desirable to set FILTER or FSTATUS to a low value (close to 0) when the solver is not able to find a solution because of big input changes. A drawback of a filter on data is that raw inputs are not used in the application and it takes several cycles to reach true input values.
 
 
 
@@ -585,7 +585,7 @@ Description: Slope for penalization on future MV moves (i.e. reduces controller 
 Explanation: MV_DCOST_SLOPE implements a linear increase in movement penalty (DCOST). The increase in DCOST favors near term movement in the manipulated variable. One issue with a deadband trajectory is a phenomena called controller procrastination where the optimal solution delays a move because it gives an equal objective function to wait one or more cycles. This causes the controller to be stuck in a state of inaction. Favoring movement on the first step of the controller avoids this delay in implementing the needed changes.
 
 
-.. _mv_step_hor:
+.. _mv_step_hor_global:
 
 MV_STEP_HOR
 ------------------------
@@ -729,7 +729,7 @@ Default Value: 0
 
 Description: Row counter for data in replay.csv
 
-Explanation: REPLAY is a row indicator that is incremented each cycle when REPLAY >= 1. When replay mode is activated, data from successive rows in replay.csv are inserted into the file measurements.dbs. The application solves and then REPLAY is incremented by 1. On the next cycle, measurements.dbs is populated from the next row and the cycle repeats. REPLAY is an efficient way of loading large amounts of data into an application without needing to load each measurement individually through apm_meas(s,a,'variable',value) function calls.
+Explanation: REPLAY is a row indicator that is incremented each cycle when REPLAY >= 1. When replay mode is activated, data from successive rows in replay.csv are inserted into the file measurements.dbs. The application solves and then REPLAY is incremented by 1. On the next cycle, measurements.dbs is populated from the next row and the cycle repeats. REPLAY is an efficient way of loading large amounts of data into an application without needing to load each measurement individually.
 
 
 

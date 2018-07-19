@@ -60,19 +60,20 @@ Estimation
 MPU
 ^^^
 
-Model Parameter Update is parameter estimation for non-dynamic conditions. This mode implements the special variable types as follows:
+Model Parameter Update is parameter estimation for non-dynamic conditions. 
+.. This mode implements the special variable types as follows:
 
-FV
-""
+.. FV
+.. ""
 
-MV
-""
+.. MV
+.. ""
 
-SV
-""
+.. SV
+.. ""
 
-CV
-""
+.. CV
+.. ""
 
 MHE
 ^^^
@@ -100,8 +101,8 @@ Manipulated variables are like FVs, but discretized with time.
 
 `FSTATUS` allows giving a measurements for each time.
 
-SV
-""
+.. SV
+.. ""
 
 CV
 ""
@@ -126,17 +127,17 @@ RTO
 
 Real-Time Optimization
 
-FV
-""
+.. FV
+.. ""
 
-MV
-""
+.. MV
+.. ""
 
-SV
-""
+.. SV
+.. ""
 
-CV
-""
+.. CV
+.. ""
 
 MPC
 ^^^
@@ -144,17 +145,17 @@ MPC
 
 Model Predictive Control
 
-FV
-""
+.. FV
+.. ""
 
-MV
-""
+.. MV
+.. ""
 
-SV
-""
+.. SV
+.. ""
 
-CV
-""
+.. CV
+.. ""
 
 Controlled variables are the objective to match. When `STATUS=1` for a CV, the
 objective includes a minimization between model predictions and the setpoint.

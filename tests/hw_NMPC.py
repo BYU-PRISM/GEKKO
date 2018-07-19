@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 #%% Simulation
 
-s = GEKKO()
+s = GEKKO(remote=False)
 
 #1 step of simulation, discretization matches MHE
 s.time = np.linspace(0,.1,2)
@@ -50,7 +50,7 @@ s.options.TIME_SHIFT = 1
 
 #%% NMPC model
 
-m = GEKKO()
+m = GEKKO(remote=False)
 
 m.time = np.linspace(0,2,21)
 

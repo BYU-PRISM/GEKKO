@@ -2,6 +2,7 @@
 import numpy as np
 from random import random
 from gekko import GEKKO
+import matplotlib.pyplot as plt
 
 
 #%% Process
@@ -114,22 +115,21 @@ for i in range(cycles):
     k_est[i] = m.K.NEWVAL
     tau_est[i] = m.tau.NEWVAL
 
-m.GUI()
 
-# #%% Plot results
-# plt.figure()
-# plt.subplot(4,1,1)
-# plt.plot(y_meas)
-# plt.plot(y_est)
-# plt.legend(('meas','pred'))
-# plt.subplot(4,1,2)
-# plt.plot(np.ones(cycles)*p.K.value[0])
-# plt.plot(k_est)
-# plt.legend(('actual','pred'))
-# plt.subplot(4,1,3)
-# plt.plot(np.ones(cycles)*p.tau.value[0])
-# plt.plot(tau_est)
-# plt.legend(('actual','pred'))
-# plt.subplot(4,1,4)
-# plt.plot(u_meas)
-# plt.legend('u')
+#%% Plot results
+plt.figure()
+plt.subplot(4,1,1)
+plt.plot(y_meas)
+plt.plot(y_est)
+plt.legend(('meas','pred'))
+plt.subplot(4,1,2)
+plt.plot(np.ones(cycles)*p.K.value[0])
+plt.plot(k_est)
+plt.legend(('actual','pred'))
+plt.subplot(4,1,3)
+plt.plot(np.ones(cycles)*p.tau.value[0])
+plt.plot(tau_est)
+plt.legend(('actual','pred'))
+plt.subplot(4,1,4)
+plt.plot(u_meas)
+plt.legend('u')

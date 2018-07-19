@@ -499,7 +499,7 @@ class GEKKO(object):
 
 
     #%% Get a solution
-    def solve(self,disp=True,debug=False,GUI=False):
+    def solve(self,disp=True,debug=False,GUI=False,**kwargs):
         """Solve the optimization problem.
 
         This function has these substeps:
@@ -509,6 +509,8 @@ class GEKKO(object):
         -Solve the problem using the apm.exe commandline interface.
         -Load results into python variables.
         """
+        if 'remote' in kwargs:
+            raise TypeError('"remote" argument has been moved to model initialization (GEKKO(remote=True))')
 
         timing = False
         if timing == True:
