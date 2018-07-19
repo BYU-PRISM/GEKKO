@@ -1,3 +1,6 @@
+# This is the test_runner for our end-to-end tests. It is not 
+# a test itself, but import it and use it to run your own E2E tests.
+# See `hs71_test.py` for an example.
 from colorama import Fore, Style
 import traceback
 
