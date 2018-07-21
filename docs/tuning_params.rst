@@ -32,6 +32,7 @@ Description: Anti-Windup Status for a Manipulated Variable
 
 Explanation: Anti-Windup Status (`AWS`) is terminology borrowed from classical controls such as Proportional Integral Derivative (PID) controllers. Anti-Windup refers to the integral action that is paused when the controller reaches a saturation limit. An example of a saturation limit is a valve that is limited to 0-100% open. If the controller requests -10%, the valve is still limited to 0%. The AWS indication is useful to show when a controller is being driven by an optimization objective versus constraints that limit movement. A Key Performance Indicator (KPI) of many controllers is the fraction of time that a MV is not at an upper or lower bound limit.
 
+
 .. _bias:
 
 BIAS
@@ -70,6 +71,7 @@ Description: Cost weight: (+)=minimize, (-)=maximize
 
 Explanation: Multiplies the parameter by the `COST` value specified. This is used to scale the terms in the objective function. It is important that each term in the objective function is scaled to be of the same order of magnitude to ensure that the optimizer considers each of them (unless different weighting is specifically desired).
 
+
 .. _critical:
 
 CRITICAL
@@ -82,6 +84,7 @@ Default Value: 0
 Description: Critical: 0=OFF, 1=ON
 
 Explanation: Turns the application off ( :ref:`reqctrlmode` =1) if the instrument that provides the measurement has a :ref:`pstatus` =0 (bad measurement). A critical measurement has this flag on to give control back to the operator if the measurement fails to deliver a good value.
+
 
 .. _dcost:
 
@@ -117,6 +120,7 @@ Description: Delta MV maximum step per horizon interval
 
 Explanation: Applies a hard constraint that prevents the MV from being changed by more than the specified value in one time step. This can be used to prevent large jumps in the MV value in the case where that is either undesirable or infeasible. The time step is defined as the length of the first time step in the csv file.
 
+
 .. _dmaxhi:
 
 DMAXHI
@@ -129,6 +133,7 @@ Default Value: 1.0e20
 Description: Delta MV positive maximum step per horizon interval
 
 Explanation: Like :ref:`dmax`, but only with positive changes. Applies a hard constraint that prevents the MV from being changed by more than the specified value in one time step, but this constraint only applies to increases in the MV value. This can be used to prevent large jumps in the MV value in the case where that is either undesirable or infeasible.
+
 
 .. _dmaxlo:
 
@@ -143,6 +148,7 @@ Description: Delta MV negative maximum step per horizon interval
 
 Explanation: Like :ref:`dmax`, but only with negative changes. Applies a hard constraint that prevents the MV from being changed by more than the specified value in one time step, but this constraint only applies to decreases in the MV value. This can be used to prevent large jumps in the MV value in the case where that is either undesirable or infeasible.
 
+
 .. _dpred:
 
 DPRED
@@ -155,6 +161,7 @@ Default Value: 0.0
 Description: Delta prediction changes for each step'
 
 Explanation: Changes in the manipulated variables (MVs) are listed for the first 10 steps of the horizon including `DPRED[1]`, `DPRED[2]`, etc. Values of zero indicate that there are no changes. With `REQCTRLMODE=1` (COLD), all :ref:`dpred` values are zero. With `REQCTRLMODE=2` (WARM), only `DPRED[1]` is required to be zero but the other segments may be non-zero. With `REQCTRLMODE=3` (CONTROL), the first `DPRED` value is changing.
+
 
 .. _fstatus:
 
@@ -173,6 +180,7 @@ Explanation: Determines how much of the measurement ( :ref:`meas`) to use in upd
 
 	x = LSTVAL * (1-FSTATUS) + MEAS * FSTATUS
 
+
 .. _fdelay:
 
 FDELAY
@@ -185,6 +193,7 @@ Default Value: 0
 Description: Feedback delay: 0=No Delay, >=1 horizon steps for delay
 
 Explanation: The feedback delay places the measurement at the appropriate point in the horizon for dynamic estimation. Typical examples are laboratory measurement or gas chromatographs that report measurements that were taken in the past, usually with a 10 min - 2 hour delay. When the new value is reported, it should be placed at the appropriate point in the data time horizon. `FDELAY` is the number of horizon steps in the past where the measurement was actually taken.
+
 
 .. _lower:
 
@@ -199,6 +208,7 @@ Description: Lower bound
 
 Explanation: `LOWER` is the lower limit of a variable. If the variable guess value is below the lower limit, it is adjusted to the lower limit. The lower limit is also checked with the upper limit to ensure that it is less than or equal to the upper limit. If the lower limit is equal to the upper limit, the variable is fixed at that value.
 
+
 .. _lstval:
 
 LSTVAL
@@ -211,6 +221,7 @@ Default Value: 1.0
 Description: Last value from previous solution
 
 Explanation: The last value (`LSTVAL`) is the value from the prior solution of the optimization problem or simulation.
+
 
 .. _meas:
 
@@ -225,6 +236,9 @@ Description: Measured value
 
 Explanation: The measurement of a variable or parameter. The value of `MEAS` is initialized to the initial model value. The `MEAS` value is used in the application if :ref:`fstatus` is greater than zero, but not when `FSTATUS=0`.
 
+`MEAS` must be a scalar and only one measurement is loaded in each `solve()` command. If multiple measurements are needed, they can be loaded through the :ref:`value` attribute in their respective locations.
+
+
 .. _meas_gap:
 
 MEAS_GAP
@@ -237,6 +251,7 @@ Default Value: 1.0
 Description: Deadband for noise rejection of measurements in MHE
 
 Explanation: Used in estimation problems with :ref:`ev_type` =1 (l1-norm objective). The measurement gap (`MEAS_GAP`) defines a dead-band region around the measurement. If the model prediction is within that dead-band, there is no objective function penalty. Outside of that region, there is a linear penalty specified with the :ref:`wmeas` parameter. The :ref:`wmodel` parameter is the weighting given to deviation from the prior model prediction but does not have a deadband around the prior model prediction. The gap is only around the measured values.
+
 
 .. _model:
 
@@ -251,6 +266,7 @@ Description: Model predicted value
 
 Explanation: The MODEL value is a property of SV (State Variable) and CV (Controlled Variable) types. It is the predicted value of the current time. The current time is the first time step for a simulator or controller and the last value in the horizon for estimation.
 
+
 .. _mv_step_hor:
 
 MV_STEP_HOR
@@ -263,6 +279,7 @@ Default Value: 0 (for APM.MV_STEP_HOR) or 1 (for MV(#).MV_STEP_HOR)
 Description: Step length for manipulated variables: 0 uses APM.MV_STEP_HOR as default
 
 Explanation: The manipulated variable step horizon (MV_STEP_HOR) is by default to allow the MV to be adjusted every time set of the collocation. There are cases where the MV should not move every time step but should be constrained to move only a certain multiple of the collocation time step. With MV_STEP_HOR = 2, the manipulated variable is allowed to move on the first step and every other step thereafter. MV_STEP_HOR = 5, the manipulated variable is allowed to move on the first step and every 5th step thereafter. There is also a parameter APM.MV_STEP_HOR that is used as a global configuration for all MVs when the individual MV option is set to 0.
+
 
 .. _newval:
 
@@ -277,6 +294,7 @@ Description: New value implemented by the estimator or controller (NEWVAL = MEAS
 
 Explanation: The new value of the parameter estimate (FV) or manipulated variable (MV). This value is taken from the first step of the controller or the last step of the estimator. The NEWVAL is set equal to the measured value if the FV or MV status is off and the FSTATUS (feedback status) is ON (1).
 
+
 .. _nxtval:
 
 NXTVAL
@@ -289,6 +307,7 @@ Default Value: 1.0
 Description: Next value that the estimator or controller would implement if CTRLMODE=3.
 
 Explanation: The next value (NXTVAL) to be implemented by the controller. This is especially useful for a controller in WARM mode (CTRLMODE=2) where no values are changed on the first step (still in manual mode) but the control actions are computed beyond the first step. This is a useful mode to inspect the controller performance before it is turned on.
+
 
 .. _objpct:
 
@@ -303,6 +322,7 @@ Description: Percent of objective function contribution considering all SV and C
 
 Explanation: The objective function percent is useful to see which controlled variables (CVs) are contributing the most to the controller overall objective function. If one of the CVs has a high OBJPCT, it may be dominating the controller action and the tuning factors WSP (APM.CV_TYPE=2) or WSPHI/WSPLO (APM.CV_TYPE=1) should be adjusted accordingly.
 
+
 .. _ostatus:
 
 OSTATUS
@@ -315,6 +335,7 @@ Default Value: 0
 Description: Bit encoding for status messages
 
 Explanation: Status messages encoded in binary form for transfer and decoding. This is deprecated and will be removed in a future release.
+
 
 .. _ostatuschg:
 
@@ -497,6 +518,18 @@ Description: Upper bound
 Explanation: `UPPER` is the the upper limit of a variable. If the variable guess value is above the upper limit, it is adjusted to the upper limit before it is given to the solver. The upper limit is also checked with the lower limit ( :ref:`lower`) to ensure that it is greater than or equal to the lower limit. If the upper limit is equal to the lower limit, the variable is fixed at that value.
 
 
+.. _value:
+
+VALUE
+------
+
+Type: Real, Input/Output
+
+Default Value: 1
+
+Description: Value of the variable
+
+Explanation: 
 .. _vdvl:
 
 VDVL
@@ -607,6 +640,7 @@ Default Value: 1.0
 Description: Objective function weight on upper set point for linear error model
 
 Explanation: A weighting factor to penalize deviation above the upper setpoint trajectory with final target SPHI. If there is no penalty to cross the upper setpoint, WSPHI can be set to zero.
+
 
 .. _wsplo:
 
