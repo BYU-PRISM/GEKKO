@@ -25,7 +25,7 @@ def gk_logic_tree(self):
         #SP vs SPHI/SPLO
         if self.options.CV_TYPE == 1: # 1-norm of cv setpoint
             #CV SPHI and SPLO should be used, no SP
-            for v in self.variables:
+            for v in self._variables:
                 if v.type == 'CV':
                     if v.STATUS == 1:
                         if v.SP is not None:
@@ -36,7 +36,7 @@ def gk_logic_tree(self):
                             break #teaching completed; don't need to check any more
         elif self.options.CV_TYPE == 2: # 2-norm of cv setpoint
             #CV SPHI and SPLO should be used, no SP
-            for v in self.variables:
+            for v in self._variables:
                 if v.type == 'CV':
                     if v.STATUS == 1:
                         if v.SPHI is not None or v.SPLO is not None:
@@ -47,7 +47,7 @@ def gk_logic_tree(self):
                             break #teaching completed; don't need to check any more
         
         if self.options.IMODE > 5: # 6 or 9 -- dynamic control
-            for v in self.variables:
+            for v in self._variables:
                 if v.type == 'CV':
                     if v.STATUS == 1:
                         if v.TR_INIT > 0:
@@ -59,16 +59,15 @@ def gk_logic_tree(self):
                     
     #%% Estimation
     if (self.options.IMODE+1)%3 == 0: #2,5,8
-        for v in self.variables:
+        for v in self._variables:
             if v.type == 'CV':
                 if v.STATUS == 1:
                     print("Warning: STATUS of CVs has no effect in estimation. Use FSTATUS.")
-                    
-        if self.options.MEAS_GAP is not None and self.options.EV_TYPE != 1:
-            print("Warning: MEAS_GAP only for EV_TYPE=1")
+                if v.MEAS_GAP is not None and self.options.EV_TYPE != 1:
+                    print("Warning: MEAS_GAP only for EV_TYPE=1")
     
     #%% Measurements
-    for vp in self.variables+self.parameters:
+    for vp in self._variables+self._parameters:
         if vp.type is not None:
             if vp.MEAS is not None:
                 if vp.FSTATUS == 0:
@@ -100,14 +99,14 @@ def verify_input_options(self):
         if self.options.__dict__[o] != data['APM'][o]: #compare APM to GK
             print(str(o)+" was not written correctly") #give message if they don't match
     ## Local Options
-    for vp in self.parameters:
+    for vp in self._parameters:
         if vp.type != None: #(FV/MV/SV/CV) not Param or Var
             for o in parameter_options[vp.type]['inputs']:
                 if o not in ['LB','UB']: #TODO: for o in data[vp.name] to avoid this check
                     if vp.__dict__[o] is not None and not self.like(vp.__dict__[o], data[vp.name][o]):
                         print(str(vp)+'.'+str(o)+" was not written correctly") #give message if they don't match
 
-    for vp in self.variables:
+    for vp in self._variables:
         if vp.type != None: #(FV/MV/SV/CV) not Param or Var
             for o in variable_options[vp.type]['inputs']:
                 if o not in ['LB','UB']:
@@ -125,7 +124,7 @@ def name_check(self):
     illegal_3 = set(['abs','exp','log','sin','cos','tan','erf'])
     illegal_4 = set(['sqrt','asin','acos','atan'])
     
-    for x in self._constants+self.parameters+self.variables+self.intermediates+self._objects:
+    for x in self._constants+self._parameters+self._variables+self._intermediates+self._objects:
         #unique names
         if x.name not in all_names:
             all_names.add(x.name)

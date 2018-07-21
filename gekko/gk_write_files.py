@@ -23,9 +23,9 @@ def build_model(self):
         for const in self._constants:
             model += '\t%s = %s\n' % (const, const.value)
         model += 'End Constants\n'
-    if self.parameters:
+    if self._parameters:
         model += 'Parameters\n'
-        for parameter in self.parameters:
+        for parameter in self._parameters:
             i = 0
             model += '\t%s' % parameter
             if not isinstance(parameter.VALUE.value, (list,np.ndarray)):
@@ -45,9 +45,9 @@ def build_model(self):
             model += '\n'
         model += 'End Parameters\n'
 
-    if self.variables:
+    if self._variables:
         model += 'Variables\n'
-        for parameter in self.variables:
+        for parameter in self._variables:
             i = 0
             model += '\t%s' % parameter
             if not isinstance(parameter.VALUE.value, (list,np.ndarray)):
@@ -66,19 +66,19 @@ def build_model(self):
             model += '\n'
         model += 'End Variables\n'
 
-    if self.intermediates:
+    if self._intermediates:
         model += 'Intermediates\n'
-        for i in range(len(self.inter_equations)):
-            model += '\t%s=%s\n' % (str(self.intermediates[i]), str(self.inter_equations[i]))
+        for i in range(len(self._inter_equations)):
+            model += '\t%s=%s\n' % (str(self._intermediates[i]), str(self._inter_equations[i]))
         model += 'End Intermediates\n'
 
-    if self.equations or self.objectives:
+    if self._equations or self._objectives:
         model += 'Equations\n'
-        if self.equations:
-            for equation in self.equations:
+        if self._equations:
+            for equation in self._equations:
                 model += '\t%s\n' % equation
-        if self.objectives:
-            for o in self.objectives:
+        if self._objectives:
+            for o in self._objectives:
                 model += '\t%s\n' % o
         model += 'End Equations\n'
 
@@ -137,7 +137,7 @@ def write_csv(self):
             print("Warning: model time only used for dynamic modes (IMODE>3)")
 
     #check all parameters and arrays
-    for vp in self.variables+self.parameters:
+    for vp in self._variables+self._parameters:
         #Only save csv data if the user changed the value (changes registered in vp.value.change)
         if vp.value.change is False:
             continue
@@ -150,7 +150,7 @@ def write_csv(self):
                     #in MPU, the first vp checked could be a scalar value (FV, param, var initial guess)
                     #but the CV is likely longer so skip scalar values (they will be set in the APM file)
                     continue
-                    
+
 
             if vp.value.change is True: #Save the entire array of values
                 #skip variable if its value is a string (ie symbolic initialization)
@@ -159,7 +159,7 @@ def write_csv(self):
                     vp.value.change = False
                     #do nothing else, go to next variable
                     continue
-                
+
                 #discretize all values to arrays
                 if not isinstance(vp.VALUE.value, (list,np.ndarray)):
                     vp.VALUE = np.ones(length)*vp.VALUE
@@ -237,11 +237,11 @@ def write_info(self):
     if self.options.CYCLECOUNT < 1:
         #Classify variable in .info file
         filename = self.model_name+'.info'
-    
+
         #Create and open configuration files
         with open(os.path.join(self.path,filename), 'w+') as f:
             #check each Var and Param for FV/MV/SV/CV
-            for vp in self.variables+self.parameters:
+            for vp in self._variables+self._parameters:
                 if vp.type is not None:
                     f.write(vp.type+', '+vp.name+'\n')
 
@@ -261,7 +261,7 @@ def generate_dbs_file(self):
     with open(os.path.join(self.path,filename), 'w+') as f:
         f.write(file_content)
         #check for set options of each Var and Param
-        for vp in self.parameters:
+        for vp in self._parameters:
             if vp.type is not None: #(FV/MV/SV/CV) not Param or Var
                 for o in parameter_options[vp.type]['inputs']+parameter_options[vp.type]['inout']:
                     if o == 'VALUE':
@@ -270,7 +270,7 @@ def generate_dbs_file(self):
                         if vp.__dict__[o] is not None:
                             f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
 
-        for vp in self.variables:
+        for vp in self._variables:
             if vp.type is not None: #(FV/MV/SV/CV) not Param or Var
                 for o in variable_options[vp.type]['inputs']+variable_options[vp.type]['inout']:
                     if o == 'VALUE':
@@ -280,7 +280,7 @@ def generate_dbs_file(self):
                             f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
 
 
-def write_solver_options(self,remote):
+def write_solver_options(self):
     opt_file = ''
     if self.solver_options:
         #determine filename from solver number
@@ -296,7 +296,7 @@ def write_solver_options(self,remote):
             opt_file += option + '\n'
 
         #If remote solve, pass string to append to .apm file
-        if remote is True:
+        if self.remote is True:
             return 'File ' + filename + '\n' + opt_file + 'End File\n'
         #write file for local solve
         else:
@@ -362,9 +362,9 @@ def to_JSON(self): #JSON input to APM not currently supported -- this function i
 #                const_dict['value'] = self.jsonify(const.value)
 #            const_dict[const.name] = const_dict
 
-    if self.parameters:
+    if self._parameters:
         p_dict = dict()
-        for parameter in self.parameters:
+        for parameter in self._parameters:
             o_dict = dict()
             for o in parameter_options[parameter.type]['inputs']+parameter_options[parameter.type]['inout']:
                 if o == 'VALUE':
@@ -375,9 +375,9 @@ def to_JSON(self): #JSON input to APM not currently supported -- this function i
             p_dict[parameter.name] = o_dict
         json_data['parameters'] = p_dict
 
-    if self.variables:
+    if self._variables:
         p_dict = dict()
-        for parameter in self.variables:
+        for parameter in self._variables:
             o_dict = dict()
             for o in variable_options[parameter.type]['inputs']+variable_options[parameter.type]['inout']:
                 if o == 'VALUE':
@@ -389,9 +389,9 @@ def to_JSON(self): #JSON input to APM not currently supported -- this function i
         json_data['variables'] = p_dict
 
     """
-    if self.intermediates:
+    if self._intermediates:
         temp_dict = dict()
-        for intermediate in self.intermediates:
+        for intermediate in self._intermediates:
             temp_dict['name'] = {'value':self.jsonify(intermediate.value)}
         json_data['intermediates'] = temp_dict
     """
@@ -403,4 +403,3 @@ def to_JSON(self): #JSON input to APM not currently supported -- this function i
     #load JSON to dictionary:
     #with open(os.path.join(self.path,'jsontest.json')) as json_file:
     #   data = json.load(json_file)
-

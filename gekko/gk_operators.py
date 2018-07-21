@@ -106,7 +106,15 @@ class GK_Operators:
 class GK_Intermediate(GK_Operators):
     def __init__(self, name, value=None):
         GK_Operators.__init__(self,name, value=None)
-    
+        
+    def __repr__(self):
+        return str(self.value) #'%s = %f' % (self.name, self.value)
+    def __len__(self):
+        return len(self.value)
+    def __getitem__(self,key):
+        return self.value[key]
+     
+      
 class GK_Value(list):
     def __init__(self,value):
         if value is not None:

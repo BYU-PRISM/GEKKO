@@ -8,6 +8,7 @@ from .properties import parameter_options, variable_options
 
 #%% Post-solve processing
 
+## options.JSON has all APM options
 def load_JSON(self):
     f = open(os.path.join(self.path,'options.json'))
     data = json.load(f)
@@ -16,7 +17,7 @@ def load_JSON(self):
     for o in self.options._output_option_list+self.options._inout_option_list:
         self.options.__dict__[o] = data['APM'][o]
     #Variable options (FV/MV/SV/CV)
-    for vp in self.parameters:
+    for vp in self._parameters:
         if vp.type != None: #(FV/MV/SV/CV) not Param or Var
             for o in parameter_options[vp.type]['outputs']+parameter_options[vp.type]['inout']:
                 if o == 'VALUE':
@@ -47,7 +48,7 @@ def load_JSON(self):
                             vp.__dict__[o] = dpred
                 else: #everything besides value, dpred and pred
                     vp.__dict__[o] = data[vp.name][o]
-    for vp in self.variables:
+    for vp in self._variables:
         if vp.type != None: #(FV/MV/SV/CV) not Param or Var
             for o in variable_options[vp.type]['outputs']+variable_options[vp.type]['inout']:
 
@@ -69,20 +70,28 @@ def load_JSON(self):
                     vp.__dict__[o] = data[vp.name][o]
     return data
 
+
+## results.json has variable value results
 def load_results(self):
     if (os.path.isfile(os.path.join(self.path, 'results.json'))):
         f = open(os.path.join(self.path,'results.json'))
         data = json.load(f)
         f.close()
 
-        for vp in self.parameters:
+        for vp in self._parameters:
             if vp.type is not None:
                 try:
                     vp.VALUE = data[vp.name]
                     vp.value.change = False
                 except Exception:
                     print(vp.name+ " not found in results file")
-        for vp in self.variables:
+        for i in self._intermediates:
+            try:
+                i.value.value = data[i.name]
+                i.value.change = False
+            except Exception:
+                print(i.name+ " not found in results file")
+        for vp in self._variables:
             try:
                 vp.VALUE = data[vp.name]
                 vp.value.change = False
@@ -101,29 +110,3 @@ def load_results(self):
     return data
 
 
-
-
-def load_csv_results(self):
-
-    # Load results.csv into a dictionary keyed with variable names
-    if (os.path.isfile(os.path.join(self.path, 'results.csv'))):
-        with open(os.path.join(self.path,'results.csv')) as f:
-            reader = csv.reader(f, delimiter=',')
-            y={}
-            for row in reader:
-                if len(row)==2:
-                    y[row[0]] = float(row[1])
-                else:
-                    y[row[0]] = [float(col) for col in row[1:]]
-        # Load variable values into their respective objects from the dictionary
-        for vp in self.parameters+self.variables:
-            try:
-                vp.VALUE = y[str(vp)]
-            except Exception:
-                pass
-        # Return solution
-        return y
-
-    else:
-        print("Error: 'results.csv' not found. Check above for addition error details")
-        return {}

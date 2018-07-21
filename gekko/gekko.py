@@ -14,7 +14,7 @@ from .apm import cmd, get_file
 from .gk_global_options import GKGlobalOptions
 from .gk_parameter import GKParameter, GK_MV, GK_FV
 from .gk_variable import GKVariable, GK_CV, GK_SV
-from .gk_operators import GK_Operators
+from .gk_operators import GK_Operators, GK_Intermediate
 from itertools import count
 from .gk_gui import GK_GUI
 
@@ -50,19 +50,21 @@ class GEKKO(object):
     """Create a model object. This is the basic object for solving optimization problems"""
     _ids = count(0) #keep track of number of active class instances to not overwrite eachother with default model name
 
-    def __init__(self, server='http://byu.apmonitor.com', name=None):
+    def __init__(self, remote=True, server='http://byu.apmonitor.com', name=None):
+        self.remote = remote
         self.server = compatible_string_strip(server)
         self.options = GKGlobalOptions()
         self.id = next(self._ids) #instance count of class
+        self.gui_open = False
 
         #keep a list of constants, params, vars, eqs, etc associated with this model
         self._constants = []
-        self.parameters = []
-        self.variables = []
-        self.intermediates = []
-        self.inter_equations = []
-        self.equations = []
-        self.objectives = []
+        self._parameters = []
+        self._variables = []
+        self._intermediates = []
+        self._inter_equations = []
+        self._equations = []
+        self._objectives = []
         self._connections = []
         self._objects = []
 
@@ -86,7 +88,8 @@ class GEKKO(object):
         self.solver_options = []
 
         #clear anything already on the server
-        cmd(self.server,self.model_name,'clear all')
+        if self.remote:
+            cmd(self.server,self.model_name,'clear all')
 
 
     #%% Parts of the model
@@ -112,10 +115,10 @@ class GEKKO(object):
         if name is not None:
             name = re.sub(r'\W+', '', name).lower()
         else:
-            name = 'p' + str(len(self.parameters) + 1)
+            name = 'p' + str(len(self._parameters) + 1)
 
         parameter = GKParameter(name, value)
-        self.parameters.append(parameter)
+        self._parameters.append(parameter)
         return parameter
 
     def FV(self, value=None, lb=None, ub=None, integer=False, fixed_initial=True, name=None):
@@ -124,12 +127,12 @@ class GEKKO(object):
         if name is not None:
             name = re.sub(r'\W+', '', name).lower()
         else:
-            name = 'p' + str(len(self.parameters) + 1)
+            name = 'p' + str(len(self._parameters) + 1)
         if integer == True:
             name = 'int_'+name
 
         parameter = GK_FV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
-        self.parameters.append(parameter)
+        self._parameters.append(parameter)
         if fixed_initial is False:
             self.Connection(parameter,'CALCULATED',pos1=1,node1=1)
         return parameter
@@ -139,12 +142,12 @@ class GEKKO(object):
         if name is not None:
             name = re.sub(r'\W+', '', name).lower()
         else:
-            name = 'p' + str(len(self.parameters) + 1)
+            name = 'p' + str(len(self._parameters) + 1)
         if integer == True:
             name = 'int_'+name
 
         parameter = GK_MV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
-        self.parameters.append(parameter)
+        self._parameters.append(parameter)
         if fixed_initial is False:
             self.Connection(parameter,'CALCULATED',pos1=1,node1=1)
         return parameter
@@ -155,12 +158,12 @@ class GEKKO(object):
         if name is not None:
             name = re.sub(r'\W+', '', name).lower()
         else:
-            name = 'v' + str(len(self.variables) + 1)
+            name = 'v' + str(len(self._variables) + 1)
         if integer == True:
             name = 'int_'+name
 
         variable = GKVariable(name, value, lb, ub)
-        self.variables.append(variable)
+        self._variables.append(variable)
         if fixed_initial is False:
             self.Connection(variable,'CALCULATED',pos1=1,node1=1)
         return variable
@@ -170,12 +173,12 @@ class GEKKO(object):
         if name is not None:
             name = re.sub(r'\W+', '', name).lower()
         else:
-            name = 'v' + str(len(self.variables) + 1)
+            name = 'v' + str(len(self._variables) + 1)
         if integer == True:
             name = 'int_'+name
 
         variable = GK_SV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
-        self.variables.append(variable)
+        self._variables.append(variable)
         if fixed_initial is False:
             self.Connection(variable,'CALCULATED',pos1=1,node1=1)
         return variable
@@ -186,12 +189,12 @@ class GEKKO(object):
         if name is not None:
             name = re.sub(r'\W+', '', name).lower()
         else:
-            name = 'v' + str(len(self.variables) + 1)
+            name = 'v' + str(len(self._variables) + 1)
         if integer == True:
             name = 'int_'+name
 
         variable = GK_CV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
-        self.variables.append(variable)
+        self._variables.append(variable)
         if fixed_initial is False:
             self.Connection(variable,'CALCULATED',pos1=1,node1=1)
         return variable
@@ -201,14 +204,14 @@ class GEKKO(object):
             name = re.sub(r'\W+', '', name).lower()
             if name == '':
                 name = None
-        inter = GK_Operators(name)
-        self.intermediates.append(inter)
-        self.inter_equations.append(str(equation))
+        inter = GK_Intermediate(name)
+        self._intermediates.append(inter)
+        self._inter_equations.append(str(equation))
         return inter
 
     def Equation(self,equation):
         EqObj = EquationObj(equation)
-        self.equations.append(EqObj)
+        self._equations.append(EqObj)
         return EqObj
 
     def Equations(self,eqs):
@@ -219,7 +222,7 @@ class GEKKO(object):
         return l
 
     def Obj(self,obj):
-        self.objectives.append('minimize ' + str(obj))
+        self._objectives.append('minimize ' + str(obj))
 
     #%% Connections
 
@@ -319,8 +322,8 @@ class GEKKO(object):
 
         #Bound x to x_data limits
         if bound_x is True:
-            x.lb = x_data[0]
-            x.ub = x_data[-1]
+            x.lower = x_data[0]
+            x.upper = x_data[-1]
 
 
     ## State Space
@@ -334,43 +337,43 @@ class GEKKO(object):
         u (inputs)
         """
         #TODO add support for E matrix
-        
+
         #set all matricies to numpy
         A = np.array(A)
         B = np.array(B)
         C = np.array(C)
         if D != None: #D is supplied
             D = np.array(D)
-            
+
         # dx/dt = A * x + B * u
         #     y = C * x + D * u
         #
         # dimensions
         # (nx1) = (nxn)*(nx1) + (nxm)*(mx1)
         # (px1) = (pxn)*(nx1) + (pxm)*(mx1)
-        
+
         #count number of states, inputs and outputs
         n = A.shape[0]
         m = B.shape[1]
         p = C.shape[0]
-        
+
         #verify that all inputs are 2D of appropriate size
         if A.shape[1] != n or B.shape[0] != n or C.shape[1] != n:
             raise Exception("Inconsistent matrix sizes.")
         if D is not None:
             if D.shape[0] != p or D.shape[1] != m:
                 raise Exception("Inconsistent matrix sizes (D).")
-                
-        
+
+
         # build lti object with unique object name
         SS_name = 'statespace' + str(len(self._objects) + 1)
         self._objects.append(SS_name + ' = lti')
-        
+
         # write lti object config file objectname.txt
         file_name = SS_name + '.txt'
         if dense is True:
             file_data = 'dense, '
-        else: 
+        else:
             file_data = 'sparse, '
         if discrete is False:
             file_data += 'continuous \n'
@@ -382,7 +385,7 @@ class GEKKO(object):
         with open(os.path.join(self.path,file_name), 'w+') as f:
             f.write(file_data)
         self._extra_files.append(file_name) #add csv file to list of extra file to send to server
-        
+
         if dense is True:
             #write A,B,C,[D] matricies to objectname.A/B/C/D.txt
             file_name = SS_name + '.a.txt'
@@ -405,7 +408,7 @@ class GEKKO(object):
             sparse_matrix = []
             for j in range(n):
                 for i in range(n):
-                    if A[i,j] != 0: 
+                    if A[i,j] != 0:
                         sparse_matrix.append([i+1,j+1,A[i,j]])
             np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
             self._extra_files.append(file_name) #add csv file to list of extra file to send to server
@@ -413,7 +416,7 @@ class GEKKO(object):
             sparse_matrix = []
             for j in range(m):
                 for i in range(n):
-                    if B[i,j] != 0: 
+                    if B[i,j] != 0:
                         sparse_matrix.append([i+1,j+1,B[i,j]])
             np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
             self._extra_files.append(file_name) #add csv file to list of extra file to send to server
@@ -421,7 +424,7 @@ class GEKKO(object):
             sparse_matrix = []
             for j in range(n):
                 for i in range(p):
-                    if C[i,j] != 0: 
+                    if C[i,j] != 0:
                         sparse_matrix.append([i+1,j+1,C[i,j]])
             np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
             self._extra_files.append(file_name) #add csv file to list of extra file to send to server
@@ -430,25 +433,25 @@ class GEKKO(object):
                 sparse_matrix = []
                 for j in range(m):
                     for i in range(p):
-                        if D[i,j] != 0: 
+                        if D[i,j] != 0:
                             sparse_matrix.append([i+1,j+1,D[i,j]])
                 np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
                 self._extra_files.append(file_name) #add csv file to list of extra file to send to server
-    
+
         #define arrays of states, outputs and inputs
         x = [self.SV() for i in np.arange(n)]
         y = [self.CV() for i in np.arange(p)]
         u = [self.MV() for i in np.arange(m)]
-    
-        
-        #Add connections between u, x and y with lti object 
+
+
+        #Add connections between u, x and y with lti object
         for i in range(n):
             self._connections.append(x[i].name + ' = ' + SS_name+'.x['+str(i+1)+']')
         for i in range(m):
             self._connections.append(u[i].name + ' = ' + SS_name+'.u['+str(i+1)+']')
         for i in range(p):
             self._connections.append(y[i].name + ' = ' + SS_name+'.y['+str(i+1)+']')
-            
+
         return x,y,u
 
 
@@ -457,22 +460,22 @@ class GEKKO(object):
         constrains v[end] = v[0]. This does not affect the default behavior of
         fixing initial conditions (v[0]).
         """
-        
+
         #Verify that v is calculated (MV,SV,CV,Var)
         if not isinstance(v,(GKVariable,GKParameter)):
             raise TypeError("Variable must be calculated and dynamic (Var,SV,CV,MV)")
         if isinstance(v,(GKParameter)):
             if v.type != 'MV':
                 raise TypeError("Variable must be calculated and dynamic (Var,SV,CV,MV)")
-            
+
         #build periodic object with unique object name
         periodic_name = 'periodic_obj_' + str(len(self._objects) + 1)
         self._objects.append(periodic_name + ' = periodic')
 
         #Add connections between v and periodic object attribute x
         self._connections.append(v.name + ' = ' + periodic_name+'.x')
-        
-        
+
+
 
     #%% Add array functionality to all types
     def Array(self,f,dim,**args):
@@ -496,7 +499,7 @@ class GEKKO(object):
 
 
     #%% Get a solution
-    def solve(self,remote=True,disp=True,debug=False):
+    def solve(self,disp=True,debug=False,GUI=False,**kwargs):
         """Solve the optimization problem.
 
         This function has these substeps:
@@ -506,6 +509,8 @@ class GEKKO(object):
         -Solve the problem using the apm.exe commandline interface.
         -Load results into python variables.
         """
+        if 'remote' in kwargs:
+            raise TypeError('"remote" argument has been moved to model initialization (GEKKO(remote=True))')
 
         timing = False
         if timing == True:
@@ -542,7 +547,7 @@ class GEKKO(object):
 
         if timing == True:
             t = time.time()
-        self.write_solver_options(remote)
+        self.write_solver_options()
         if timing == True:
             print('build solver options', time.time() - t)
 
@@ -555,7 +560,7 @@ class GEKKO(object):
         if debug == True:
             self.name_check()
 
-        if remote == False:#local_solve
+        if self.remote == False:#local_solve
             if timing == True:
                 t = time.time()
 
@@ -567,7 +572,7 @@ class GEKKO(object):
             # Calls apmonitor through the command line
             if os.name == 'nt': #Windows
                 apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm.exe')
-                app = subprocess.Popen([apm_exe, self.model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self.path, env = {"PATH" : self.path }, universal_newlines=True)                
+                app = subprocess.Popen([apm_exe, self.model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self.path, env = {"PATH" : self.path }, universal_newlines=True)
                 for line in iter(app.stdout.readline, ""):
                     if disp == True:
                         try:
@@ -618,7 +623,7 @@ class GEKKO(object):
             cmd(self.server, self.model_name, 'option '+dbs)
             #solver options
             if self.solver_options:
-                opt_file=self.write_solver_options(remote)
+                opt_file=self.write_solver_options()
                 cmd(self.server,self.model_name, ' '+opt_file)
 
             #extra files (eg solver.opt, cspline.data)
@@ -681,11 +686,38 @@ class GEKKO(object):
         if timing == True:
             print('debug', time.time() - t)
 
+        if self.gui_open:
+            self.gui.update()
+        elif GUI is True:
+            self.gui_open = True
+            self.gui = GK_GUI(self.path)
+            self.gui.display()
 
 
 
+    #%% Name matching
+    
+    def get_names(self):
+        """ Matches names of constants, parameters, intermediates and variables
+        to the python name from scope __main__. Name is converted to lowercase.
+        The function cannot be used after a variable is used (including in 
+        defining intermediate equations). USE WITH CAUTION. """
+        import __main__ as main
+        main_dict = vars(main)
+        for var in main_dict:
+            if isinstance(main_dict[var], GK_Operators):
+                main_dict[var].__dict__['name'] = re.sub(r'\W+', '', var).lower()
+                print('Found ' + var)
+            if isinstance(main_dict[var], list):
+                list_var = main_dict[var]
+                for i in range(len(list_var)):
+                    if isinstance(list_var[i], GK_Operators):
+                        list_var[i].__dict__['name'] = re.sub(r'\W+', '', var).lower()+'['+str(i)+']'
+                        print('Found ' + var+'['+str(i)+']')
 
 
+            
+            
 
     #%% Cleanup functions (use with caution)
 
@@ -734,6 +766,7 @@ class GEKKO(object):
     def atan(self,other):
         return GK_Operators('atan('+str(other) + ')')
 
-    def GUI(self, **kwargs):
-        gui = GK_GUI(self.path,**kwargs)
-        gui.display()
+    def GUI(self):
+        if not self.gui_open:
+            self.gui = GK_GUI(self.path)
+            self.gui.display()

@@ -23,7 +23,7 @@ export default {
     // This is passed in and is used for looking up the other props from the global store
     externalId: {
       type: Number,
-      default: 1
+      required: true
     }
   },
   data () {
@@ -33,21 +33,38 @@ export default {
     }
   },
   computed: {
-    data () { return this.$store.state.plots.filter(plot => plot.id === this.externalId)[0].data },
-    layout () { return this.$store.state.plots.filter(plot => plot.id === this.externalId)[0].layout }
+    updateNumber () {
+      return this.$state.updateNumber
+    },
+    plotData () {
+      if (this.$store.state.plots.length > 0) {
+        return this.$store.state.plots.find(plot => plot.id === this.externalId).data
+      } else {
+        return false
+      }
+    },
+    layout () { return this.$store.state.plots.find(plot => plot.id === this.externalId).layout }
   },
   watch: {
-    numPlots: () => {
-      console.log('numPlots changed, resizing plot')
-      this.plotlyResize // eslint-disable-line
-    },
-    plotData: (val) => { Plotly.newPlot(this.id, val, this.layout) }
+    numPlots () {
+        this.plotlyResize // eslint-disable-line
+    }
+  },
+  created () {
+    this.$store.watch(
+      (state) => { return state.plots },
+      () => {
+        Plotly.react(this.id, this.plotData, this.layout)
+      },
+      {deep: true}
+    )
   },
   beforeDestroy () { window.removeEventListener('resize', this.plotlyResize) },
   mounted () {
     window.addEventListener('resize', this.plotlyResize)
-    console.log('plot layout', this.layout)
-    Plotly.newPlot(this.id, this.data, this.layout)
+    if (this.plotData) {
+      Plotly.newPlot(this.id, this.plotData, this.layout)
+    }
   },
   methods: {
     plotlyResize () { Plotly.Plots.resize(this.id) },
