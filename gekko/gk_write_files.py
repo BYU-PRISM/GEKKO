@@ -262,22 +262,20 @@ def generate_dbs_file(self):
         f.write(file_content)
         #check for set options of each Var and Param
         for vp in self._parameters:
-            if vp.type is not None: #(FV/MV/SV/CV) not Param or Var
-                for o in parameter_options[vp.type]['inputs']+parameter_options[vp.type]['inout']:
-                    if o == 'VALUE':
-                        continue
-                    else: #everything else is an option
-                        if vp.__dict__[o] is not None:
-                            f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
+            for o in parameter_options[vp.type]['inputs']+parameter_options[vp.type]['inout']:
+                if o == 'VALUE':
+                    continue
+                else: #everything else is an option
+                    if vp.__dict__[o] is not None:
+                        f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
 
         for vp in self._variables:
-            if vp.type is not None: #(FV/MV/SV/CV) not Param or Var
-                for o in variable_options[vp.type]['inputs']+variable_options[vp.type]['inout']:
-                    if o == 'VALUE':
-                        continue
-                    else: #everything else is an option
-                        if vp.__dict__[o] is not None:
-                            f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
+            for o in variable_options[vp.type]['inputs']+variable_options[vp.type]['inout']:
+                if o == 'VALUE':
+                    continue
+                else: #everything else is an option
+                    if vp.__dict__[o] is not None:
+                        f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
 
 
 def write_solver_options(self):
