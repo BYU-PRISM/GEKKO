@@ -3,6 +3,7 @@
 # See `hs71_test.py` for an example.
 from colorama import Fore, Style
 import traceback
+import numpy as np
 
 def test(name, testFunc):
     try:
@@ -15,3 +16,12 @@ def test(name, testFunc):
     except Exception as e:
         print('Unhandled error!')
         print(e)
+
+def like(v1,v2):
+    eps = 1e-5 #maximum allowable difference
+    v1 = np.array(v1)
+    v2 = np.array(v2)
+    if np.any(np.abs(v1-v2)>eps):
+        return False
+    else: 
+        return True

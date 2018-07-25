@@ -6,7 +6,7 @@ import benchmark3_test
 import benchmark4_test
 import fishing_optimization_test
 import benchmark_jennings_test
-import hw_cruisecontrol_test
+import cruisecontrol_test
 import hw_flightcontrol_test
 import hw_HIV_test
 import hw_reservoirs_test
