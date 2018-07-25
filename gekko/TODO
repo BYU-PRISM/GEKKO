@@ -24,8 +24,6 @@ Functionality
 Interface
 ---------
 
--do intermediates need a value property? they are not initialized or passed in by csv, but are they read back from the solution?
-
 -Load back values of scalars not as list
 
 
@@ -37,10 +35,6 @@ Robustness
 -if .dt() used and csv not provided, demand time variable
 
 -"The value of MEAS is initialized to the initial model value. "
-
--UPPER and LOWER matching UB and LB?
-
--Confirm FV MV SV CV inputs
 
 -ujson for speed
 
@@ -60,23 +54,14 @@ Code cleanup
 
 -don't write csv if csv_read < 1 
 
--hide model properties (constants, variables, inter_equations, etc) with prepended _
-
 -consense post-solve file reading functions so each file is only opened and processed once
 
 -make model function writing prettier/shorter
 
 -commas probably not needed in model file (variable=value,>lb,<ub --> variable=value <ub >lb)
 
--simplify the solve function (pre-solve, solve, post-solve)
-
 -APM JSON input
 
-
-Questions
----------
-
--what var types can have a measurement?
 
 
 
