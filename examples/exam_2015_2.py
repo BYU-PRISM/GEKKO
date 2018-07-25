@@ -131,7 +131,7 @@ print("Passenger weight: ", m_passengers.value[0])
 
 #%% Control
 #initialize model
-m = gekko.GEKKO()
+m = gekko.GEKKO(remote=False)
 
 #set time
 m.time = np.linspace(0,30,31)
@@ -167,11 +167,11 @@ RPM.STATUS = 1
 x.STATUS = 0
 v.STATUS = 1
 m_passengers.value = 400
-a.UB = 1
+a.upper = 1
 v.SPHI = 10.1
 v.SPLO = 9.9
 
-m.solve(disp=False)
+m.solve(disp=True)
 
 plt.figure()
 plt.subplot(3,1,1)
