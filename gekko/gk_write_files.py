@@ -104,7 +104,7 @@ def build_model(self):
     filename = self.model_name + '.apm'
 
     # Create file in writable format always overrite previous model file
-    f = open(os.path.join(self.path,filename), 'w')
+    f = open(os.path.join(self._path,filename), 'w')
     f.write('Model\n')
     f.write(model)
     f.write('\nEnd Model')
@@ -224,7 +224,7 @@ def write_csv(self):
     if first_array == False: #no data
         self.csv_status = 'none'
     else:
-        np.savetxt(os.path.join(self.path,file_name), csv_data.T, delimiter=",", fmt='%1.25s')
+        np.savetxt(os.path.join(self._path,file_name), csv_data.T, delimiter=",", fmt='%1.25s')
         self.csv_status = 'generated'
 
 
@@ -239,7 +239,7 @@ def write_info(self):
         filename = self.model_name+'.info'
 
         #Create and open configuration files
-        with open(os.path.join(self.path,filename), 'w+') as f:
+        with open(os.path.join(self._path,filename), 'w+') as f:
             #check each Var and Param for FV/MV/SV/CV
             for vp in self._variables+self._parameters:
                 if vp.type is not None:
@@ -258,7 +258,7 @@ def generate_dbs_file(self):
     #print all global options
     file_content = self.options.getOverridesString()
     #cycle through all Params and Vars to find set options
-    with open(os.path.join(self.path,filename), 'w+') as f:
+    with open(os.path.join(self._path,filename), 'w+') as f:
         f.write(file_content)
         #check for set options of each Var and Param
         for vp in self._parameters:
@@ -298,7 +298,7 @@ def write_solver_options(self):
             return 'File ' + filename + '\n' + opt_file + 'End File\n'
         #write file for local solve
         else:
-            with open(os.path.join(self.path,filename), 'w+') as f:
+            with open(os.path.join(self._path,filename), 'w+') as f:
                 f.write(opt_file)
 
     #do nothing if no options were added
@@ -393,11 +393,11 @@ def to_JSON(self): #JSON input to APM not currently supported -- this function i
             temp_dict['name'] = {'value':self.jsonify(intermediate.value)}
         json_data['intermediates'] = temp_dict
     """
-    f = open(os.path.join(self.path,'jsontest.json'), 'w')
+    f = open(os.path.join(self._path,'jsontest.json'), 'w')
     #f.write(json.dumps(self, default=lambda o: _try(o), sort_keys=True, indent=2, separators=(',',':')).replace('\n', ''))
     json.dump(json_data,f, indent=2,separators=(',', ':'))
     f.close()
     #return json.dumps(self, default=lambda o: _try(o), sort_keys=True, indent=0, separators=(',',':')).replace('\n', '')
     #load JSON to dictionary:
-    #with open(os.path.join(self.path,'jsontest.json')) as json_file:
+    #with open(os.path.join(self._path,'jsontest.json')) as json_file:
     #   data = json.load(json_file)

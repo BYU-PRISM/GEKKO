@@ -54,8 +54,8 @@ class GEKKO(object):
         self.remote = remote
         self.server = compatible_string_strip(server)
         self.options = GKGlobalOptions()
-        self.id = next(self._ids) #instance count of class
-        self.gui_open = False
+        self._id = next(self._ids) #instance count of class
+        self._gui_open = False
 
         #keep a list of constants, params, vars, eqs, etc associated with this model
         self._constants = []
@@ -71,16 +71,16 @@ class GEKKO(object):
         #time discretization
         self.time = None
 
-        self.model_initialized = False #probably not needed
-        self.csv_status = None #indicate 'provided' or 'generated'
-        self.model = ''
+        self._model_initialized = False #probably not needed
+        self._csv_status = None #indicate 'provided' or 'generated'
+        self._model = ''
 
         #Default model name, numbered to allow multiple models
         if name == None:
-            name = 'gk_model'+str(self.id)
+            name = 'gk_model'+str(self._id)
         self.model_name = name.lower().replace(" ", "")
         #Path of model folder
-        self.path = tempfile.mkdtemp(suffix=self.model_name)
+        self._path = tempfile.mkdtemp(suffix=self.model_name)
 
         #extra, non-default files to send to server (eg solver.opt, cspline.csv)
         self._extra_files = []
@@ -131,7 +131,7 @@ class GEKKO(object):
         if integer == True:
             name = 'int_'+name
 
-        parameter = GK_FV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
+        parameter = GK_FV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self._path, integer=integer)
         self._parameters.append(parameter)
         if fixed_initial is False:
             self.Connection(parameter,'CALCULATED',pos1=1,node1=1)
@@ -146,7 +146,7 @@ class GEKKO(object):
         if integer == True:
             name = 'int_'+name
 
-        parameter = GK_MV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
+        parameter = GK_MV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self._path, integer=integer)
         self._parameters.append(parameter)
         if fixed_initial is False:
             self.Connection(parameter,'CALCULATED',pos1=1,node1=1)
@@ -177,7 +177,7 @@ class GEKKO(object):
         if integer == True:
             name = 'int_'+name
 
-        variable = GK_SV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
+        variable = GK_SV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self._path, integer=integer)
         self._variables.append(variable)
         if fixed_initial is False:
             self.Connection(variable,'CALCULATED',pos1=1,node1=1)
@@ -193,7 +193,7 @@ class GEKKO(object):
         if integer == True:
             name = 'int_'+name
 
-        variable = GK_CV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self.path, integer=integer)
+        variable = GK_CV(name=name, value=value, lb=lb, ub=ub, gk_model=self.model_name, model_path=self._path, integer=integer)
         self._variables.append(variable)
         if fixed_initial is False:
             self.Connection(variable,'CALCULATED',pos1=1,node1=1)
@@ -311,7 +311,7 @@ class GEKKO(object):
         file_name = cspline_name + '.csv'
         csv_data = np.hstack(('x_data',x_data.astype(object)))
         csv_data = np.vstack((csv_data,np.hstack(('y_data',y_data.astype(object)))))
-        np.savetxt(os.path.join(self.path,file_name), csv_data.T, delimiter=",", fmt='%1.25s')
+        np.savetxt(os.path.join(self._path,file_name), csv_data.T, delimiter=",", fmt='%1.25s')
 
         #add csv file to list of extra file to send to server
         self._extra_files.append(file_name)
@@ -382,24 +382,24 @@ class GEKKO(object):
         file_data += str(m) + ' !inputs \n'
         file_data += str(n) + ' !states \n'
         file_data += str(p) + ' !outputs \n'
-        with open(os.path.join(self.path,file_name), 'w+') as f:
+        with open(os.path.join(self._path,file_name), 'w+') as f:
             f.write(file_data)
         self._extra_files.append(file_name) #add csv file to list of extra file to send to server
 
         if dense is True:
             #write A,B,C,[D] matricies to objectname.A/B/C/D.txt
             file_name = SS_name + '.a.txt'
-            np.savetxt(os.path.join(self.path,file_name), A, delimiter=" ", fmt='%1.25s')
+            np.savetxt(os.path.join(self._path,file_name), A, delimiter=" ", fmt='%1.25s')
             self._extra_files.append(file_name) #add csv file to list of extra file to send to server
             file_name = SS_name + '.b.txt'
-            np.savetxt(os.path.join(self.path,file_name), B, delimiter=" ", fmt='%1.25s')
+            np.savetxt(os.path.join(self._path,file_name), B, delimiter=" ", fmt='%1.25s')
             self._extra_files.append(file_name) #add csv file to list of extra file to send to server
             file_name = SS_name + '.c.txt'
-            np.savetxt(os.path.join(self.path,file_name), C, delimiter=" ", fmt='%1.25s')
+            np.savetxt(os.path.join(self._path,file_name), C, delimiter=" ", fmt='%1.25s')
             self._extra_files.append(file_name) #add csv file to list of extra file to send to server
             if D is not None:
                 file_name = SS_name + '.d.txt'
-                np.savetxt(os.path.join(self.path,file_name), D, delimiter=" ", fmt='%1.25s')
+                np.savetxt(os.path.join(self._path,file_name), D, delimiter=" ", fmt='%1.25s')
                 self._extra_files.append(file_name) #add csv file to list of extra file to send to server
         else: #sparse form
         # (nx1) = (nxn)*(nx1) + (nxm)*(mx1)
@@ -410,7 +410,7 @@ class GEKKO(object):
                 for i in range(n):
                     if A[i,j] != 0:
                         sparse_matrix.append([i+1,j+1,A[i,j]])
-            np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
+            np.savetxt(os.path.join(self._path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
             self._extra_files.append(file_name) #add csv file to list of extra file to send to server
             file_name = SS_name + '.b.txt'
             sparse_matrix = []
@@ -418,7 +418,7 @@ class GEKKO(object):
                 for i in range(n):
                     if B[i,j] != 0:
                         sparse_matrix.append([i+1,j+1,B[i,j]])
-            np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
+            np.savetxt(os.path.join(self._path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
             self._extra_files.append(file_name) #add csv file to list of extra file to send to server
             file_name = SS_name + '.c.txt'
             sparse_matrix = []
@@ -426,7 +426,7 @@ class GEKKO(object):
                 for i in range(p):
                     if C[i,j] != 0:
                         sparse_matrix.append([i+1,j+1,C[i,j]])
-            np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
+            np.savetxt(os.path.join(self._path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
             self._extra_files.append(file_name) #add csv file to list of extra file to send to server
             if D is not None:
                 file_name = SS_name + '.d.txt'
@@ -435,7 +435,7 @@ class GEKKO(object):
                     for i in range(p):
                         if D[i,j] != 0:
                             sparse_matrix.append([i+1,j+1,D[i,j]])
-                np.savetxt(os.path.join(self.path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
+                np.savetxt(os.path.join(self._path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
                 self._extra_files.append(file_name) #add csv file to list of extra file to send to server
 
         #define arrays of states, outputs and inputs
@@ -525,7 +525,7 @@ class GEKKO(object):
         if timing == True:
             t = time.time()
         # Build the model
-        if self.model != 'provided': #no model was provided
+        if self._model != 'provided': #no model was provided
             self.build_model()
         if timing == True:
             print('build model', time.time() - t)
@@ -533,7 +533,7 @@ class GEKKO(object):
 
         if timing == True:
             t = time.time()
-        if self.csv_status != 'provided':
+        if self._csv_status != 'provided':
             self.write_csv()
         if timing == True:
             print('build csv', time.time() - t)
@@ -572,7 +572,7 @@ class GEKKO(object):
             # Calls apmonitor through the command line
             if os.name == 'nt': #Windows
                 apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm.exe')
-                app = subprocess.Popen([apm_exe, self.model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self.path, env = {"PATH" : self.path }, universal_newlines=True)
+                app = subprocess.Popen([apm_exe, self.model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self._path, env = {"PATH" : self._path }, universal_newlines=True)
                 for line in iter(app.stdout.readline, ""):
                     if disp == True:
                         try:
@@ -582,7 +582,7 @@ class GEKKO(object):
                 app.wait()
             else:
                 apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apmonitor')
-                app = subprocess.Popen([apm_exe, self.model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self.path, env = {"PATH" : self.path, "LD_LIBRARY_PATH" : os.path.dirname(os.path.realpath(__file__))+'/bin/lib' }, universal_newlines=True)
+                app = subprocess.Popen([apm_exe, self.model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self._path, env = {"PATH" : self._path, "LD_LIBRARY_PATH" : os.path.dirname(os.path.realpath(__file__))+'/bin/lib' }, universal_newlines=True)
                 for line in iter(app.stdout.readline, ""):
                     if disp == True:
                         print(line.replace('\n', ''))
@@ -598,7 +598,7 @@ class GEKKO(object):
 
         else: #solve on APM server
             def send_if_exists(extension):
-                path = os.path.join(self.path,self.model_name + '.' + extension)
+                path = os.path.join(self._path,self.model_name + '.' + extension)
                 if os.path.isfile(path):
                     with open(path) as f:
                         file = f.read()
@@ -610,7 +610,7 @@ class GEKKO(object):
             cmd(self.server,self.model_name,'clear csv')
 
             #send model file
-            with open(os.path.join(self.path,self.model_name + '.apm')) as f:
+            with open(os.path.join(self._path,self.model_name + '.apm')) as f:
                 model = f.read()
             cmd(self.server, self.model_name, ' '+model)
             #send csv file
@@ -618,7 +618,7 @@ class GEKKO(object):
             #send info file
             send_if_exists('info')
             #send dbs file
-            with open(os.path.join(self.path,'measurements.dbs')) as f:
+            with open(os.path.join(self._path,'measurements.dbs')) as f:
                 dbs = f.read()
             cmd(self.server, self.model_name, 'option '+dbs)
             #solver options
@@ -628,7 +628,7 @@ class GEKKO(object):
 
             #extra files (eg solver.opt, cspline.data)
             for f_name in self._extra_files:
-                with open(os.path.join(self.path,f_name)) as f:
+                with open(os.path.join(self._path,f_name)) as f:
                     extra_file_data = f.read() #read data
                     extra_file_data = 'File ' + f_name + '\n' + extra_file_data + 'End File \n' #format for appending to apm file
                 cmd(self.server,self.model_name, ' '+extra_file_data)
@@ -645,20 +645,20 @@ class GEKKO(object):
 
             try:
                 results = byte2str(get_file(self.server,self.model_name,'results.json'))
-                f = open(os.path.join(self.path,'results.json'), 'w')
+                f = open(os.path.join(self._path,'results.json'), 'w')
                 f.write(str(results))
                 f.close()
                 options = byte2str(get_file(self.server,self.model_name,'options.json'))
-                f = open(os.path.join(self.path,'options.json'), 'w')
+                f = open(os.path.join(self._path,'options.json'), 'w')
                 f.write(str(options))
                 f.close()
                 if self.options.CSV_WRITE >= 1:
                     results = byte2str(get_file(self.server,self.model_name,'results.csv'))
-                    with open(os.path.join(self.path,'results.csv'), 'w') as f:
+                    with open(os.path.join(self._path,'results.csv'), 'w') as f:
                         f.write(str(results))
                     if self.options.CSV_WRITE >1:
                         results_all = byte2str(get_file(self.server,self.model_name,'results_all.csv'))
-                        with open(os.path.join(self.path,'results_all.csv'), 'w') as f:
+                        with open(os.path.join(self._path,'results_all.csv'), 'w') as f:
                             f.write(str(results_all))
             except:
                 raise ImportError('Results files not found. APM did not find a solution or the server is unreachable.')
@@ -686,11 +686,11 @@ class GEKKO(object):
         if timing == True:
             print('debug', time.time() - t)
 
-        if self.gui_open:
+        if self._gui_open:
             self.gui.update()
         elif GUI is True:
-            self.gui_open = True
-            self.gui = GK_GUI(self.path)
+            self._gui_open = True
+            self.gui = GK_GUI(self._path)
             self.gui.display()
 
 
@@ -722,20 +722,20 @@ class GEKKO(object):
     #%% Cleanup functions (use with caution)
 
     def clear(self):
-        files = glob.glob(os.path.join(self.path,'*'))
+        files = glob.glob(os.path.join(self._path,'*'))
         for f in files:
             os.remove(f)
     def clear_data(self):
         #csv file
         try:
-            os.remove(os.path.join(self.path,self.model_name+'.csv'))
+            os.remove(os.path.join(self._path,self.model_name+'.csv'))
         except:
             pass
         #t0 files
-        d = os.listdir(self.path)
+        d = os.listdir(self._path)
         for f in d:
             if f.endswith('.t0') or f.endswith('.dxdt'):
-                os.remove(os.path.join(self.path,f))
+                os.remove(os.path.join(self._path,f))
 
 
     #%% Trig functions
@@ -767,6 +767,6 @@ class GEKKO(object):
         return GK_Operators('atan('+str(other) + ')')
 
     def GUI(self):
-        if not self.gui_open:
-            self.gui = GK_GUI(self.path)
+        if not self._gui_open:
+            self.gui = GK_GUI(self._path)
             self.gui.display()

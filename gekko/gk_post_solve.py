@@ -10,7 +10,7 @@ from .properties import parameter_options, variable_options
 
 ## options.JSON has all APM options
 def load_JSON(self):
-    f = open(os.path.join(self.path,'options.json'))
+    f = open(os.path.join(self._path,'options.json'))
     data = json.load(f)
     f.close()
     #global (APM) options
@@ -73,8 +73,8 @@ def load_JSON(self):
 
 ## results.json has variable value results
 def load_results(self):
-    if (os.path.isfile(os.path.join(self.path, 'results.json'))):
-        f = open(os.path.join(self.path,'results.json'))
+    if (os.path.isfile(os.path.join(self._path, 'results.json'))):
+        f = open(os.path.join(self._path,'results.json'))
         data = json.load(f)
         f.close()
 
