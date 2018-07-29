@@ -23,7 +23,7 @@ class Brain():
         self.m.options.OTOL = 1e-4
         self.m.options.RTOL = 1e-4
         if bfgs:
-            self.m.solver_options = ['hessian_approximation limited-memory']
+            self.m._solver_options = ['hessian_approximation limited-memory']
         
         self._explicit = explicit 
         self._input_size = None

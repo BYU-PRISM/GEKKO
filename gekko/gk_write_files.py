@@ -8,7 +8,7 @@ from .gk_operators import GK_Operators
 
 #%% Write files
 
-def build_model(self):
+def _build_model(self):
     ''' Write model to apm file.
 
     Also does some minimal model validation
@@ -99,9 +99,9 @@ def build_model(self):
     model = model.replace('++','+').replace('--','+').replace('+-','-').replace('-+','-')
 
     # Create .apm file
-    if(self.model_name == None):
-        self.model_name = "default_model_name"
-    filename = self.model_name + '.apm'
+    if(self._model_name == None):
+        self._model_name = "default_model_name"
+    filename = self._model_name + '.apm'
 
     # Create file in writable format always overrite previous model file
     f = open(os.path.join(self._path,filename), 'w')
@@ -110,19 +110,19 @@ def build_model(self):
     f.write('\nEnd Model')
     f.close()
 
-    self.model = 'auto-generated' #what does this do?
+    self._model = 'auto-generated' #what does this do?
 
-    self.model_initialized = True
+    self._model_initialized = True
 
 
 
-def write_csv(self):
+def _write_csv(self):
     """Write csv file and validate data.
     If the problem is dynamic, the time discretization is provided in the
     first column of this csv. All params/variables that are initialized
     with an array are loaded as well and must be the same length. """
 
-    file_name = self.model_name + '.csv'
+    file_name = self._model_name + '.csv'
 
     ## Dynamic data csv
     if self.options.IMODE > 3:
@@ -229,14 +229,14 @@ def write_csv(self):
 
 
 
-def write_info(self):
+def _write_info(self):
     #since there is currently no way to change variable classification after
     #declaration, rewriting the info file is redundant and makes the server info
     #file on remote solves large
     #avoid this problem by only writing the info file for the first successful solve
     if self.options.CYCLECOUNT < 1:
         #Classify variable in .info file
-        filename = self.model_name+'.info'
+        filename = self._model_name+'.info'
 
         #Create and open configuration files
         with open(os.path.join(self._path,filename), 'w+') as f:
@@ -246,7 +246,7 @@ def write_info(self):
                     f.write(vp.type+', '+vp.name+'\n')
 
 
-def generate_dbs_file(self):
+def _generate_dbs_file(self):
     '''Write options to measurements.dbs file so it gets automatically deleted
     to prevent file build-up on the server
 
@@ -278,9 +278,9 @@ def generate_dbs_file(self):
                         f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
 
 
-def write_solver_options(self):
+def _write_solver_options(self):
     opt_file = ''
-    if self.solver_options:
+    if self._solver_options:
         #determine filename from solver number
         if self.options.SOLVER == 1:
             filename = 'apopt.opt'
@@ -290,7 +290,7 @@ def write_solver_options(self):
             raise TypeError("Solver options only available for APOPT(1) and IPOPT(3)")
 
         #write each option to a line
-        for option in self.solver_options:
+        for option in self._solver_options:
             opt_file += option + '\n'
 
         #If remote solve, pass string to append to .apm file
@@ -312,7 +312,7 @@ def write_solver_options(self):
 #%% Not currently used
 
 
-def jsonify(self,data): #This function was mostly copied from SO
+def _jsonify(self,data): #This function was mostly copied from SO
     if type(data).__module__=='numpy': # if value is numpy.*: > to python list
         json_data = data.tolist()
     elif isinstance(data, dict): # for nested lists
@@ -332,7 +332,7 @@ def jsonify(self,data): #This function was mostly copied from SO
     return json_data
 
 
-def to_JSON(self): #JSON input to APM not currently supported -- this function isn't tested
+def _to_JSON(self): #JSON input to APM not currently supported -- this function isn't tested
     """
     include in JSON:
     global options
