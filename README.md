@@ -10,7 +10,7 @@ A pip package is available:
 pip install gekko
 ```
 
-The most recent version is 0.0.4rc2. You can upgrade from the command line with the upgrade flag:
+The most recent version is 0.1. You can upgrade from the command line with the upgrade flag:
 
 ```sh
 pip install --upgrade gekko
