@@ -26,7 +26,7 @@ This example demonstrates how to solve the HS71 benchmark problem using GEKKO::
 	from gekko import GEKKO
 
 	# Initialize Model
-	m = GEKKO()
+	m = GEKKO(remote=True)
 
 	#help(m)
 
@@ -65,7 +65,7 @@ This example demonstrates how to solve the HS71 benchmark problem using GEKKO::
 	m.options.IMODE = 3 #steady state optimization
 
 	#Solve simulation
-	m.solve(remote=True) # solve on public server
+	m.solve() # solve on public server
 
 	#Results
 	print('')
