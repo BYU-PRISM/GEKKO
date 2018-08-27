@@ -324,6 +324,70 @@ class GEKKO(object):
         if bound_x is True:
             x.lower = x_data[0]
             x.upper = x_data[-1]
+    
+    ## BSpline
+    def bspline(self, x,y,z,x_data,y_data,z_data,data=True):
+        """Generate a 2d Bspline with continuous first and seconds derivatives
+        from 1-D arrays of x_data and y_data coordinates (in strictly ascending order)
+        and 2-D z data of size (x.size,y.size). GEKKO variables x, y and z are 
+        linked with function z=f(x,y) where the function f is bspline. """
+
+        #verify that x,y,z are valid GEKKO variables
+        if not isinstance(x,(GKVariable,GKParameter)):
+            raise TypeError("First arguement must be a GEKKO parameter or variable")
+        if not isinstance(y,(GKVariable,GKParameter)):
+            raise TypeError("Second arguement must be a GEKKO parameter or variable")
+        if not isinstance(z,(GKVariable)):
+            raise TypeError("Third arguement must be a GEKKO variable")
+
+        #verify data input types
+        if not all(isinstance(data, (list,np.ndarray)) for data in [x_data,y_data,z_data]):
+            raise TypeError("data must be a python list or numpy array")
+
+        #convert data to flat numpy arrays
+        x_data = np.array(x_data).flatten()
+        y_data = np.array(y_data).flatten()
+        z_data = np.array(z_data)
+
+        #verify data inputs are strictly increasing
+        dx = np.diff(x_data)
+        dy = np.diff(y_data)
+        if np.any(dx < 0) or np.any(dy < 0):
+            raise TypeError('x_data and y_data must be strictly increasing')
+
+        #build cspline object with unique object name
+        bspline_name = 'bspline' + str(len(self._objects) + 1)
+        self._objects.append(bspline_name + ' = bspline')
+
+        #Raw data vs pre-built splines
+        if data:
+            #verify matching data sizes 
+            if  z_data.shape != (x_data.size,y_data.size):
+                raise Exception('z_data must be of size (x_data.size,y_data.size)')
+            #save x,y,z data
+            np.savetxt(os.path.join(self._path,bspline_name+'_x.csv'), x_data, delimiter=",", fmt='%1.25s')
+            np.savetxt(os.path.join(self._path,bspline_name+'_y.csv'), y_data, delimiter=",", fmt='%1.25s')
+            np.savetxt(os.path.join(self._path,bspline_name+'_z.csv'), z_data, delimiter=",", fmt='%1.25s')
+            #add files to list of extra file to send to server
+            self._extra_files.append(bspline_name+'_x.csv')
+            self._extra_files.append(bspline_name+'_y.csv')
+            self._extra_files.append(bspline_name+'_z.csv')
+        
+        else: #data is knots and coeffs
+            #save tx,ty,c data
+            np.savetxt(os.path.join(self._path,bspline_name+'_tx.csv'), x_data, delimiter=",", fmt='%1.25s')
+            np.savetxt(os.path.join(self._path,bspline_name+'_ty.csv'), y_data, delimiter=",", fmt='%1.25s')
+            np.savetxt(os.path.join(self._path,bspline_name+'_c.csv'), z_data, delimiter=",", fmt='%1.25s')
+            #add files to list of extra file to send to server
+            self._extra_files.append(bspline_name+'_tx.csv')
+            self._extra_files.append(bspline_name+'_ty.csv')
+            self._extra_files.append(bspline_name+'_c.csv')
+
+        #Add connections between x and y with cspline object data
+        self._connections.append(x.name + ' = ' + bspline_name+'.x')
+        self._connections.append(y.name + ' = ' + bspline_name+'.y')
+        self._connections.append(z.name + ' = ' + bspline_name+'.z')
+            
 
 
     ## State Space
