@@ -167,7 +167,7 @@ Description: CSV write: 0=Off, 1=Write results.csv, 2=Write results_all.csv
 Explanation: CSV_WRITE is an option that controls how much information is written to results files.
 When it is 0 (OFF), no result files are written. This may be desirable to further reduce the time associated with solution post-processing.
 When CSV_WRITE=1, a file results.csv is written with all of the constants, parameters, and variables. The data is written in a row oriented form with each row header as the name and subsequent column values are the values at each of the time points requested in the input data file. The values from results.csv are automatically loaded back to the GEKKO variables' attribute `value`.
-When CSV_WRITE=2, another file named results_all.csv is produced that contains not only the endpoints but also the intermediate collocation nodes of the solution. This data file is saved in the model path, visible by `print(m.path)`.
+When CSV_WRITE=2, another file named results_all.csv is produced that contains not only the endpoints but also the intermediate collocation nodes of the solution. This data file is saved in the model path, visible by `print(m._path)`.
 
 
 .. _ctrlmode:

@@ -306,7 +306,7 @@ These are GEKKO model attributes used internally. They are not intended for exte
 
     The name of the model as a string. Used in local temporary file name and application name for remote solves. This is set by the optional argument `name` when intializing a model. Default names include the model `id` attribute to maintain unique names.
 
-.. py:attribute::   path
+.. py:attribute::   _path
 
     The absolute path of the temporary file used to store all input/output files for the APMonitor executable.
 
