@@ -280,7 +280,7 @@ def _generate_dbs_file(self):
 
 def _write_solver_options(self):
     opt_file = ''
-    if self._solver_options:
+    if self.solver_options:
         #determine filename from solver number
         if self.options.SOLVER == 1:
             filename = 'apopt.opt'
@@ -290,11 +290,11 @@ def _write_solver_options(self):
             raise TypeError("Solver options only available for APOPT(1) and IPOPT(3)")
 
         #write each option to a line
-        for option in self._solver_options:
+        for option in self.solver_options:
             opt_file += option + '\n'
 
         #If remote solve, pass string to append to .apm file
-        if self.remote is True:
+        if self._remote is True:
             return 'File ' + filename + '\n' + opt_file + 'End File\n'
         #write file for local solve
         else:

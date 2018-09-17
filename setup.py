@@ -40,7 +40,7 @@ extra_files = gui_files + ['bin/apm.exe']
 #   apm_binary = ['gekko/bin/apmonitor' AND LA libaries]
 
 setup(name='gekko',
-    version='0.1a3',
+    version='0.1b1',
     description='Optimization software for differential algebraic equations',
     long_description=long_description,
     #url="https://readthedocsurl",

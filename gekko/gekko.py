@@ -81,11 +81,12 @@ class GEKKO(object):
         self._model_name = name.lower().replace(" ", "")
         #Path of model folder
         self._path = tempfile.mkdtemp(suffix=self._model_name)
+        self.path = self._path #DEPRECATED, temporarily included for backwards compatibility
 
         #extra, non-default files to send to server (eg solver.opt, cspline.csv)
         self._extra_files = []
         #list of strings for solver options
-        self._solver_options = []
+        self.solver_options = []
 
         #clear anything already on the server
         if self._remote:
@@ -686,7 +687,7 @@ class GEKKO(object):
                 dbs = f.read()
             cmd(self._server, self._model_name, 'option '+dbs)
             #solver options
-            if self._solver_options:
+            if self.solver_options:
                 opt_file=self._write_solver_options()
                 cmd(self._server,self._model_name, ' '+opt_file)
 
