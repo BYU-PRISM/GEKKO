@@ -11,7 +11,7 @@ Examples
 
 
 
-## **HS 71**
+**HS 71**
 
 .. math::
 
@@ -76,15 +76,14 @@ This example demonstrates how to solve the HS71 benchmark problem using GEKKO::
 	print('x4: ' + str(x4.value))
 	
 
-## **Solver Selection**
+**Solver Selection**
 
-Solve y2=1 with APOPT solver. See APMonitor documentation or GEKKO documentation for additional solver options.
+Solve y2=1 with APOPT solver. See APMonitor documentation or GEKKO documentation for additional solver options::
 
-```
-m = GEKKO()           # create GEKKO model
-y = m.Var(value=2)    # define new variable, initial value=2
-m.Equation(y**2==1)   # define new equation
-m.options.SOLVER=1    # change solver (1=APOPT,3=IPOPT)
-m.solve(disp=False)   # solve locally (remote=False)
-print('y: ' + str(y.value)) # print variable value
-```
+	m = GEKKO()           # create GEKKO model
+	y = m.Var(value=2)    # define new variable, initial value=2
+	m.Equation(y**2==1)   # define new equation
+	m.options.SOLVER=1    # change solver (1=APOPT,3=IPOPT)
+	m.solve(disp=False)   # solve locally (remote=False)
+	print('y: ' + str(y.value)) # print variable value
+
