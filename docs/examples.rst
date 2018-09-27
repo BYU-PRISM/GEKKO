@@ -76,8 +76,9 @@ This example demonstrates how to solve the HS71 benchmark problem using GEKKO::
 	print('x3: ' + str(x3.value))
 	print('x4: ' + str(x4.value))
 	
-
-**Solver Selection**
+----------------
+Solver Selection
+----------------
 
 Solve y2=1 with APOPT solver. See APMonitor documentation or GEKKO documentation for additional solver options::
 
@@ -88,3 +89,44 @@ Solve y2=1 with APOPT solver. See APMonitor documentation or GEKKO documentation
 	m.solve(disp=False)   # solve locally (remote=False)
 	print('y: ' + str(y.value)) # print variable value
 
+y: [1.0]
+
+--------------------------
+Solve Linear Equations
+--------------------------
+
+.. math::
+
+	3x+2y=1
+	x+2y=0
+	
+::
+
+	m = GEKKO()            # create GEKKO model
+	x = m.Var()            # define new variable, default=0
+	y = m.Var()            # define new variable, default=0
+	m.Equations([3*x+2*y==1, x+2*y==0])  # equations
+	m.solve(disp=False)    # solve
+	print(x.value,y.value) # print solution
+	
+[0.5] [-0.25]
+
+--------------------------
+Solve Nonlinear Equations
+--------------------------
+
+.. math::
+
+	x+2y=0 
+	x2+y2=1
+	
+::
+
+	m = GEKKO()             # create GEKKO model
+	x = m.Var(value=0)      # define new variable, initial value=0
+	y = m.Var(value=1)      # define new variable, initial value=1
+	m.Equations([x + 2*y==0, x**2+y**2==1]) # equations
+	m.solve(disp=False)     # solve
+	print([x.value[0],y.value[0]]) # print solution
+	
+[-0.8944272, 0.4472136]
