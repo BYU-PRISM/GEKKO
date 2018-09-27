@@ -97,7 +97,7 @@ Solve Linear Equations
 
 .. math::
 
-	3x+2y=1
+	3x+2y=1 \\
 	x+2y=0
 	
 ::
@@ -117,8 +117,8 @@ Solve Nonlinear Equations
 
 .. math::
 
-	x+2y=0 
-	x2+y2=1
+	x+2y=0 \\
+	x^2+y^2=1
 	
 ::
 
@@ -252,7 +252,7 @@ Solve the following differential equation with initial condition :math:`y(0)=5`:
 
 .. math::
 
-	k\\frac{dy}{dt}=−ty
+	k \frac{dy}{dt} = −ty
 
 where :math:`k=10`. The solution of :math:`y(t)` should be reported from an initial time :math:`0` to final time :math:`20`. Create a plot of the result for :math:`y(t)` versus :math:`t`.::
 
