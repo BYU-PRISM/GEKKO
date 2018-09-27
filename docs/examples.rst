@@ -130,3 +130,143 @@ Solve Nonlinear Equations
 	print([x.value[0],y.value[0]]) # print solution
 	
 [-0.8944272, 0.4472136]
+
+--------------------------------
+Interpolation with Cubic Spline
+--------------------------------
+
+::
+
+	import numpy as np
+	import matplotlib.pyplot as plt
+
+	xm = np.array([0,1,2,3,4,5])
+	ym = np.array([0.1,0.2,0.3,0.5,1.0,0.9])
+
+	m = GEKKO()             # create GEKKO model
+	m.options.IMODE = 2     # solution mode
+	x = m.Param(value=np.linspace(-1,6)) # prediction points
+	y = m.Var()             # prediction results
+	m.cspline(x, y, xm, ym) # cubic spline
+	m.solve(disp=False)     # solve
+
+	# create plot
+	plt.plot(xm,ym,'bo')
+	plt.plot(x.value,y.value,'r--',label='cubic spline')
+	plt.legend(loc='best')
+
+--------------------------------
+Linear and Polynomial Regression
+--------------------------------
+
+::
+
+	import numpy as np
+	import matplotlib.pyplot as plt
+
+	xm = np.array([0,1,2,3,4,5])
+	ym = np.array([0.1,0.2,0.3,0.5,0.8,2.0])
+
+	#### Solution
+	m = GEKKO()
+	m.options.IMODE=2
+	# coefficients
+	c = [m.FV(value=0) for i in range(4)]
+	x = m.Param(value=xm)
+	y = m.CV(value=ym)
+	y.FSTATUS = 1
+	# polynomial model
+	m.Equation(y==c[0]+c[1]*x+c[2]*x**2+c[3]*x**3)
+
+	# linear regression
+	c[0].STATUS=1
+	c[1].STATUS=1
+	m.solve(disp=False)
+	p1 = [c[1].value[0],c[0].value[0]]
+
+	# quadratic
+	c[2].STATUS=1
+	m.solve(disp=False)
+	p2 = [c[2].value[0],c[1].value[0],c[0].value[0]]
+
+	# cubic
+	c[3].STATUS=1
+	m.solve(disp=False)
+	p3 = [c[3].value[0],c[2].value[0],c[1].value[0],c[0].value[0]]
+
+	# plot fit
+	plt.plot(xm,ym,'ko',markersize=10)
+	xp = np.linspace(0,5,100)
+	plt.plot(xp,np.polyval(p1,xp),'b--',linewidth=2)
+	plt.plot(xp,np.polyval(p2,xp),'r--',linewidth=3)
+	plt.plot(xp,np.polyval(p3,xp),'g:',linewidth=2)
+	plt.legend(['Data','Linear','Quadratic','Cubic'],loc='best')
+	plt.xlabel('x')
+	plt.ylabel('y')
+	
+--------------------------------
+Nonlinear Regression
+--------------------------------
+
+::
+
+	import numpy as np
+	import matplotlib.pyplot as plt
+
+	# measurements
+	xm = np.array([0,1,2,3,4,5])
+	ym = np.array([0.1,0.2,0.3,0.5,0.8,2.0])
+
+	# GEKKO model
+	m = GEKKO()
+
+	# parameters
+	x = m.Param(value=xm)
+	a = m.FV()
+	a.STATUS=1
+
+	# variables
+	y = m.CV(value=ym)
+	y.FSTATUS=1
+
+	# regression equation
+	m.Equation(y==0.1*m.exp(a*x))
+
+	# regression mode
+	m.options.IMODE = 2
+
+	# optimize
+	m.solve(disp=False)
+
+	# print parameters
+	print('Optimized, a = ' + str(a.value[0]))
+
+	plt.plot(xm,ym,'bo')
+	plt.plot(xm,y.value,'r-')
+	
+--------------------------------
+Solve Differential Equation(s)
+--------------------------------
+
+Solve the following differential equation with initial condition y(0)=5:
+
+kdydt=−ty
+
+where k=10. The solution of y(t) should be reported from an initial time 0 to final time 20. Create of plot of the result for y(t) versus t.::
+
+	from gekko import GEKKO
+	import numpy as np
+	import matplotlib.pyplot as plt
+
+	m = GEKKO()
+	m.time = np.linspace(0,20,100)
+	k = 10
+	y = m.Var(value=5.0)
+	t = m.Param(value=m.time)
+	m.Equation(k*y.dt()==-t*y)
+	m.options.IMODE = 4
+	m.solve(disp=False)
+
+	plt.plot(m.time,y.value)
+	plt.xlabel('time')
+	plt.ylabel('y')
