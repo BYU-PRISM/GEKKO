@@ -322,3 +322,132 @@ x2: [4.599279]
 x3: [4.0]
 x4: [1.0]
 Objective: 17.5322673
+
+------------------------------------
+Moving Horizon Estimation
+------------------------------------
+
+::
+
+    from gekko import GEKKO
+    import numpy as np
+    import matplotlib.pyplot as plt  
+    
+    # Estimator Model
+    m = GEKKO()
+    m.time = p.time
+    # Parameters
+    m.u = m.MV(value=u_meas) #input
+    m.K = m.FV(value=1, lb=1, ub=3)    # gain
+    m.tau = m.FV(value=5, lb=1, ub=10) # time constant
+    # Variables
+    m.x = m.SV() #state variable
+    m.y = m.CV(value=y_meas) #measurement
+    # Equations
+    m.Equations([m.tau * m.x.dt() == -m.x + m.u, 
+                m.y == m.K * m.x])
+    # Options
+    m.options.IMODE = 5 #MHE
+    m.options.EV_TYPE = 1
+    # STATUS = 0, optimizer doesn't adjust value
+    # STATUS = 1, optimizer can adjust
+    m.u.STATUS = 0
+    m.K.STATUS = 1
+    m.tau.STATUS = 1
+    m.y.STATUS = 1
+    # FSTATUS = 0, no measurement
+    # FSTATUS = 1, measurement used to update model
+    m.u.FSTATUS = 1
+    m.K.FSTATUS = 0
+    m.tau.FSTATUS = 0
+    m.y.FSTATUS = 1
+    # DMAX = maximum movement each cycle
+    m.K.DMAX = 2.0
+    m.tau.DMAX = 4.0
+    # MEAS_GAP = dead-band for measurement / model mismatch
+    m.y.MEAS_GAP = 0.25
+    
+    # solve
+    m.solve(disp=False)
+    
+    # Plot results
+    plt.subplot(2,1,1)
+    plt.plot(m.time,u_meas,'b:',label='Input (u) meas')
+    plt.legend()
+    plt.subplot(2,1,2)
+    plt.plot(m.time,y_meas,'gx',label='Output (y) meas')
+    plt.plot(p.time,p.y.value,'k-',label='Output (y) actual')
+    plt.plot(m.time,m.y.value,'r--',label='Output (y) estimated')
+    plt.legend()
+    plt.show()
+    
+------------------------------------
+Model Predictive Control
+------------------------------------
+
+::
+
+    from gekko import GEKKO
+    import numpy as np
+    import matplotlib.pyplot as plt  
+    
+    m = GEKKO()
+    m.time = np.linspace(0,20,41)
+    
+    # Parameters
+    mass = 500
+    b = m.Param(value=50)
+    K = m.Param(value=0.8)
+    
+    # Manipulated variable
+    p = m.MV(value=0, lb=0, ub=100)
+    p.STATUS = 1  # allow optimizer to change
+    p.DCOST = 0.1 # smooth out gas pedal movement
+    p.DMAX = 20   # slow down change of gas pedal
+    
+    # Controlled Variable
+    v = m.CV(value=0)
+    v.STATUS = 1  # add the SP to the objective
+    m.options.CV_TYPE = 2 # squared error
+    v.SP = 40     # set point
+    v.TR_INIT = 1 # set point trajectory
+    v.TAU = 5     # time constant of trajectory
+    
+    # Process model
+    m.Equation(mass*v.dt() == -v*b + K*b*p)
+    
+    m.options.IMODE = 6 # control
+    m.solve(disp=False)
+    
+    # get additional solution information
+    import json
+    with open(m.path+'//results.json') as f:
+        results = json.load(f)
+    
+    plt.figure()
+    plt.subplot(2,1,1)
+    plt.plot(m.time,p.value,'b-',label='MV Optimized')
+    plt.legend()
+    plt.ylabel('Input')
+    plt.subplot(2,1,2)
+    plt.plot(m.time,results['v1.tr'],'k-',label='Reference Trajectory')
+    plt.plot(m.time,v.value,'r--',label='CV Response')
+    plt.ylabel('Output')
+    plt.xlabel('Time')
+    plt.legend(loc='best')
+    plt.show()
+    
+------------------------------------
+Additional Examples
+------------------------------------
+
+::
+
+* `18 Applications with Python GEKKO <https://apmonitor.com/wiki/index.php/Main/GekkoPythonOptimization>`_
+* `Dynamic Optimization Course (see Homework Solutions) <http://apmonitor.com/do/index.php/Main/InvertedPendulum>`_
+* `GEKKO Search on APMonitor Documentation <http://apmonitor.com/wiki/index.php?n=Main.HomePage&action=search&q=gekko>`_
+* `GEKKO (optimization software) on Wikipedia <https://en.wikipedia.org/wiki/Gekko_(optimization_software)>`_
+* `GEKKO Journal Article <https://www.mdpi.com/2227-9717/6/8/106>`_
+* `GEKKO Webinar to the AIChE CAST Division <https://github.com/loganbeal/CAST_GEKKO_webinar>`_
+
+
