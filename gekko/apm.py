@@ -40,7 +40,7 @@ if ver==2:  # Python 2
                         if disp: 
                             print(line)
                         # Start recording output if error is detected
-                        if 'error' in line:
+                        if 'error' in line or 'without' in line:
                             record_error = True
                         if record_error:
                             apm_error+= line + '\n'
@@ -116,7 +116,7 @@ else:       # Python 3+
                         if disp:
                             print(line)
                         # Start recording output if error is detected
-                        if 'error' in line:
+                        if 'error' in line or 'without' in line:
                             record_error = True
                         if record_error:
                             apm_error+= line + '\n'
