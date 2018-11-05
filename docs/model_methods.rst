@@ -16,9 +16,12 @@ Model Building Functions
 Model Building
 --------------
 
-.. py:class::	m = GEKKO([server], [name]):
+.. py:class::	m = GEKKO(remote=True, [server], [name]):
 
 	Creates a GEKKO model `m`.
+
+	If `remote` is `True`, the problem is sent to `self.server` to be solved. If `False`, GEKKO looks for local binaries of APMonitor.
+
 
 .. py:classmethod::    c =  m.Const(value, [name]):
 
@@ -76,7 +79,7 @@ Model Building
     The optional keyword arguments (`**args`) are applied to each element of the array.
 
 
-.. py:classmethod:: m.solve(remote=True,disp=True,debug=False)
+.. py:classmethod:: m.solve(disp=True,debug=False)
 
 
 	Solve the optimization problem.
@@ -87,19 +90,18 @@ Model Building
 
 	* Validate and write .csv file
 
-	* Write options to overrides.dbs
+	* Write options to .dbs file
 
-	* Solve the problem using the apm.exe commandline interface.
+	* Solve the problem using apm.exe 
 
 	* Load results into python variables.
 
 
-	If `remote` is `True`, the problem is sent to `self.server` to be solved. If `False`, GEKKO looks for local binaries of APMonitor.
-
-	If disp is `True`, APM and solve output are printed.
+	If `disp` is `True`, APM and solve output are printed.
 
 	If `debug` is `True`, variable names are checked for problems, tuning parameters are checked for common errors, and user-defined input options are compared against options used by APM. This is useful in debugging strange results.
 
+    If `GUI` is `True`, the results of this solve are sent to the GUI. If the GUI is not open yet, the GUI object is created, the server is spawned and the browser client is launched.  
 
 
 .. py:classmethod:: m.Connection(var1,var2,pos1=None,pos2=None,node1='end',node2='end')
@@ -258,33 +260,37 @@ These are GEKKO model attributes used internally. They are not intended for exte
 
     String representation of the server url where the model is solved. The default is 'http://xps.apmonitor.com'. This is set by the optional argument `server` when intializing a model.
 
+.. py:attribute::   remote
+
+    Boolean that determines if solutions are offloaded to the server or executed locally.
+
 .. py:attribute::   id
 
 .. py:attribute::   _constants
 
     A python list of pointers to GEKKO Constants attributed to the model.
 
-.. py:attribute::   parameters
+.. py:attribute::   _parameters
 
     A python list of pointers to GEKKO Parameters, FVs and MVs attributed to the model.
 
-.. py:attribute::   variables
+.. py:attribute::   _variables
 
     A python list of pointers to GEKKO Variables, SVs and CVs attributed to the model.
 
-.. py:attribute::   intermediates
+.. py:attribute::   _intermediates
 
     A python list of pointers to GEKKO Intermediate variables attributed to the model.
 
-.. py:attribute::   inter_equations
+.. py:attribute::   _inter_equations
 
     A python list of the explicit intermediate equations. The order of this list must match the order of intermediates in the `intermediates` attribute.
 
-.. py:attribute::   equations
+.. py:attribute::   _equations
 
     A python list of equations
 
-.. py:attribute::   objectives
+.. py:attribute::   _objectives
 
     A python list of objective.
 
@@ -300,7 +306,7 @@ These are GEKKO model attributes used internally. They are not intended for exte
 
     The name of the model as a string. Used in local temporary file name and application name for remote solves. This is set by the optional argument `name` when intializing a model. Default names include the model `id` attribute to maintain unique names.
 
-.. py:attribute::   path
+.. py:attribute::   _path
 
     The absolute path of the temporary file used to store all input/output files for the APMonitor executable.
 

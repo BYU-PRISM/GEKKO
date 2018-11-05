@@ -1,25 +1,28 @@
 # Notes on Gekko Gui development
 
-## Priorities
-- squish any bugs that may arise
-  - backend tends to crash in Windows IPython env
-
 ## Todo
 - check for memory leaks (serious problems for operators running it for months on end)
-- Get dynamic plotting working
 - Get some initial figures to Dr. Hedengren
 - Integrate in a `hist_hor` optional parameter for API, default to 50-100
 - Break up tab into variables, intermediates, and parameters
-- Make the GUI not shrink treeviews on every data update
 
 ## Ideas
 - a 'selected plot' allowing sidebar to contain options that update that selected plot
 - divide out variables tab into `vars`, `params`, `intermediates`
-  - wait on Logan to distinguish between intermediates and constants
 - could add any extra settings like poll rate to a `tools` tab
 - add trajectory hi and lo traces, default to hidden
-- add better error handling to all the endpoints
-  - catch them and display them in the browser
+
+## Questions
+
 
 ## Notes
-- Made intermediates hidden by default
+- trs_hi/lo - additional slack variables - ignore
+- wsp - weighted set points - ignore
+- err_hi/lo - ignore
+- what to plot
+  - tr_hi, tr_lo, bcv(biased control variable) for operators
+  - add just var for engineer (unbiased)
+
+- store history for MV, FV, CV, SV
+  - value var.MODEL in options.json for CV, SV
+  - value var.MEAS in options.json for MV, FV

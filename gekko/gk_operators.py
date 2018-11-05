@@ -54,9 +54,9 @@ class GK_Operators:
     def __pow__(self,other): # **
         return GK_Operators('((' + str(self) + ')^(' + str(other) + '))')
     def __div__(self,other): # /
-        return GK_Operators('(' + str(self) + '/' + str(other) + ')')
+        return GK_Operators('((' + str(self) + ')/(' + str(other) + '))')
     def __truediv__(self,other): # /
-        return GK_Operators('(' + str(self) + '/' + str(other) + ')')
+        return GK_Operators('((' + str(self) + ')/(' + str(other) + '))')
     def __mul__(self,other): # *
         return GK_Operators('((' + str(self) + ')*(' + str(other) + '))')
     def __neg__(self): #-x

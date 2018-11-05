@@ -51,7 +51,7 @@ Non-Dynamic modes sets all differential terms to zero to calculate steady-state 
 Simulation
 ----------
 
-Simulation just solves the given equations. These modes provide little benefit over other ODE integrator packages. However, successful simulation of a model within GEKKO helps debug the model and greatly facilitates the transition from model development/simulation to optimization.
+Simulation just solves the given equations. These modes provide little benefit over other equation solver or ODE integrator packages. However, successful simulation of a model within GEKKO helps debug the model and greatly facilitates the transition from model development/simulation to optimization.
 
 
 Estimation
@@ -60,26 +60,27 @@ Estimation
 MPU
 ^^^
 
-Model Parameter Update is parameter estimation for non-dynamic conditions. This mode implements the special variable types as follows:
+Model Parameter Update is parameter estimation for non-dynamic conditions. 
+.. This mode implements the special variable types as follows:
 
-FV
-""
+.. FV
+.. ""
 
-MV
-""
+.. MV
+.. ""
 
-SV
-""
+.. SV
+.. ""
 
-CV
-""
+.. CV
+.. ""
 
 MHE
 ^^^
 
-Moving Horizon Estimation is for dynamic estimation, both for states and parameter regression. The horizon to match is the discretized time horizon of the model `m.time`. `m.time` should be discretized and regular intervals. New measurements are added at the end of the horizon `m.time[-1]` and the oldest measurements (`m.time[0]`) is dropped off.
+Moving Horizon Estimation is for dynamic estimation, both for states and parameter regression. The horizon to match is the discretized time horizon of the model `m.time`. `m.time` should be discretized at regular intervals. New measurements are added at the end of the horizon (e.g. `m.time[-1]`) and the oldest measurements (e.g. `m.time[0]`) are dropped off.
 
-`m.options.TIMESHIFT` enables automatic shifting of all variables and parameters with each new solve of a model. The frequency of new measurements should match the discretization of `m.time`.
+:ref:`timeshift` enables automatic shifting of all variables and parameters with each new solve of a model. The frequency of new measurements should match the discretization of `m.time`.
 
 FV
 ""
@@ -100,8 +101,8 @@ Manipulated variables are like FVs, but discretized with time.
 
 `FSTATUS` allows giving a measurements for each time.
 
-SV
-""
+.. SV
+.. ""
 
 CV
 ""
@@ -126,17 +127,17 @@ RTO
 
 Real-Time Optimization
 
-FV
-""
+.. FV
+.. ""
 
-MV
-""
+.. MV
+.. ""
 
-SV
-""
+.. SV
+.. ""
 
-CV
-""
+.. CV
+.. ""
 
 MPC
 ^^^
@@ -144,17 +145,17 @@ MPC
 
 Model Predictive Control
 
-FV
-""
+.. FV
+.. ""
 
-MV
-""
+.. MV
+.. ""
 
-SV
-""
+.. SV
+.. ""
 
-CV
-""
+.. CV
+.. ""
 
 Controlled variables are the objective to match. When `STATUS=1` for a CV, the
 objective includes a minimization between model predictions and the setpoint.

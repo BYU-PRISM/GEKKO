@@ -10,7 +10,7 @@ from .properties import parameter_options, variable_options
 
 ## options.JSON has all APM options
 def load_JSON(self):
-    f = open(os.path.join(self.path,'options.json'))
+    f = open(os.path.join(self._path,'options.json'))
     data = json.load(f)
     f.close()
     #global (APM) options
@@ -73,8 +73,8 @@ def load_JSON(self):
 
 ## results.json has variable value results
 def load_results(self):
-    if (os.path.isfile(os.path.join(self.path, 'results.json'))):
-        f = open(os.path.join(self.path,'results.json'))
+    if (os.path.isfile(os.path.join(self._path, 'results.json'))):
+        f = open(os.path.join(self._path,'results.json'))
         data = json.load(f)
         f.close()
 
@@ -87,7 +87,7 @@ def load_results(self):
                     print(vp.name+ " not found in results file")
         for i in self._intermediates:
             try:
-                i.VALUE = data[i.name]
+                i.value.value = data[i.name]
                 i.value.change = False
             except Exception:
                 print(i.name+ " not found in results file")
@@ -110,29 +110,3 @@ def load_results(self):
     return data
 
 
-
-
-## No longer used -- reading results.json instead of results.csv
-def load_csv_results(self):
-    # Load results.csv into a dictionary keyed with variable names
-    if (os.path.isfile(os.path.join(self.path, 'results.csv'))):
-        with open(os.path.join(self.path,'results.csv')) as f:
-            reader = csv.reader(f, delimiter=',')
-            y={}
-            for row in reader:
-                if len(row)==2:
-                    y[row[0]] = float(row[1])
-                else:
-                    y[row[0]] = [float(col) for col in row[1:]]
-        # Load variable values into their respective objects from the dictionary
-        for vp in self._parameters+self._variables:
-            try:
-                vp.VALUE = y[str(vp)]
-            except Exception:
-                pass
-        # Return solution
-        return y
-
-    else:
-        print("Error: 'results.csv' not found. Check above for addition error details")
-        return {}

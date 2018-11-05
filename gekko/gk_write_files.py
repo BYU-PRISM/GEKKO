@@ -8,7 +8,7 @@ from .gk_operators import GK_Operators
 
 #%% Write files
 
-def build_model(self):
+def _build_model(self):
     ''' Write model to apm file.
 
     Also does some minimal model validation
@@ -99,30 +99,30 @@ def build_model(self):
     model = model.replace('++','+').replace('--','+').replace('+-','-').replace('-+','-')
 
     # Create .apm file
-    if(self.model_name == None):
-        self.model_name = "default_model_name"
-    filename = self.model_name + '.apm'
+    if(self._model_name == None):
+        self._model_name = "default_model_name"
+    filename = self._model_name + '.apm'
 
     # Create file in writable format always overrite previous model file
-    f = open(os.path.join(self.path,filename), 'w')
+    f = open(os.path.join(self._path,filename), 'w')
     f.write('Model\n')
     f.write(model)
     f.write('\nEnd Model')
     f.close()
 
-    self.model = 'auto-generated' #what does this do?
+    self._model = 'auto-generated' #what does this do?
 
-    self.model_initialized = True
+    self._model_initialized = True
 
 
 
-def write_csv(self):
+def _write_csv(self):
     """Write csv file and validate data.
     If the problem is dynamic, the time discretization is provided in the
     first column of this csv. All params/variables that are initialized
     with an array are loaded as well and must be the same length. """
 
-    file_name = self.model_name + '.csv'
+    file_name = self._model_name + '.csv'
 
     ## Dynamic data csv
     if self.options.IMODE > 3:
@@ -224,29 +224,29 @@ def write_csv(self):
     if first_array == False: #no data
         self.csv_status = 'none'
     else:
-        np.savetxt(os.path.join(self.path,file_name), csv_data.T, delimiter=",", fmt='%1.25s')
+        np.savetxt(os.path.join(self._path,file_name), csv_data.T, delimiter=",", fmt='%1.25s')
         self.csv_status = 'generated'
 
 
 
-def write_info(self):
+def _write_info(self):
     #since there is currently no way to change variable classification after
     #declaration, rewriting the info file is redundant and makes the server info
     #file on remote solves large
     #avoid this problem by only writing the info file for the first successful solve
     if self.options.CYCLECOUNT < 1:
         #Classify variable in .info file
-        filename = self.model_name+'.info'
+        filename = self._model_name+'.info'
 
         #Create and open configuration files
-        with open(os.path.join(self.path,filename), 'w+') as f:
+        with open(os.path.join(self._path,filename), 'w+') as f:
             #check each Var and Param for FV/MV/SV/CV
             for vp in self._variables+self._parameters:
                 if vp.type is not None:
                     f.write(vp.type+', '+vp.name+'\n')
 
 
-def generate_dbs_file(self):
+def _generate_dbs_file(self):
     '''Write options to measurements.dbs file so it gets automatically deleted
     to prevent file build-up on the server
 
@@ -258,29 +258,27 @@ def generate_dbs_file(self):
     #print all global options
     file_content = self.options.getOverridesString()
     #cycle through all Params and Vars to find set options
-    with open(os.path.join(self.path,filename), 'w+') as f:
+    with open(os.path.join(self._path,filename), 'w+') as f:
         f.write(file_content)
         #check for set options of each Var and Param
         for vp in self._parameters:
-            if vp.type is not None: #(FV/MV/SV/CV) not Param or Var
-                for o in parameter_options[vp.type]['inputs']+parameter_options[vp.type]['inout']:
-                    if o == 'VALUE':
-                        continue
-                    else: #everything else is an option
-                        if vp.__dict__[o] is not None:
-                            f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
+            for o in parameter_options[vp.type]['inputs']+parameter_options[vp.type]['inout']:
+                if o == 'VALUE':
+                    continue
+                else: #everything else is an option
+                    if vp.__dict__[o] is not None:
+                        f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
 
         for vp in self._variables:
-            if vp.type is not None: #(FV/MV/SV/CV) not Param or Var
-                for o in variable_options[vp.type]['inputs']+variable_options[vp.type]['inout']:
-                    if o == 'VALUE':
-                        continue
-                    else: #everything else is an option
-                        if vp.__dict__[o] is not None:
-                            f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
+            for o in variable_options[vp.type]['inputs']+variable_options[vp.type]['inout']:
+                if o == 'VALUE':
+                    continue
+                else: #everything else is an option
+                    if vp.__dict__[o] is not None:
+                        f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
 
 
-def write_solver_options(self):
+def _write_solver_options(self):
     opt_file = ''
     if self.solver_options:
         #determine filename from solver number
@@ -296,11 +294,11 @@ def write_solver_options(self):
             opt_file += option + '\n'
 
         #If remote solve, pass string to append to .apm file
-        if self.remote is True:
+        if self._remote is True:
             return 'File ' + filename + '\n' + opt_file + 'End File\n'
         #write file for local solve
         else:
-            with open(os.path.join(self.path,filename), 'w+') as f:
+            with open(os.path.join(self._path,filename), 'w+') as f:
                 f.write(opt_file)
 
     #do nothing if no options were added
@@ -314,7 +312,7 @@ def write_solver_options(self):
 #%% Not currently used
 
 
-def jsonify(self,data): #This function was mostly copied from SO
+def _jsonify(self,data): #This function was mostly copied from SO
     if type(data).__module__=='numpy': # if value is numpy.*: > to python list
         json_data = data.tolist()
     elif isinstance(data, dict): # for nested lists
@@ -334,7 +332,7 @@ def jsonify(self,data): #This function was mostly copied from SO
     return json_data
 
 
-def to_JSON(self): #JSON input to APM not currently supported -- this function isn't tested
+def _to_JSON(self): #JSON input to APM not currently supported -- this function isn't tested
     """
     include in JSON:
     global options
@@ -395,11 +393,11 @@ def to_JSON(self): #JSON input to APM not currently supported -- this function i
             temp_dict['name'] = {'value':self.jsonify(intermediate.value)}
         json_data['intermediates'] = temp_dict
     """
-    f = open(os.path.join(self.path,'jsontest.json'), 'w')
+    f = open(os.path.join(self._path,'jsontest.json'), 'w')
     #f.write(json.dumps(self, default=lambda o: _try(o), sort_keys=True, indent=2, separators=(',',':')).replace('\n', ''))
     json.dump(json_data,f, indent=2,separators=(',', ':'))
     f.close()
     #return json.dumps(self, default=lambda o: _try(o), sort_keys=True, indent=0, separators=(',',':')).replace('\n', '')
     #load JSON to dictionary:
-    #with open(os.path.join(self.path,'jsontest.json')) as json_file:
+    #with open(os.path.join(self._path,'jsontest.json')) as json_file:
     #   data = json.load(json_file)

@@ -71,10 +71,11 @@ Variable
 
 Calculated by solver to meet constraints (Equations)::
 
-	v = m.Var([value], [lb], [ub], [name]):
+	v = m.Var([value], [lb], [ub], [integer], [name]):
 
 
 * `lb` and `ub` provide lower and upper variable bounds, respectively, to the solver.
+* `integer` is a boolean that specifies an integer variable for mixed-integer solvers
 
 
 Intermediates
@@ -100,9 +101,10 @@ Fixed Variable
 Fixed Variables (FV) inherit Parameters, but potentially add a degree of freedom and are always fixed
 throughout the horizon (i.e. they are not discretized in dynamic modes).::
 
-	f = m.FV([value], [lb], [ub], [name])
+	f = m.FV([value], [lb], [ub], [integer], [name])
 
 * `lb` and `ub` provide lower and upper variable bounds, respectively, to the solver.
+* `integer` is a boolean that specifies an integer variable for mixed-integer solvers
 
 
 Manipulated Variable
@@ -110,9 +112,10 @@ Manipulated Variable
 
 Manipulated Variables (MV) inherit FVs but are discretized throughout the horizon and have time-dependent attributes::
 
-	m = m.MV([value], [lb], [ub], [name])
+	m = m.MV([value], [lb], [ub], [integer], [name])
 
 * `lb` and `ub` provide lower and upper variable bounds, respectively, to the solver.
+* `integer` is a boolean that specifies an integer variable for mixed-integer solvers
 
 
 State Variable
@@ -120,7 +123,7 @@ State Variable
 
 State Variables (SV) inherit Variables with just a couple extra attributes::
 
-    s =  m.SV([value], [lb], [ub], [name])
+    s =  m.SV([value], [lb], [ub], [integer], [name])
 
 
 Controlled Variable
@@ -130,7 +133,7 @@ Controlled Variables (CV) inherit SVs but potentially add an objective (such as
 reaching a setpoint in control applications or matching model and measured values
 in estimation)::
 
-    c = m.CV([value], [lb], [ub], [name])
+    c = m.CV([value], [lb], [ub], [integer], [name])
 
 
 

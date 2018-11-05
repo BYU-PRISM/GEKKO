@@ -40,9 +40,9 @@ APMonitor provides the following to a Nonlinear Programming Solver (APOPT, BPOPT
     * 2nd Derivative of the equations
     * 2nd Derivative of the objective function
 
-Once the solution is complete, APMonitor writes the results in results.csv that is loaded back into the python variables by GEKKO
+Once the solution is complete, APMonitor writes the results in results.json that is loaded back into the python variables by GEKKO
 
-When the system of equations does not converge, APMonitor produces a convergence report in ‘infeasibilities.txt’. There are other levels of debugging that help expose the steps that APMonitor is taking to analyze or solve the problem. Setting APM.diaglevel to higher levels (0-10) gives more output to the user. Setting APM.coldstart to 2 decomposes the problem into irreducible sets of variables and equations to identify infeasible equations or properly initialize a model.
+When the system of equations does not converge, APMonitor produces a convergence report in ‘infeasibilities.txt’. There are other levels of debugging that help expose the steps that APMonitor is taking to analyze or solve the problem. Setting :ref:`diaglevel` to higher levels (0-10) gives more output to the user. Setting :ref:`coldstart` to 2 decomposes the problem into irreducible sets of variables and equations to identify infeasible equations or properly initialize a model.
 
 
 

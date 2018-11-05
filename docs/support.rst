@@ -19,4 +19,4 @@ Further clarification regarding the APMonitor functionality on the back end of G
 Advanced Debugging
 ------------------
 
-The files read/written by GEKKO and APMonitor are in the folder indicated in `m.path`. Information on debugging these files is available on `APMonitor <http://apmonitor.com/wiki/>`_.
+The files read/written by GEKKO and APMonitor are in the folder indicated in `m._path`. Information on debugging these files is available on `APMonitor <http://apmonitor.com/wiki/>`_.

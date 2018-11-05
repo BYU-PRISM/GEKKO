@@ -6,6 +6,7 @@ Created on Mon Dec 11 16:31:25 2017
 """
 
 from .gekko import GEKKO
+#from .brain import Brain
 
 Gekko = GEKKO
 gekko = GEKKO
