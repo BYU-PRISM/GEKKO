@@ -26,6 +26,9 @@ if ver==2:  # Python 2
             app.replace(" ", "")
             params = urllib.urlencode({'p': app, 'a': aline})
             f = urllib.urlopen(url_base, params)
+            # initialize apm_error recording
+            record_error = False
+            apm_error = ''
             # Stream solution output
             if(aline=='solve'):
                 line = ''
@@ -36,11 +39,19 @@ if ver==2:  # Python 2
                     elif char == '\n':
                         if disp: 
                             print(line)
+                        # Start recording output if error is detected
+                        if 'error' in line:
+                            record_error = True
+                        if record_error:
+                            apm_error+= line + '\n'
                         line = ''
                     else:
                         line += char
             # Send request to web-server
-            response = f.read()
+            if apm_error != '': # check if any apm errors were found
+                response = apm_error
+            else:
+                response = f.read()
         except:
             response = 'Failed to connect to server'
         return response
@@ -90,6 +101,9 @@ else:       # Python 3+
             params = urllib.parse.urlencode({'p':app,'a':aline})
             en_params = params.encode()
             f = urllib.request.urlopen(url_base,en_params)
+            # initialize apm_error recording
+            record_error = False
+            apm_error = ''
             # Stream solution output
             if(aline=='solve'):
                 line = ''
@@ -101,12 +115,20 @@ else:       # Python 3+
                     elif char == '\n':
                         if disp:
                             print(line)
-                        line = ''
+                        # Start recording output if error is detected
+                        if 'error' in line:
+                            record_error = True
+                        if record_error:
+                            apm_error+= line + '\n'
+                        line = '' # reset line
                     else:
                         line += char
-            # Send request to web-server
-            en_response = f.read()
-            response = en_response.decode()
+            if apm_error != '': # check if any apm errors were found
+                response = apm_error
+            else:
+                # Send request to web-server
+                en_response = f.read()
+                response = en_response.decode()
         except:
             response = 'Failed to connect to server'
         return response

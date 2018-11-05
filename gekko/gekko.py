@@ -633,6 +633,10 @@ class GEKKO(object):
             if os.name != 'nt':
                 if not os.path.isdir(os.path.join(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'bin'),'lib')):
                     print('Warning: \'lib\' folder is missing. Necessary libraries may not be present.')
+                    
+            # initialize apm_error recording
+            record_error = False
+            apm_error = ''
 
             # Calls apmonitor through the command line
             if os.name == 'nt': #Windows
@@ -644,6 +648,13 @@ class GEKKO(object):
                             print(line.replace('\n', ''))
                         except:
                             pass
+                    # Start recording output if error is detected
+                    if 'error' in line or 'without' in line:
+                        record_error = True
+                    if record_error:
+                        apm_error+=line
+                        
+                last_line = line # Retrieve last line printed by apm
                 app.wait()
             else:
                 apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apmonitor')
@@ -653,6 +664,13 @@ class GEKKO(object):
                         print(line.replace('\n', ''))
                     else:
                         pass
+                    # Start recording output if error is detected
+                    if 'error' in line or 'without' in line:
+                        record_error = True
+                    if record_error:
+                        apm_error+=line
+                        
+                last_line = line # Retrieve last line printed by apm
                 app.wait()
             _, errs = app.communicate()
             # print(out)
@@ -660,6 +678,8 @@ class GEKKO(object):
                 print("Error:", errs)
             if timing == True:
                 print('solve', time.time() - t)
+            if 'STOPPING' in last_line:
+                raise Exception('Model' + apm_error)
 
         else: #solve on APM server
             def send_if_exists(extension):
