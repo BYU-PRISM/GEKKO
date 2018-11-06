@@ -801,7 +801,14 @@ class GEKKO(object):
                         print('Found ' + var+'['+str(i)+']')
 
 
-            
+    def open_folder(self):
+        """Opens the backend folder that holds the APM model and csv files that 
+        Gekko writes.  Mainly used for debugging."""
+        if sys.platform == "win32":
+            os.startfile(self._path)
+        else:
+            opener ="open" if sys.platform == "darwin" else "xdg-open"
+            subprocess.call([opener, self._path])
             
 
     #%% Cleanup functions (use with caution)
