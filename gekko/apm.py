@@ -13,7 +13,7 @@ else:       # Python 3+
 
 if ver==2:  # Python 2
 
-    def cmd(server, app, aline, disp=True):
+    def cmd(server, app, aline, disp=True, debug=1):
         '''Send a request to the server \n \
            server = address of server \n \
            app      = application name \n \
@@ -39,11 +39,12 @@ if ver==2:  # Python 2
                     elif char == '\n':
                         if disp: 
                             print(line)
-                        # Start recording output if error is detected
-                        if 'error' in line or 'without' in line:
-                            record_error = True
-                        if record_error:
-                            apm_error+= line + '\n'
+                        if debug >= 1:
+                            # Start recording output if error is detected
+                            if '@error' in line:
+                                record_error = True
+                            if record_error:
+                                apm_error+= line + '\n'
                         line = ''
                     else:
                         line += char
@@ -87,7 +88,7 @@ if ver==2:  # Python 2
 
 else:       # Python 3+
     
-    def cmd(server,app,aline, disp=True):
+    def cmd(server,app,aline, disp=True, debug=1):
         '''Send a request to the server \n \
            server = address of server \n \
            app      = application name \n \
@@ -115,11 +116,12 @@ else:       # Python 3+
                     elif char == '\n':
                         if disp:
                             print(line)
-                        # Start recording output if error is detected
-                        if 'error' in line or 'without' in line:
-                            record_error = True
-                        if record_error:
-                            apm_error+= line + '\n'
+                        if debug >= 1:
+                            # Start recording output if error is detected
+                            if '@error' in line:
+                                record_error = True
+                            if record_error:
+                                apm_error+= line + '\n'
                         line = '' # reset line
                     else:
                         line += char

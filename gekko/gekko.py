@@ -564,7 +564,7 @@ class GEKKO(object):
 
 
     #%% Get a solution
-    def solve(self,disp=True,debug=False,GUI=False,**kwargs):
+    def solve(self,disp=True,debug=1,GUI=False,**kwargs):
         """Solve the optimization problem.
 
         This function has these substeps:
@@ -622,7 +622,7 @@ class GEKKO(object):
         if timing == True:
             print('write info', time.time() - t)
 
-        if debug == True:
+        if debug >= 2:
             self.name_check()
 
         if self._remote == False:#local_solve
@@ -648,11 +648,12 @@ class GEKKO(object):
                             print(line.replace('\n', ''))
                         except:
                             pass
-                    # Start recording output if error is detected
-                    if 'error' in line or 'without' in line:
-                        record_error = True
-                    if record_error:
-                        apm_error+=line
+                    if debug >= 1:
+                        # Start recording output if error is detected
+                        if '@error' in line:
+                            record_error = True
+                        if record_error:
+                            apm_error+=line
                         
                 last_line = line # Retrieve last line printed by apm
                 app.wait()
@@ -664,11 +665,12 @@ class GEKKO(object):
                         print(line.replace('\n', ''))
                     else:
                         pass
-                    # Start recording output if error is detected
-                    if 'error' in line or 'without' in line:
-                        record_error = True
-                    if record_error:
-                        apm_error+=line
+                    if debug >= 1:
+                        # Start recording output if error is detected
+                        if '@error' in line:
+                            record_error = True
+                        if record_error:
+                            apm_error+=line
                         
                 last_line = line # Retrieve last line printed by apm
                 app.wait()
@@ -765,7 +767,7 @@ class GEKKO(object):
 
         if timing == True:
             t = time.time()
-        if debug == True:
+        if debug >= 2:
             self.verify_input_options()
             self.gk_logic_tree()
         if timing == True:
