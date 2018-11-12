@@ -37,15 +37,23 @@ The most recent version is 0.1. You can upgrade from the command line with the u
     pip install --upgrade gekko
 
 
-Advanced Installation
+Citing GEKKO
 ---------------------
 
-To enable local solve (rather than solving on the remote server), copy the required executables from the `GEKKO GitHub repo <https://github.com/BYU-PRISM/GEKKO>`_ to your local path. ::
+If you use GEKKO in your work, please cite the following paper:
 
-    gekko/gekko/bin/*
-
-Currently, the pip packages already includes the Windows executable (apm.exe). Local executables for other operating systems are in development.
-
+```
+@article{beal2018gekko,
+  title={GEKKO Optimization Suite},
+  author={Beal, Logan and Hill, Daniel and Martin, R and Hedengren, John},
+  journal={Processes},
+  volume={6},
+  number={8},
+  pages={106},
+  year={2018},
+  publisher={Multidisciplinary Digital Publishing Institute}
+}
+```
 
 Contents
 --------
