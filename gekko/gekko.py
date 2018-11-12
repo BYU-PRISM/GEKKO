@@ -646,7 +646,7 @@ class GEKKO(object):
                             pass
                 app.wait()
             else:
-                apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apmonitor')
+                apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm')
                 app = subprocess.Popen([apm_exe, self._model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self._path, env = {"PATH" : self._path, "LD_LIBRARY_PATH" : os.path.dirname(os.path.realpath(__file__))+'/bin/lib' }, universal_newlines=True)
                 for line in iter(app.stdout.readline, ""):
                     if disp == True:
