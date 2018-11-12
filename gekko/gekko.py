@@ -564,7 +564,7 @@ class GEKKO(object):
 
 
     #%% Get a solution
-    def solve(self,disp=True,debug=False,GUI=False,**kwargs):
+    def solve(self,disp=True,debug=1,GUI=False,**kwargs):
         """Solve the optimization problem.
 
         This function has these substeps:
@@ -622,7 +622,7 @@ class GEKKO(object):
         if timing == True:
             print('write info', time.time() - t)
 
-        if debug == True:
+        if debug >= 2:
             self.name_check()
 
         if self._remote == False:#local_solve
@@ -633,6 +633,10 @@ class GEKKO(object):
             if os.name != 'nt':
                 if not os.path.isdir(os.path.join(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'bin'),'lib')):
                     print('Warning: \'lib\' folder is missing. Necessary libraries may not be present.')
+                    
+            # initialize apm_error recording
+            record_error = False
+            apm_error = ''
 
             # Calls apmonitor through the command line
             if os.name == 'nt': #Windows
@@ -644,6 +648,14 @@ class GEKKO(object):
                             print(line.replace('\n', ''))
                         except:
                             pass
+                    if debug >= 1:
+                        # Start recording output if error is detected
+                        if '@error' in line:
+                            record_error = True
+                        if record_error:
+                            apm_error+=line
+                        
+                last_line = line # Retrieve last line printed by apm
                 app.wait()
             else:
                 apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm')
@@ -653,6 +665,14 @@ class GEKKO(object):
                         print(line.replace('\n', ''))
                     else:
                         pass
+                    if debug >= 1:
+                        # Start recording output if error is detected
+                        if '@error' in line:
+                            record_error = True
+                        if record_error:
+                            apm_error+=line
+                        
+                last_line = line # Retrieve last line printed by apm
                 app.wait()
             _, errs = app.communicate()
             # print(out)
@@ -660,6 +680,8 @@ class GEKKO(object):
                 print("Error:", errs)
             if timing == True:
                 print('solve', time.time() - t)
+            if 'STOPPING' in last_line:
+                raise Exception('Model' + apm_error)
 
         else: #solve on APM server
             def send_if_exists(extension):
@@ -745,7 +767,7 @@ class GEKKO(object):
 
         if timing == True:
             t = time.time()
-        if debug == True:
+        if debug >= 2:
             self.verify_input_options()
             self.gk_logic_tree()
         if timing == True:
@@ -781,7 +803,14 @@ class GEKKO(object):
                         print('Found ' + var+'['+str(i)+']')
 
 
-            
+    def open_folder(self):
+        """Opens the backend folder that holds the APM model and csv files that 
+        Gekko writes.  Mainly used for debugging."""
+        if sys.platform == "win32":
+            os.startfile(self._path)
+        else:
+            opener ="open" if sys.platform == "darwin" else "xdg-open"
+            subprocess.call([opener, self._path])
             
 
     #%% Cleanup functions (use with caution)
@@ -830,6 +859,10 @@ class GEKKO(object):
         return GK_Operators('acos('+str(other) + ')')
     def atan(self,other):
         return GK_Operators('atan('+str(other) + ')')
+    def erf(self,other):
+        return GK_Operators('erf('+str(other) + ')')
+    def erfc(self,other):
+        return GK_Operators('erfc('+str(other) + ')')
 
     def GUI(self):
         if not self._gui_open:
