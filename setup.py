@@ -29,7 +29,7 @@ def package_files(directory):
 #gather all files for GUI support
 gui_files = package_files('gekko/static')
 #add APM executable file
-extra_files = gui_files + ['bin/apm.exe']
+extra_files = gui_files + ['bin/apm.exe','bin/apm']
 
 #APM binaries based on OS (currently only available for Windows)
 #if os.name == 'nt':
@@ -40,7 +40,7 @@ extra_files = gui_files + ['bin/apm.exe']
 #   apm_binary = ['gekko/bin/apmonitor' AND LA libaries]
 
 setup(name='gekko',
-    version='0.1b1',
+    version='0.1b2',
     description='Optimization software for differential algebraic equations',
     long_description=long_description,
     #url="https://readthedocsurl",
