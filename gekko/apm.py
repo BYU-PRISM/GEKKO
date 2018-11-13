@@ -56,6 +56,7 @@ if ver==2:  # Python 2
         except:
             response = 'Failed to connect to server'
         return response
+    
 
     def get_ip(server):
         '''Get current IP address \n \

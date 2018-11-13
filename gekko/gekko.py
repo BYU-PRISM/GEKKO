@@ -655,7 +655,6 @@ class GEKKO(object):
                         if record_error:
                             apm_error+=line
                         
-                last_line = line # Retrieve last line printed by apm
                 app.wait()
             else:
                 apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm')
@@ -672,7 +671,6 @@ class GEKKO(object):
                         if record_error:
                             apm_error+=line
                         
-                last_line = line # Retrieve last line printed by apm
                 app.wait()
             _, errs = app.communicate()
             # print(out)
@@ -680,8 +678,8 @@ class GEKKO(object):
                 print("Error:", errs)
             if timing == True:
                 print('solve', time.time() - t)
-            if 'STOPPING' in last_line:
-                raise Exception('Model' + apm_error)
+            if record_error:
+                raise Exception(apm_error)
 
         else: #solve on APM server
             def send_if_exists(extension):
@@ -721,7 +719,11 @@ class GEKKO(object):
                 cmd(self._server,self._model_name, ' '+extra_file_data)
 
             #solve remotely
-            cmd(self._server, self._model_name, 'solve', disp)
+            response = cmd(self._server, self._model_name, 'solve', disp, debug)
+            
+            #print APM error message and die
+            if '@error' in response:
+                raise Exception(response)
 
             #load results
             def byte2str(byte):

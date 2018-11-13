@@ -23,13 +23,14 @@ class Brain():
         self.m.options.OTOL = 1e-4
         self.m.options.RTOL = 1e-4
         if bfgs:
-            self.m._solver_options = ['hessian_approximation limited-memory']
+            self.m.solver_options = ['hessian_approximation limited-memory']
         
         self._explicit = explicit 
         self._input_size = None
         self._output_size = None
         self._layers = []
         self._weights = []
+        self._biases = []
         self.input = []
         self.output = []
         
@@ -47,7 +48,7 @@ class Brain():
         #add input layer to list of layers
         self._layers.append(self.input)
 
-    def layer(self,linear=0,relu=0,tanh=0,gaussian=0,ltype='dense'):
+    def layer(self,linear=0,relu=0,tanh=0,gaussian=0,bent=0,leaky=0,ltype='dense'):
         """
         Layer types:
             dense
@@ -62,7 +63,7 @@ class Brain():
             sigmoid
             linear
         """
-        size = relu + tanh + linear + gaussian 
+        size = relu + tanh + linear + gaussian + bent + leaky
         if size < 1:
             raise Exception("Need at least one node")
         
@@ -76,6 +77,11 @@ class Brain():
             for w in self._weights[-1]:
                 w.STATUS = 1
                 w.FSTATUS = 0
+            #input times weights, add bias and activate
+            self._biases.append([self.m.FV(value=0) for _ in range(size)])
+            for b in self._biases[-1]:
+                b.STATUS = 1
+                b.FSTATUS = 0
             
             
             count = 0
@@ -83,7 +89,7 @@ class Brain():
             if self._explicit:
             
                 # build new neuron weighted inputs
-                neuron_inputs = [self.m.Intermediate(sum((self._weights[-1][(i*n_p)+j]*self._layers[-1][j]) for j in range(n_p))) for i in range(size)] #i counts nodes in this layer, j counts nodes of previous layer
+                neuron_inputs = [self.m.Intermediate(self._biases[-1][i] + sum((self._weights[-1][(i*n_p)+j]*self._layers[-1][j]) for j in range(n_p))) for i in range(size)] #i counts nodes in this layer, j counts nodes of previous layer
                 
                 ##neuron activation
                 self._layers.append([])
@@ -99,13 +105,23 @@ class Brain():
                 if gaussian > 0:
                     self._layers[-1] += [self.m.Intermediate(self.m.exp(-neuron_inputs[i]**2)) for i in range(count,count+gaussian)]
                     count += gaussian
+                if bent > 0:
+                    self._layers[-1] += [self.m.Intermediate((self.m.sqrt(neuron_inputs[i]**2 + 1) - 1)/2 + neuron_inputs[i]) for i in range(count,count+bent)]
+                    count += bent
+                if leaky > 0:
+                    s = [self.m.Var(lb=0) for _ in range(leaky*2)]
+                    self.m.Equations( [ (1.5*neuron_inputs[i+count]) - (0.5*neuron_inputs[i+count]) == s[2*i] - s[2*i+1] for i in range(leaky) ] )
+                    self._layers[-1] += [self.m.Intermediate(neuron_inputs[count+i] + s[2*i]) for i in range(leaky)]
+                    [self.m.Obj(s[2*i]*s[2*i+1]) for i in range(leaky)]
+                    self.m.Equations([s[2*i]*s[2*i+1] == 0 for i in range(leaky)])
+                    count += leaky
                     
             
             else: #type=implicit
                  
                 # build new neuron weighted inputs
                 neuron_inputs = [self.m.Var() for i in range(size)]
-                self.m.Equations([neuron_inputs[i] == sum((self._weights[-1][(i*n_p)+j]*self._layers[-1][j]) for j in range(n_p)) for i in range(size)]) #i counts nodes in this layer, j counts nodes of previous layer
+                self.m.Equations([neuron_inputs[i] == self._biases[-1][i] + sum((self._weights[-1][(i*n_p)+j]*self._layers[-1][j]) for j in range(n_p)) for i in range(size)]) #i counts nodes in this layer, j counts nodes of previous layer
                 
                 ##neuron activation
                 neurons = [self.m.Var() for i in range(size)]
@@ -133,6 +149,16 @@ class Brain():
                         n.LOWER = -3.5
                         n.UPPER = 3.5
                     count += gaussian
+                if bent > 0:
+                    self.m.Equations([neurons[i] == ((self.m.sqrt(neuron_inputs[i]**2 + 1) - 1)/2 + neuron_inputs[i]) for i in range(count,count+bent)])
+                    count += bent
+                if leaky > 0:
+                    s = [self.m.Var(lb=0) for _ in range(leaky*2)]
+                    self.m.Equations( [ (1.5*neuron_inputs[count+i]) - (0.5*neuron_inputs[count+i]) == s[2*i] - s[2*i+1] for i in range(leaky) ] )
+                    self.m.Equations([neurons[count+i] == neuron_inputs[count+i] + s[2*i] for i in range(leaky)])
+                    [self.m.Obj(10000*s[2*i]*s[2*i+1]) for i in range(leaky)]
+                    #self.m.Equations([s[2*i]*s[2*i+1] == 0 for i in range(leaky)])
+                    count += leaky
                     
                     
         else:
@@ -158,7 +184,7 @@ class Brain():
         """
         
         # build a layer to ensure that the number of nodes matches the output
-        self.layer(size,0,0,0,ltype)
+        self.layer(size,0,0,0,0,0,ltype)
         
         self.output = [self.m.CV() for _ in range(size)]
         for o in self.output:
@@ -191,6 +217,9 @@ class Brain():
         for wl in self._weights:
             for w in wl:
                 w.STATUS = 0
+        for bl in self._biases:
+            for b in bl:
+                b.STATUS = 0
         self.m.solve(disp=False)
         
         ##return result
@@ -251,6 +280,9 @@ class Brain():
         for wl in self._weights:
             for w in wl:
                 w.STATUS = 1
+        for bl in self._biases:
+            for b in bl:
+                b.STATUS = 1
             
         self.m.solve(disp=disp)
         
