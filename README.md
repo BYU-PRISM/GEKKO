@@ -24,7 +24,7 @@ To enable local solve (rather than solving on the remote server), copy the requi
 gekko/gekko/bin/*
 ```
 
-Currently, the pip packages already includes the Windows executable (apm.exe). Local executables for other operating systems are in development.
+Currently, the pip packages includes the Windows executable (apm.exe) and the Linux executable (apm). Local executables for other operating systems (MacOS, ARM processors) are in development but they can still be used with remote server access (default for all operating systems).
 
 ## What does GEKKO do?
 
