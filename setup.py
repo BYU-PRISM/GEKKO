@@ -29,7 +29,7 @@ def package_files(directory):
 #gather all files for GUI support
 gui_files = package_files('gekko/static')
 #add APM executable file
-extra_files = gui_files + ['bin/apm.exe','bin/apm']
+extra_files = gui_files + ['bin/apm.exe','bin/apm','bin/apm_arm']
 
 #APM binaries based on OS (currently only available for Windows)
 #if os.name == 'nt':
@@ -39,11 +39,11 @@ extra_files = gui_files + ['bin/apm.exe','bin/apm']
 #elif linux:
 #   apm_binary = ['gekko/bin/apmonitor' AND LA libaries]
 
+# versions: a (alpha), b (beta), rc (release candidate)
 setup(name='gekko',
-    version='0.1b2',
+    version='0.1rc1',
     description='Optimization software for differential algebraic equations',
     long_description=long_description,
-    #url="https://readthedocsurl",
     classifiers=[
         'Development Status :: 4 - Beta',
         'Programming Language :: Python :: 2',
@@ -52,6 +52,7 @@ setup(name='gekko',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
     keywords='DAE optimization MILP MINLP QP NLP MIDO IPOPT',
     url='https://github.com/BYU-PRISM/GEKKO',
