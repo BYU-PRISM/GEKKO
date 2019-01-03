@@ -540,7 +540,66 @@ class GEKKO(object):
         #Add connections between v and periodic object attribute x
         self._connections.append(v.name + ' = ' + periodic_name+'.x')
 
+    def arx(self,A,B,na,nb,ny,nu):
+        """
+        Build a GEKKO from ARX representation.
+        Give A,B,C and D, returns:
+        m (GEKKO model)
+        A (coefficients for A polynomial, ny by na)
+        B (coefficients for B polynomial, ny by nu by nb)
+        na (# of A coefficients)
+        nb (# of B coefficients)
+        ny (# of outputs)
+        nu (# of inputs)
+        """
+        #set all matricies to numpy
+        A = np.array(A)
+        A = np.transpose(A)
+        B = np.array(B)
+        B = np.transpose(B)
+ 
+        # build arx object with unique object name
+        arx_name = 'sysa'  #+ str(len(self._objects) + 1)
+        self._objects.append(arx_name + ' = arx')
+        
+        # write arx object config file objectname.txt
+        file_name = arx_name + '.txt'
+        file_data = ''
+        file_data += str(nu) + ' !inputs \n'
+        file_data += str(ny) + ' !outputs \n'
+        file_data += str(nb) + ' !number of input terms \n'
+        file_data += str(na) + ' !number of output terms \n'
+        with open(os.path.join(self._path,file_name), 'w+') as f:
+            f.write(file_data)
+        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
 
+         
+        #write A,B matricies to objectname.A/B.txt
+        file_name = arx_name + '.alpha.txt'
+        np.savetxt(os.path.join(self._path,file_name), A, delimiter=", ", fmt='%1.25s')
+        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+        file_name = arx_name + '.beta.txt'
+        np.savetxt(os.path.join(self._path,file_name), B, delimiter=", ", fmt='%1.25s')
+        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+        
+        #define arrays of states, outputs and inputs
+        y = [self.CV() for i in np.arange(ny)]
+        u = [self.MV() for i in np.arange(nu)]
+
+
+        #Add connections between u, x and y with arx object
+        for i in range(nu):
+            if nu == 1:
+                self._connections.append(u[i].name + ' = ' + arx_name+'.u')
+            else:
+                self._connections.append(u[i].name + ' = ' + arx_name+'.u['+str(i+1)+']')
+        for i in range(ny):
+            if ny == 1:
+                self._connections.append(y[i].name + ' = ' + arx_name+'.y')
+            else:    
+                self._connections.append(y[i].name + ' = ' + arx_name+'.y['+str(i+1)+']')
+
+        return y,u
 
     #%% Add array functionality to all types
     def Array(self,f,dim,**args):
@@ -628,11 +687,6 @@ class GEKKO(object):
         if self._remote == False:#local_solve
             if timing == True:
                 t = time.time()
-
-            # Check for all the necessary libraries
-            if os.name != 'nt':
-                if not os.path.isdir(os.path.join(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'bin'),'lib')):
-                    print('Warning: \'lib\' folder is missing. Necessary libraries may not be present.')
                     
             # initialize apm_error recording
             record_error = False
@@ -657,8 +711,11 @@ class GEKKO(object):
                         
                 app.wait()
             else:
-                apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm')
-                app = subprocess.Popen([apm_exe, self._model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self._path, env = {"PATH" : self._path, "LD_LIBRARY_PATH" : os.path.dirname(os.path.realpath(__file__))+'/bin/lib' }, universal_newlines=True)
+                if os.uname()[4].startswith("arm"):
+                    apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm_arm')
+                else:
+                    apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm')
+                app = subprocess.Popen([apm_exe, self._model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self._path, env = {"PATH" : self._path }, universal_newlines=True)
                 for line in iter(app.stdout.readline, ""):
                     if disp == True:
                         print(line.replace('\n', ''))
