@@ -158,11 +158,13 @@ class GK_Value(list):
         return np.array(self.value)
 
     def __iter__(self):
-        for v in self.value:
-            yield v
-        
+        try:
+            for v in self.value:
+                yield v
+        except:
+            return self.value        
             
-        #%%Operator overloading for building functions
+    #%%Operator overloading for building functions
     #comparisons
     def __lt__(self,other): #less than
         return self.value < other
