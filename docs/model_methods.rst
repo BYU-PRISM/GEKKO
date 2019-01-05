@@ -76,10 +76,8 @@ Model Building
 .. py:classmethod::    a = m.Array(type,dimension,**args)
 
 	Create an n-dimensional array (as defined in tuple input `dimension` ) of GEKKO variables of type `type` .
-    The optional keyword arguments (`**args`) are applied to each element of the array. The following example demonstrates the use of a 3x2 Array, a Parameter, Intermediates, and an Objective. The array values are initialized to 2.0 and bounds are set to -10.0 to 10.0.
+    The optional keyword arguments (`**args`) are applied to each element of the array. The following example demonstrates the use of a 3x2 Array, a Parameter, Intermediates, and an Objective. The array values are initialized to 2.0 and bounds are set to -10.0 to 10.0.::
 
-.. code-block:: python
-    pygments_style = 'sphinx'
 	from gekko import GEKKO
 	m = GEKKO()
 	# variable array dimension
