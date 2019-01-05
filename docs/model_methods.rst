@@ -76,8 +76,33 @@ Model Building
 .. py:classmethod::    a = m.Array(type,dimension,**args)
 
 	Create an n-dimensional array (as defined in tuple input `dimension` ) of GEKKO variables of type `type` .
-    The optional keyword arguments (`**args`) are applied to each element of the array.
+    The optional keyword arguments (`**args`) are applied to each element of the array. The following example demonstrates the use of a 3x2 Array, a Parameter, Intermediates, and an Objective. The array values are initialized to 2.0 and bounds are set to -10.0 to 10.0.
 
+````python
+from gekko import GEKKO
+m = GEKKO()
+# variable array dimension
+n = 3 # rows
+p = 2 # columns
+# create array
+x = m.Array(m.Var,(n,p))
+for i in range(n):
+    for j in range(p):
+        x[i,j].value = 2.0
+        x[i,j].lower = -10.0
+        x[i,j].upper = 10.0
+# create parameter
+y = m.Param(value = 1.0)
+# sum columns
+z = [None]*p
+for j in range(p):
+    z[j] = m.Intermediate(sum([x[i,j] for i in range(n)]))
+# objective
+m.Obj(sum([z[j]**2 + y for j in range(p)]))
+# minimize objective
+m.solve()
+print(x)
+````
 
 .. py:classmethod:: m.solve(disp=True,debug=False)
 
