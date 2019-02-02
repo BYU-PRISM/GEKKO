@@ -441,13 +441,9 @@ Model Predictive Control
 Additional Examples
 ------------------------------------
 
-::
-
 	* `18 Applications with Python GEKKO <https://apmonitor.com/wiki/index.php/Main/GekkoPythonOptimization>`_
 	* `Dynamic Optimization Course (see Homework Solutions) <http://apmonitor.com/do/index.php/Main/InvertedPendulum>`_
 	* `GEKKO Search on APMonitor Documentation <http://apmonitor.com/wiki/index.php?n=Main.HomePage&action=search&q=gekko>`_
 	* `GEKKO (optimization software) on Wikipedia <https://en.wikipedia.org/wiki/Gekko_(optimization_software)>`_
 	* `GEKKO Journal Article <https://www.mdpi.com/2227-9717/6/8/106>`_
 	* `GEKKO Webinar to the AIChE CAST Division <https://github.com/loganbeal/CAST_GEKKO_webinar>`_
-
-
