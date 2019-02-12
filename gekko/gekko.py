@@ -48,7 +48,7 @@ class EquationObj(object):
 #%%Create class
 class GEKKO(object):
     """Create a model object. This is the basic object for solving optimization problems"""
-    _ids = count(0) #keep track of number of active class instances to not overwrite eachother with default model name
+    _ids = count(0) #keep track of number of active class instances to not overwrite each other with default model name
 
     def __init__(self, remote=True, server='http://byu.apmonitor.com', name=None):
         self._remote = remote
@@ -263,70 +263,116 @@ class GEKKO(object):
             self._connections.append(var1_str + ' = FIXED')
             var1.__dict__['_fixed_values'].append((pos1,var2))
 
-    #Simplified Connection
+    # Simplified Connection
     def fix(self,var, pos, val):
         self.Connection(var,val,pos1=pos)
 
     #%% Objects
-        # There isn't generalized syntax for objects, so each one is added individually
+    # There isn't generalized syntax for objects, so each one is added individually
 
-    ## Cubic Spline
-    def cspline(self, x,y,x_data,y_data,bound_x=False):
-        """Generate a 1d cubic spline with continuous first and seconds derivatives
-        from arrays of x and y data which link to GEKKO variables x and y with a
-        constraint that y=f(x).
+    # APMonitor Objects
+    # abs2        = absolute value with MPCC (continuous first/second deriv)
+    # arx         = auto-regressive exogenous input (time series) model
+    # bspline     = bspline for 2D data
+    # cspline     = cubic spline for 1D data
+    # periodic    = periodic (initial=final) for dynamic problems
+    # state_space = continuous/discrete and dense/sparse state space
 
-        Input: x: GEKKO variable, y: GEKKO variable, x_data: array of x data,
-        y_data: array of y data that matches x_data, bound_x: boolean to state
-        x should be bounded at the upper and lower bounds of x_data to avoid
-        extrapolation error of the cspline. """
+    # --- add to GEKKO ---
+    # axb, fmax, fmin, fsign, fsum, fvsum, lag, lookup, pwl, qobj, table
 
-        #verify that x and y are valid GEKKO variables
+    # --- flowsheet objects in APMonitor but not GEKKO ---
+    # compounds, feedback, flash, flash_column, mass, massflow, massflows, 
+    #  molarflows, mixer, pid, poly_reactor, pump, reactor, recovery, splitter,
+    #  stage_1, stage_2, stream_lag, thermo, vessel, vesselm
+
+    def abs2(self,x):
+        """ Generates the absolute value with continuous first and
+        second derivatives. The other method for absolute value (abs) has
+        a point that is not continuously differentiable at an argument value
+        of zero and can cause a gradient-based optimizer to fail to converge.
+        Usage: y = abs2(x)
+        Input: GEKKO variable or parameter
+        Output: GEKKO variable
+        """
+        # verify that x is a valid GEKKO variables
         if not isinstance(x,(GKVariable,GKParameter)):
-            raise TypeError("First arguement must be a GEKKO parameter or variable")
-        if not isinstance(y,(GKVariable)):
-            raise TypeError("Second arguement must be a GEKKO variable")
+            raise TypeError("First argument must be a GEKKO parameter or variable")
 
-        #verify data input types
-        if not isinstance(x_data, (list,np.ndarray)):
-            raise TypeError("x_data must be a python list or numpy array")
-        if not isinstance(y_data, (list,np.ndarray)):
-            raise TypeError("y_data must be a python list or numpy array")
+        # build abs object with unique object name
+        abs_name = 'abs_obj_' + str(len(self._objects) + 1)
+        self._objects.append(abs_name + ' = abs')
 
-        #convert data to flat numpy arrays
-        x_data = np.array(x_data).flatten()
-        y_data = np.array(y_data).flatten()
+        # add connections between x and abs object attribute x
+        self._connections.append(x.name + ' = ' + abs_name+'.x')
+        # add connections between y and abs object attribute y
+        y = self.Var()
+        self._connections.append(y.name + ' = ' + abs_name+'.y')
+        
+        return y
 
-        #verify data inputs for same length and ordered x_data
-        if np.size(x_data) != np.size(y_data):
-            raise Exception('Data arrays must have the same length')
-        sort_order = np.argsort(x_data)
-        x_data = x_data[sort_order]
-        y_data = y_data[sort_order]
+    def arx(self,A,B,na,nb,ny,nu):
+        """
+        Build a GEKKO from ARX representation.
+        Give A,B,C and D, returns:
+        m (GEKKO model)
+        A (coefficients for A polynomial, ny by na)
+        B (coefficients for B polynomial, ny by nu by nb)
+        na (# of A coefficients)
+        nb (# of B coefficients)
+        ny (# of outputs)
+        nu (# of inputs)
+        """
+        #set all matricies to numpy
+        A = np.array(A)
+        A = np.transpose(A)
+        B = np.array(B)
+        B = np.transpose(B)
+ 
+        # build arx object with unique object name
+        arx_name = 'sysa'  #+ str(len(self._objects) + 1)
+        self._objects.append(arx_name + ' = arx')
+        
+        # write arx object config file objectname.txt
+        file_name = arx_name + '.txt'
+        file_data = ''
+        file_data += str(nu) + ' !inputs \n'
+        file_data += str(ny) + ' !outputs \n'
+        file_data += str(nb) + ' !number of input terms \n'
+        file_data += str(na) + ' !number of output terms \n'
+        with open(os.path.join(self._path,file_name), 'w+') as f:
+            f.write(file_data)
+        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
 
-        #build cspline object with unique object name
-        cspline_name = 'cspline' + str(len(self._objects) + 1)
-        self._objects.append(cspline_name + ' = cspline')
+         
+        #write A,B matricies to objectname.A/B.txt
+        file_name = arx_name + '.alpha.txt'
+        np.savetxt(os.path.join(self._path,file_name), A, delimiter=", ", fmt='%1.25s')
+        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+        file_name = arx_name + '.beta.txt'
+        np.savetxt(os.path.join(self._path,file_name), B, delimiter=", ", fmt='%1.25s')
+        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+        
+        #define arrays of states, outputs and inputs
+        y = [self.CV() for i in np.arange(ny)]
+        u = [self.MV() for i in np.arange(nu)]
 
-        #write x_data and y_data to objectname.csv
-        file_name = cspline_name + '.csv'
-        csv_data = np.hstack(('x_data',x_data.astype(object)))
-        csv_data = np.vstack((csv_data,np.hstack(('y_data',y_data.astype(object)))))
-        np.savetxt(os.path.join(self._path,file_name), csv_data.T, delimiter=",", fmt='%1.25s')
 
-        #add csv file to list of extra file to send to server
-        self._extra_files.append(file_name)
+        #Add connections between u, x and y with arx object
+        for i in range(nu):
+            if nu == 1:
+                self._connections.append(u[i].name + ' = ' + arx_name+'.u')
+            else:
+                self._connections.append(u[i].name + ' = ' + arx_name+'.u['+str(i+1)+']')
+        for i in range(ny):
+            if ny == 1:
+                self._connections.append(y[i].name + ' = ' + arx_name+'.y')
+            else:    
+                self._connections.append(y[i].name + ' = ' + arx_name+'.y['+str(i+1)+']')
 
-        #Add connections between x and y with cspline object data
-        self._connections.append(x.name + ' = ' + cspline_name+'.x_data')
-        self._connections.append(y.name + ' = ' + cspline_name+'.y_data')
-
-        #Bound x to x_data limits
-        if bound_x is True:
-            x.lower = x_data[0]
-            x.upper = x_data[-1]
+        return y,u
     
-    ## BSpline
+    ## bspline
     def bspline(self, x,y,z,x_data,y_data,z_data,data=True):
         """Generate a 2d Bspline with continuous first and seconds derivatives
         from 1-D arrays of x_data and y_data coordinates (in strictly ascending order)
@@ -335,11 +381,11 @@ class GEKKO(object):
 
         #verify that x,y,z are valid GEKKO variables
         if not isinstance(x,(GKVariable,GKParameter)):
-            raise TypeError("First arguement must be a GEKKO parameter or variable")
+            raise TypeError("First argument must be a GEKKO parameter or variable")
         if not isinstance(y,(GKVariable,GKParameter)):
-            raise TypeError("Second arguement must be a GEKKO parameter or variable")
+            raise TypeError("Second argument must be a GEKKO parameter or variable")
         if not isinstance(z,(GKVariable)):
-            raise TypeError("Third arguement must be a GEKKO variable")
+            raise TypeError("Third argument must be a GEKKO variable")
 
         #verify data input types
         if not all(isinstance(data, (list,np.ndarray)) for data in [x_data,y_data,z_data]):
@@ -388,9 +434,83 @@ class GEKKO(object):
         self._connections.append(x.name + ' = ' + bspline_name+'.x')
         self._connections.append(y.name + ' = ' + bspline_name+'.y')
         self._connections.append(z.name + ' = ' + bspline_name+'.z')
-            
 
+    ## cubic Spline
+    def cspline(self, x,y,x_data,y_data,bound_x=False):
+        """Generate a 1d cubic spline with continuous first and seconds derivatives
+        from arrays of x and y data which link to GEKKO variables x and y with a
+        constraint that y=f(x).
 
+        Input: x: GEKKO variable, y: GEKKO variable, x_data: array of x data,
+        y_data: array of y data that matches x_data, bound_x: boolean to state
+        x should be bounded at the upper and lower bounds of x_data to avoid
+        extrapolation error of the cspline. """
+
+        #verify that x and y are valid GEKKO variables
+        if not isinstance(x,(GKVariable,GKParameter)):
+            raise TypeError("First argument must be a GEKKO parameter or variable")
+        if not isinstance(y,(GKVariable)):
+            raise TypeError("Second argument must be a GEKKO variable")
+
+        #verify data input types
+        if not isinstance(x_data, (list,np.ndarray)):
+            raise TypeError("x_data must be a python list or numpy array")
+        if not isinstance(y_data, (list,np.ndarray)):
+            raise TypeError("y_data must be a python list or numpy array")
+
+        #convert data to flat numpy arrays
+        x_data = np.array(x_data).flatten()
+        y_data = np.array(y_data).flatten()
+
+        #verify data inputs for same length and ordered x_data
+        if np.size(x_data) != np.size(y_data):
+            raise Exception('Data arrays must have the same length')
+        sort_order = np.argsort(x_data)
+        x_data = x_data[sort_order]
+        y_data = y_data[sort_order]
+
+        #build cspline object with unique object name
+        cspline_name = 'cspline' + str(len(self._objects) + 1)
+        self._objects.append(cspline_name + ' = cspline')
+
+        #write x_data and y_data to objectname.csv
+        file_name = cspline_name + '.csv'
+        csv_data = np.hstack(('x_data',x_data.astype(object)))
+        csv_data = np.vstack((csv_data,np.hstack(('y_data',y_data.astype(object)))))
+        np.savetxt(os.path.join(self._path,file_name), csv_data.T, delimiter=",", fmt='%1.25s')
+
+        #add csv file to list of extra file to send to server
+        self._extra_files.append(file_name)
+
+        #Add connections between x and y with cspline object data
+        self._connections.append(x.name + ' = ' + cspline_name+'.x_data')
+        self._connections.append(y.name + ' = ' + cspline_name+'.y_data')
+
+        #Bound x to x_data limits
+        if bound_x is True:
+            x.lower = x_data[0]
+            x.upper = x_data[-1]
+
+    def periodic(self,v):
+        """ Makes the variable argument periodic by adding an equation to
+        constrains v[end] = v[0]. This does not affect the default behavior of
+        fixing initial conditions (v[0]).
+        """
+
+        #Verify that v is calculated (MV,SV,CV,Var)
+        if not isinstance(v,(GKVariable,GKParameter)):
+            raise TypeError("Variable must be calculated and dynamic (Var,SV,CV,MV)")
+        if isinstance(v,(GKParameter)):
+            if v.type != 'MV':
+                raise TypeError("Variable must be calculated and dynamic (Var,SV,CV,MV)")
+
+        #build periodic object with unique object name
+        periodic_name = 'periodic_obj_' + str(len(self._objects) + 1)
+        self._objects.append(periodic_name + ' = periodic')
+
+        #Add connections between v and periodic object attribute x
+        self._connections.append(v.name + ' = ' + periodic_name+'.x')
+    
     ## State Space
     def state_space(self,A,B,C,D=None,discrete=False,dense=False):
         """
@@ -518,88 +638,6 @@ class GEKKO(object):
             self._connections.append(y[i].name + ' = ' + SS_name+'.y['+str(i+1)+']')
 
         return x,y,u
-
-
-    def periodic(self,v):
-        """ Makes the variable argument periodic by adding an equation to
-        constrains v[end] = v[0]. This does not affect the default behavior of
-        fixing initial conditions (v[0]).
-        """
-
-        #Verify that v is calculated (MV,SV,CV,Var)
-        if not isinstance(v,(GKVariable,GKParameter)):
-            raise TypeError("Variable must be calculated and dynamic (Var,SV,CV,MV)")
-        if isinstance(v,(GKParameter)):
-            if v.type != 'MV':
-                raise TypeError("Variable must be calculated and dynamic (Var,SV,CV,MV)")
-
-        #build periodic object with unique object name
-        periodic_name = 'periodic_obj_' + str(len(self._objects) + 1)
-        self._objects.append(periodic_name + ' = periodic')
-
-        #Add connections between v and periodic object attribute x
-        self._connections.append(v.name + ' = ' + periodic_name+'.x')
-
-    def arx(self,A,B,na,nb,ny,nu):
-        """
-        Build a GEKKO from ARX representation.
-        Give A,B,C and D, returns:
-        m (GEKKO model)
-        A (coefficients for A polynomial, ny by na)
-        B (coefficients for B polynomial, ny by nu by nb)
-        na (# of A coefficients)
-        nb (# of B coefficients)
-        ny (# of outputs)
-        nu (# of inputs)
-        """
-        #set all matricies to numpy
-        A = np.array(A)
-        A = np.transpose(A)
-        B = np.array(B)
-        B = np.transpose(B)
- 
-        # build arx object with unique object name
-        arx_name = 'sysa'  #+ str(len(self._objects) + 1)
-        self._objects.append(arx_name + ' = arx')
-        
-        # write arx object config file objectname.txt
-        file_name = arx_name + '.txt'
-        file_data = ''
-        file_data += str(nu) + ' !inputs \n'
-        file_data += str(ny) + ' !outputs \n'
-        file_data += str(nb) + ' !number of input terms \n'
-        file_data += str(na) + ' !number of output terms \n'
-        with open(os.path.join(self._path,file_name), 'w+') as f:
-            f.write(file_data)
-        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
-
-         
-        #write A,B matricies to objectname.A/B.txt
-        file_name = arx_name + '.alpha.txt'
-        np.savetxt(os.path.join(self._path,file_name), A, delimiter=", ", fmt='%1.25s')
-        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
-        file_name = arx_name + '.beta.txt'
-        np.savetxt(os.path.join(self._path,file_name), B, delimiter=", ", fmt='%1.25s')
-        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
-        
-        #define arrays of states, outputs and inputs
-        y = [self.CV() for i in np.arange(ny)]
-        u = [self.MV() for i in np.arange(nu)]
-
-
-        #Add connections between u, x and y with arx object
-        for i in range(nu):
-            if nu == 1:
-                self._connections.append(u[i].name + ' = ' + arx_name+'.u')
-            else:
-                self._connections.append(u[i].name + ' = ' + arx_name+'.u['+str(i+1)+']')
-        for i in range(ny):
-            if ny == 1:
-                self._connections.append(y[i].name + ' = ' + arx_name+'.y')
-            else:    
-                self._connections.append(y[i].name + ' = ' + arx_name+'.y['+str(i+1)+']')
-
-        return y,u
 
     #%% Add array functionality to all types
     def Array(self,f,dim,**args):
@@ -890,38 +928,63 @@ class GEKKO(object):
             if f.endswith('.t0') or f.endswith('.dxdt'):
                 os.remove(os.path.join(self._path,f))
 
-
-    #%% Trig functions
-    def sin(self,other):
-        return GK_Operators('sin(' + str(other) + ')')
+    # Functions
+    #  abs(x) absolute value |x|
+    #  acos(x) inverse cosine, cos^-1(x)
+    #  acosh(x) inverse hyperbolic cosine, cosh^-1(x)
+    #  asin(x) inverse sine, sin^-1(x)
+    #  asinh(x) inverse hyperbolic sine, sinh^-1(x)
+    #  atan(x) inverse tangent, tan^-1(x)
+    #  atanh(x) inverse hyperbolic tangent, tanh^-1(x)
+    #  cos(x) cosine
+    #  erf(x) error function
+    #  erfc(x) complementary error function
+    #  exp(x) e^x
+    #  log(x) log_e (x), natural log
+    #  log10(x) log_10 (x), log base 10
+    #  sin(x) sine
+    #  sinh(x) hyperbolic sine
+    #  sqrt(x) square root
+    #  tan(x) tangent
+    #  tanh(x) hyperbolic tangent
+    def abs(self,other):
+        return GK_Operators('abs('+str(other) + ')')
+    def acos(self,other):
+        return GK_Operators('acos('+str(other) + ')')
+    def acosh(self,other):
+        return GK_Operators('acosh('+str(other) + ')')
+    def asin(self,other):
+        return GK_Operators('asin('+str(other) + ')')
+    def asinh(self,other):
+        return GK_Operators('asinh('+str(other) + ')')
+    def atan(self,other):
+        return GK_Operators('atan('+str(other) + ')')
+    def atanh(self,other):
+        return GK_Operators('atanh('+str(other) + ')')
     def cos(self,other):
         return GK_Operators('cos(' + str(other) + ')')
-    def tan(self,other):
-        return GK_Operators('tan(' + str(other) + ')')
-    def sinh(self,other):
-        return GK_Operators('sinh(' + str(other) + ')')
     def cosh(self,other):
         return GK_Operators('cosh(' + str(other) + ')')
-    def tanh(self,other):
-        return GK_Operators('tanh(' + str(other) + ')')
+    def erf(self,other):
+        return GK_Operators('erf('+str(other) + ')')
+    def erfc(self,other):
+        return GK_Operators('erfc('+str(other) + ')')
     def exp(self,other):
         return GK_Operators('exp(' + str(other) + ')')
     def log(self,other):
         return GK_Operators('log('+str(other) + ')')
     def log10(self,other):
         return GK_Operators('log10('+str(other) + ')')
+    def sin(self,other):
+        return GK_Operators('sin(' + str(other) + ')')
+    def sinh(self,other):
+        return GK_Operators('sinh(' + str(other) + ')')
     def sqrt(self,other):
         return GK_Operators('sqrt('+str(other) + ')')
-    def asin(self,other):
-        return GK_Operators('asin('+str(other) + ')')
-    def acos(self,other):
-        return GK_Operators('acos('+str(other) + ')')
-    def atan(self,other):
-        return GK_Operators('atan('+str(other) + ')')
-    def erf(self,other):
-        return GK_Operators('erf('+str(other) + ')')
-    def erfc(self,other):
-        return GK_Operators('erfc('+str(other) + ')')
+    def tan(self,other):
+        return GK_Operators('tan(' + str(other) + ')')
+    def tanh(self,other):
+        return GK_Operators('tanh(' + str(other) + ')')
 
     def GUI(self):
         if not self._gui_open:
