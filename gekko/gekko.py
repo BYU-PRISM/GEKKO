@@ -271,13 +271,18 @@ class GEKKO(object):
     # There isn't generalized syntax for objects, so each one is added individually
 
     # APMonitor Objects
-    # abs2        = absolute value with MPCC (continuous first/second deriv)
+    # abs2        = absolute value with MPCC
     # abs3        = absolute value with binary variable for switch
     # arx         = auto-regressive exogenous input (time series) model
     # bspline     = bspline for 2D data
     # cspline     = cubic spline for 1D data
+    # max2        = max value with MPCC
+    # max3        = max value with binary variable for switch
+    # min2        = min value with MPCC
+    # min3        = min value with binary variable for switch
     # periodic    = periodic (initial=final) for dynamic problems
-    # sign2       = signum function with MPCC (continuous first/second deriv)
+    # sign2       = signum function with MPCC
+    # sign3       = signum function with binary variable for switch
     # state_space = continuous/discrete and dense/sparse state space
 
     # --- add to GEKKO ---
@@ -512,6 +517,116 @@ class GEKKO(object):
         if bound_x is True:
             x.lower = x_data[0]
             x.upper = x_data[-1]
+            
+    def max2(self,x1,x2):
+        """ Generates the maximum value with continuous first and
+        second derivatives. The traditional method for max value (max) is not
+        continuously differentiable and can cause a gradient-based optimizer
+        to fail to converge.
+        Usage: y = m.max2(x1,x2)
+        Input: GEKKO variable, parameter, or expression
+        Output: GEKKO variable
+        """
+        # verify that x1 and x2 are valid GEKKO variables or parameters
+        if isinstance(x1,(GKVariable,GKParameter)):
+            xin1 = x1
+        else:
+            # create input variable if it is an expression
+            xin1 = self.Var()
+            self.Equation(xin1==x1)
+        if isinstance(x2,(GKVariable,GKParameter)):
+            xin2 = x2
+        else:
+            # create input variable if it is an expression
+            xin2 = self.Var()
+            self.Equation(xin2==x2)
+        # build max object with unique object name
+        max_name = 'max2_' + str(len(self._objects) + 1)
+        self._objects.append(max_name + ' = max')
+        # add connections between x and max object attribute x
+        self._connections.append(xin1.name + ' = ' + max_name+'.x[1]')
+        self._connections.append(xin2.name + ' = ' + max_name+'.x[2]')
+        # add connections between y and max object attribute y
+        y = self.Var()
+        self._connections.append(y.name + ' = ' + max_name+'.y')
+        return y
+
+    def max3(self,x1,x2):
+        """ Generates the maximum value with a binary switch variable.
+        The traditional method for max value (max) is not continuously
+        differentiable and can cause a gradient-based optimizer to fail
+        to converge.
+        Usage: y = m.max3(x1,x2)
+        Input: GEKKO variable, parameter, or expression
+        Output: GEKKO variable
+        """
+        # add binary (intb) and output (y) variable
+        intb = self.Var(0,lb=0,ub=1,integer=True)
+        y = self.Var()
+        # add equations for switching conditions
+        #  intb=0 when x1>x2 and y=x1
+        #  intb=1 when x2>x1 and y=x2
+        self.Equation((1-intb)*(x2-x1) <= 0)
+        self.Equation(intb*(x1-x2) <= 0)
+        self.Equation(y==(1-intb)*x1+intb*x2)
+        # change default solver to APOPT (MINLP)
+        self.options.SOLVER = 1
+        return y
+
+    def min2(self,x1,x2):
+        """ Generates the minimum value with continuous first and
+        second derivatives. The traditional method for min value (min) is not
+        continuously differentiable and can cause a gradient-based optimizer
+        to fail to converge.
+        Usage: y = m.min2(x1,x2)
+        Input: GEKKO variable, parameter, or expression
+        Output: GEKKO variable
+        """
+        # verify that x1 and x2 are valid GEKKO variables or parameters
+        if isinstance(x1,(GKVariable,GKParameter)):
+            xin1 = x1
+        else:
+            # create input variable if it is an expression
+            xin1 = self.Var()
+            self.Equation(xin1==x1)
+        if isinstance(x2,(GKVariable,GKParameter)):
+            xin2 = x2
+        else:
+            # create input variable if it is an expression
+            xin2 = self.Var()
+            self.Equation(xin2==x2)
+        # build min object with unique object name
+        min_name = 'min2_' + str(len(self._objects) + 1)
+        self._objects.append(min_name + ' = min')
+        # add connections between x and min object attribute x
+        self._connections.append(xin1.name + ' = ' + min_name+'.x[1]')
+        self._connections.append(xin2.name + ' = ' + min_name+'.x[2]')
+        # add connections between y and min object attribute y
+        y = self.Var()
+        self._connections.append(y.name + ' = ' + min_name+'.y')
+        return y
+
+    def min3(self,x1,x2):
+        """ Generates the minimum value with a binary switch variable.
+        The traditional method for min value (min) is not continuously
+        differentiable and can cause a gradient-based optimizer to fail
+        to converge.
+        Usage: y = m.min3(x1,x2)
+        Input: GEKKO variable, parameter, or expression
+        Output: GEKKO variable
+        """
+        # add binary (intb) and output (y) variable
+        intb = self.Var(0,lb=0,ub=1,integer=True)
+        y = self.Var()
+        # add equations for switching conditions
+        #  intb=0 when x1<x2 and y=x1
+        #  intb=1 when x2<x1 and y=x2
+        self.Equation((1-intb)*(x1-x2) <= 0)
+        self.Equation(intb*(x2-x1) <= 0)
+        self.Equation(y==(1-intb)*x1+intb*x2)
+        # change default solver to APOPT (MINLP)
+        self.options.SOLVER = 1
+        return y
 
     def periodic(self,v):
         """ Makes the variable argument periodic by adding an equation to
