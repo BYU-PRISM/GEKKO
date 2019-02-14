@@ -277,10 +277,11 @@ class GEKKO(object):
     # bspline     = bspline for 2D data
     # cspline     = cubic spline for 1D data
     # periodic    = periodic (initial=final) for dynamic problems
+    # sign2       = signum function with MPCC (continuous first/second deriv)
     # state_space = continuous/discrete and dense/sparse state space
 
     # --- add to GEKKO ---
-    # axb, fmax, fmin, fsign, fsum, fvsum, lag, lookup, pwl, qobj, table
+    # axb, fmax, fmin, fsum, fvsum, lag, lookup, pwl, qobj, table
 
     # --- flowsheet objects in APMonitor but not GEKKO ---
     # compounds, feedback, flash, flash_column, mass, massflow, massflows, 
@@ -292,7 +293,7 @@ class GEKKO(object):
         second derivatives. The traditional method for absolute value (abs) has
         a point that is not continuously differentiable at an argument value
         of zero and can cause a gradient-based optimizer to fail to converge.
-        Usage: y = abs2(x)
+        Usage: y = m.abs2(x)
         Input: GEKKO variable, parameter, or expression
         Output: GEKKO variable
         """
@@ -317,7 +318,7 @@ class GEKKO(object):
         """ Generates the absolute value with a binary switch. The traditional method
         for absolute value (abs) has a point that is not continuously differentiable
         at an argument value of zero and can cause a gradient-based optimizer to fail to converge.
-        Usage: y = abs3(x)
+        Usage: y = m.abs3(x)
         Input: GEKKO variable, parameter, or expression
         Output: GEKKO variable 
         """
@@ -531,6 +532,50 @@ class GEKKO(object):
 
         #Add connections between v and periodic object attribute x
         self._connections.append(v.name + ' = ' + periodic_name+'.x')
+                
+    def sign2(self,x):
+        """ Generates the sign of an argument with MPCC. The traditional method
+        for signum (sign) is not continuously differentiable and can cause
+        a gradient-based optimizer to fail to converge.
+        Usage: y = m.sign2(x)
+        Input: GEKKO variable, parameter, or expression
+        Output: GEKKO variable 
+        """
+        # verify that x is a valid GEKKO variable or parameter
+        if isinstance(x,(GKVariable,GKParameter)):
+            xin = x
+        else:
+            # create input variable if it is an expression
+            xin = self.Var()
+            self.Equation(xin==x)
+        # build abs object with unique object name
+        sign_name = 'sign2_' + str(len(self._objects) + 1)
+        self._objects.append(sign_name + ' = sign')
+        # add connections between x and sign object attribute x
+        self._connections.append(xin.name + ' = ' + sign_name+'.x')
+        # add connections between y and sign object attribute y
+        y = self.Var()
+        self._connections.append(y.name + ' = ' + sign_name+'.y')
+        return y
+        
+    def sign3(self,x):
+        """ Generates the sign of an argument with binary switching variable.
+        The traditional method for signum (sign) is not continuously differentiable
+        and can cause a gradient-based optimizer to fail to converge.
+        Usage: y = m.sign3(x)
+        Input: GEKKO variable, parameter, or expression
+        Output: GEKKO variable 
+        """
+        # add binary (intb) and output (y) variable
+        intb = self.Var(0,lb=0,ub=1,integer=True)
+        y = self.Var()
+        # add equations for switching conditions
+        self.Equation((1-intb)*x <= 0)
+        self.Equation(intb * (-x) <= 0)
+        self.Equation(y+1==intb*2)
+        # change default solver to APOPT (MINLP)
+        self.options.SOLVER = 1
+        return y
     
     ## State Space
     def state_space(self,A,B,C,D=None,discrete=False,dense=False):
@@ -698,12 +743,6 @@ class GEKKO(object):
         timing = False
         if timing == True:
             import time
-
-        # JSON input read to APM
-#        t = time.time()
-#        self.to_JSON()
-#        print('print JSON', time.time() - t)
-
 
         if timing == True:
             t = time.time()
