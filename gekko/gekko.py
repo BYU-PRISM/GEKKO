@@ -272,6 +272,7 @@ class GEKKO(object):
 
     # APMonitor Objects
     # abs2        = absolute value with MPCC (continuous first/second deriv)
+    # abs3        = absolute value with binary variable for switch
     # arx         = auto-regressive exogenous input (time series) model
     # bspline     = bspline for 2D data
     # cspline     = cubic spline for 1D data
@@ -288,27 +289,47 @@ class GEKKO(object):
 
     def abs2(self,x):
         """ Generates the absolute value with continuous first and
-        second derivatives. The other method for absolute value (abs) has
+        second derivatives. The traditional method for absolute value (abs) has
         a point that is not continuously differentiable at an argument value
         of zero and can cause a gradient-based optimizer to fail to converge.
         Usage: y = abs2(x)
-        Input: GEKKO variable or parameter
+        Input: GEKKO variable, parameter, or expression
         Output: GEKKO variable
         """
-        # verify that x is a valid GEKKO variables
-        if not isinstance(x,(GKVariable,GKParameter)):
-            raise TypeError("First argument must be a GEKKO parameter or variable")
-
+        # verify that x is a valid GEKKO variable or parameter
+        if isinstance(x,(GKVariable,GKParameter)):
+            xin = x
+        else:
+            # create input variable if it is an expression
+            xin = self.Var()
+            self.Equation(xin==x)
         # build abs object with unique object name
-        abs_name = 'abs_obj_' + str(len(self._objects) + 1)
+        abs_name = 'abs2_' + str(len(self._objects) + 1)
         self._objects.append(abs_name + ' = abs')
-
         # add connections between x and abs object attribute x
-        self._connections.append(x.name + ' = ' + abs_name+'.x')
+        self._connections.append(xin.name + ' = ' + abs_name+'.x')
         # add connections between y and abs object attribute y
         y = self.Var()
         self._connections.append(y.name + ' = ' + abs_name+'.y')
-        
+        return y
+
+    def abs3(self,x):
+        """ Generates the absolute value with a binary switch. The traditional method
+        for absolute value (abs) has a point that is not continuously differentiable
+        at an argument value of zero and can cause a gradient-based optimizer to fail to converge.
+        Usage: y = abs3(x)
+        Input: GEKKO variable, parameter, or expression
+        Output: GEKKO variable 
+        """
+        # add binary (intb) and output (y) variable
+        intb = self.Var(0,lb=0,ub=1,integer=True)
+        y = self.Var()
+        # add equations for switching conditions
+        self.Equation((1-intb)*x <= 0)
+        self.Equation(intb * (-x) <= 0)
+        self.Equation(y==(1-intb)*(-x) + intb*x)
+        # change default solver to APOPT (MINLP)
+        self.options.SOLVER = 1
         return y
 
     def arx(self,A,B,na,nb,ny,nu):
