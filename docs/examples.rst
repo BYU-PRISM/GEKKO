@@ -8,7 +8,29 @@ Examples
 .. toctree::
 	:maxdepth: 1
 
+---------------
+Variable and Equation Arrays
+---------------
 
+.. math::
+
+   x_1 = x_0 + p \\
+   x_2-1 = x_1 + x_0 \\
+   x_2 = x_1^2
+
+This example demonstrates how to define a parameter with a value of 1.2, a variable array, an equation, and an equation array using GEKKO. After the solution with m.solve(), the x values are printed.::
+
+	from gekko import GEKKO
+	m=GEKKO()
+	p=m.Param(1.2)
+	x=m.Array(m.Var,3)
+	eq0 = x[1]==x[0]+p
+	eq1 = x[2]-1==x[1]+x[0]
+	m.Equation(x[2]==x[1]**2)
+	m.Equations([eq0,eq1])
+	m.solve()
+	for i in range(3):
+ 	   print('x['+str(i)+']='+str(x[i].value))
 
 ---------------
 HS 71 Benchmark
