@@ -58,7 +58,7 @@ Variable and Equation Arrays
    x_2-1 = x_1 + x_0 \\
    x_2 = x_1^2
 
-This example demonstrates how to define a parameter with a value of 1.2, a variable array, an equation, and an equation array using GEKKO. After the solution with m.solve(), the x values are printed.::
+This example demonstrates how to define a parameter with a value of 1.2, a variable array, an equation, and an equation array using GEKKO. After the solution with m.solve(), the x values are printed::
 
 	from gekko import GEKKO
 	m=GEKKO()
