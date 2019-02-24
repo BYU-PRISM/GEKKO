@@ -67,6 +67,7 @@ class GEKKO(object):
         self._objectives = []
         self._connections = []
         self._objects = []
+        self._raw = []
 
         #time discretization
         self.time = None
@@ -225,6 +226,9 @@ class GEKKO(object):
     def Obj(self,obj):
         self._objectives.append('minimize ' + str(obj))
 
+    def Raw(self,raw):
+        self._raw.append(str(raw))
+        
     #%% Connections
 
     def Connection(self,var1, var2, pos1=None, pos2=None, node1='end', node2='end'):
@@ -284,6 +288,7 @@ class GEKKO(object):
     # sign2       = signum function with MPCC
     # sign3       = signum function with binary variable for switch
     # state_space = continuous/discrete and dense/sparse state space
+    # sysid       = linear time invariant system identification (ARX / OE)
 
     # --- add to GEKKO ---
     # axb, fmax, fmin, fsum, fvsum, lag, lookup, pwl, qobj, table
@@ -338,23 +343,41 @@ class GEKKO(object):
         self.options.SOLVER = 1
         return y
 
-    def arx(self,A,B,na,nb,ny,nu):
+    def arx(self,a,b,c=np.array([])):
         """
         Build a GEKKO from ARX representation.
         Give A,B,C and D, returns:
         m (GEKKO model)
-        A (coefficients for A polynomial, ny by na)
-        B (coefficients for B polynomial, ny by nu by nb)
+        a (coefficients for a polynomial, na by ny)
+        b (coefficients for b polynomial, nb by nu by ny)
+        c (coefficients for output bias, ny)
         na (# of A coefficients)
         nb (# of B coefficients)
         ny (# of outputs)
         nu (# of inputs)
         """
+        #get sizes
+        na = np.size(a,0)
+        nb = np.size(b,0)
+        ny = np.size(a,1)
+        nu = np.size(b,1)
         #set all matricies to numpy
-        A = np.array(A)
-        A = np.transpose(A)
-        B = np.array(B)
-        B = np.transpose(B)
+        a = np.array(a)
+        b = np.array(b)
+        if c.size==0:
+            c = np.zeros(ny)
+        else:
+            c = np.array(c)
+        #check consistency
+        if b.ndim<=1:
+            raise TypeError('b dimension must be (nb,nu,ny) or (nb,nu) when ny=1')        
+        if b.ndim==2 and ny!=1:
+            raise TypeError('b (nb,nu,ny) dimension must by consistent with ny')
+        if b.ndim==3:
+            if ny!=np.size(b,2):
+                raise TypeError('b (nb,nu,ny) dimension must by consistent with a (na,ny)')
+        if ny!=np.size(c):
+            raise TypeError('c (ny) dimension must be length ' + str(ny))
  
         # build arx object with unique object name
         arx_name = 'sysa'  #+ str(len(self._objects) + 1)
@@ -370,20 +393,29 @@ class GEKKO(object):
         with open(os.path.join(self._path,file_name), 'w+') as f:
             f.write(file_data)
         self._extra_files.append(file_name) #add csv file to list of extra file to send to server
-
          
         #write A,B matricies to objectname.A/B.txt
         file_name = arx_name + '.alpha.txt'
-        np.savetxt(os.path.join(self._path,file_name), A, delimiter=", ", fmt='%1.25s')
+        np.savetxt(os.path.join(self._path,file_name), a, delimiter=", ", fmt='%1.25s')
         self._extra_files.append(file_name) #add csv file to list of extra file to send to server
         file_name = arx_name + '.beta.txt'
-        np.savetxt(os.path.join(self._path,file_name), B, delimiter=", ", fmt='%1.25s')
+        if b.ndim==2:
+            #write once for 2D array
+            np.savetxt(os.path.join(self._path,file_name), b[i], delimiter=", ", fmt='%1.25s')
+        elif b.ndim==3:
+            #open file in binary mode to append for 3D array
+            f=open(os.path.join(self._path,file_name),'ab')
+            for i in range(nb):
+                np.savetxt(os.path.join(self._path,file_name), b[i], delimiter=", ", fmt='%1.25s')
+            f.close()
+        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+        file_name = arx_name + '.gamma.txt'
+        np.savetxt(os.path.join(self._path,file_name), c, delimiter=", ", fmt='%1.25s')
         self._extra_files.append(file_name) #add csv file to list of extra file to send to server
         
         #define arrays of states, outputs and inputs
         y = [self.CV() for i in np.arange(ny)]
         u = [self.MV() for i in np.arange(nu)]
-
 
         #Add connections between u, x and y with arx object
         for i in range(nu):
@@ -819,6 +851,279 @@ class GEKKO(object):
             self._connections.append(y[i].name + ' = ' + SS_name+'.y['+str(i+1)+']')
 
         return x,y,u
+        
+    ## System identification of time series model
+    def sysid(self,t,u,y,na,nb,shift=0):
+        '''
+         Identification of linear time-invariant models
+         
+         y,a,b,c = sysid(t,u,y,na,nb,shift=0)
+             
+         Input:     t = time data
+                    u = input data for the regression
+                    y = output data for the regression   
+                    na   = number of output coefficients
+                    nb   = number of input coefficients
+                    shift (optional) = 
+                       0 (no shift), 1 (initial pt),
+                       2 (mean center), 3 (calculate c)
+        
+         Output:    returns ypred (predicted outputs), a,b,c coefficients
+                    sysa.apm is written (model file with identified parameters)
+        '''
+        # convert to numpy arrays
+        t = np.array(t)
+        u = np.array(u)
+        y = np.array(y)
+        # objective scaling
+        obj_scale = 1
+        # sizes
+        n = np.size(u,0)
+        nu = np.size(u,1)
+        ny = np.size(y,1)
+        # consistency checks
+        if ny<=0 or nu<=0 or np.size(t)<=0:
+            raise TypeError('time (t), inputs (u), outputs (y) must contain data')
+        if np.size(t)!=np.size(u,0) or np.size(t)!=np.size(y,0):
+            raise TypeError('Data rows must be equal for t,u,y')
+        m = max(na,nb)
+
+        # first column is time
+        dt = t[1] - t[0]
+    
+        # shift options
+        if shift==0:
+            u_ss = np.zeros(nu)
+            y_ss = np.zeros(ny)
+        elif shift==1:
+            u_ss = u[0]
+            y_ss = y[0]
+        elif shift==2:
+            u_ss = np.mean(u,0)
+            y_ss = np.mean(y,0)
+        else:
+            u_ss = np.zeros(nu)
+            y_ss = np.zeros(ny)
+        
+        if shift==2 or shift==3:
+            for i in range(n):
+                for j in range(nu):
+                    u[i,j] = u[i,j] - u_ss[j]
+                for j in range(ny):
+                    y[i,j] = y[i,j] - y_ss[j]
+
+        # create new GEKKO model
+        syid = GEKKO(remote=self._remote,server=self._server)    
+
+        syid.Raw('Objects')
+        syid.Raw('  sum_a[1:ny] = sum(%i)'%na)
+        syid.Raw('  sum_b[1:nu][1::ny] = sum(%i)'%nb)
+        syid.Raw('End Objects')
+        syid.Raw('  ')
+        syid.Raw('Connections')
+        syid.Raw('  a[1:na][1::ny] = sum_a[1::ny].x[1:na]')
+        syid.Raw('  b[1:nb][1::nu][1:::ny] = sum_b[1::nu][1:::ny].x[1:nb]')
+        syid.Raw('  sum_a[1:ny] = sum_a[1:ny].y')
+        syid.Raw('  sum_b[1:nu][1::ny] = sum_b[1:nu][1::ny].y')
+        syid.Raw('End Connections')
+        syid.Raw('  ')
+        syid.Raw('Constants')
+        syid.Raw('  n = %i' %n)
+        syid.Raw('  nu = %i'%nu)
+        syid.Raw('  ny = %i'%ny)
+        syid.Raw('  na = %i'%na)
+        syid.Raw('  nb = %i'%nb)
+        syid.Raw('  m = %i'%m)
+        syid.Raw('  ')
+        syid.Raw('Parameters')
+        syid.Raw('  a[1:na][1::ny] = 0 !>= -1 <= 1')
+        syid.Raw('  b[1:nb][1::nu][1:::ny] = 0')
+        syid.Raw('  c[1:ny] = 0')
+        syid.Raw('  u[1:n][1::nu]')
+        syid.Raw('  y[1:m][1::ny]')
+        syid.Raw('  z[1:n][1::ny]')
+        syid.Raw('  ')
+        syid.Raw('Variables')
+        syid.Raw('  y[m+1:n][1::ny] = 0')
+        syid.Raw('  sum_a[1:ny] = 0 !<= 1')
+        syid.Raw('  sum_b[1:nu][1::ny] = 0')
+        syid.Raw('  K[1:nu][1::ny] = 0 !>=0 <= 10 ') 
+        syid.Raw('  ')
+        syid.Raw('Equations')
+        eqn = '  y[m+1:n][1::ny] = a[1][1::ny]*y[m:n-1][1::ny]'
+        for j in range(1,nu+1):
+            eqn += ' + b[1][%i][1::ny]*u[m:n-1][%i]'%(j,j,)
+            for i in range(2,nb+1): 
+                eqn += ' + b[%i][%i][1::ny]*u[m-%i:n-%i][%i]'%(i,j,i-1,i,j,)
+        for i in range(2,na+1): 
+            eqn += ' + a[%i][1::ny]*y[m-%i:n-%i][1::ny]'%(i,i-1,i,)
+        syid.Raw(eqn)
+        syid.Raw('')
+        syid.Raw('  K[1:nu][1::ny] * (1 - sum_a[1::ny]) = sum_b[1:nu][1::ny]')
+        syid.Raw('  minimize %e * (y[m+1:n][1::ny] - z[m+1:n][1::ny])^2'%obj_scale)
+
+        syid.Raw('File *.csv')
+        for j in range(1,nu+1): 
+            for i in range(1,n+1): 
+                syid.Raw('u[%i][%i], %e'%(i,j,u[i-1,j-1],))
+        for k in range(1,ny+1):
+            for i in range(1,n+1):
+                syid.Raw('z[%i][%i], %e'%(i,k,y[i-1,k-1],))
+        for k in range(1,ny+1): 
+            for i in range(1,n+1): 
+                syid.Raw('y[%i][%i], %e'%(i,k,y[i-1,k-1],))
+        syid.Raw('End File')
+
+        syid.options.SOLVER = 3
+        syid.options.IMODE = 2
+        syid.options.MAX_ITER = 200
+        syid.Raw('File overrides.dbs')
+        #syid.Raw('  apm.solver=3')
+        #syid.Raw('  apm.imode=2')
+        #syid.Raw('  apm.max_iter=200')
+        for i in range(1,ny+1): 
+            name = 'c[' + str(i) + ']'
+            if shift==4:
+                syid.Raw(name+'.status=1')
+            else:
+                syid.Raw(name+'.status=0')            
+        for k in range(1,ny+1): 
+            for i in range(1,na+1): 
+                name = 'a[' + str(i) + '][' + str(k) + ']'
+                syid.Raw(name+'.status=1')
+        for k in range(1,ny+1): 
+            for j in range(1,nb+1): 
+                for i in range(1,nb+1): 
+                    name = 'b[' + str(i) + '][' + str(j) + '][' + str(k) + ']'
+                    syid.Raw(name+'.status=1')
+        syid.Raw('End File')
+
+        syid.Raw('File *.info')
+        for i in range(1,ny+1): 
+            name = 'c[' + str(i) + ']'
+            syid.Raw('FV, '+name)
+        for k in range(1,ny+1): 
+            for i in range(1,na+1): 
+                name = 'a[' + str(i) + '][' + str(k) + ']'
+                syid.Raw('FV, '+name)
+        for k in range(1,ny+1): 
+            for j in range(1,nb+1): 
+                for i in range(1,nb+1): 
+                    name = 'b[' + str(i) + '][' + str(j) + '][' + str(k) + ']'
+                    syid.Raw('FV, '+name)
+        syid.Raw('End File')
+
+        # solve system ID
+        syid.solve()
+        syid.open_folder()
+    
+        # retrieve and visualize solution
+        import json
+        with open(syid.path+'//results.json') as f:
+            sol = json.load(f)
+
+        ypred = np.empty((n,ny))
+        for j in range(ny):
+            for i in range(n):
+                yn = 'y['+str(i+1)+']['+str(j+1)+']'
+                ypred[i,j] = sol[yn][0]
+                
+        alpha = np.empty((na,ny))
+        beta = np.empty((nb,nu,ny))
+        gamma = np.empty((ny))
+        for j in range(1,ny+1):
+            for i in range(1,na+1):
+                name = 'a['+str(i)+']['+str(j)+']'
+                alpha[i-1,j-1] = sol[name][0];
+        for k in range(1,ny+1):
+            for j in range(1,nu+1):
+                for i in range(1,nb+1):
+                    name = 'b['+str(i)+']['+str(j)+']['+str(k)+']'
+                    beta[i-1,j-1,k-1] = sol[name][0]
+        for i in range(1,ny+1):
+            name = 'c['+str(i)+']'
+            gamma[i-1] = sol[name][0]
+        
+        name = 'sysa'
+        fid = open(syid.path+'//sysa.apm','w')
+        fid.write('Objects\n')
+        fid.write(' '+name+' = arx\n')    
+        fid.write('End Objects\n')
+        fid.write('\n')    
+        fid.write('Connections\n')
+        if nu==1:
+            fid.write('  u = '+name+'.u\n')
+        else:
+            fid.write('  u[1:%i] = '%nu+name+'.u[1:%i]\n'%nu)
+        if ny ==1:
+            fid.write('  y = '+name+'.y\n')
+        else:
+            fid.write('  y[1:%i] = '%ny+name+'.y[1:%i]\n'%ny)
+        fid.write('End Connections\n')
+        fid.write('\n')
+        fid.write('Model \n')
+        fid.write('  Parameters \n')
+        if nu==1:
+            fid.write('    u = 0\n')
+        else:
+            fid.write('    u[1:%i] = 0\n'%nu)
+        fid.write('  End Parameters \n')
+        fid.write('\n')
+        fid.write('  Variables \n')
+        if ny==1:
+            fid.write('    y = 0\n')
+        else:
+            fid.write('    y[1:%i] = 0\n'%ny)
+        fid.write('  End Variables \n')
+        fid.write('\n')
+        fid.write('  Equations \n')
+        fid.write('    ! add any additional equations here \n')
+        fid.write('  End Equations \n')
+        fid.write('End Model \n')
+        fid.write('\n')
+        fid.write('File '+name+'.txt\n')
+        fid.write('  %i      ! m=number of inputs\n'%nu)
+        fid.write('  %i      ! p=number of outputs\n'%ny)
+        fid.write('  %i      ! nb=number of input terms\n'%nb)
+        fid.write('  %i      ! na=number of output terms\n'%na)
+        fid.write('End File\n')
+        fid.write('\n')
+        fid.write('! Alpha matrix (na x p)\n')
+        fid.write('File '+name+'.alpha.txt \n')
+        for i in range(1,na+1):
+            for j in range(1,ny+1):
+                fid.write('  ')
+                if j<=ny-1:
+                    fid.write('%e , '%alpha[i-1,j-1])
+                else:
+                    fid.write('%e '%alpha[i-1,j-1]) # no comma
+            fid.write('\n')
+        fid.write('End File \n')
+        fid.write('\n')
+        fid.write('! Beta matrix (p x (nb x m))\n')
+        fid.write('File '+name+'.beta.txt \n')
+        for i in range(1,ny+1):
+            for j in range(1,nb+1):
+                fid.write('  ')
+                for k in range(1,nu+1):
+                    if k<=nu-1:
+                        fid.write('%e , '%beta[j-1,k-1,i-1])
+                    else:
+                        fid.write('%e '%beta[j-1,k-1,i-1])
+                fid.write('\n')
+        fid.write('End File \n')
+        fid.write('\n')
+        fid.write('! Gamma vector (p x 1)\n')
+        fid.write('File '+name+'.gamma.txt \n')
+        for i in range(1,ny+1):
+            fid.write('%e \n'%gamma[i-1])
+        fid.write('End File \n')
+        fid.close()
+        
+        msg = 'Created ARX (Auto-Regressive eXogenous inputs) Model: sysa.apm'
+        print(msg)
+        
+        return ypred+y_ss,alpha,beta,gamma
 
     #%% Add array functionality to all types
     def Array(self,f,dim,**args):

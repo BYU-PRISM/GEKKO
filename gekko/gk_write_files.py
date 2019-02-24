@@ -108,6 +108,10 @@ def _build_model(self):
     f.write('Model\n')
     f.write(model)
     f.write('\nEnd Model')
+    if self._raw:
+        f.write('\n')
+        for r in self._raw:
+            f.write('%s\n'%r)
     f.close()
 
     self._model = 'auto-generated' #what does this do?
