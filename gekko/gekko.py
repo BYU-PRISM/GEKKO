@@ -348,8 +348,8 @@ class GEKKO(object):
         Build a GEKKO from ARX representation.
         Give A,B,C and D, returns:
         m (GEKKO model)
-        a (coefficients for a polynomial, na by ny)
-        b (coefficients for b polynomial, nb by nu by ny)
+        a (coefficients for a polynomial, na x ny)
+        b (coefficients for b polynomial, ny x (nb x nu))
         c (coefficients for output bias, ny)
         na (# of A coefficients)
         nb (# of B coefficients)
@@ -358,9 +358,9 @@ class GEKKO(object):
         """
         #get sizes
         na = np.size(a,0)
-        nb = np.size(b,0)
+        nb = np.size(b,1)
         ny = np.size(a,1)
-        nu = np.size(b,1)
+        nu = np.size(b,2)
         #set all matricies to numpy
         a = np.array(a)
         b = np.array(b)
@@ -372,15 +372,15 @@ class GEKKO(object):
         if b.ndim<=1:
             raise TypeError('b dimension must be (nb,nu,ny) or (nb,nu) when ny=1')        
         if b.ndim==2 and ny!=1:
-            raise TypeError('b (nb,nu,ny) dimension must by consistent with ny')
+            raise TypeError('b (ny x (nb,nu)) dimension must by consistent with ny=1')
         if b.ndim==3:
-            if ny!=np.size(b,2):
-                raise TypeError('b (nb,nu,ny) dimension must by consistent with a (na,ny)')
+            if ny!=np.size(b,0):
+                raise TypeError('b (ny x (nb,nu)) dimension must by consistent with a matrix (na,ny)')
         if ny!=np.size(c):
             raise TypeError('c (ny) dimension must be length ' + str(ny))
  
         # build arx object with unique object name
-        arx_name = 'sysa'  #+ str(len(self._objects) + 1)
+        arx_name = 'sysa'  + str(len(self._objects) + 1)
         self._objects.append(arx_name + ' = arx')
         
         # write arx object config file objectname.txt
@@ -401,12 +401,12 @@ class GEKKO(object):
         file_name = arx_name + '.beta.txt'
         if b.ndim==2:
             #write once for 2D array
-            np.savetxt(os.path.join(self._path,file_name), b[i], delimiter=", ", fmt='%1.25s')
+            np.savetxt(os.path.join(self._path,file_name), b, delimiter=", ", fmt='%1.25s')
         elif b.ndim==3:
             #open file in binary mode to append for 3D array
             f=open(os.path.join(self._path,file_name),'ab')
-            for i in range(nb):
-                np.savetxt(os.path.join(self._path,file_name), b[i], delimiter=", ", fmt='%1.25s')
+            for i in range(ny):
+                np.savetxt(f, b[i], delimiter=", ", fmt='%1.25s')
             f.close()
         self._extra_files.append(file_name) #add csv file to list of extra file to send to server
         file_name = arx_name + '.gamma.txt'
@@ -853,11 +853,11 @@ class GEKKO(object):
         return x,y,u
         
     ## System identification of time series model
-    def sysid(self,t,u,y,na,nb,shift=0):
+    def sysid(self,t,u,y,na,nb,shift='none',pred='model'):
         '''
          Identification of linear time-invariant models
          
-         y,a,b,c = sysid(t,u,y,na,nb,shift=0)
+         y,a,b,c = sysid(t,u,y,na,nb,shift=0,pred='model')
              
          Input:     t = time data
                     u = input data for the regression
@@ -865,8 +865,14 @@ class GEKKO(object):
                     na   = number of output coefficients
                     nb   = number of input coefficients
                     shift (optional) = 
-                       0 (no shift), 1 (initial pt),
-                       2 (mean center), 3 (calculate c)
+                       'none' (no shift)
+                       'init' (initial pt),
+                       'mean' (mean center)
+                       'calc' (calculate c)
+                    pred (option) = 
+                       'model' for output error regression form
+                       'meas' for ARX regression form
+                       Using 'model' favors an unbiased model prediction
         
          Output:    returns ypred (predicted outputs), a,b,c coefficients
                     sysa.apm is written (model file with identified parameters)
@@ -892,20 +898,20 @@ class GEKKO(object):
         dt = t[1] - t[0]
     
         # shift options
-        if shift==0:
+        if shift=='none':
             u_ss = np.zeros(nu)
             y_ss = np.zeros(ny)
-        elif shift==1:
+        elif shift=='init':
             u_ss = u[0]
             y_ss = y[0]
-        elif shift==2:
+        elif shift=='mean':
             u_ss = np.mean(u,0)
             y_ss = np.mean(y,0)
         else:
             u_ss = np.zeros(nu)
             y_ss = np.zeros(ny)
         
-        if shift==2 or shift==3:
+        if shift=='init' or shift=='mean':
             for i in range(n):
                 for j in range(nu):
                     u[i,j] = u[i,j] - u_ss[j]
@@ -936,7 +942,7 @@ class GEKKO(object):
         syid.Raw('  m = %i'%m)
         syid.Raw('  ')
         syid.Raw('Parameters')
-        syid.Raw('  a[1:na][1::ny] = 0 !>= -1 <= 1')
+        syid.Raw('  a[1:na][1::ny] = 0 !>= 0.00001 <= 0.9999999')
         syid.Raw('  b[1:nb][1::nu][1:::ny] = 0')
         syid.Raw('  c[1:ny] = 0')
         syid.Raw('  u[1:n][1::nu]')
@@ -947,16 +953,28 @@ class GEKKO(object):
         syid.Raw('  y[m+1:n][1::ny] = 0')
         syid.Raw('  sum_a[1:ny] = 0 !<= 1')
         syid.Raw('  sum_b[1:nu][1::ny] = 0')
-        syid.Raw('  K[1:nu][1::ny] = 0 !>=0 <= 10 ') 
+        syid.Raw('  K[1:nu][1::ny] = 0 # >=-1000 <=1000')
         syid.Raw('  ')
         syid.Raw('Equations')
-        eqn = '  y[m+1:n][1::ny] = a[1][1::ny]*y[m:n-1][1::ny]'
+        if pred=='model':
+            # use model to predict next y (Output error)
+            eqn = '  y[m+1:n][1::ny] = a[1][1::ny]*y[m:n-1][1::ny]'
+        else:
+            # use measurement to predict next y (ARX)
+            eqn = '  y[m+1:n][1::ny] = a[1][1::ny]*z[m:n-1][1::ny]'
         for j in range(1,nu+1):
-            eqn += ' + b[1][%i][1::ny]*u[m:n-1][%i]'%(j,j,)
+            eqn += '+b[1][%i][1::ny]*u[m:n-1][%i]'%(j,j,)
             for i in range(2,nb+1): 
-                eqn += ' + b[%i][%i][1::ny]*u[m-%i:n-%i][%i]'%(i,j,i-1,i,j,)
+                eqn += '+b[%i][%i][1::ny]*u[m-%i:n-%i][%i]'%(i,j,i-1,i,j,)
+        if pred=='model':
+            # use model to predict next y (Output error)
+            seqn = '+a[%i][1::ny]*y[m-%i:n-%i][1::ny]'
+        else:
+            # use measurement to predict next y (ARX)
+            seqn = '+a[%i][1::ny]*z[m-%i:n-%i][1::ny]'        
         for i in range(2,na+1): 
-            eqn += ' + a[%i][1::ny]*y[m-%i:n-%i][1::ny]'%(i,i-1,i,)
+            eqn += seqn%(i,i-1,i,)
+        eqn += '+c[1::ny]'
         syid.Raw(eqn)
         syid.Raw('')
         syid.Raw('  K[1:nu][1::ny] * (1 - sum_a[1::ny]) = sum_b[1:nu][1::ny]')
@@ -978,12 +996,9 @@ class GEKKO(object):
         syid.options.IMODE = 2
         syid.options.MAX_ITER = 200
         syid.Raw('File overrides.dbs')
-        #syid.Raw('  apm.solver=3')
-        #syid.Raw('  apm.imode=2')
-        #syid.Raw('  apm.max_iter=200')
         for i in range(1,ny+1): 
             name = 'c[' + str(i) + ']'
-            if shift==4:
+            if shift=='calc':
                 syid.Raw(name+'.status=1')
             else:
                 syid.Raw(name+'.status=0')            
@@ -992,7 +1007,7 @@ class GEKKO(object):
                 name = 'a[' + str(i) + '][' + str(k) + ']'
                 syid.Raw(name+'.status=1')
         for k in range(1,ny+1): 
-            for j in range(1,nb+1): 
+            for j in range(1,nu+1): 
                 for i in range(1,nb+1): 
                     name = 'b[' + str(i) + '][' + str(j) + '][' + str(k) + ']'
                     syid.Raw(name+'.status=1')
@@ -1007,7 +1022,7 @@ class GEKKO(object):
                 name = 'a[' + str(i) + '][' + str(k) + ']'
                 syid.Raw('FV, '+name)
         for k in range(1,ny+1): 
-            for j in range(1,nb+1): 
+            for j in range(1,nu+1): 
                 for i in range(1,nb+1): 
                     name = 'b[' + str(i) + '][' + str(j) + '][' + str(k) + ']'
                     syid.Raw('FV, '+name)
@@ -1015,7 +1030,6 @@ class GEKKO(object):
 
         # solve system ID
         syid.solve()
-        syid.open_folder()
     
         # retrieve and visualize solution
         import json
@@ -1029,7 +1043,7 @@ class GEKKO(object):
                 ypred[i,j] = sol[yn][0]
                 
         alpha = np.empty((na,ny))
-        beta = np.empty((nb,nu,ny))
+        beta = np.empty((ny,nb,nu))
         gamma = np.empty((ny))
         for j in range(1,ny+1):
             for i in range(1,na+1):
@@ -1039,89 +1053,25 @@ class GEKKO(object):
             for j in range(1,nu+1):
                 for i in range(1,nb+1):
                     name = 'b['+str(i)+']['+str(j)+']['+str(k)+']'
-                    beta[i-1,j-1,k-1] = sol[name][0]
+                    beta[k-1,i-1,j-1] = sol[name][0]
         for i in range(1,ny+1):
             name = 'c['+str(i)+']'
             gamma[i-1] = sol[name][0]
-        
-        name = 'sysa'
-        fid = open(syid.path+'//sysa.apm','w')
-        fid.write('Objects\n')
-        fid.write(' '+name+' = arx\n')    
-        fid.write('End Objects\n')
-        fid.write('\n')    
-        fid.write('Connections\n')
-        if nu==1:
-            fid.write('  u = '+name+'.u\n')
-        else:
-            fid.write('  u[1:%i] = '%nu+name+'.u[1:%i]\n'%nu)
-        if ny ==1:
-            fid.write('  y = '+name+'.y\n')
-        else:
-            fid.write('  y[1:%i] = '%ny+name+'.y[1:%i]\n'%ny)
-        fid.write('End Connections\n')
-        fid.write('\n')
-        fid.write('Model \n')
-        fid.write('  Parameters \n')
-        if nu==1:
-            fid.write('    u = 0\n')
-        else:
-            fid.write('    u[1:%i] = 0\n'%nu)
-        fid.write('  End Parameters \n')
-        fid.write('\n')
-        fid.write('  Variables \n')
-        if ny==1:
-            fid.write('    y = 0\n')
-        else:
-            fid.write('    y[1:%i] = 0\n'%ny)
-        fid.write('  End Variables \n')
-        fid.write('\n')
-        fid.write('  Equations \n')
-        fid.write('    ! add any additional equations here \n')
-        fid.write('  End Equations \n')
-        fid.write('End Model \n')
-        fid.write('\n')
-        fid.write('File '+name+'.txt\n')
-        fid.write('  %i      ! m=number of inputs\n'%nu)
-        fid.write('  %i      ! p=number of outputs\n'%ny)
-        fid.write('  %i      ! nb=number of input terms\n'%nb)
-        fid.write('  %i      ! na=number of output terms\n'%na)
-        fid.write('End File\n')
-        fid.write('\n')
-        fid.write('! Alpha matrix (na x p)\n')
-        fid.write('File '+name+'.alpha.txt \n')
-        for i in range(1,na+1):
-            for j in range(1,ny+1):
-                fid.write('  ')
-                if j<=ny-1:
-                    fid.write('%e , '%alpha[i-1,j-1])
-                else:
-                    fid.write('%e '%alpha[i-1,j-1]) # no comma
-            fid.write('\n')
-        fid.write('End File \n')
-        fid.write('\n')
-        fid.write('! Beta matrix (p x (nb x m))\n')
-        fid.write('File '+name+'.beta.txt \n')
-        for i in range(1,ny+1):
-            for j in range(1,nb+1):
-                fid.write('  ')
-                for k in range(1,nu+1):
-                    if k<=nu-1:
-                        fid.write('%e , '%beta[j-1,k-1,i-1])
-                    else:
-                        fid.write('%e '%beta[j-1,k-1,i-1])
-                fid.write('\n')
-        fid.write('End File \n')
-        fid.write('\n')
-        fid.write('! Gamma vector (p x 1)\n')
-        fid.write('File '+name+'.gamma.txt \n')
-        for i in range(1,ny+1):
-            fid.write('%e \n'%gamma[i-1])
-        fid.write('End File \n')
-        fid.close()
-        
-        msg = 'Created ARX (Auto-Regressive eXogenous inputs) Model: sysa.apm'
-        print(msg)
+
+        #if shift=='init' or shift=='mean':
+        #    print('calculate gamma')
+        #    print('y_ss')
+        #    print(y_ss)
+        #    print('u_ss')
+        #    print(u_ss)
+        #    print('part 1')
+        #    print(y_ss * (np.ones(ny)-np.sum(alpha,axis=0)))
+        #    print('part 2')
+        #    print(np.sum(np.dot(beta,u_ss),axis=1))
+        #    gamma = y_ss * (np.ones(ny)-np.sum(alpha,axis=0)) - np.sum(np.dot(beta,u_ss),axis=1)
+        #    print(gamma)
+        #    import time
+        #    time.sleep(10)
         
         return ypred+y_ss,alpha,beta,gamma
 
