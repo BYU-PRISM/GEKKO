@@ -1,6 +1,6 @@
 # GEKKO
 
-[GEKKO](http://gekko.readthedocs.io/en/latest/) is a Python package for optimization, specializing in dynamic optimization of differential algebraic equations (DAE) systems. GEKKO provides a user-friendly interface to the powerful [APMonitor optimization suite](http://apmonitor.com/wiki/) on the back end. It is coupled with large-scale solvers for linear, quadratic, nonlinear, and mixed integer programming (LP, QP, NLP, MILP, MINLP). Modes of operation include data reconciliation, real-time optimization, dynamic simulation, and nonlinear predictive control.
+[GEKKO](http://gekko.readthedocs.io/en/latest/) is a Python package for machine learning and optimization, specializing in time series and differential algebraic equations (DAE) systems. GEKKO provides a user-friendly interface to the [APMonitor optimization suite](http://apmonitor.com/wiki/). It is coupled with large-scale solvers for linear, quadratic, nonlinear, and mixed integer programming (LP, QP, NLP, MILP, MINLP). Modes of operation include parameter regression, dynamic data reconciliation, real-time optimization, dynamic simulation, and nonlinear predictive control.
 
 ### Installation
 
@@ -28,7 +28,7 @@ Currently, the pip packages includes the Windows executable (apm.exe) and the Li
 
 ## What does GEKKO do?
 
-GEKKO is optimization software for mixed-integer and differential algebraic equations. It is coupled with large-scale solvers for linear, quadratic, nonlinear, and mixed integer programming (LP, QP, NLP, MILP, MINLP). Modes of operation include data reconciliation, real-time optimization, dynamic simulation, and nonlinear predictive control. The client or server is freely available with interfaces in MATLAB, Python, or from a web browser.
+GEKKO is optimization software for machine learning and optimization of mixed-integer and differential algebraic equations. It is coupled with large-scale solvers for linear, quadratic, nonlinear, and mixed integer programming (LP, QP, NLP, MILP, MINLP). Modes of operation include data reconciliation, real-time optimization, dynamic simulation, and nonlinear predictive control. The client or server is freely available with interfaces in MATLAB, Python, or from a web browser.
 
 GEKKO is a high-level abstraction of mathematical optimization problems. Values in the models are defined by Constants, Parameters, and Variables. The values are related to each other by Intermediates or Equations. Objective functions are defined to maximize or minimize certain values. Objects are built-in collections of values (constants, parameters, and variables) and relationships (intermediates, equations, and objective functions). Objects can build upon other objects with object-oriented relationships.
 
