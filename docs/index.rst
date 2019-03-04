@@ -18,7 +18,7 @@ GEKKO is a Python package for machine learning and optimization of mixed-integer
 differential algebraic equations. It is coupled with large-scale solvers for
 linear, quadratic, nonlinear, and mixed integer programming (LP, QP, NLP, MILP,
 MINLP). Modes of operation include parameter regression, data reconciliation, real-time optimization,
-dynamic simulation, and nonlinear predictive control. GEKKO is an object-oriented python library to facilitate local execution of APMonitor.
+dynamic simulation, and nonlinear predictive control. GEKKO is an object-oriented Python library to facilitate local execution of APMonitor.
 
 More of the backend details are available at :ref:`what_APM_does` and in the `GEKKO Journal Article <https://www.mdpi.com/2227-9717/6/8/106>`_. Example applications are available to `get started with GEKKO <https://apmonitor.com/wiki/index.php/Main/GekkoPythonOptimization>`_. 
 
