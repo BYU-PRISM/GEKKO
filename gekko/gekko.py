@@ -343,19 +343,22 @@ class GEKKO(object):
         self.options.SOLVER = 1
         return y
 
-    def arx(self,a,b,c=np.array([])):
+    def arx(self,p):
         """
         Build a GEKKO from ARX representation.
-        Give A,B,C and D, returns:
-        m (GEKKO model)
-        a (coefficients for a polynomial, na x ny)
-        b (coefficients for b polynomial, ny x (nb x nu))
-        c (coefficients for output bias, ny)
-        na (# of A coefficients)
-        nb (# of B coefficients)
-        ny (# of outputs)
-        nu (# of inputs)
+        inputs:
+           parameter dictionary p['a'], p['b'], p['c']
+           a (coefficients for a polynomial, na x ny)
+           b (coefficients for b polynomial, ny x (nb x nu))
+           c (coefficients for output bias, ny)
         """
+        try:
+            a = p['a']
+            b = p['b']
+            c = p['c']
+        except:
+            raise TypeError("arx input must be dictionary with a,b,c as output from sysid")
+
         #get sizes
         na = np.size(a,0)
         nb = np.size(b,1)
@@ -853,11 +856,11 @@ class GEKKO(object):
         return x,y,u
         
     ## System identification of time series model
-    def sysid(self,t,u,y,na,nb,shift='none',pred='model'):
+    def sysid(self,t,u,y,na,nb,shift='calc',scale=True,diaglevel=0,pred='model',objf=1):
         '''
          Identification of linear time-invariant models
          
-         y,a,b,c = sysid(t,u,y,na,nb,shift=0,pred='model')
+         y,p,K = sysid(t,u,y,na,nb,shift=0,pred='model',objf=1)
              
          Input:     t = time data
                     u = input data for the regression
@@ -869,20 +872,26 @@ class GEKKO(object):
                        'init' (initial pt),
                        'mean' (mean center)
                        'calc' (calculate c)
+                    scale (optional) = 
+                       scale data to between zero to one unless
+                         data range is already less than one
                     pred (option) = 
                        'model' for output error regression form
                        'meas' for ARX regression form
                        Using 'model' favors an unbiased model prediction
-        
-         Output:    returns ypred (predicted outputs), a,b,c coefficients
-                    sysa.apm is written (model file with identified parameters)
+                    objf = objective scaling factor
+                       minimize objf*(model-meas)**2 + 1e-3 * (a^2 + b^2 + c^2)
+                    diaglevel = display solver output and diagnostics (0-6)
+                    
+         Output:    returns
+                    ypred (predicted outputs)
+                    p as coefficient dictionary with keys 'a','b','c'
+                    K gain matrix
         '''
         # convert to numpy arrays
         t = np.array(t)
         u = np.array(u)
         y = np.array(y)
-        # objective scaling
-        obj_scale = 1
         # sizes
         n = np.size(u,0)
         nu = np.size(u,1)
@@ -896,21 +905,45 @@ class GEKKO(object):
 
         # first column is time
         dt = t[1] - t[0]
+
+        # gain scaling
+        Ks = np.ones((ny,nu))
+        if scale:
+            # scale data to 0-1
+            y_max = np.max(y,axis=0)
+            y_min = np.min(y,axis=0)
+            u_max = np.max(u,axis=0)
+            u_min = np.min(u,axis=0)
+            # limit range >= 1
+            y_range = np.empty(ny)
+            u_range = np.empty(nu)
+            for i in range(ny):
+                y_range[i] = np.max([1,(y_max[i]-y_min[i])])
+            for i in range(nu):
+                u_range[i] = np.max([1,(u_max[i]-u_min[i])])
+            for i in range(n):
+                for j in range(nu):
+                    u[i,j] = (u[i,j]-u_min[j])/u_range[j]
+                for j in range(ny):
+                    y[i,j] = (y[i,j]-y_min[j])/y_range[j]
+            # gain scaling factor - scaled to unscaled
+            for i in range(ny):
+                for j in range(nu):
+                    Ks[i,j] = y_range[i]/u_range[j]
     
         # shift options
-        if shift=='none':
-            u_ss = np.zeros(nu)
-            y_ss = np.zeros(ny)
-        elif shift=='init':
-            u_ss = u[0]
-            y_ss = y[0]
+        if shift=='init':
+            u_ss = u[0].copy()
+            y_ss = y[0].copy()
         elif shift=='mean':
             u_ss = np.mean(u,0)
             y_ss = np.mean(y,0)
         else:
+            # all other cases
             u_ss = np.zeros(nu)
             y_ss = np.zeros(ny)
         
+        # shift down to initial or mean values
         if shift=='init' or shift=='mean':
             for i in range(n):
                 for j in range(nu):
@@ -919,7 +952,8 @@ class GEKKO(object):
                     y[i,j] = y[i,j] - y_ss[j]
 
         # create new GEKKO model
-        syid = GEKKO(remote=self._remote,server=self._server)    
+        syid = GEKKO(remote=self._remote,server=self._server) 
+        #syid.open_folder()        
 
         syid.Raw('Objects')
         syid.Raw('  sum_a[1:ny] = sum(%i)'%na)
@@ -948,12 +982,13 @@ class GEKKO(object):
         syid.Raw('  u[1:n][1::nu]')
         syid.Raw('  y[1:m][1::ny]')
         syid.Raw('  z[1:n][1::ny]')
+        syid.Raw('  Ks[1:nu][1::ny] = 1')
         syid.Raw('  ')
         syid.Raw('Variables')
         syid.Raw('  y[m+1:n][1::ny] = 0')
         syid.Raw('  sum_a[1:ny] = 0 !<= 1')
         syid.Raw('  sum_b[1:nu][1::ny] = 0')
-        syid.Raw('  K[1:nu][1::ny] = 0 # >=-1000 <=1000')
+        syid.Raw('  K[1:nu][1::ny] = 0 >=-1000 <=1000')
         syid.Raw('  ')
         syid.Raw('Equations')
         if pred=='model':
@@ -977,25 +1012,32 @@ class GEKKO(object):
         eqn += '+c[1::ny]'
         syid.Raw(eqn)
         syid.Raw('')
-        syid.Raw('  K[1:nu][1::ny] * (1 - sum_a[1::ny]) = sum_b[1:nu][1::ny]')
-        syid.Raw('  minimize %e * (y[m+1:n][1::ny] - z[m+1:n][1::ny])^2'%obj_scale)
+        syid.Raw('  K[1:nu][1::ny] * (1 - sum_a[1::ny]) = Ks[1:nu][1::ny] * sum_b[1:nu][1::ny]')        
+        syid.Raw('  minimize %e * (y[m+1:n][1::ny] - z[m+1:n][1::ny])^2'%objf)
+        syid.Raw('  minimize 1e-3 * a[1:na][1::ny]^2')
+        syid.Raw('  minimize 1e-3 * b[1:nb][1::nu][1:::ny]^2')
+        syid.Raw('  minimize 1e-3 * c[1:ny]^2')
 
         syid.Raw('File *.csv')
         for j in range(1,nu+1): 
             for i in range(1,n+1): 
-                syid.Raw('u[%i][%i], %e'%(i,j,u[i-1,j-1],))
+                syid.Raw('u[%i][%i], %e'%(i,j,u[i-1,j-1]))
         for k in range(1,ny+1):
             for i in range(1,n+1):
-                syid.Raw('z[%i][%i], %e'%(i,k,y[i-1,k-1],))
+                syid.Raw('z[%i][%i], %e'%(i,k,y[i-1,k-1]))
         for k in range(1,ny+1): 
             for i in range(1,n+1): 
-                syid.Raw('y[%i][%i], %e'%(i,k,y[i-1,k-1],))
+                syid.Raw('y[%i][%i], %e'%(i,k,y[i-1,k-1]))
+        for k in range(1,ny+1):
+            for j in range(1,nu+1):
+                syid.Raw('Ks[%i][%i], %e'%(k,j,Ks[k-1,j-1]))            
         syid.Raw('End File')
 
-        syid.options.SOLVER = 3
-        syid.options.IMODE = 2
-        syid.options.MAX_ITER = 200
         syid.Raw('File overrides.dbs')
+        syid.Raw(' apm.solver=3')
+        syid.Raw(' apm.imode=2')
+        syid.Raw(' apm.max_iter=800')
+        syid.Raw(' apm.diaglevel='+str(diaglevel-1))        
         for i in range(1,ny+1): 
             name = 'c[' + str(i) + ']'
             if shift=='calc':
@@ -1029,8 +1071,7 @@ class GEKKO(object):
         syid.Raw('End File')
 
         # solve system ID
-        syid.solve()
-    
+        syid.solve(disp=(diaglevel>=1))
         # retrieve and visualize solution
         import json
         with open(syid.path+'//results.json') as f:
@@ -1045,6 +1086,7 @@ class GEKKO(object):
         alpha = np.empty((na,ny))
         beta = np.empty((ny,nb,nu))
         gamma = np.empty((ny))
+        K = np.empty((ny,nu))
         for j in range(1,ny+1):
             for i in range(1,na+1):
                 name = 'a['+str(i)+']['+str(j)+']'
@@ -1057,23 +1099,61 @@ class GEKKO(object):
         for i in range(1,ny+1):
             name = 'c['+str(i)+']'
             gamma[i-1] = sol[name][0]
+        for j in range(1,ny+1):
+            for i in range(1,nu+1):
+                name = 'k['+str(i)+']['+str(j)+']'
+                K[i-1,j-1] = sol[name][0];
 
-        #if shift=='init' or shift=='mean':
-        #    print('calculate gamma')
-        #    print('y_ss')
-        #    print(y_ss)
-        #    print('u_ss')
-        #    print(u_ss)
-        #    print('part 1')
-        #    print(y_ss * (np.ones(ny)-np.sum(alpha,axis=0)))
-        #    print('part 2')
-        #    print(np.sum(np.dot(beta,u_ss),axis=1))
-        #    gamma = y_ss * (np.ones(ny)-np.sum(alpha,axis=0)) - np.sum(np.dot(beta,u_ss),axis=1)
-        #    print(gamma)
-        #    import time
-        #    time.sleep(10)
+        if shift=='init' or shift=='mean':
+            for i in range(ny):
+                gamma[i] = y_ss[i] * (1-np.sum(alpha[:,i]))
+                for j in range(nu):
+                    gamma[i] = gamma[i] - np.sum(beta[i,:,j]*u_ss[i])
+                    
+        if scale:
+            # scaled form with:
+            #    ys = (y-ym)/yr (yr=y_range, ym=y_min)
+            #    us = (u-um)/ur (ur=u_range, um=u_min)
+            # Fit with scaled variables
+            #    ys[k+1] = a * ys[k] + b * us[k] + c
+            # Un-scale parameters
+            #    (y[k+1]-ym)/yr = a*(y[k]-ym)/yr + b*(u[k]-um)/ur + c
+            # Multiply by yr
+            #    (y[k+1]-ym) = a*(y[k]-ym) + b*(u[k]-um)*yr/ur + yr*c
+            for i in range(ny):
+                gamma[i] = gamma[i] * y_range[i] # c' = c*yr
+                for j in range(nb):
+                    for k in range(nu):
+                        # b' = b*yr/ur
+                        beta[i,j,k] = beta[i,j,k] * y_range[i]/u_range[k]
+            # Move constants to end
+            #    (y[k+1] = a * y[k] + (b*yr) * u[k]) + (ym-a*ym-b'*um/ur+c')
+            for i in range(ny):
+                bsum = 0
+                for j in range(nu):
+                    bsum += np.sum(beta[i,:,j])*u_min[j]/u_range[j]
+                gamma[i] = gamma[i] + y_min[i]*(1-np.sum(alpha[:,i])) - bsum
+            # un-scale ypred
+            for i in range(n):
+                for j in range(ny):
+                    ypred[i,j] = ypred[i,j] + y_ss[j]
+                    ypred[i,j] = ypred[i,j]*y_range[j]+y_min[j]
+
+        # create parameter dictionary
+        p = {'a': alpha, 'b': beta, 'c': gamma}
+
+        if (diaglevel>=1):
+            print('Gain')
+            print(K)
+            print('alpha')
+            print(alpha)
+            print('beta')
+            print(beta)
+            print('gamma')
+            print(gamma)
         
-        return ypred+y_ss,alpha,beta,gamma
+        # predictions, parameters, gain matrix
+        return ypred,p,K
 
     #%% Add array functionality to all types
     def Array(self,f,dim,**args):
