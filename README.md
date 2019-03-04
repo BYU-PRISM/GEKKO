@@ -16,15 +16,7 @@ The most recent version is 0.1. You can upgrade from the command line with the u
 pip install --upgrade gekko
 ```
 
-### Advanced Installation
-
-To enable local solve (rather than solving on the remote server), copy the required executables from this repo to your local path.
-
-```sh
-gekko/gekko/bin/*
-```
-
-Currently, the pip packages includes the Windows executable (apm.exe) and the Linux executable (apm). Local executables for other operating systems (MacOS, ARM processors) are in development but they can still be used with remote server access (default for all operating systems).
+GEKKO can run in remote mode (solved on high performance server) or on a local CPU. The pip package includes the Windows executable (apm.exe), a Linux executable (apm), and a Linux ARM processor executable (apm_arm). Local executables for other operating systems (MacOS) are in development but they can still be used with remote server access that is default for all operating systems.
 
 ## What does GEKKO do?
 
