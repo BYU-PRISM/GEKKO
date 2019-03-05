@@ -856,7 +856,7 @@ class GEKKO(object):
         return x,y,u
         
     ## System identification of time series model
-    def sysid(self,t,u,y,na,nb,shift='calc',scale=True,diaglevel=0,pred='model',objf=1):
+    def sysid(self,t,u,y,na=1,nb=1,nk=0,shift='calc',scale=True,diaglevel=0,pred='model',objf=1):
         '''
          Identification of linear time-invariant models
          
@@ -865,8 +865,9 @@ class GEKKO(object):
          Input:     t = time data
                     u = input data for the regression
                     y = output data for the regression   
-                    na   = number of output coefficients
-                    nb   = number of input coefficients
+                    na   = number of output coefficients (default=1)
+                    nb   = number of input coefficients (default=1)
+                    nk   = input delay steps (default=0)
                     shift (optional) = 
                        'none' (no shift)
                        'init' (initial pt),
@@ -901,7 +902,8 @@ class GEKKO(object):
             raise TypeError('time (t), inputs (u), outputs (y) must contain data')
         if np.size(t)!=np.size(u,0) or np.size(t)!=np.size(y,0):
             raise TypeError('Data rows must be equal for t,u,y')
-        m = max(na,nb)
+        nbk = nb+nk
+        m = max(na,nbk)
 
         # first column is time
         dt = t[1] - t[0]
@@ -957,7 +959,7 @@ class GEKKO(object):
 
         syid.Raw('Objects')
         syid.Raw('  sum_a[1:ny] = sum(%i)'%na)
-        syid.Raw('  sum_b[1:nu][1::ny] = sum(%i)'%nb)
+        syid.Raw('  sum_b[1:nu][1::ny] = sum(%i)'%nbk)
         syid.Raw('End Objects')
         syid.Raw('  ')
         syid.Raw('Connections')
@@ -972,7 +974,7 @@ class GEKKO(object):
         syid.Raw('  nu = %i'%nu)
         syid.Raw('  ny = %i'%ny)
         syid.Raw('  na = %i'%na)
-        syid.Raw('  nb = %i'%nb)
+        syid.Raw('  nb = %i'%nbk)
         syid.Raw('  m = %i'%m)
         syid.Raw('  ')
         syid.Raw('Parameters')
@@ -999,7 +1001,7 @@ class GEKKO(object):
             eqn = '  y[m+1:n][1::ny] = a[1][1::ny]*z[m:n-1][1::ny]'
         for j in range(1,nu+1):
             eqn += '+b[1][%i][1::ny]*u[m:n-1][%i]'%(j,j,)
-            for i in range(2,nb+1): 
+            for i in range(2,nbk+1): 
                 eqn += '+b[%i][%i][1::ny]*u[m-%i:n-%i][%i]'%(i,j,i-1,i,j,)
         if pred=='model':
             # use model to predict next y (Output error)
@@ -1039,20 +1041,23 @@ class GEKKO(object):
         syid.Raw(' apm.max_iter=800')
         syid.Raw(' apm.diaglevel='+str(diaglevel-1))        
         for i in range(1,ny+1): 
-            name = 'c[' + str(i) + ']'
+            name = ' c[' + str(i) + ']'
             if shift=='calc':
                 syid.Raw(name+'.status=1')
             else:
                 syid.Raw(name+'.status=0')            
         for k in range(1,ny+1): 
             for i in range(1,na+1): 
-                name = 'a[' + str(i) + '][' + str(k) + ']'
+                name = ' a[' + str(i) + '][' + str(k) + ']'
                 syid.Raw(name+'.status=1')
         for k in range(1,ny+1): 
             for j in range(1,nu+1): 
-                for i in range(1,nb+1): 
-                    name = 'b[' + str(i) + '][' + str(j) + '][' + str(k) + ']'
-                    syid.Raw(name+'.status=1')
+                for i in range(1,nbk+1): 
+                    name = ' b[' + str(i) + '][' + str(j) + '][' + str(k) + ']'
+                    if i<=nk:
+                        syid.Raw(name+'.status=0')
+                    else:
+                        syid.Raw(name+'.status=1')
         syid.Raw('End File')
 
         syid.Raw('File *.info')
@@ -1065,7 +1070,7 @@ class GEKKO(object):
                 syid.Raw('FV, '+name)
         for k in range(1,ny+1): 
             for j in range(1,nu+1): 
-                for i in range(1,nb+1): 
+                for i in range(1,nbk+1): 
                     name = 'b[' + str(i) + '][' + str(j) + '][' + str(k) + ']'
                     syid.Raw('FV, '+name)
         syid.Raw('End File')
@@ -1084,7 +1089,7 @@ class GEKKO(object):
                 ypred[i,j] = sol[yn][0]
                 
         alpha = np.empty((na,ny))
-        beta = np.empty((ny,nb,nu))
+        beta = np.empty((ny,nbk,nu))
         gamma = np.empty((ny))
         K = np.empty((ny,nu))
         for j in range(1,ny+1):
@@ -1093,7 +1098,7 @@ class GEKKO(object):
                 alpha[i-1,j-1] = sol[name][0];
         for k in range(1,ny+1):
             for j in range(1,nu+1):
-                for i in range(1,nb+1):
+                for i in range(1,nbk+1):
                     name = 'b['+str(i)+']['+str(j)+']['+str(k)+']'
                     beta[k-1,i-1,j-1] = sol[name][0]
         for i in range(1,ny+1):
@@ -1122,7 +1127,7 @@ class GEKKO(object):
             #    (y[k+1]-ym) = a*(y[k]-ym) + b*(u[k]-um)*yr/ur + yr*c
             for i in range(ny):
                 gamma[i] = gamma[i] * y_range[i] # c' = c*yr
-                for j in range(nb):
+                for j in range(nbk):
                     for k in range(nu):
                         # b' = b*yr/ur
                         beta[i,j,k] = beta[i,j,k] * y_range[i]/u_range[k]
