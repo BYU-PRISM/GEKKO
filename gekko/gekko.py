@@ -365,12 +365,12 @@ class GEKKO(object):
         ny = np.size(a,1)
         nu = np.size(b,2)
         #set all matricies to numpy
-        a = np.array(a)
-        b = np.array(b)
+        a = np.array(a,dtype=float)
+        b = np.array(b,dtype=float)
         if c.size==0:
             c = np.zeros(ny)
         else:
-            c = np.array(c)
+            c = np.array(c,dtype=float)
         #check consistency
         if b.ndim<=1:
             raise TypeError('b dimension must be (nb,nu,ny) or (nb,nu) when ny=1')        
@@ -454,9 +454,9 @@ class GEKKO(object):
             raise TypeError("data must be a python list or numpy array")
 
         #convert data to flat numpy arrays
-        x_data = np.array(x_data).flatten()
-        y_data = np.array(y_data).flatten()
-        z_data = np.array(z_data)
+        x_data = np.array(x_data,dtype=float).flatten()
+        y_data = np.array(y_data,dtype=float).flatten()
+        z_data = np.array(z_data,dtype=float)
 
         #verify data inputs are strictly increasing
         dx = np.diff(x_data)
@@ -521,8 +521,8 @@ class GEKKO(object):
             raise TypeError("y_data must be a python list or numpy array")
 
         #convert data to flat numpy arrays
-        x_data = np.array(x_data).flatten()
-        y_data = np.array(y_data).flatten()
+        x_data = np.array(x_data,dtype=float).flatten()
+        y_data = np.array(y_data,dtype=float).flatten()
 
         #verify data inputs for same length and ordered x_data
         if np.size(x_data) != np.size(y_data):
@@ -740,11 +740,11 @@ class GEKKO(object):
         #TODO add support for E matrix
 
         #set all matricies to numpy
-        A = np.array(A)
-        B = np.array(B)
-        C = np.array(C)
+        A = np.array(A,dtype=float)
+        B = np.array(B,dtype=float)
+        C = np.array(C,dtype=float)
         if D != None: #D is supplied
-            D = np.array(D)
+            D = np.array(D,dtype=float)
 
         # dx/dt = A * x + B * u
         #     y = C * x + D * u
@@ -856,7 +856,7 @@ class GEKKO(object):
         return x,y,u
         
     ## System identification of time series model
-    def sysid(self,t,u,y,na=1,nb=1,nk=0,shift='calc',scale=True,diaglevel=0,pred='model',objf=1):
+    def sysid(self,t,u,y,na=1,nb=1,nk=0,shift='calc',scale=True,diaglevel=0,pred='model',objf=100):
         '''
          Identification of linear time-invariant models
          
@@ -890,13 +890,21 @@ class GEKKO(object):
                     K gain matrix
         '''
         # convert to numpy arrays
-        t = np.array(t)
-        u = np.array(u)
-        y = np.array(y)
-        # sizes
+        t = np.array(t,dtype=float)
+        u = np.array(u,dtype=float)
+        y = np.array(y,dtype=float)
         n = np.size(u,0)
-        nu = np.size(u,1)
-        ny = np.size(y,1)
+        # sizes
+        if u.ndim==1:
+            nu = 1
+            u = np.reshape(u,(n,nu))
+        else:
+            nu = np.size(u,1)
+        if y.ndim==1:
+            ny = 1
+            y = np.reshape(y,(n,ny))
+        else:
+            ny = np.size(y,1)
         # consistency checks
         if ny<=0 or nu<=0 or np.size(t)<=0:
             raise TypeError('time (t), inputs (u), outputs (y) must contain data')
@@ -920,18 +928,18 @@ class GEKKO(object):
             y_range = np.empty(ny)
             u_range = np.empty(nu)
             for i in range(ny):
-                y_range[i] = np.max([1,(y_max[i]-y_min[i])])
+                y_range[i] = np.max([1.0,(y_max[i]-y_min[i])])
             for i in range(nu):
-                u_range[i] = np.max([1,(u_max[i]-u_min[i])])
+                u_range[i] = np.max([1.0,(u_max[i]-u_min[i])])
             for i in range(n):
                 for j in range(nu):
-                    u[i,j] = (u[i,j]-u_min[j])/u_range[j]
+                    u[i][j] = (u[i][j]-u_min[j])/u_range[j]
                 for j in range(ny):
-                    y[i,j] = (y[i,j]-y_min[j])/y_range[j]
+                    y[i][j] = (y[i][j]-y_min[j])/y_range[j]
             # gain scaling factor - scaled to unscaled
             for i in range(ny):
                 for j in range(nu):
-                    Ks[i,j] = y_range[i]/u_range[j]
+                    Ks[i][j] = y_range[i]/u_range[j]
     
         # shift options
         if shift=='init':
@@ -949,9 +957,9 @@ class GEKKO(object):
         if shift=='init' or shift=='mean':
             for i in range(n):
                 for j in range(nu):
-                    u[i,j] = u[i,j] - u_ss[j]
+                    u[i][j] = u[i][j] - u_ss[j]
                 for j in range(ny):
-                    y[i,j] = y[i,j] - y_ss[j]
+                    y[i][j] = y[i][j] - y_ss[j]
 
         # create new GEKKO model
         syid = GEKKO(remote=self._remote,server=self._server) 
@@ -959,14 +967,14 @@ class GEKKO(object):
 
         syid.Raw('Objects')
         syid.Raw('  sum_a[1:ny] = sum(%i)'%na)
-        syid.Raw('  sum_b[1:nu][1::ny] = sum(%i)'%nbk)
+        syid.Raw('  sum_b[1:ny][1::nu] = sum(%i)'%nbk)
         syid.Raw('End Objects')
         syid.Raw('  ')
         syid.Raw('Connections')
         syid.Raw('  a[1:na][1::ny] = sum_a[1::ny].x[1:na]')
-        syid.Raw('  b[1:nb][1::nu][1:::ny] = sum_b[1::nu][1:::ny].x[1:nb]')
+        syid.Raw('  b[1:nb][1::nu][1:::ny] = sum_b[1:::ny][1::nu].x[1:nb]')
         syid.Raw('  sum_a[1:ny] = sum_a[1:ny].y')
-        syid.Raw('  sum_b[1:nu][1::ny] = sum_b[1:nu][1::ny].y')
+        syid.Raw('  sum_b[1:ny][1::nu] = sum_b[1:ny][1::nu].y')
         syid.Raw('End Connections')
         syid.Raw('  ')
         syid.Raw('Constants')
@@ -978,19 +986,19 @@ class GEKKO(object):
         syid.Raw('  m = %i'%m)
         syid.Raw('  ')
         syid.Raw('Parameters')
-        syid.Raw('  a[1:na][1::ny] = 0 !>= 0.00001 <= 0.9999999')
+        syid.Raw('  a[1:na][1::ny] = 0.9 !>= 0.00001 <= 0.9999999')
         syid.Raw('  b[1:nb][1::nu][1:::ny] = 0')
         syid.Raw('  c[1:ny] = 0')
         syid.Raw('  u[1:n][1::nu]')
         syid.Raw('  y[1:m][1::ny]')
         syid.Raw('  z[1:n][1::ny]')
-        syid.Raw('  Ks[1:nu][1::ny] = 1')
+        syid.Raw('  Ks[1:ny][1::nu] = 1')
         syid.Raw('  ')
         syid.Raw('Variables')
         syid.Raw('  y[m+1:n][1::ny] = 0')
         syid.Raw('  sum_a[1:ny] = 0 !<= 1')
-        syid.Raw('  sum_b[1:nu][1::ny] = 0')
-        syid.Raw('  K[1:nu][1::ny] = 0 >=-1000 <=1000')
+        syid.Raw('  sum_b[1:ny][1::nu] = 0')
+        syid.Raw('  K[1:ny][1::nu] = 0 >=-1e8 <=1e8')
         syid.Raw('  ')
         syid.Raw('Equations')
         if pred=='model':
@@ -1014,7 +1022,7 @@ class GEKKO(object):
         eqn += '+c[1::ny]'
         syid.Raw(eqn)
         syid.Raw('')
-        syid.Raw('  K[1:nu][1::ny] * (1 - sum_a[1::ny]) = Ks[1:nu][1::ny] * sum_b[1:nu][1::ny]')        
+        syid.Raw('  K[1:ny][1::nu] * (1 - sum_a[1:ny]) = Ks[1:ny][1::nu] * sum_b[1:ny][1::nu]')        
         syid.Raw('  minimize %e * (y[m+1:n][1::ny] - z[m+1:n][1::ny])^2'%objf)
         syid.Raw('  minimize 1e-3 * a[1:na][1::ny]^2')
         syid.Raw('  minimize 1e-3 * b[1:nb][1::nu][1:::ny]^2')
@@ -1023,16 +1031,16 @@ class GEKKO(object):
         syid.Raw('File *.csv')
         for j in range(1,nu+1): 
             for i in range(1,n+1): 
-                syid.Raw('u[%i][%i], %e'%(i,j,u[i-1,j-1]))
+                syid.Raw('u[%i][%i], %e'%(i,j,u[i-1][j-1]))
         for k in range(1,ny+1):
             for i in range(1,n+1):
-                syid.Raw('z[%i][%i], %e'%(i,k,y[i-1,k-1]))
+                syid.Raw('z[%i][%i], %e'%(i,k,y[i-1][k-1]))
         for k in range(1,ny+1): 
             for i in range(1,n+1): 
-                syid.Raw('y[%i][%i], %e'%(i,k,y[i-1,k-1]))
+                syid.Raw('y[%i][%i], %e'%(i,k,y[i-1][k-1]))
         for k in range(1,ny+1):
             for j in range(1,nu+1):
-                syid.Raw('Ks[%i][%i], %e'%(k,j,Ks[k-1,j-1]))            
+                syid.Raw('Ks[%i][%i], %e'%(k,j,Ks[k-1][j-1]))            
         syid.Raw('End File')
 
         syid.Raw('File overrides.dbs')
@@ -1087,7 +1095,7 @@ class GEKKO(object):
             for i in range(n):
                 yn = 'y['+str(i+1)+']['+str(j+1)+']'
                 ypred[i,j] = sol[yn][0]
-                
+          
         alpha = np.empty((na,ny))
         beta = np.empty((ny,nbk,nu))
         gamma = np.empty((ny))
@@ -1095,25 +1103,33 @@ class GEKKO(object):
         for j in range(1,ny+1):
             for i in range(1,na+1):
                 name = 'a['+str(i)+']['+str(j)+']'
-                alpha[i-1,j-1] = sol[name][0];
+                alpha[i-1][j-1] = sol[name][0];
         for k in range(1,ny+1):
             for j in range(1,nu+1):
                 for i in range(1,nbk+1):
                     name = 'b['+str(i)+']['+str(j)+']['+str(k)+']'
-                    beta[k-1,i-1,j-1] = sol[name][0]
+                    beta[k-1][i-1][j-1] = sol[name][0]
         for i in range(1,ny+1):
             name = 'c['+str(i)+']'
             gamma[i-1] = sol[name][0]
         for j in range(1,ny+1):
             for i in range(1,nu+1):
-                name = 'k['+str(i)+']['+str(j)+']'
-                K[i-1,j-1] = sol[name][0];
+                name = 'k['+str(j)+']['+str(i)+']'
+                K[j-1][i-1] = sol[name][0];
 
         if shift=='init' or shift=='mean':
             for i in range(ny):
-                gamma[i] = y_ss[i] * (1-np.sum(alpha[:,i]))
+                gamma[i] = y_ss[i]
+                for j in range(na):
+                    gamma[i] = gamma[i] - y_ss[i] * alpha[j,i]
                 for j in range(nu):
-                    gamma[i] = gamma[i] - np.sum(beta[i,:,j]*u_ss[i])
+                    for k in range(nbk):
+                        gamma[i] = gamma[i] - u_ss[j] * beta[i][k][j]
+
+        # add steady state to output
+        for i in range(n):
+            for j in range(ny):
+                ypred[i,j] = ypred[i,j] + y_ss[j]
                     
         if scale:
             # scaled form with:
@@ -1132,16 +1148,15 @@ class GEKKO(object):
                         # b' = b*yr/ur
                         beta[i,j,k] = beta[i,j,k] * y_range[i]/u_range[k]
             # Move constants to end
-            #    (y[k+1] = a * y[k] + (b*yr) * u[k]) + (ym-a*ym-b'*um/ur+c')
+            #    (y[k+1] = a * y[k] + (b*yr/ur) * u[k]) + (ym-a*ym-b'*um+c')
             for i in range(ny):
                 bsum = 0
                 for j in range(nu):
-                    bsum += np.sum(beta[i,:,j])*u_min[j]/u_range[j]
+                    bsum += np.sum(beta[i,:,j])*u_min[j]
                 gamma[i] = gamma[i] + y_min[i]*(1-np.sum(alpha[:,i])) - bsum
             # un-scale ypred
             for i in range(n):
                 for j in range(ny):
-                    ypred[i,j] = ypred[i,j] + y_ss[j]
                     ypred[i,j] = ypred[i,j]*y_range[j]+y_min[j]
 
         # create parameter dictionary
