@@ -100,7 +100,7 @@ class GEKKO(object):
         this Const, a python variable or a magic number. However, this Const
         can be provided a name to make the .apm model more clear."""
         if name is not None:
-            name = re.sub('[^0-9a-zA-Z]+', '_',name).lower()
+            name = re.sub(r'\W+', '_', name).lower()
             if name == '':
                 name = None
         if isinstance(value, (list,np.ndarray)):
@@ -115,7 +115,7 @@ class GEKKO(object):
         are effectively constants unless the resulting .spm model is used later
         and the parameters can be set as MVs or FVs. """
         if name is not None:
-            name = re.sub('[^0-9a-zA-Z]+', '_',name).lower()
+            name = re.sub(r'\W+', '_', name).lower()
         else:
             name = 'p' + str(len(self._parameters) + 1)
 
@@ -127,7 +127,7 @@ class GEKKO(object):
         """A manipulated variable that is fixed with time. Therefore it lacks
         time-based attributes."""
         if name is not None:
-            name = re.sub('[^0-9a-zA-Z]+', '_',name).lower()
+            name = re.sub(r'\W+', '_', name).lower()
         else:
             name = 'p' + str(len(self._parameters) + 1)
         if integer == True:
@@ -142,7 +142,7 @@ class GEKKO(object):
     def MV(self, value=None, lb=None, ub=None, integer=False, fixed_initial=True, name=None):
         """Change these variables optimally to meet objectives"""
         if name is not None:
-            name = re.sub('[^0-9a-zA-Z]+', '_',name).lower()
+            name = re.sub(r'\W+', '_', name).lower()
         else:
             name = 'p' + str(len(self._parameters) + 1)
         if integer == True:
@@ -158,7 +158,7 @@ class GEKKO(object):
         """Calculated by solver to meet constraints (Equations). The number of
         variables (including CVs and SVs) must equal the number of equations."""
         if name is not None:
-            name = re.sub('[^0-9a-zA-Z]+', '_',name).lower()
+            name = re.sub(r'\W+', '_', name).lower()
         else:
             name = 'v' + str(len(self._variables) + 1)
         if integer == True:
@@ -173,7 +173,7 @@ class GEKKO(object):
     def SV(self, value=None, lb=None, ub=None, integer=False, fixed_initial=True, name=None):
         """A variable that's special"""
         if name is not None:
-            name = re.sub('[^0-9a-zA-Z]+', '_',name).lower()
+            name = re.sub(r'\W+', '_', name).lower()
         else:
             name = 'v' + str(len(self._variables) + 1)
         if integer == True:
@@ -189,7 +189,7 @@ class GEKKO(object):
         """A variable with a setpoint. Reaching the setpoint is added to the
         objective."""
         if name is not None:
-            name = re.sub('[^0-9a-zA-Z]+', '_',name).lower()
+            name = re.sub(r'\W+', '_', name).lower()
         else:
             name = 'v' + str(len(self._variables) + 1)
         if integer == True:
@@ -203,7 +203,7 @@ class GEKKO(object):
 
     def Intermediate(self,equation,name=None):
         if name is not None:
-            name = re.sub('[^0-9a-zA-Z]+', '_',name).lower()
+            name = re.sub(r'\W+', '_', name).lower()
             if name == '':
                 name = None
         inter = GK_Intermediate(name)
@@ -1420,13 +1420,13 @@ class GEKKO(object):
         main_dict = vars(main)
         for var in main_dict:
             if isinstance(main_dict[var], GK_Operators):
-                main_dict[var].__dict__['name'] = re.sub('[^0-9a-zA-Z]+', '_',var).lower()
+                main_dict[var].__dict__['name'] = re.sub(r'\W+', '_', var).lower()
                 print('Found ' + var)
             if isinstance(main_dict[var], list):
                 list_var = main_dict[var]
                 for i in range(len(list_var)):
                     if isinstance(list_var[i], GK_Operators):
-                        list_var[i].__dict__['name'] = re.sub('[^0-9a-zA-Z]+', '_',var).lower()+'['+str(i)+']'
+                        list_var[i].__dict__['name'] = re.sub(r'\W+', '_', var).lower()+'['+str(i)+']'
                         print('Found ' + var+'['+str(i)+']')
 
 
