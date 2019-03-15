@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 from .gekko import GEKKO
 #from .brain import Brain
 
