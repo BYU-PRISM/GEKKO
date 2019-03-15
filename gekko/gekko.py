@@ -877,11 +877,18 @@ class GEKKO(object):
                        scale data to between zero to one unless
                          data range is already less than one
                     pred (option) = 
-                       'model' for output error regression form
-                       'meas' for ARX regression form
-                       Using 'model' favors an unbiased model prediction
+                       'model' for output error regression form, implicit solution
+                       'meas' for ARX regression form, explicit solution
+                       Using 'model' favors an unbiased model prediction but
+                         can require more time to compute, especially for large
+                         data sets
+                       Using 'meas' computes the coefficients of the time series
+                         model with an explicit solution
                     objf = objective scaling factor
-                       minimize objf*(model-meas)**2 + 1e-3 * (a^2 + b^2 + c^2)
+                       when pred='model':
+                          minimize objf*(model-meas)**2 + 1e-3 * (a^2 + b^2 + c^2)
+                       when pred='meas':
+                          minimize (model-meas)**2
                     diaglevel = display solver output and diagnostics (0-6)
                     
          Output:    returns
@@ -889,6 +896,9 @@ class GEKKO(object):
                     p as coefficient dictionary with keys 'a','b','c'
                     K gain matrix
         '''
+        # string options to lowercase
+        shift = str(shift).lower()
+        pred = str(pred).lower()
         # convert to numpy arrays
         t = np.array(t,dtype=float)
         u = np.array(u,dtype=float)
@@ -960,162 +970,235 @@ class GEKKO(object):
                     u[i][j] = u[i][j] - u_ss[j]
                 for j in range(ny):
                     y[i][j] = y[i][j] - y_ss[j]
-
-        # create new GEKKO model
-        syid = GEKKO(remote=self._remote,server=self._server) 
-        #syid.open_folder()        
-
-        syid.Raw('Objects')
-        syid.Raw('  sum_a[1:ny] = sum(%i)'%na)
-        syid.Raw('  sum_b[1:ny][1::nu] = sum(%i)'%nbk)
-        syid.Raw('End Objects')
-        syid.Raw('  ')
-        syid.Raw('Connections')
-        syid.Raw('  a[1:na][1::ny] = sum_a[1::ny].x[1:na]')
-        syid.Raw('  b[1:nb][1::nu][1:::ny] = sum_b[1:::ny][1::nu].x[1:nb]')
-        syid.Raw('  sum_a[1:ny] = sum_a[1:ny].y')
-        syid.Raw('  sum_b[1:ny][1::nu] = sum_b[1:ny][1::nu].y')
-        syid.Raw('End Connections')
-        syid.Raw('  ')
-        syid.Raw('Constants')
-        syid.Raw('  n = %i' %n)
-        syid.Raw('  nu = %i'%nu)
-        syid.Raw('  ny = %i'%ny)
-        syid.Raw('  na = %i'%na)
-        syid.Raw('  nb = %i'%nbk)
-        syid.Raw('  m = %i'%m)
-        syid.Raw('  ')
-        syid.Raw('Parameters')
-        syid.Raw('  a[1:na][1::ny] = 0.9 !>= 0.00001 <= 0.9999999')
-        syid.Raw('  b[1:nb][1::nu][1:::ny] = 0')
-        syid.Raw('  c[1:ny] = 0')
-        syid.Raw('  u[1:n][1::nu]')
-        syid.Raw('  y[1:m][1::ny]')
-        syid.Raw('  z[1:n][1::ny]')
-        syid.Raw('  Ks[1:ny][1::nu] = 1')
-        syid.Raw('  ')
-        syid.Raw('Variables')
-        syid.Raw('  y[m+1:n][1::ny] = 0')
-        syid.Raw('  sum_a[1:ny] = 0 !<= 1')
-        syid.Raw('  sum_b[1:ny][1::nu] = 0')
-        syid.Raw('  K[1:ny][1::nu] = 0 >=-1e8 <=1e8')
-        syid.Raw('  ')
-        syid.Raw('Equations')
-        if pred=='model':
-            # use model to predict next y (Output error)
-            eqn = '  y[m+1:n][1::ny] = a[1][1::ny]*y[m:n-1][1::ny]'
-        else:
-            # use measurement to predict next y (ARX)
-            eqn = '  y[m+1:n][1::ny] = a[1][1::ny]*z[m:n-1][1::ny]'
-        for j in range(1,nu+1):
-            eqn += '+b[1][%i][1::ny]*u[m:n-1][%i]'%(j,j,)
-            for i in range(2,nbk+1): 
-                eqn += '+b[%i][%i][1::ny]*u[m-%i:n-%i][%i]'%(i,j,i-1,i,j,)
-        if pred=='model':
-            # use model to predict next y (Output error)
-            seqn = '+a[%i][1::ny]*y[m-%i:n-%i][1::ny]'
-        else:
-            # use measurement to predict next y (ARX)
-            seqn = '+a[%i][1::ny]*z[m-%i:n-%i][1::ny]'        
-        for i in range(2,na+1): 
-            eqn += seqn%(i,i-1,i,)
-        eqn += '+c[1::ny]'
-        syid.Raw(eqn)
-        syid.Raw('')
-        syid.Raw('  K[1:ny][1::nu] * (1 - sum_a[1:ny]) = Ks[1:ny][1::nu] * sum_b[1:ny][1::nu]')        
-        syid.Raw('  minimize %e * (y[m+1:n][1::ny] - z[m+1:n][1::ny])^2'%objf)
-        syid.Raw('  minimize 1e-3 * a[1:na][1::ny]^2')
-        syid.Raw('  minimize 1e-3 * b[1:nb][1::nu][1:::ny]^2')
-        syid.Raw('  minimize 1e-3 * c[1:ny]^2')
-
-        syid.Raw('File *.csv')
-        for j in range(1,nu+1): 
-            for i in range(1,n+1): 
-                syid.Raw('u[%i][%i], %e'%(i,j,u[i-1][j-1]))
-        for k in range(1,ny+1):
-            for i in range(1,n+1):
-                syid.Raw('z[%i][%i], %e'%(i,k,y[i-1][k-1]))
-        for k in range(1,ny+1): 
-            for i in range(1,n+1): 
-                syid.Raw('y[%i][%i], %e'%(i,k,y[i-1][k-1]))
-        for k in range(1,ny+1):
-            for j in range(1,nu+1):
-                syid.Raw('Ks[%i][%i], %e'%(k,j,Ks[k-1][j-1]))            
-        syid.Raw('End File')
-
-        syid.Raw('File overrides.dbs')
-        syid.Raw(' apm.solver=3')
-        syid.Raw(' apm.imode=2')
-        syid.Raw(' apm.max_iter=800')
-        syid.Raw(' apm.diaglevel='+str(diaglevel-1))        
-        for i in range(1,ny+1): 
-            name = ' c[' + str(i) + ']'
-            if shift=='calc':
-                syid.Raw(name+'.status=1')
-            else:
-                syid.Raw(name+'.status=0')            
-        for k in range(1,ny+1): 
-            for i in range(1,na+1): 
-                name = ' a[' + str(i) + '][' + str(k) + ']'
-                syid.Raw(name+'.status=1')
-        for k in range(1,ny+1): 
-            for j in range(1,nu+1): 
-                for i in range(1,nbk+1): 
-                    name = ' b[' + str(i) + '][' + str(j) + '][' + str(k) + ']'
-                    if i<=nk:
-                        syid.Raw(name+'.status=0')
-                    else:
-                        syid.Raw(name+'.status=1')
-        syid.Raw('End File')
-
-        syid.Raw('File *.info')
-        for i in range(1,ny+1): 
-            name = 'c[' + str(i) + ']'
-            syid.Raw('FV, '+name)
-        for k in range(1,ny+1): 
-            for i in range(1,na+1): 
-                name = 'a[' + str(i) + '][' + str(k) + ']'
-                syid.Raw('FV, '+name)
-        for k in range(1,ny+1): 
-            for j in range(1,nu+1): 
-                for i in range(1,nbk+1): 
-                    name = 'b[' + str(i) + '][' + str(j) + '][' + str(k) + ']'
-                    syid.Raw('FV, '+name)
-        syid.Raw('End File')
-
-        # solve system ID
-        syid.solve(disp=(diaglevel>=1))
-        # retrieve and visualize solution
-        import json
-        with open(syid.path+'//results.json') as f:
-            sol = json.load(f)
-
-        ypred = np.empty((n,ny))
-        for j in range(ny):
-            for i in range(n):
-                yn = 'y['+str(i+1)+']['+str(j+1)+']'
-                ypred[i,j] = sol[yn][0]
-          
+                    
+        # explicit solution
         alpha = np.empty((na,ny))
         beta = np.empty((ny,nbk,nu))
-        gamma = np.empty((ny))
-        K = np.empty((ny,nu))
-        for j in range(1,ny+1):
-            for i in range(1,na+1):
-                name = 'a['+str(i)+']['+str(j)+']'
-                alpha[i-1][j-1] = sol[name][0];
-        for k in range(1,ny+1):
+        gamma = np.zeros((ny))
+        ypred = np.zeros((n,ny))
+        np.warnings.filterwarnings('ignore')
+        #%% Least Square fitting
+        # y(k+1) = A*y(k) + B*u(k)
+        for i in range(ny):
+            yc = y[:,i]
+            yut = tuple()
+            for j in range(na):
+                yut += (yc[m-j-1:n-j-1],)
+            for j in range(nu):
+                for k in range(nbk):
+                    yut += (u[m-k-1:n-k-1,j],)
+            if shift=='calc':
+                # add ones for gamma calculation
+                yut += (np.ones(n-m),)
+            # combine input data
+            yu = np.vstack(yut)
+            # output data
+            yk1 = yc[m:n]
+            # calculate parameters
+            params = np.linalg.lstsq(yu.T, yk1,rcond=1e-15)[0]
+            for j in range(na):
+                alpha[j,i] = params[j]
+            for j in range(nu):
+                for k in range(nbk):
+                    beta[i][k][j] = params[na+j*(nbk)+k]
+            if shift=='calc':
+               gamma[i] = params[-1]
+            else:
+               gamma[i] = 0.0
+
+            # Predict using prior model values
+            ypred[0:m,i] = y[0:m,i]
+            for j in range(m,n):
+                for k in range(na):
+                    ypred[j][i] += alpha[k][i] * ypred[j-1-k][i]
+                for iu in range(nu):
+                    for k in range(nbk):
+                        ypred[j][i] += beta[i][k][iu] * u[j-1-k][iu]
+                ypred[j][i] += gamma[i]
+            
+            # Predict using prior measurements
+            # This makes predictions look better, but it is not a
+            #   good assessment because it is just the error in one
+            #   prediction step
+            #ypred[0:m,i] = y[0:m,i]
+            #for j in range(n-m):
+            #    ypred[j+m,i] = np.dot(params.T,yu[:,j])
+
+        K = np.zeros((ny,nu))
+        for j in range(ny):
+            for k in range(nu):
+                sa = 0.0
+                sb = 0.0
+                for kk in range(na):
+                    sa += alpha[kk][j]
+                for kk in range(nbk):
+                    sb += beta[j][kk][k]
+                K[j][k] = sb / (1.0-sa)
+
+        # Check if solver solution is required
+        if (pred=='model'):
+            if n>=1000:
+               print("sysid recommendation: switch to pred='meas' for faster solution")
+            # create new GEKKO model
+            syid = GEKKO(remote=self._remote,server=self._server) 
+            #syid.open_folder()        
+            
+            syid.Raw('Objects')
+            syid.Raw('  sum_a[1:ny] = sum(%i)'%na)
+            syid.Raw('  sum_b[1:ny][1::nu] = sum(%i)'%nbk)
+            syid.Raw('End Objects')
+            syid.Raw('  ')
+            syid.Raw('Connections')
+            syid.Raw('  a[1:na][1::ny] = sum_a[1::ny].x[1:na]')
+            syid.Raw('  b[1:nb][1::nu][1:::ny] = sum_b[1:::ny][1::nu].x[1:nb]')
+            syid.Raw('  sum_a[1:ny] = sum_a[1:ny].y')
+            syid.Raw('  sum_b[1:ny][1::nu] = sum_b[1:ny][1::nu].y')
+            syid.Raw('End Connections')
+            syid.Raw('  ')
+            syid.Raw('Constants')
+            syid.Raw('  n = %i' %n)
+            syid.Raw('  nu = %i'%nu)
+            syid.Raw('  ny = %i'%ny)
+            syid.Raw('  na = %i'%na)
+            syid.Raw('  nb = %i'%nbk)
+            syid.Raw('  m = %i'%m)
+            syid.Raw('  ')
+            syid.Raw('Parameters')
+            syid.Raw('  a[1:na][1::ny] = 0.9 !>= 0.00001 <= 0.9999999')
+            syid.Raw('  b[1:nb][1::nu][1:::ny] = 0')
+            syid.Raw('  c[1:ny] = 0')
+            syid.Raw('  u[1:n][1::nu]')
+            syid.Raw('  y[1:m][1::ny]')
+            syid.Raw('  z[1:n][1::ny]')
+            syid.Raw('  Ks[1:ny][1::nu] = 1')
+            syid.Raw('  ')
+            syid.Raw('Variables')
+            syid.Raw('  y[m+1:n][1::ny] = 0')
+            syid.Raw('  sum_a[1:ny] = 0 !<= 1')
+            syid.Raw('  sum_b[1:ny][1::nu] = 0')
+            syid.Raw('  K[1:ny][1::nu] = 0 >=-1e8 <=1e8')
+            syid.Raw('  ')
+            syid.Raw('Equations')
+            if pred=='model':
+                # use model to predict next y (Output error)
+                eqn = '  y[m+1:n][1::ny] = a[1][1::ny]*y[m:n-1][1::ny]'
+            else:
+                # use measurement to predict next y (ARX)
+                eqn = '  y[m+1:n][1::ny] = a[1][1::ny]*z[m:n-1][1::ny]'
             for j in range(1,nu+1):
-                for i in range(1,nbk+1):
-                    name = 'b['+str(i)+']['+str(j)+']['+str(k)+']'
-                    beta[k-1][i-1][j-1] = sol[name][0]
-        for i in range(1,ny+1):
-            name = 'c['+str(i)+']'
-            gamma[i-1] = sol[name][0]
-        for j in range(1,ny+1):
-            for i in range(1,nu+1):
-                name = 'k['+str(j)+']['+str(i)+']'
-                K[j-1][i-1] = sol[name][0];
+                eqn += '+b[1][%i][1::ny]*u[m:n-1][%i]'%(j,j,)
+                for i in range(2,nbk+1): 
+                    eqn += '+b[%i][%i][1::ny]*u[m-%i:n-%i][%i]'%(i,j,i-1,i,j,)
+            if pred=='model':
+                # use model to predict next y (Output error)
+                seqn = '+a[%i][1::ny]*y[m-%i:n-%i][1::ny]'
+            else:
+                # use measurement to predict next y (ARX)
+                seqn = '+a[%i][1::ny]*z[m-%i:n-%i][1::ny]'        
+            for i in range(2,na+1): 
+                eqn += seqn%(i,i-1,i,)
+            eqn += '+c[1::ny]'
+            syid.Raw(eqn)
+            syid.Raw('')
+            syid.Raw('  K[1:ny][1::nu] * (1 - sum_a[1:ny]) = Ks[1:ny][1::nu] * sum_b[1:ny][1::nu]')        
+            syid.Raw('  minimize %e * (y[m+1:n][1::ny] - z[m+1:n][1::ny])^2'%objf)
+            syid.Raw('  minimize 1e-3 * a[1:na][1::ny]^2')
+            syid.Raw('  minimize 1e-3 * b[1:nb][1::nu][1:::ny]^2')
+            syid.Raw('  minimize 1e-3 * c[1:ny]^2')
+            
+            syid.Raw('File *.csv')
+            for j in range(1,nu+1): 
+                for i in range(1,n+1): 
+                    syid.Raw('u[%i][%i], %e'%(i,j,u[i-1][j-1]))
+            for k in range(1,ny+1):
+                for i in range(1,n+1):
+                    syid.Raw('z[%i][%i], %e'%(i,k,y[i-1][k-1]))
+            for k in range(1,ny+1): 
+                for i in range(1,n+1): 
+                    syid.Raw('y[%i][%i], %e'%(i,k,y[i-1][k-1]))
+            for k in range(1,ny+1):
+                for j in range(1,nu+1):
+                    syid.Raw('Ks[%i][%i], %e'%(k,j,Ks[k-1][j-1]))            
+                    syid.Raw('K[%i][%i], %e'%(k,j,K[k-1][j-1]))
+            for j in range(1,na+1):
+                for k in range(1,ny+1):
+                    syid.Raw('a[%i][%i], %e'%(j,k,alpha[j-1][k-1]))
+            for k in range(1,ny+1):
+                for j in range(1,nbk+1):
+                    for kk in range(1,nu+1):
+                        syid.Raw('b[%i][%i][%i], %e'%(j,kk,k,beta[k-1][j-1][kk-1]))
+            for j in range(1,ny+1):
+                syid.Raw('c[%i], %e'%(j,gamma[j-1]))
+                
+            syid.Raw('End File')
+            
+            syid.Raw('File overrides.dbs')
+            syid.Raw(' apm.solver=3')
+            syid.Raw(' apm.imode=2')
+            syid.Raw(' apm.max_iter=800')
+            syid.Raw(' apm.diaglevel='+str(diaglevel-1))        
+            for i in range(1,ny+1): 
+                name = ' c[' + str(i) + ']'
+                if shift=='calc':
+                    syid.Raw(name+'.status=1')
+                else:
+                    syid.Raw(name+'.status=0')            
+            for k in range(1,ny+1): 
+                for i in range(1,na+1): 
+                    name = ' a[' + str(i) + '][' + str(k) + ']'
+                    syid.Raw(name+'.status=1')
+            for k in range(1,ny+1): 
+                for j in range(1,nu+1): 
+                    for i in range(1,nbk+1): 
+                        name = ' b[' + str(i) + '][' + str(j) + '][' + str(k) + ']'
+                        if i<=nk:
+                            syid.Raw(name+'.status=0')
+                        else:
+                            syid.Raw(name+'.status=1')
+            syid.Raw('End File')
+            
+            syid.Raw('File *.info')
+            for i in range(1,ny+1): 
+                name = 'c[' + str(i) + ']'
+                syid.Raw('FV, '+name)
+            for k in range(1,ny+1): 
+                for i in range(1,na+1): 
+                    name = 'a[' + str(i) + '][' + str(k) + ']'
+                    syid.Raw('FV, '+name)
+            for k in range(1,ny+1): 
+                for j in range(1,nu+1): 
+                    for i in range(1,nbk+1): 
+                        name = 'b[' + str(i) + '][' + str(j) + '][' + str(k) + ']'
+                        syid.Raw('FV, '+name)
+            syid.Raw('End File')
+            
+            # solve system ID
+            syid.solve(disp=(diaglevel>=1))
+            # retrieve and visualize solution
+            import json
+            with open(syid.path+'//results.json') as f:
+                sol = json.load(f)
+            
+            for j in range(ny):
+                for i in range(n):
+                    yn = 'y['+str(i+1)+']['+str(j+1)+']'
+                    ypred[i,j] = sol[yn][0]
+            for j in range(1,ny+1):
+                for i in range(1,na+1):
+                    name = 'a['+str(i)+']['+str(j)+']'
+                    alpha[i-1][j-1] = sol[name][0];
+            for k in range(1,ny+1):
+                for j in range(1,nu+1):
+                    for i in range(1,nbk+1):
+                        name = 'b['+str(i)+']['+str(j)+']['+str(k)+']'
+                        beta[k-1][i-1][j-1] = sol[name][0]
+            for i in range(1,ny+1):
+                name = 'c['+str(i)+']'
+                gamma[i-1] = sol[name][0]
+            for j in range(1,ny+1):
+                for i in range(1,nu+1):
+                    name = 'k['+str(j)+']['+str(i)+']'
+                    K[j-1][i-1] = sol[name][0];
 
         if shift=='init' or shift=='mean':
             for i in range(ny):
@@ -1163,6 +1246,7 @@ class GEKKO(object):
         p = {'a': alpha, 'b': beta, 'c': gamma}
 
         if (diaglevel>=1):
+            print('---Final---')
             print('Gain')
             print(K)
             print('alpha')
