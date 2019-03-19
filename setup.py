@@ -41,7 +41,7 @@ extra_files = gui_files + ['bin/apm.exe','bin/apm','bin/apm_arm']
 
 # versions: a (alpha), b (beta), rc (release candidate)
 setup(name='gekko',
-    version='0.2b1',
+    version='0.2b2',
     description='Optimization software for differential algebraic equations',
     long_description=long_description,
     classifiers=[
