@@ -11,13 +11,13 @@ here = os.path.abspath(os.path.dirname(__file__))
 long_description = """GEKKO
 =====
 
-GEKKO is a python package for optimization, specializing in dynamic optimization
-of differential algebraic equations (DAE) systems. GEKKO provides a user-friendly
-interface to the powerful APMonitor optimization suite on the back end. It is
-coupled with large-scale solvers for linear, quadratic, nonlinear, and mixed
-integer programming (LP, QP, NLP, MILP, MINLP). Modes of operation include data
-reconciliation, real-time optimization, dynamic simulation, and nonlinear
-predictive control."""
+GEKKO is a python package for machine learning and optimization, specializing in
+dynamic optimization of differential algebraic equations (DAE) systems. GEKKO 
+provides a user-friendly interface to the powerful APMonitor optimization suite
+on the back end. It is coupled with large-scale solvers for linear, quadratic,
+nonlinear, and mixed integer programming (LP, QP, NLP, MILP, MINLP). Capabilities
+include machine learning, discrete or continuous models, real-time optimization, 
+simulation, moving horizon estimation, and nonlinear predictive control."""
 
 def package_files(directory):
     paths = []
@@ -42,7 +42,7 @@ extra_files = gui_files + ['bin/apm.exe','bin/apm','bin/apm_arm']
 # versions: a (alpha), b (beta), rc (release candidate)
 setup(name='gekko',
     version='0.2b2',
-    description='Optimization software for differential algebraic equations',
+    description='Machine learning and optimization for dynamic systems',
     long_description=long_description,
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -54,7 +54,7 @@ setup(name='gekko',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
-    keywords='DAE optimization MILP MINLP QP NLP MIDO IPOPT',
+    keywords='differential deep learning reinforcement optimization mixed-integer',
     url='https://github.com/BYU-PRISM/GEKKO',
     author='BYU PRISM Lab',
     author_email='john_hedengren@byu.edu',
