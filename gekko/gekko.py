@@ -285,10 +285,13 @@ class GEKKO(object):
     # min2        = min value with MPCC
     # min3        = min value with binary variable for switch
     # periodic    = periodic (initial=final) for dynamic problems
+    # pwl         = piecewise linear function
     # sign2       = signum function with MPCC
     # sign3       = signum function with binary variable for switch
     # state_space = continuous/discrete and dense/sparse state space
+    # sum         = summation with APM object
     # sysid       = linear time invariant system identification (ARX / OE)
+    # vsum        = vertical summation (integral) of a variable in data direction
 
     # --- add to GEKKO ---
     # axb, fmax, fmin, fsum, fvsum, lag, lookup, pwl, qobj, table
@@ -439,7 +442,7 @@ class GEKKO(object):
         """Generate a 2d Bspline with continuous first and seconds derivatives
         from 1-D arrays of x_data and y_data coordinates (in strictly ascending order)
         and 2-D z data of size (x.size,y.size). GEKKO variables x, y and z are 
-        linked with function z=f(x,y) where the function f is bspline. """
+        linked with function z=f(x,y) where the function f is a bspline. """
 
         #verify that x,y,z are valid GEKKO variables
         if not isinstance(x,(GKVariable,GKParameter)):
@@ -464,7 +467,7 @@ class GEKKO(object):
         if np.any(dx < 0) or np.any(dy < 0):
             raise TypeError('x_data and y_data must be strictly increasing')
 
-        #build cspline object with unique object name
+        #build bspline object with unique object name
         bspline_name = 'bspline' + str(len(self._objects) + 1)
         self._objects.append(bspline_name + ' = bspline')
 
@@ -492,21 +495,29 @@ class GEKKO(object):
             self._extra_files.append(bspline_name+'_ty.csv')
             self._extra_files.append(bspline_name+'_c.csv')
 
-        #Add connections between x and y with cspline object data
+        #Add connections between x and y with bspline object data
         self._connections.append(x.name + ' = ' + bspline_name+'.x')
         self._connections.append(y.name + ' = ' + bspline_name+'.y')
         self._connections.append(z.name + ' = ' + bspline_name+'.z')
+        return
 
     ## cubic Spline
     def cspline(self, x,y,x_data,y_data,bound_x=False):
         """Generate a 1d cubic spline with continuous first and seconds derivatives
-        from arrays of x and y data which link to GEKKO variables x and y with a
+        from arrays of x and y data that link to GEKKO variables x and y with a
         constraint that y=f(x).
 
-        Input: x: GEKKO variable, y: GEKKO variable, x_data: array of x data,
-        y_data: array of y data that matches x_data, bound_x: boolean to state
-        x should be bounded at the upper and lower bounds of x_data to avoid
-        extrapolation error of the cspline. """
+        Inputs:
+          x: GEKKO parameter or variable
+          y: GEKKO variable
+          x_data: array of x data
+          y_data: array of y data that matches x_data size
+          bound_x: boolean to state if x should be bounded 
+                   at the upper and lower bounds of x_data to avoid
+                   extrapolation error of the cubic spline 
+                   
+        Output: none"""
+
 
         #verify that x and y are valid GEKKO variables
         if not isinstance(x,(GKVariable,GKParameter)):
@@ -552,6 +563,7 @@ class GEKKO(object):
         if bound_x is True:
             x.lower = x_data[0]
             x.upper = x_data[-1]
+        return
             
     def max2(self,x1,x2):
         """ Generates the maximum value with continuous first and
@@ -682,6 +694,69 @@ class GEKKO(object):
 
         #Add connections between v and periodic object attribute x
         self._connections.append(v.name + ' = ' + periodic_name+'.x')
+        return
+
+    ## piecewise linear
+    def pwl(self, x,y,x_data,y_data,bound_x=False):
+        """Generate a 1d piecewise linear function with continuous derivatives
+        from vectors of x and y data that link to GEKKO variables x and y with a
+        constraint that y=f(x) with piecewise linear units.
+
+        Inputs:
+          x: GEKKO parameter or variable
+          y: GEKKO variable
+          x_data: array of x data
+          y_data: array of y data that matches x_data size
+          bound_x: boolean to state if x should be bounded 
+                   at the upper and lower bounds of x_data to avoid
+                   extrapolation error of the piecewise linear region. 
+                   
+        Output: none"""
+
+        #verify that x and y are valid GEKKO variables
+        if not isinstance(x,(GKVariable,GKParameter)):
+            raise TypeError("First argument must be a GEKKO parameter or variable")
+        if not isinstance(y,(GKVariable)):
+            raise TypeError("Second argument must be a GEKKO variable")
+
+        #verify data input types
+        if not isinstance(x_data, (list,np.ndarray)):
+            raise TypeError("x_data must be a python list or numpy array")
+        if not isinstance(y_data, (list,np.ndarray)):
+            raise TypeError("y_data must be a python list or numpy array")
+
+        #convert data to flat numpy arrays
+        x_data = np.array(x_data,dtype=float).flatten()
+        y_data = np.array(y_data,dtype=float).flatten()
+
+        #verify data inputs for same length and ordered x_data
+        if np.size(x_data) != np.size(y_data):
+            raise Exception('Data arrays must have the same length')
+        sort_order = np.argsort(x_data)
+        x_data = x_data[sort_order]
+        y_data = y_data[sort_order]
+
+        #build pwl object with unique object name
+        pwl_name = 'pwl' + str(len(self._objects) + 1)
+        self._objects.append(pwl_name + ' = pwl')
+
+        #write x_data and y_data to objectname.txt
+        file_name = pwl_name + '.txt'
+        data = np.vstack((x_data,y_data))
+        np.savetxt(os.path.join(self._path,file_name), data.T, delimiter=",", fmt='%1.25s')
+
+        #add txt file to list of extra file to send to server
+        self._extra_files.append(file_name)
+
+        #Add connections between x and y with pwl object data
+        self._connections.append(x.name + ' = ' + pwl_name+'.x')
+        self._connections.append(y.name + ' = ' + pwl_name+'.y')
+
+        #Bound x to x_data limits
+        if bound_x is True:
+            x.lower = x_data[0]
+            x.upper = x_data[-1]            
+        return
                 
     def sign2(self,x):
         """ Generates the sign of an argument with MPCC. The traditional method
@@ -854,6 +929,49 @@ class GEKKO(object):
             self._connections.append(y[i].name + ' = ' + SS_name+'.y['+str(i+1)+']')
 
         return x,y,u
+        
+    def sum(self,x):
+        """ Summation using APM object.
+        Usage: y = m.sum(x)
+        Input: Numpy array or List of GEKKO variables, parameters,
+               constants, intermediates, or expressions
+        Output: GEKKO variable
+        """
+        #check for numpy array
+        if isinstance(x, np.ndarray):
+            y = np.sum(x)
+            return y
+
+        #verify data input types
+        if not isinstance(x, list):
+            raise TypeError("x must be a python list of GEKKO parameters, variables, or expressions")
+
+        # build sum object with unique object name
+        sum_name = 'sum_' + str(len(self._objects) + 1)
+        self._objects.append(sum_name + ' = sum('+str(len(x))+')')
+
+        # cycle through list
+        i = 0
+        for xi in x:
+            i += 1
+            # verify that x is a valid GEKKO variable or parameter
+            if isinstance(xi,(GKVariable,GKParameter)):
+                xin = xi
+            elif isinstance(xi, np.ndarray):
+                xin = self.Param(value=np.sum(xi))
+            else:
+                # create variable if it is an expression
+                # can't use an intermediate because they don't create connections
+                xin = self.Var()
+                self.Equation(xin==xi)
+            # add connections between x and sum object attribute x
+            self._connections.append(xin.name + ' = ' + sum_name+'.x['+str(i)+']')
+
+        # add connections between y and sum object attribute y
+        y = self.Var()
+        self._connections.append(y.name + ' = ' + sum_name+'.y')
+
+        return y
         
     ## System identification of time series model
     def sysid(self,t,u,y,na=1,nb=1,nk=0,shift='calc',scale=True,diaglevel=0,pred='model',objf=100):
@@ -1258,6 +1376,26 @@ class GEKKO(object):
         
         # predictions, parameters, gain matrix
         return ypred,p,K
+
+    def vsum(self,x):
+        """ Summation of variable in the data or time direction. This is
+        similar to an integral but only does the summation of all points,
+        not the integral area that considers time intervals.
+        """
+
+        #Verify that x is Gekko Param or Var
+        if not isinstance(x,(GKVariable,GKParameter)):
+            raise TypeError("Variable must be a Gekko Param or Var")
+
+        #build vsum object with unique object name
+        vsum_name = 'vsum_obj_' + str(len(self._objects) + 1)
+        self._objects.append(vsum_name + ' = vsum')
+
+        #Add connections between x and vsum object attribute x
+        self._connections.append(x.name + ' = ' + vsum_name+'.x')
+        y = self.Var() # output
+        self._connections.append(y.name + ' = ' + vsum_name+'.y')
+        return y
 
     #%% Add array functionality to all types
     def Array(self,f,dim,**args):
