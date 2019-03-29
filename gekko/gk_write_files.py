@@ -23,14 +23,16 @@ def _build_model(self):
         for const in self._constants:
             model += '\t%s = %s\n' % (const, const.value)
         model += 'End Constants\n'
+
     if self._parameters:
         model += 'Parameters\n'
         for parameter in self._parameters:
             i = 0
             model += '\t%s' % parameter
             if not isinstance(parameter.VALUE.value, (list,np.ndarray)):
-                i = 1
-                model += ' = %s' % parameter.VALUE
+                if not (parameter.VALUE==None):
+                    i = 1
+                    model += ' = %s' % parameter.VALUE
             if parameter.type != None: #Only FV/MV have bounds
                 if parameter.UPPER is not None:
                     if i == 1:
@@ -47,22 +49,23 @@ def _build_model(self):
 
     if self._variables:
         model += 'Variables\n'
-        for parameter in self._variables:
+        for variable in self._variables:
             i = 0
-            model += '\t%s' % parameter
-            if not isinstance(parameter.VALUE.value, (list,np.ndarray)):
-                i = 1
-                model += ' = %s' % parameter.VALUE
-            if parameter.UPPER is not None:
+            model += '\t%s' % variable
+            if not isinstance(variable.VALUE.value, (list,np.ndarray)):
+                if not (variable.VALUE==None):
+                    i = 1
+                    model += ' = %s' % variable.VALUE
+            if variable.UPPER is not None:
                 if i == 1:
                     model += ', '
                 i = 1
-                model += '<= %s' % parameter.UPPER
-            if parameter.LOWER is not None:
+                model += '<= %s' % variable.UPPER
+            if variable.LOWER is not None:
                 if i == 1:
                     model += ', '
                 i = 1
-                model += '>= %s' % parameter.LOWER
+                model += '>= %s' % variable.LOWER
             model += '\n'
         model += 'End Variables\n'
 
@@ -93,6 +96,13 @@ def _build_model(self):
         for obj_str in self._objects:
             model += '\t%s\n' % obj_str
         model += 'End Objects\n'
+
+    if self._compounds:
+        model += 'Compounds\n'
+        for compound in self._compounds:
+            model += '  %s\n' % (compound,)
+        model += 'End Compounds\n'
+
     #print(model) #for debugging
 
     #replace multiple operators resulting from signs

@@ -79,12 +79,11 @@ def load_results(self):
         f.close()
 
         for vp in self._parameters:
-            if vp.type is not None:
-                try:
-                    vp.VALUE = data[vp.name]
-                    vp.value.change = False
-                except Exception:
-                    print(vp.name+ " not found in results file")
+            try:
+                vp.VALUE = data[vp.name]
+                vp.value.change = False
+            except Exception:
+                print(vp.name+ " not found in results file")
         for i in self._intermediates:
             try:
                 i.value.value = data[i.name]
@@ -103,8 +102,6 @@ def load_results(self):
     else:
         print("Error: 'results.json' not found. Check above for additional error details")
         return {}
-
-
 
     print(data['APM']['SOLVESTATUS'])
     return data

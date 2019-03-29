@@ -121,8 +121,11 @@ def verify_input_options(self):
 def name_check(self):
     all_names = set() #build the set of all variables names to check for uniqueness
     #illegal names (reserved for functions)
-    illegal_3 = set(['abs','exp','log','sin','cos','tan','erf'])
-    illegal_4 = set(['sqrt','asin','acos','atan'])
+    # not checking for 5+ character object names
+    illegal = set(['abs','arx','cos','erf','exp','log','pwl',\
+                     'sin','sum','tan','abs2','abs3','max2',\
+                     'max3','min2','min3','sqrt','asin','acos',\
+                     'atan','vsum'])
     
     for x in self._constants+self._parameters+self._variables+self._intermediates+self._objects:
         #unique names
@@ -132,11 +135,8 @@ def name_check(self):
             raise NameError(x.name+" is used multiple times")
         #reserved functions
         if len(x.name) >=3:
-            if x.name[0:3] in illegal_3: 
+            if x.name in illegal: 
                 raise NameError(x.name+" is an illegal name (reserved function name)")
-            if len(x.name) >=4:
-                if x.name[0:4] in illegal_4:
-                    raise NameError(x.name+" is an illegal name (reserved function name)")
         
         #special names
         if len(x.name) >=3:
@@ -144,4 +144,3 @@ def name_check(self):
                 print("Warning: "+x.name+" is added to the objective function (name starts with 'obj')")
             if x.name[0:3] == 'slk':
                 print("Warning: "+x.name+" is a slack variable (name starts with 'slk') -- lower bound of zero")
-       
