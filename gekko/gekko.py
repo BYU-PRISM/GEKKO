@@ -284,6 +284,7 @@ class GEKKO(object):
     # arx         = auto-regressive exogenous input (time series) model
     # bspline     = bspline for 2D data
     # cspline     = cubic spline for 1D data
+    # if          = if conditional
     # max2        = max value with MPCC
     # max3        = max value with binary variable for switch
     # min2        = min value with MPCC
@@ -299,60 +300,62 @@ class GEKKO(object):
     # vsum        = vertical summation (integral) of a variable in data direction
 
     # Thermo Objects
+    #   usage: thermo('mw') for constants
+    #          thermo('lvp',T) for temperature dependent
     # ---- Temperature Independent ----
-    # thermo_mw   = Molecular Weight (kg/kmol)
-    # thermo_tc   = Critical Temperature (K)
-    # thermo_pc   = Critical Pressure (Pa)
-    # thermo_vc   = Critical Volume (m^3/kmol)
-    # thermo_ccf  = Crit Compress Factor (unitless)
-    # thermo_mp   = Melting Point (K)
-    # thermo_tpt  = Triple Pt Temperature (K)
-    # thermo_tpp  = Triple Pt Pressure (Pa)
-    # thermo_nbp  = Normal Boiling Point (K)
-    # thermo_lmv  = Liq Molar Volume (m^3/kmol)
-    # thermo_ighf = IG Heat of Formation (J/kmol)
-    # thermo_iggf = IG Gibbs of Formation (J/kmol)
-    # thermo_igae = IG Absolute Entropy (J/kmol*K)
-    # thermo_shf  = Std Heat of Formation (J/kmol)
-    # thermo_sgf  = Std Gibbs of Formation (J/kmol)
-    # thermo_sae  = Std Absolute Entropy (J/kmol*K)
-    # thermo_hfmp = Heat Fusion at Melt Pt (J/kmol)
-    # thermo_snhc = Std Net Heat of Comb (J/kmol)
-    # thermo_af   = Acentric Factor (unitless)
-    # thermo_rg   = Radius of Gyration (m)
-    # thermo_sp   = Solubility Parameter ((J/m^3)^0.5)
-    # thermo_dm   = Dipole Moment (c*m)
-    # thermo_r    = van der Waals Volume (m^3/kmol)
-    # thermo_q    = van der Waals Area (m^2)
-    # thermo_ri   = Refractive Index (unitless)
-    # thermo_fp   = Flash Point (K)
-    # thermo_lfl  = Lower Flammability Limit (K)
-    # thermo_ufl  = Upper Flammability Limit (K)
-    # thermo_lflt = Lower Flamm Limit Temp (K)
-    # thermo_uflt = Upper Flamm Limit Temp (K)
-    # thermo_ait  = Auto Ignition Temp (K)
+    # mw   = Molecular Weight (kg/kmol)
+    # tc   = Critical Temperature (K)
+    # pc   = Critical Pressure (Pa)
+    # vc   = Critical Volume (m^3/kmol)
+    # ccf  = Crit Compress Factor (unitless)
+    # mp   = Melting Point (K)
+    # tpt  = Triple Pt Temperature (K)
+    # tpp  = Triple Pt Pressure (Pa)
+    # nbp  = Normal Boiling Point (K)
+    # lmv  = Liq Molar Volume (m^3/kmol)
+    # ighf = IG Heat of Formation (J/kmol)
+    # iggf = IG Gibbs of Formation (J/kmol)
+    # igae = IG Absolute Entropy (J/kmol*K)
+    # shf  = Std Heat of Formation (J/kmol)
+    # sgf  = Std Gibbs of Formation (J/kmol)
+    # sae  = Std Absolute Entropy (J/kmol*K)
+    # hfmp = Heat Fusion at Melt Pt (J/kmol)
+    # snhc = Std Net Heat of Comb (J/kmol)
+    # af   = Acentric Factor (unitless)
+    # rg   = Radius of Gyration (m)
+    # sp   = Solubility Parameter ((J/m^3)^0.5)
+    # dm   = Dipole Moment (c*m)
+    # r    = van der Waals Volume (m^3/kmol)
+    # q    = van der Waals Area (m^2)
+    # ri   = Refractive Index (unitless)
+    # fp   = Flash Point (K)
+    # lfl  = Lower Flammability Limit (K)
+    # ufl  = Upper Flammability Limit (K)
+    # lflt = Lower Flamm Limit Temp (K)
+    # uflt = Upper Flamm Limit Temp (K)
+    # ait  = Auto Ignition Temp (K)
     # ---- Temperature Dependent ----   
-    # thermo_sd   = Solid Density (kmol/m^3)
-    # thermo_ld   = Liquid Density (kmol/m^3) 
-    # thermo_svp  = Solid Vapor Pressure (Pa) 
-    # thermo_lvp  = Liquid Vapor Pressure (Pa) 
-    # thermo_hvap = Heat of Vaporization (J/kmol) 
-    # thermo_scp  = Solid Heat Capacity (J/kmol*K) 
-    # thermo_lcp  = Liquid Heat Capacity (J/kmol*K) 
-    # thermo_igcp = Ideal Gas Heat Capacity (J/kmol*K) 
-    # thermo_svc  = Second Virial Coefficient (m^3/kmol) 
-    # thermo_lv   = Liquid Viscosity (Pa*s) 
-    # thermo_vv   = Vapor Viscosity (Pa*s) 
-    # thermo_sk   = Solid Thermal Conductivity (W/m*K) 
-    # thermo_lk   = Liq Thermal Conductivity (W/m*K) 
-    # thermo_vk   = Vap Thermal Conductivity (W/m*K) 
-    # thermo_st   = Surface Tension (N/m) 
-    # thermo_sh   = Solid Enthalpy (J/kmol) 
-    # thermo_lh   = Liq Enthalpy (J/kmol) 
-    # thermo_vh   = Vap Enthalpy (J/kmol)                  
+    # sd   = Solid Density (kmol/m^3)
+    # ld   = Liquid Density (kmol/m^3) 
+    # svp  = Solid Vapor Pressure (Pa) 
+    # lvp  = Liquid Vapor Pressure (Pa) 
+    # hvap = Heat of Vaporization (J/kmol) 
+    # scp  = Solid Heat Capacity (J/kmol*K) 
+    # lcp  = Liquid Heat Capacity (J/kmol*K) 
+    # igcp = Ideal Gas Heat Capacity (J/kmol*K) 
+    # svc  = Second Virial Coefficient (m^3/kmol) 
+    # lv   = Liquid Viscosity (Pa*s) 
+    # vv   = Vapor Viscosity (Pa*s) 
+    # sk   = Solid Thermal Conductivity (W/m*K) 
+    # lk   = Liq Thermal Conductivity (W/m*K) 
+    # vk   = Vap Thermal Conductivity (W/m*K) 
+    # st   = Surface Tension (N/m) 
+    # sh   = Solid Enthalpy (J/kmol) 
+    # lh   = Liq Enthalpy (J/kmol) 
+    # vh   = Vap Enthalpy (J/kmol)                  
     
     # --- add to GEKKO ---
-    # axb, fmax, fmin, fsum, fvsum, lag, lookup, pwl, qobj, table
+    # axb, lag, lookup, qobj, table
 
     # --- flowsheet objects in APMonitor but not GEKKO ---
     # compounds, feedback, flash, flash_column, mass, massflow, massflows, 
@@ -577,103 +580,6 @@ class GEKKO(object):
         self._compounds.append(name)
         return
 
-    def thermo(self,prop,T=300.0):
-        """ Include thermodynamic property
-        """
-        self._thermo_obj = True
-        prop = prop.lower()
-        
-        # check if it is a temperature dependent property
-        tdp = ['sd','ld','lv','vv','sk','lk','vk','st','sh','lh','vh',\
-               'svp','lvp','scp','lcp','svc','hvap','igcp']
-        if prop.lower() in tdp:
-            td = True
-            # inquire if T is a valid GEKKO variable or parameter
-            if isinstance(T,(GKVariable,GKParameter)):
-                Tin = T
-            else:
-                # create input variable if it is an expression
-                Tin = self.Var()
-                self.Equation(Tin==T)
-        else:
-            td = False
-
-        # build thermo object with unique object name
-        thermo_name = 'thermo_' + str(len(self._objects) + 1)
-        self._objects.append(thermo_name+'=thermo_'+prop)
-
-        # add connections between y and thermo object attribute y
-        if not td:  # not temperature dependent
-            y = {}
-            i = 0
-            for c in self._compounds:
-                i += 1
-                y[c] = self.Param()
-                self._connections.append(y[c].name+'='+thermo_name+'.'+prop+'['+str(i)+']')
-        else:  # temperature dependent
-            y = {}
-            i = 0
-            for c in self._compounds:
-                i += 1
-                y[c] = self.Var()
-                self._connections.append(y[c].name+'='+thermo_name+'.'+prop+'['+str(i)+']')
-            # link temperature
-            y['T'] = Tin
-            self._connections.append(Tin.name+'='+thermo_name+'.T')
-            
-        # add units and property description
-        if (prop=='mw'): y['units']='kg/kmol'; y['property']='Molecular Weight'
-        if (prop=='tc'): y['units']='K'; y['property']='Critical Temperature'
-        if (prop=='pc'): y['units']='Pa'; y['property']='Critical Pressure'
-        if (prop=='vc'): y['units']='m^3/kmol'; y['property']='Critical Volume'
-        if (prop=='ccf'): y['units']='unitless'; y['property']='Crit Compress Factor'
-        if (prop=='mp'): y['units']='K'; y['property']='Melting Point'
-        if (prop=='tpt'): y['units']='K'; y['property']='Triple Pt Temperature'
-        if (prop=='tpp'): y['units']='Pa'; y['property']='Triple Pt Pressure'
-        if (prop=='nbp'): y['units']='K'; y['property']='Normal Boiling Point'
-        if (prop=='lmv'): y['units']='m^3/kmol'; y['property']='Liq Molar Volume'
-        if (prop=='ighf'): y['units']='J/kmol'; y['property']='IG Heat of Formation'
-        if (prop=='iggf'): y['units']='J/kmol'; y['property']='IG Gibbs of Formation'
-        if (prop=='igae'): y['units']='J/kmol-K'; y['property']='IG Absolute Entropy'
-        if (prop=='shf'): y['units']='J/kmol'; y['property']='Std Heat of Formation'
-        if (prop=='sgf'): y['units']='J/kmol'; y['property']='Std Gibbs of Formation'
-        if (prop=='sae'): y['units']='J/kmol-K'; y['property']='Std Absolute Entropy'
-        if (prop=='hfmp'): y['units']='J/kmol'; y['property']='Heat Fusion at Melt Pt'
-        if (prop=='snhc'): y['units']='J/kmol'; y['property']='Std Net Heat of Comb'
-        if (prop=='af'): y['units']='unitless'; y['property']='Acentric Factor'
-        if (prop=='rg'): y['units']='m'; y['property']='Radius of Gyration'
-        if (prop=='sp'): y['units']='(J/m^3)^0.5'; y['property']='Solubility Parameter'
-        if (prop=='dm'): y['units']='c*m'; y['property']='Dipole Moment'
-        if (prop=='r'): y['units']='m^3/kmol'; y['property']='van der Waals Volume'
-        if (prop=='q'): y['units']='m^2'; y['property']='van der Waals Area'
-        if (prop=='ri'): y['units']='unitless'; y['property']='Refractive Index'
-        if (prop=='fp'): y['units']='K'; y['property']='Flash Point'
-        if (prop=='lfl'): y['units']='K'; y['property']='Lower Flammability Limit'
-        if (prop=='ufl'): y['units']='K'; y['property']='Upper Flammability Limit'
-        if (prop=='lflt'): y['units']='K'; y['property']='Lower Flamm Limit Temp'
-        if (prop=='uflt'): y['units']='K'; y['property']='Upper Flamm Limit Temp'
-        if (prop=='ait'): y['units']='K'; y['property']='Auto Ignition Temp'
-        if (prop=='sd'): y['units']='kmol/m^3'; y['property']='Solid Density'
-        if (prop=='ld'): y['units']='kmol/m^3 '; y['property']='Liquid Density'
-        if (prop=='svp'): y['units']='Pa '; y['property']='Solid Vapor Pressure'
-        if (prop=='lvp'): y['units']='Pa '; y['property']='Liquid Vapor Pressure'
-        if (prop=='hvap'): y['units']='J/kmol '; y['property']='Heat of Vaporization'
-        if (prop=='scp'): y['units']='J/kmol-K '; y['property']='Solid Heat Capacity'
-        if (prop=='lcp'): y['units']='J/kmol-K '; y['property']='Liquid Heat Capacity'
-        if (prop=='igcp'): y['units']='J/kmol-K '; y['property']='Ideal Gas Heat Capacity'
-        if (prop=='svc'): y['units']='m^3/kmol '; y['property']='Second Virial Coefficient'
-        if (prop=='lv'): y['units']='Pa*s '; y['property']='Liquid Viscosity'
-        if (prop=='vv'): y['units']='Pa*s '; y['property']='Vapor Viscosity'
-        if (prop=='sk'): y['units']='W/m-K '; y['property']='Solid Thermal Conductivity'
-        if (prop=='lk'): y['units']='W/m-K '; y['property']='Liq Thermal Conductivity'
-        if (prop=='vk'): y['units']='W/m-K '; y['property']='Vap Thermal Conductivity'
-        if (prop=='st'): y['units']='N/m '; y['property']='Surface Tension'
-        if (prop=='sh'): y['units']='J/kmol '; y['property']='Solid Enthalpy'
-        if (prop=='lh'): y['units']='J/kmol '; y['property']='Liq Enthalpy'
-        if (prop=='vh'): y['units']='J/kmol '; y['property']='Vap Enthalpy'
-        
-        return y
-
     ## cubic Spline
     def cspline(self, x,y,x_data,y_data,bound_x=False):
         """Generate a 1d cubic spline with continuous first and seconds derivatives
@@ -737,6 +643,31 @@ class GEKKO(object):
             x.lower = x_data[0]
             x.upper = x_data[-1]
         return
+
+    def if3(self,condition,x1,x2):
+        """ IF conditional with a binary switch variable.
+        The traditional method for IF statements is not continuously
+        differentiable and can cause a gradient-based optimizer to fail
+        to converge.
+        Usage: y = m.if3(condition,x1,x2)
+        Inputs:
+           condition: GEKKO variable, parameter, or expression
+           x1 and x2: GEKKO variable, parameter, or expression
+        Output: GEKKO variable y = x1 when condition<0
+                               y = x2 when condition>=0
+        """
+        # add binary (intb) and output (y) variable
+        intb = self.Var(0,lb=0,ub=1,integer=True)
+        y = self.Var()
+        # add equations for switching conditions
+        #  intb=0 when condition<0  and y=x1
+        #  intb=1 when condition>=0 and y=x2
+        self.Equation((1-intb)*condition<=0)
+        self.Equation(intb*condition>=0)
+        self.Equation(y==(1-intb)*x1+intb*x2)
+        # change default solver to APOPT (MINLP)
+        self.options.SOLVER = 1
+        return y
             
     def max2(self,x1,x2):
         """ Generates the maximum value with continuous first and
@@ -1549,6 +1480,103 @@ class GEKKO(object):
         
         # predictions, parameters, gain matrix
         return ypred,p,K
+        
+    def thermo(self,prop,T=300.0):
+        """ Include thermodynamic property
+        """
+        self._thermo_obj = True
+        prop = prop.lower()
+        
+        # check if it is a temperature dependent property
+        tdp = ['sd','ld','lv','vv','sk','lk','vk','st','sh','lh','vh',\
+               'svp','lvp','scp','lcp','svc','hvap','igcp']
+        if prop.lower() in tdp:
+            td = True
+            # inquire if T is a valid GEKKO variable or parameter
+            if isinstance(T,(GKVariable,GKParameter)):
+                Tin = T
+            else:
+                # create input variable if it is an expression
+                Tin = self.Var()
+                self.Equation(Tin==T)
+        else:
+            td = False
+
+        # build thermo object with unique object name
+        thermo_name = 'thermo_' + str(len(self._objects) + 1)
+        self._objects.append(thermo_name+'=thermo_'+prop)
+
+        # add connections between y and thermo object attribute y
+        if not td:  # not temperature dependent
+            y = {}
+            i = 0
+            for c in self._compounds:
+                i += 1
+                y[c] = self.Param()
+                self._connections.append(y[c].name+'='+thermo_name+'.'+prop+'['+str(i)+']')
+        else:  # temperature dependent
+            y = {}
+            i = 0
+            for c in self._compounds:
+                i += 1
+                y[c] = self.Var()
+                self._connections.append(y[c].name+'='+thermo_name+'.'+prop+'['+str(i)+']')
+            # link temperature
+            y['T'] = Tin
+            self._connections.append(Tin.name+'='+thermo_name+'.T')
+            
+        # add units and property description
+        if (prop=='mw'): y['units']='kg/kmol'; y['property']='Molecular Weight'
+        if (prop=='tc'): y['units']='K'; y['property']='Critical Temperature'
+        if (prop=='pc'): y['units']='Pa'; y['property']='Critical Pressure'
+        if (prop=='vc'): y['units']='m^3/kmol'; y['property']='Critical Volume'
+        if (prop=='ccf'): y['units']='unitless'; y['property']='Crit Compress Factor'
+        if (prop=='mp'): y['units']='K'; y['property']='Melting Point'
+        if (prop=='tpt'): y['units']='K'; y['property']='Triple Pt Temperature'
+        if (prop=='tpp'): y['units']='Pa'; y['property']='Triple Pt Pressure'
+        if (prop=='nbp'): y['units']='K'; y['property']='Normal Boiling Point'
+        if (prop=='lmv'): y['units']='m^3/kmol'; y['property']='Liq Molar Volume'
+        if (prop=='ighf'): y['units']='J/kmol'; y['property']='IG Heat of Formation'
+        if (prop=='iggf'): y['units']='J/kmol'; y['property']='IG Gibbs of Formation'
+        if (prop=='igae'): y['units']='J/kmol-K'; y['property']='IG Absolute Entropy'
+        if (prop=='shf'): y['units']='J/kmol'; y['property']='Std Heat of Formation'
+        if (prop=='sgf'): y['units']='J/kmol'; y['property']='Std Gibbs of Formation'
+        if (prop=='sae'): y['units']='J/kmol-K'; y['property']='Std Absolute Entropy'
+        if (prop=='hfmp'): y['units']='J/kmol'; y['property']='Heat Fusion at Melt Pt'
+        if (prop=='snhc'): y['units']='J/kmol'; y['property']='Std Net Heat of Comb'
+        if (prop=='af'): y['units']='unitless'; y['property']='Acentric Factor'
+        if (prop=='rg'): y['units']='m'; y['property']='Radius of Gyration'
+        if (prop=='sp'): y['units']='(J/m^3)^0.5'; y['property']='Solubility Parameter'
+        if (prop=='dm'): y['units']='c*m'; y['property']='Dipole Moment'
+        if (prop=='r'): y['units']='m^3/kmol'; y['property']='van der Waals Volume'
+        if (prop=='q'): y['units']='m^2'; y['property']='van der Waals Area'
+        if (prop=='ri'): y['units']='unitless'; y['property']='Refractive Index'
+        if (prop=='fp'): y['units']='K'; y['property']='Flash Point'
+        if (prop=='lfl'): y['units']='K'; y['property']='Lower Flammability Limit'
+        if (prop=='ufl'): y['units']='K'; y['property']='Upper Flammability Limit'
+        if (prop=='lflt'): y['units']='K'; y['property']='Lower Flamm Limit Temp'
+        if (prop=='uflt'): y['units']='K'; y['property']='Upper Flamm Limit Temp'
+        if (prop=='ait'): y['units']='K'; y['property']='Auto Ignition Temp'
+        if (prop=='sd'): y['units']='kmol/m^3'; y['property']='Solid Density'
+        if (prop=='ld'): y['units']='kmol/m^3 '; y['property']='Liquid Density'
+        if (prop=='svp'): y['units']='Pa '; y['property']='Solid Vapor Pressure'
+        if (prop=='lvp'): y['units']='Pa '; y['property']='Liquid Vapor Pressure'
+        if (prop=='hvap'): y['units']='J/kmol '; y['property']='Heat of Vaporization'
+        if (prop=='scp'): y['units']='J/kmol-K '; y['property']='Solid Heat Capacity'
+        if (prop=='lcp'): y['units']='J/kmol-K '; y['property']='Liquid Heat Capacity'
+        if (prop=='igcp'): y['units']='J/kmol-K '; y['property']='Ideal Gas Heat Capacity'
+        if (prop=='svc'): y['units']='m^3/kmol '; y['property']='Second Virial Coefficient'
+        if (prop=='lv'): y['units']='Pa*s '; y['property']='Liquid Viscosity'
+        if (prop=='vv'): y['units']='Pa*s '; y['property']='Vapor Viscosity'
+        if (prop=='sk'): y['units']='W/m-K '; y['property']='Solid Thermal Conductivity'
+        if (prop=='lk'): y['units']='W/m-K '; y['property']='Liq Thermal Conductivity'
+        if (prop=='vk'): y['units']='W/m-K '; y['property']='Vap Thermal Conductivity'
+        if (prop=='st'): y['units']='N/m '; y['property']='Surface Tension'
+        if (prop=='sh'): y['units']='J/kmol '; y['property']='Solid Enthalpy'
+        if (prop=='lh'): y['units']='J/kmol '; y['property']='Liq Enthalpy'
+        if (prop=='vh'): y['units']='J/kmol '; y['property']='Vap Enthalpy'
+        
+        return y
 
     def vsum(self,x):
         """ Summation of variable in the data or time direction. This is
