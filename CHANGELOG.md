@@ -21,7 +21,31 @@ All notable changes to the GEKKO project will be documented in this file.
 ## [0.1] - 2019-03-01
 ### Initial stable release
 
-## [0.0.1a1] - 2018-01-10
+## [0.1rc7] - 2019-02-01
+### Final 0.1 release candidate
+### Added
+- System identification and ARX model support as new objects
+
+## [0.1rc4] - 2019-02-12
+### 0.1 release candidate 4
+### Added
+- Additional APMonitor object support
+- Support for ARM processors
+
+## [0.1b2] - 2018-11-13
+### 0.1 beta release 2
+### Added
+- Additional GUI support
+
+### Changed
+- Remote option with GEKKO initialization, not solve command
+
+## [0.1a2] - 2018-03-28
+### 0.1 alpha release 2
+### Added
+- Initial GUI support
+
+## 0.0.1a1 - 2018-01-05
 ### Initial GEKKO public release, alpha version
 
 [Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/0.1...HEAD
