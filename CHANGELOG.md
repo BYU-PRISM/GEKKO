@@ -9,11 +9,12 @@ All notable changes to the GEKKO project will be documented in this file.
 - New vsum for vertical (data direction) summation for IMODE=2, IMODE=4+
 - New sum for more efficient summation in GEKKO with APMonitor object
 - New APM 0.8.8 local executable for IMODE 7 bug fix
-- New PWL (Piecewise linear
+- New PWL (Piecewise linear) object
 
 ### Changed
 - Improved sysid (System Identification) for fast identification when not constrained
 - Write values from JSON for Parameters on solver exit. It was previously ignoring Param values. This is needed for Thermo objects that are constants.
+- Bug fix for y=m.Var(x.value) in gk_operators.py
 
 ### Removed
 - None
