@@ -119,6 +119,9 @@ class GK_Value(list):
     def __init__(self,value):
         if value is not None:
             self.change = True
+            if (type(self)==type(value)):
+                # value is a GK_Value type, need value.value
+                value = value.value
             self.value = value
         else:
             self.value = 0 #store default value without triggering change detection
