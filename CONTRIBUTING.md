@@ -3,7 +3,7 @@
 #### **Did you find a bug?**
 
 * **Do not open up a GitHub issue if the bug is a security vulnerability
-  in Gekko**, and instead contact Advanced Process Solutions, LLC support at support@apmonitor.com.
+  in Gekko**, and instead contact support@apmonitor.com.
 
 * **Ensure the bug was not already reported** by searching on GitHub under [Issues](https://github.com/BYU-PRISM/GEKKO/issues).
 
