@@ -3,6 +3,14 @@ All notable changes to the GEKKO project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.2rc6] - 2019-04-15
+### Added
+- New axb object for Ax=b, Ax<b, and Ax>b linear equations
+- New qobj object for quadratic objectives 0.5 x^T A x + b^T x
+
+# Changed
+- New APM 0.8.9 local executable with axb and qobj improvements
+
 ## [0.2rc5] - 2019-04-03
 ### Added
 - New thermo objects
@@ -49,7 +57,8 @@ All notable changes to the GEKKO project will be documented in this file.
 ## 0.0.1a1 - 2018-01-05
 ### Initial GEKKO public release, alpha version
 
-[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/0.1...HEAD
+[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/0.2rc5...HEAD
+[0.2rc5]: https://github.com/BYU-PRISM/GEKKO/compare/0.1...0.2rc5
 [0.1]: https://github.com/BYU-PRISM/GEKKO/compare/0.1rc7...0.1
 [0.1rc7]: https://github.com/BYU-PRISM/GEKKO/compare/0.1rc4...0.1rc7
 [0.1rc4]: https://github.com/BYU-PRISM/GEKKO/compare/0.1b2...0.1rc4
