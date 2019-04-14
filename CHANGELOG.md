@@ -3,15 +3,15 @@ All notable changes to the GEKKO project will be documented in this file.
 
 ## [Unreleased]
 
-## [0.2rc6] - 2019-04-15
+## [0.2rc6] - Version 0.2 Release Candidate 6, Date: 2019-04-15
 ### Added
 - New axb object for Ax=b, Ax<b, and Ax>b linear equations
 - New qobj object for quadratic objectives 0.5 x^T A x + b^T x
 
-# Changed
+### Changed
 - New APM 0.8.9 local executable with axb and qobj improvements
 
-## [0.2rc5] - 2019-04-03
+## [0.2rc5] - Version 0.2 Release Candidate 5, Date: 2019-04-03
 ### Added
 - New thermo objects
 - New vsum for vertical (data direction) summation for IMODE=2, IMODE=4+
@@ -27,21 +27,21 @@ All notable changes to the GEKKO project will be documented in this file.
 ### Removed
 - None
 
-## [0.1] - 2019-03-01
+## [0.1] - Version 0.1 Stable Release, Date: 2019-03-01
 ### Initial stable release
 
-## [0.1rc7] - 2019-02-01
+## [0.1rc7] - Version 0.1 Release Candidate 7, Date: 2019-02-01
 ### Final 0.1 release candidate
 ### Added
 - System identification and ARX model support as new objects
 
-## [0.1rc4] - 2019-02-12
+## [0.1rc4] - Version 0.1 Release Candidate 4, Date: 2019-02-12
 ### 0.1 release candidate 4
 ### Added
 - Additional APMonitor object support
 - Support for ARM processors
 
-## [0.1b2] - 2018-11-13
+## [0.1b2] - Version 0.1 Beta 2, Date: 2018-11-13
 ### 0.1 beta release 2
 ### Added
 - Additional GUI support
@@ -49,12 +49,12 @@ All notable changes to the GEKKO project will be documented in this file.
 ### Changed
 - Remote option with GEKKO initialization, not solve command
 
-## [0.1a2] - 2018-03-28
+## [0.1a2] - Version 0.1 Alpha 2, Date: 2018-03-28
 ### 0.1 alpha release 2
 ### Added
 - Initial GUI support
 
-## 0.0.1a1 - 2018-01-05
+## 0.0.1a1 - Version 0.0.1 Alpha 1, Date: 2018-01-05
 ### Initial GEKKO public release, alpha version
 
 [Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/0.2rc5...HEAD
