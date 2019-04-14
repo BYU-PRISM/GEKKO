@@ -41,7 +41,7 @@ extra_files = gui_files + ['bin/apm.exe','bin/apm','bin/apm_arm']
 
 # versions: a (alpha), b (beta), rc (release candidate)
 setup(name='gekko',
-    version='0.2rc5',
+    version='0.2rc6',
     description='Machine learning and optimization for dynamic systems',
     long_description=long_description,
     classifiers=[
