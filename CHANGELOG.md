@@ -7,6 +7,7 @@ All notable changes to the GEKKO project will be documented in this file.
 ### Added
 - New axb object for Ax=b, Ax<b, and Ax>b linear equations
 - New qobj object for quadratic objectives 0.5 x^T A x + b^T x
+- New if3 conditional statement that translates conditional statemment to Mixed Integer problem
 
 ### Changed
 - New APM 0.8.9 local executable with axb and qobj improvements
