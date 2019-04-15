@@ -282,6 +282,7 @@ class GEKKO(object):
     # abs2        = absolute value with MPCC
     # abs3        = absolute value with binary variable for switch
     # arx         = auto-regressive exogenous input (time series) model
+    # axb         = matrix equality (Ax=b) and inequality (Ax<b)
     # bspline     = bspline for 2D data
     # cspline     = cubic spline for 1D data
     # if          = if conditional
@@ -291,6 +292,7 @@ class GEKKO(object):
     # min3        = min value with binary variable for switch
     # periodic    = periodic (initial=final) for dynamic problems
     # pwl         = piecewise linear function
+    # qobj        = quadratic objective
     # sign2       = signum function with MPCC
     # sign3       = signum function with binary variable for switch
     # state_space = continuous/discrete and dense/sparse state space
@@ -355,7 +357,7 @@ class GEKKO(object):
     # vh   = Vap Enthalpy (J/kmol)                  
     
     # --- add to GEKKO ---
-    # axb, lag, lookup, qobj, table
+    # lag, lookup, table
 
     # --- flowsheet objects in APMonitor but not GEKKO ---
     # compounds, feedback, flash, flash_column, mass, massflow, massflows, 
@@ -410,7 +412,7 @@ class GEKKO(object):
     def arx(self,p):
         """
         Build a GEKKO from ARX representation.
-        inputs:
+        Inputs:
            parameter dictionary p['a'], p['b'], p['c']
            a (coefficients for a polynomial, na x ny)
            b (coefficients for b polynomial, ny x (nb x nu))
@@ -497,6 +499,109 @@ class GEKKO(object):
                 self._connections.append(y[i].name + ' = ' + arx_name+'.y['+str(i+1)+']')
 
         return y,u
+
+    ## Ax=b, Ax<=b, or Ax>=b
+    def axb(self,A,b,x=None,etype='=',sparse=False):
+        """Create Ax=b, Ax<b, Ax>b, Ax<=b, or Ax>=b models
+        Usage: x = m.axb(A,b,etype='=,<,>,<=,>=',sparse=[True,False])
+        Input: A = numpy 2D array or list in dense or sparse form
+               b = numpy 1D array or list in dense or sparse form
+               x = 1D array of gekko variables (optional). If None on entry
+                     then the array is created and returned.
+               etype = ['=','<','>','>=','<='] for equality or inequality form
+               sparse = True if data is in sparse form, otherwise dense
+                 sparse matrices are stored in COO form with [row,col,value] with
+                 starting index 1 for optional matrix A and in [row,value] for 
+                 vector b
+        Output: GEKKO variables x
+        """
+
+        #verify data input types
+        if not all(isinstance(y, (list,np.ndarray)) for y in [A,b]):
+            raise TypeError("Each input (A and b) must be a python list or numpy array")
+
+        if not any(etype[0]==t for t in ['=','>','<']):
+            raise TypeError("etype must start with either, '=', '<', or '>'")
+
+        #convert data to flat numpy arrays
+        A = np.array(A,dtype=float).T
+        b = np.array(b,dtype=float).T
+        if sparse:
+            m = np.size(b,0)
+            n = np.size(b,1)
+            if (n!=2):
+                raise Exception('The b vector must be in COO form as [row,value] with 2 columns')
+        else:
+            b = b.flatten()
+        
+        # check sizes
+        if sparse:
+            m = np.size(A,0)
+            n = np.size(A,1)
+            if (n!=3):
+                raise Exception('The A matrix must be in COO form as [row,col,value] with 3 columns')
+
+        if sparse:
+            # sparse matrix size
+            r_max = int(np.max(A[:,0]))
+            c_max = int(np.max(A[:,1]))
+        else:
+            # dense matrix check
+            r_max = np.size(A,0)
+            c_max = np.size(A,1)
+            if ((not sparse) and np.size(b)!=r_max):
+                raise Exception('The number of A matrix rows and b vector size must be the same')
+
+        if x==None:
+            # create x variable array if none given
+            nx = c_max
+            xin = self.Array(self.Var,(nx))
+        else:
+            if not isinstance(x, (list,np.ndarray)):
+                raise TypeError("Optional x must be a python list or numpy array of GEKKO variables or parameters")
+            nx = len(x)
+            if nx!=c_max:
+                raise TypeError("Optional x must have same length as number of A columns")            
+            for i in range(nx):
+                if not isinstance(x[i],(GKVariable,GKParameter)):
+                    raise TypeError("List x must be composed of GEKKO parameters or variables")
+            xin = x
+            
+        #build axb object with unique object name
+        axb_name = 'axb' + str(len(self._objects) + 1)
+        self._objects.append(axb_name + ' = axb')
+
+        # write header file
+        filename = os.path.join(self._path,axb_name+'.txt')
+        fid = open(filename,'w')
+        if sparse:
+            fid.write('sparse, ')
+        else:
+            fid.write('dense, ')
+        fid.write('Ax'+etype[0]+'b\n')
+        fid.write(str(int(r_max)) + ' ! m = number of rows of A and b size \n')
+        fid.write(str(int(r_max)) + ' ! n = number of cols of A and x size \n')
+        fid.close()
+        self._extra_files.append(filename)
+
+        # write A file
+        filename = os.path.join(self._path,axb_name+'.a.txt')
+        np.savetxt(filename, A, delimiter=",", fmt='%1.25s')
+        self._extra_files.append(axb_name+'.a.txt')
+
+        # write b file
+        filename = os.path.join(self._path,axb_name+'.b.txt')
+        np.savetxt(filename, b, delimiter=",", fmt='%1.25s')
+        self._extra_files.append(axb_name+'.b.txt')
+
+        #Add connections between x and axb object x (index 1)
+        for i in range(nx):
+            self._connections.append(xin[i].name + ' = ' + axb_name+'.x['+str(i+1)+']')
+
+        if x==None:
+            return xin
+        else:
+            return
     
     ## bspline
     def bspline(self, x,y,z,x_data,y_data,z_data,data=True):
@@ -862,6 +967,128 @@ class GEKKO(object):
             x.upper = x_data[-1]            
         return
                 
+    ## qobj
+    def qobj(self,b,A=[],x=None,otype='min',sparse=False):
+        """Create quadratic objective  = 0.5 x^T A x + c^T x
+        Usage: x = m.qobj(c,Q=[2d array],otype=['min','max'],sparse=[True,False])
+        Input: b = numpy 1D array or list in dense or sparse form
+               A = numpy 2D array or list in dense or sparse form
+               x = array of gekko variables (optional). If None on entry
+                     then the array is created and returned.
+               etype = ['=','<','>','>=','<='] for equality or inequality form
+               sparse = True if data is in sparse form, otherwise dense
+                 sparse matrices are stored in COO form with [row,col,value] with
+                 starting index 1 for optional matrix A and in [row,value] for 
+                 vector b
+               sparse matrices must have 3 columns
+        Output: GEKKO variables x
+        """
+
+        #verify data input types
+        if not isinstance(b, (list,np.ndarray)):
+            raise TypeError("QOBJ input b must be a python list or numpy array")
+
+        if not any(otype[0:min(3,len(otype))].lower()==t for t in ['min','max']):
+            raise TypeError("otype must start with either, 'min' or 'max'")
+
+        b = np.array(b,dtype=float)
+        if sparse:
+            b = b.T
+            m = np.size(b,0)
+            n = np.size(b,1)
+            if (n!=2):
+                raise Exception('The b vector must be in COO form as [row,value] with 2 rows')
+        else:
+            b = b.flatten()
+
+        if (len(A)>=1):
+            if not isinstance(A, (list,np.ndarray)):
+                raise TypeError("QOBJ input A must be a python list or numpy array")
+            A = np.array(A,dtype=float).T        
+            # check sizes
+            if sparse:
+                m = np.size(A,0)
+                n = np.size(A,1)
+                if (n!=3):
+                    raise Exception('The A matrix must be in COO form as [row,col,value] with 3 rows')
+            
+            if sparse:
+                # sparse matrix size
+                r_max = np.max(A[:,0])
+                c_max = np.max(A[:,1])
+            else:
+                # dense matrix check
+                r_max = np.size(A,0)
+                c_max = np.size(A,1)
+                if (r_max!=c_max):
+                    raise Exception('QOBJ: A matrix must have same number of rows and columns')
+
+        if x==None:
+            # create x variable array if none given
+            if sparse:
+                # maximum row index
+                nx = int(np.max(b[:,0]))
+            else:
+                nx = np.size(b)
+            print(nx)
+            xin = self.Array(self.Var,(nx))
+        else:
+            if not isinstance(x, (list,np.ndarray)):
+                raise TypeError("Optional x must be a python list or numpy array of GEKKO variables or parameters")
+            nx = len(x)
+            if sparse:
+                if (nx!=int(np.max(b[:,0]))):
+                    raise TypeError("Optional x must have same dimension as sparse b")            
+            else:
+                if nx!=np.size(b):
+                    raise TypeError("Optional x must have same dimension as b")            
+            if len(A)>=1:
+                if nx!=c_max:
+                    raise TypeError("Optional x must have same dimension as A")            
+            for i in range(nx):
+                if not isinstance(x[i],(GKVariable,GKParameter)):
+                    raise TypeError("List x must be composed of GEKKO parameters or variables")
+            xin = x
+            
+        #build qobj object with unique object name
+        qobj_name = 'qobj' + str(len(self._objects) + 1)
+        self._objects.append(qobj_name + ' = qobj')
+
+        # write header file
+        filename = os.path.join(self._path,qobj_name+'.txt')
+        fid = open(filename,'w')
+        if sparse:
+            fid.write('sparse, ')
+        else:
+            fid.write('dense, ')
+        if (otype[0:min(3,len(otype))].lower()=='min'):
+            fid.write('minimize\n')
+        else:
+            fid.write('maximize\n')        
+        fid.write(str(int(nx)) + ' ! n = number of variables \n')
+        fid.close()
+        self._extra_files.append(filename)
+
+        # write A file
+        if (len(A)>=1):
+            filename = os.path.join(self._path,qobj_name+'.a.txt')
+            np.savetxt(filename, A, delimiter=",", fmt='%1.25s')
+            self._extra_files.append(qobj_name+'.a.txt')
+
+        # write b file
+        filename = os.path.join(self._path,qobj_name+'.b.txt')
+        np.savetxt(filename, b, delimiter=",", fmt='%1.25s')
+        self._extra_files.append(qobj_name+'.b.txt')
+
+        #Add connections between x and qobj object x (index 1)
+        for i in range(nx):
+            self._connections.append(xin[i].name + ' = ' + qobj_name+'.x['+str(i+1)+']')
+
+        if x==None:
+            return xin
+        else:
+            return
+
     def sign2(self,x):
         """ Generates the sign of an argument with MPCC. The traditional method
         for signum (sign) is not continuously differentiable and can cause
