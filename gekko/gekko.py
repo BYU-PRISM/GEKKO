@@ -1030,7 +1030,6 @@ class GEKKO(object):
                 nx = int(np.max(b[:,0]))
             else:
                 nx = np.size(b)
-            print(nx)
             xin = self.Array(self.Var,(nx))
         else:
             if not isinstance(x, (list,np.ndarray)):
