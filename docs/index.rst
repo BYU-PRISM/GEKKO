@@ -1,11 +1,3 @@
-.. ThunderSnow documentation master file, created by
-   sphinx-quickstart on Fri Jul  7 22:01:18 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-
-
-
 GEKKO Optimization Suite
 =======================================
 
@@ -29,7 +21,7 @@ A pip package is available::
 
 	pip install gekko
 
-The most recent version is 0.1. You can upgrade from the command line with the upgrade flag::
+The most recent version is 0.2. You can upgrade from the command line with the upgrade flag::
 
     pip install --upgrade gekko
 
