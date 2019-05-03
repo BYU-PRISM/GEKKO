@@ -241,83 +241,111 @@ Traditional logical expressions such as if statements cannot be used in gradient
     Generates the maximum value with a binary switch variable.
         The traditional method for max value (max) is not continuously
         differentiable and can cause a gradient-based optimizer to fail
-        to converge.
-        Usage: y = m.max3(x1,x2)
-        Input: GEKKO variable, parameter, or expression
-        Output: GEKKO variable
+        to converge.::
+	
+        	Usage: y = m.max3(x1,x2)
+		
+    Input: 
+    	GEKKO variable, parameter, or expression
+    Output: 
+    	GEKKO variable
 	
 .. py:classmethod:: y = min2(self,x1,x2)
 
-    Generates the minimum value with continuous first and
-        second derivatives. The traditional method for min value (min) is not
+    Generates the minimum value with continuous first and second derivatives. 
+    	The traditional method for min value (min) is not
         continuously differentiable and can cause a gradient-based optimizer
-        to fail to converge.
-        Usage: y = m.min2(x1,x2)
-        Input: GEKKO variable, parameter, or expression
-        Output: GEKKO variable
+        to fail to converge.::
+	
+        	Usage: y = m.min2(x1,x2)
+		
+    Input: 
+	GEKKO variable, parameter, or expression
+    Output: 
+    	GEKKO variable
 	
 .. py:classmethod:: y = min3(self,x1,x2)
 
     Generates the maximum value with a binary switch variable.
         The traditional method for max value (max) is not continuously
         differentiable and can cause a gradient-based optimizer to fail
-        to converge.
-        Usage: y = m.max3(x1,x2)
-        Input: GEKKO variable, parameter, or expression
-        Output: GEKKO variable
+        to converge.::
+        	
+		Usage: y = m.max3(x1,x2)
+        
+    Input: 
+    	GEKKO variable, parameter, or expression
+    Output: 
+    	GEKKO variable
 	
 .. py:classmethod:: y = sign2(self,x)
 
-    Generates the sign of an argument with MPCC. The traditional method
-        for signum (sign) is not continuously differentiable and can cause
-        a gradient-based optimizer to fail to converge.
-        Usage: y = m.sign2(x)
-        Input: GEKKO variable, parameter, or expression
-        Output: GEKKO variable 
+    Generates the sign of an argument with MPCC. 
+    	The traditional method for signum (sign) is not continuously differentiable and can cause
+        a gradient-based optimizer to fail to converge.::
+	
+        	Usage: y = m.sign2(x)
+		
+    Input: 
+    	GEKKO variable, parameter, or expression
+    Output:
+    	GEKKO variable 
 	
 .. py:classmethod:: y = sign3(self,x)
 
     Generates the sign of an argument with binary switching variable.
         The traditional method for signum (sign) is not continuously differentiable
-        and can cause a gradient-based optimizer to fail to converge.
-        Usage: y = m.sign3(x)
-        Input: GEKKO variable, parameter, or expression
-        Output: GEKKO variable 
+        and can cause a gradient-based optimizer to fail to converge.::
+	
+        	Usage: y = m.sign3(x)
+		
+    Input: 
+    	GEKKO variable, parameter, or expression
+    Output: 
+    	GEKKO variable 
 	
 .. py:classmethod:: y = abs2(self,x)
 
-    Generates the absolute value with continuous first and
-        second derivatives. The traditional method for absolute value (abs) has
+    Generates the absolute value with continuous first and second derivatives. 
+    	The traditional method for absolute value (abs) has
         a point that is not continuously differentiable at an argument value
-        of zero and can cause a gradient-based optimizer to fail to converge.
-        Usage: y = m.abs2(x)
-        Input: GEKKO variable, parameter, or expression
-        Output: GEKKO variable
+        of zero and can cause a gradient-based optimizer to fail to converge.::
+	
+        	Usage: y = m.abs2(x)
+		
+    Input: 
+	GEKKO variable, parameter, or expression
+    Output: 
+	GEKKO variable
 	
 .. py:classmethod:: y = abs3(self,x)
 
-    Generates the absolute value with a binary switch. The traditional method
-        for absolute value (abs) has a point that is not continuously differentiable
-        at an argument value of zero and can cause a gradient-based optimizer to fail to converge.
-        Usage: y = m.abs3(x)
-        Input: GEKKO variable, parameter, or expression
-        Output: GEKKO variable 
+    Generates the absolute value with a binary switch. 
+    	The traditional method for absolute value (abs) has a point that is not continuously differentiable
+        at an argument value of zero and can cause a gradient-based optimizer to fail to converge.::
+	
+        	Usage: y = m.abs3(x)
+		
+    Input: 
+    	GEKKO variable, parameter, or expression
+    Output: 
+    	GEKKO variable 
 	
 .. py:classmethod:: pwl(self, x,y,x_data,y_data,bound_x=False)
 
-    Generate a 1d piecewise linear function with continuous derivatives
-        from vectors of x and y data that link to GEKKO variables x and y with a
-        constraint that y=f(x) with piecewise linear units.
-        Inputs:
-          x: GEKKO parameter or variable
-          y: GEKKO variable
-          x_data: array of x data
-          y_data: array of y data that matches x_data size
-          bound_x: boolean to state if x should be bounded 
-                   at the upper and lower bounds of x_data to avoid
-                   extrapolation error of the piecewise linear region. 
-                   
-        Output: none
+    	Generate a 1d piecewise linear function with continuous derivatives
+	from vectors of x and y data that link to GEKKO variables x and y with a
+	constraint that y=f(x) with piecewise linear units.
+    Inputs:
+	  x: GEKKO parameter or variable
+	  y: GEKKO variable
+	  x_data: array of x data
+	  y_data: array of y data that matches x_data size
+	  bound_x: boolean to state if x should be bounded 
+		   at the upper and lower bounds of x_data to avoid
+		   extrapolation error of the piecewise linear region. 
+
+    Output: none
 	
 Pre-built Objects
 ------------------
@@ -332,7 +360,7 @@ Pre-built Objects
 .. py:classmethod:: y,u = arx(self,p)
 
     Build a GEKKO model from ARX representation.
-        Inputs:
+    Inputs:
            parameter dictionary p['a'], p['b'], p['c']
            a (coefficients for a polynomial, na x ny)
            b (coefficients for b polynomial, ny x (nb x nu))
@@ -340,24 +368,27 @@ Pre-built Objects
 	   
 .. py:classmethod:: x = axb(self,A,b,x=None,etype='=',sparse=False)
 
-    Create Ax=b, Ax<b, Ax>b, Ax<=b, or Ax>=b models
+    Create Ax=b, Ax<b, Ax>b, Ax<=b, or Ax>=b models::
+    
         Usage: x = m.axb(A,b,etype='=,<,>,<=,>=',sparse=[True,False])
-        Input: A = numpy 2D array or list in dense or sparse form
-               b = numpy 1D array or list in dense or sparse form
-               x = 1D array of gekko variables (optional). If None on entry
-                     then the array is created and returned.
-               etype = ['=','<','>','>=','<='] for equality or inequality form
-               sparse = True if data is in sparse form, otherwise dense
-                 sparse matrices are stored in COO form with [row,col,value] with
-                 starting index 1 for optional matrix A and in [row,value] for 
-                 vector b
-        Output: GEKKO variables x
+	
+    Input: 
+    	A = numpy 2D array or list in dense or sparse form
+       	b = numpy 1D array or list in dense or sparse form
+       	x = 1D array of gekko variables (optional). If None on entry then the array is created and returned.
+        etype = ['=','<','>','>=','<='] for equality or inequality form
+        sparse = True if data is in sparse form, otherwise dense
+	sparse matrices are stored in COO form with [row,col,value] with
+	starting index 1 for optional matrix A and in [row,value] for 
+	vector b
+    Output:
+    	GEKKO variables x
 
 .. py:classmethod:: cspline(x,y,x_data,y_data,bound_x=False)
 
 	Generate a 1d cubic spline with continuous first and seconds derivatives
-    from arrays of x and y data which link to GEKKO variables x and y with a
-    constraint that y=f(x).
+    	from arrays of x and y data which link to GEKKO variables x and y with a
+    	constraint that y=f(x).
 
     Inputs:
 
@@ -367,10 +398,10 @@ Pre-built Objects
 
 	x_data: array of x data
 
-    y_data: array of y data that matches x_data
+    	y_data: array of y data that matches x_data
 
 	bound_x: boolean to state that x should be bounded at the upper and lower bounds of x_data to avoid
-    extrapolation error of the cspline.
+    	extrapolation error of the cspline.
     
 .. py:classmethod:: bspline(self, x,y,z,x_data,y_data,z_data,data=True)
 
@@ -387,73 +418,83 @@ Pre-built Objects
     
 .. py:classmethod:: y = sum(self,x)
 
-    Summation using APM object.
+    Summation using APM object.::
+    
         Usage: y = m.sum(x)
-        Input: Numpy array or List of GEKKO variables, parameters,
-               constants, intermediates, or expressions
-        Output: GEKKO variable
+	
+    Input: 
+    	Numpy array or List of GEKKO variables, parameters,
+        constants, intermediates, or expressions
+    Output: 
+    	GEKKO variable
 
 .. py:classmethod:: y = vsum(self,x)
 
     Summation of variable in the data or time direction. This is
-        similar to an integral but only does the summation of all points,
-        not the integral area that considers time intervals.
+    similar to an integral but only does the summation of all points,
+    not the integral area that considers time intervals.
     
 .. py:classmethod:: x = qobj(self,b,A=[],x=None,otype='min',sparse=False)
 
-    Create quadratic objective  = 0.5 x^T A x + c^T x
+    Create quadratic objective  = 0.5 x^T A x + c^T x::
+    
         Usage: x = m.qobj(c,Q=[2d array],otype=['min','max'],sparse=[True,False])
-        Input: b = numpy 1D array or list in dense or sparse form
-               A = numpy 2D array or list in dense or sparse form
-               x = array of gekko variables (optional). If None on entry
-                     then the array is created and returned.
-               etype = ['=','<','>','>=','<='] for equality or inequality form
-               sparse = True if data is in sparse form, otherwise dense
-                 sparse matrices are stored in COO form with [row,col,value] with
-                 starting index 1 for optional matrix A and in [row,value] for 
-                 vector b
-               sparse matrices must have 3 columns
-        Output: GEKKO variables x
+	
+    Input: 
+    	b = numpy 1D array or list in dense or sparse form
+        A = numpy 2D array or list in dense or sparse form
+        x = array of gekko variables (optional). If None on entry then the array is created and returned.
+        etype = ['=','<','>','>=','<='] for equality or inequality form
+        sparse = True if data is in sparse form, otherwise dense
+        sparse matrices are stored in COO form with [row,col,value] with
+        starting index 1 for optional matrix A and in [row,value] for vector b
+        sparse matrices must have 3 columns
+    Output: 
+    	GEKKO variables x
 
 .. py:classmethod:: y,p,K = sysid(self,t,u,y,na=1,nb=1,nk=0,shift='calc',scale=True,diaglevel=0,pred='model',objf=100)
 
-    Identification of linear time-invariant models
+    Identification of linear time-invariant models::
          
          y,p,K = sysid(t,u,y,na,nb,shift=0,pred='model',objf=1)
              
-         Input:     t = time data
+     Input:     
+     		    t = time data
                     u = input data for the regression
                     y = output data for the regression   
                     na   = number of output coefficients (default=1)
                     nb   = number of input coefficients (default=1)
                     nk   = input delay steps (default=0)
-                    shift (optional) = 
-                       'none' (no shift)
-                       'init' (initial pt),
-                       'mean' (mean center)
-                       'calc' (calculate c)
-                    scale (optional) = 
-                       scale data to between zero to one unless
-                         data range is already less than one
-                    pred (option) = 
-                       'model' for output error regression form, implicit solution
-                       'meas' for ARX regression form, explicit solution
-                       Using 'model' favors an unbiased model prediction but
-                         can require more time to compute, especially for large
-                         data sets
-                       Using 'meas' computes the coefficients of the time series
-                         model with an explicit solution
-                    objf = objective scaling factor
-                       when pred='model':
+                    shift (optional) 
+                    	'none' (no shift)
+                    	'init' (initial pt),
+                    	'mean' (mean center)
+                    	'calc' (calculate c)
+                    scale (optional) 
+                    	scale data to between zero to one unless
+                    	data range is already less than one
+                    pred (option)
+                    	'model' for output error regression form, implicit solution.
+			Favors an unbiased model prediction but
+                        can require more time to compute, especially for large
+                        data sets.
+                       	'meas' for ARX regression form, explicit solution. 
+                       	Computes the coefficients of the time series
+                        model with an explicit solution.
+                    objf
+		    	Objective scaling factor
+                       	when pred='model':
                           minimize objf*(model-meas)**2 + 1e-3 * (a^2 + b^2 + c^2)
-                       when pred='meas':
+                       	when pred='meas':
                           minimize (model-meas)**2
-                    diaglevel = display solver output and diagnostics (0-6)
+                    diaglevel
+		    	display solver output and diagnostics (0-6)
                     
-         Output:    returns
-                    ypred (predicted outputs)
-                    p as coefficient dictionary with keys 'a','b','c'
-                    K gain matrix
+         Output:    
+	 	returns
+                ypred (predicted outputs)
+                p as coefficient dictionary with keys 'a','b','c'
+                K gain matrix
 
 
 Internal Methods
