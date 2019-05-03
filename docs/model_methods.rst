@@ -210,23 +210,31 @@ Traditional logical expressions such as if statements cannot be used in gradient
     IF conditional with a binary switch variable.
         The traditional method for IF statements is not continuously
         differentiable and can cause a gradient-based optimizer to fail
-        to converge.
-        Usage: y = m.if3(condition,x1,x2)
-        Inputs:
-           condition: GEKKO variable, parameter, or expression
-           x1 and x2: GEKKO variable, parameter, or expression
-        Output: GEKKO variable y = x1 when condition<0
-                               y = x2 when condition>=0
+        to converge.::
+	
+        	Usage: y = m.if3(condition,x1,x2)
+	
+    Inputs:
+        condition: GEKKO variable, parameter, or expression
+        x1 and x2: GEKKO variable, parameter, or expression
+    Output: 
+    	GEKKO variable 
+	y = x1 when condition<0
+        y = x2 when condition>=0
 			       
 .. py:classmethod:: y = max2(self,x1,x2)
 
-    Generates the maximum value with continuous first and
-        second derivatives. The traditional method for max value (max) is not
+    Generates the maximum value with continuous first and second derivatives. 
+	The traditional method for max value (max) is not
         continuously differentiable and can cause a gradient-based optimizer
-        to fail to converge.
-        Usage: y = m.max2(x1,x2)
-        Input: GEKKO variable, parameter, or expression
-        Output: GEKKO variable
+        to fail to converge.::
+	
+        	Usage: y = m.max2(x1,x2)
+		
+    Input: 
+    	GEKKO variable, parameter, or expression
+    Output: 
+    	GEKKO variable
 
 .. py:classmethod:: y = max3(self,x1,x2)
 
