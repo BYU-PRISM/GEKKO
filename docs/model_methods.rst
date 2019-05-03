@@ -337,11 +337,11 @@ Traditional logical expressions such as if statements cannot be used in gradient
 	from vectors of x and y data that link to GEKKO variables x and y with a
 	constraint that y=f(x) with piecewise linear units.
     Inputs:
-	  x: GEKKO parameter or variable
-	  y: GEKKO variable
-	  x_data: array of x data
-	  y_data: array of y data that matches x_data size
-	  bound_x: boolean to state if x should be bounded at the upper and lower bounds of x_data to avoid extrapolation error of the piecewise linear region. 
+	  * x: GEKKO parameter or variable
+	  * y: GEKKO variable
+	  * x_data: array of x data
+	  * y_data: array of y data that matches x_data size
+	  * bound_x: boolean to state if x should be bounded at the upper and lower bounds of x_data to avoid extrapolation error of the piecewise linear region. 
 
     Output: none
 	
@@ -480,9 +480,9 @@ Pre-built Objects
                         model with an explicit solution.
                     * objf
 		    	Objective scaling factor
-                       	when pred='model':
+                       	** when pred='model':
                           minimize objf*(model-meas)**2 + 1e-3 * (a^2 + b^2 + c^2)
-                       	when pred='meas':
+                       	** when pred='meas':
                           minimize (model-meas)**2
                     * diaglevel
 		    	display solver output and diagnostics (0-6)
