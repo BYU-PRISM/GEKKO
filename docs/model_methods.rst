@@ -341,9 +341,7 @@ Traditional logical expressions such as if statements cannot be used in gradient
 	  y: GEKKO variable
 	  x_data: array of x data
 	  y_data: array of y data that matches x_data size
-	  bound_x: boolean to state if x should be bounded 
-		   at the upper and lower bounds of x_data to avoid
-		   extrapolation error of the piecewise linear region. 
+	  bound_x: boolean to state if x should be bounded at the upper and lower bounds of x_data to avoid extrapolation error of the piecewise linear region. 
 
     Output: none
 	
@@ -359,12 +357,12 @@ Pre-built Objects
     
 .. py:classmethod:: y,u = arx(self,p)
 
-    Build a GEKKO model from ARX representation.
-    Inputs:
-           parameter dictionary p['a'], p['b'], p['c']
-           a (coefficients for a polynomial, na x ny)
-           b (coefficients for b polynomial, ny x (nb x nu))
-           c (coefficients for output bias, ny)
+	Build a GEKKO model from ARX representation.
+	Inputs:
+           * parameter dictionary p['a'], p['b'], p['c']
+           * a (coefficients for a polynomial, na x ny)
+           * b (coefficients for b polynomial, ny x (nb x nu))
+           * c (coefficients for output bias, ny)
 	   
 .. py:classmethod:: x = axb(self,A,b,x=None,etype='=',sparse=False)
 
@@ -373,14 +371,14 @@ Pre-built Objects
         Usage: x = m.axb(A,b,etype='=,<,>,<=,>=',sparse=[True,False])
 	
     Input: 
-    	A = numpy 2D array or list in dense or sparse form
-       	b = numpy 1D array or list in dense or sparse form
-       	x = 1D array of gekko variables (optional). If None on entry then the array is created and returned.
-        etype = ['=','<','>','>=','<='] for equality or inequality form
-        sparse = True if data is in sparse form, otherwise dense
+    	* A = numpy 2D array or list in dense or sparse form
+       	* b = numpy 1D array or list in dense or sparse form
+       	* x = 1D array of gekko variables (optional). If None on entry then the array is created and returned.
+        * etype = ['=','<','>','>=','<='] for equality or inequality form
+        * sparse = True if data is in sparse form, otherwise dense
 	sparse matrices are stored in COO form with [row,col,value] with
 	starting index 1 for optional matrix A and in [row,value] for 
-	vector b
+	* vector b
     Output:
     	GEKKO variables x
 
@@ -441,11 +439,10 @@ Pre-built Objects
         Usage: x = m.qobj(c,Q=[2d array],otype=['min','max'],sparse=[True,False])
 	
     Input: 
-    	b = numpy 1D array or list in dense or sparse form
-        A = numpy 2D array or list in dense or sparse form
-        x = array of gekko variables (optional). If None on entry then the array is created and returned.
-        etype = ['=','<','>','>=','<='] for equality or inequality form
-        sparse = True if data is in sparse form, otherwise dense
+    	* b = numpy 1D array or list in dense or sparse form
+        * A = numpy 2D array or list in dense or sparse form
+        * x = array of gekko variables (optional). If None on entry then the array is created and returned.
+        * sparse = True if data is in sparse form, otherwise dense
         sparse matrices are stored in COO form with [row,col,value] with
         starting index 1 for optional matrix A and in [row,value] for vector b
         sparse matrices must have 3 columns
@@ -458,22 +455,22 @@ Pre-built Objects
          
          y,p,K = sysid(t,u,y,na,nb,shift=0,pred='model',objf=1)
              
-     Input:     
-     		    t = time data
-                    u = input data for the regression
-                    y = output data for the regression   
-                    na   = number of output coefficients (default=1)
-                    nb   = number of input coefficients (default=1)
-                    nk   = input delay steps (default=0)
-                    shift (optional) 
+    Input:     
+     		    * t = time data
+                    * u = input data for the regression
+                    * y = output data for the regression   
+                    * na   = number of output coefficients (default=1)
+                    * nb   = number of input coefficients (default=1)
+                    * nk   = input delay steps (default=0)
+                    * shift (optional) 
                     	'none' (no shift)
                     	'init' (initial pt),
                     	'mean' (mean center)
                     	'calc' (calculate c)
-                    scale (optional) 
+                    * scale (optional) 
                     	scale data to between zero to one unless
                     	data range is already less than one
-                    pred (option)
+                    * pred (option)
                     	'model' for output error regression form, implicit solution.
 			Favors an unbiased model prediction but
                         can require more time to compute, especially for large
@@ -481,16 +478,16 @@ Pre-built Objects
                        	'meas' for ARX regression form, explicit solution. 
                        	Computes the coefficients of the time series
                         model with an explicit solution.
-                    objf
+                    * objf
 		    	Objective scaling factor
                        	when pred='model':
                           minimize objf*(model-meas)**2 + 1e-3 * (a^2 + b^2 + c^2)
                        	when pred='meas':
                           minimize (model-meas)**2
-                    diaglevel
+                    * diaglevel
 		    	display solver output and diagnostics (0-6)
                     
-         Output:    
+    Output:    
 	 	returns
                 ypred (predicted outputs)
                 p as coefficient dictionary with keys 'a','b','c'
