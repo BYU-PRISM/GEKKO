@@ -3,6 +3,17 @@ All notable changes to the GEKKO project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.2.0] - Version 0.2.0 Stable Release, Date: 2019-05-04
+### Stable release
+
+### Added
+- Additional example problems, test suite
+
+### Changed
+- APM Windows local executable v0.8.9 
+- APM ARM local executable v0.8.9 
+- APM Linux local executable v0.8.9 
+
 ## [0.2rc6] - Version 0.2 Release Candidate 6, Date: 2019-04-15
 ### Added
 - New axb object for Ax=b, Ax<b, and Ax>b linear equations
@@ -58,7 +69,9 @@ All notable changes to the GEKKO project will be documented in this file.
 ## 0.0.1a1 - Version 0.0.1 Alpha 1, Date: 2018-01-05
 ### Initial GEKKO public release, alpha version
 
-[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/0.2rc5...HEAD
+[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/0.2rc6...HEAD
+[0.2.0]: https://github.com/BYU-PRISM/GEKKO/compare/0.2rc6...0.2.0
+[0.2rc6]: https://github.com/BYU-PRISM/GEKKO/compare/0.2rc5...0.2rc6
 [0.2rc5]: https://github.com/BYU-PRISM/GEKKO/compare/0.1...0.2rc5
 [0.1]: https://github.com/BYU-PRISM/GEKKO/compare/0.1rc7...0.1
 [0.1rc7]: https://github.com/BYU-PRISM/GEKKO/compare/0.1rc4...0.1rc7
