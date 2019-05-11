@@ -1901,7 +1901,7 @@ class GEKKO(object):
         if debug >= 2:
             self.name_check()
 
-        if self._remote == False:#local_solve
+        if self._remote == False: # local_solve
             if timing == True:
                 t = time.time()
                     
@@ -1910,41 +1910,36 @@ class GEKKO(object):
             apm_error = ''
 
             # Calls apmonitor through the command line
-            if os.name == 'nt': #Windows
+            if sys.platform=='win32' or sys.platform=='win64': # Windows 32 or 64 bit
                 apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm.exe')
-                app = subprocess.Popen([apm_exe, self._model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self._path, env = {"PATH" : self._path }, universal_newlines=True)
-                for line in iter(app.stdout.readline, ""):
-                    if disp == True:
-                        try:
-                            print(line.replace('\n', ''))
-                        except:
-                            pass
-                    if debug >= 1:
-                        # Start recording output if error is detected
-                        if '@error' in line:
-                            record_error = True
-                        if record_error:
-                            apm_error+=line
-                        
-                app.wait()
-            else:
-                if os.uname()[4].startswith("arm"):
+            elif sys.platform=='darwin': # MacOS
+                apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm_mac')                
+            elif sys.platform=='linux' or sys.platform=='linux2': # Linux
+                if os.uname()[4].startswith("arm"): # ARM processor (Raspberry Pi)
                     apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm_arm')
-                else:
+                else: # Other Linux
                     apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm')
-                app = subprocess.Popen([apm_exe, self._model_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE,cwd = self._path, env = {"PATH" : self._path }, universal_newlines=True)
-                for line in iter(app.stdout.readline, ""):
-                    if disp == True:
+            else:
+                raise Exception('Platform '+sys.platform+' not supported for local solve, set remote=True')
+
+            app = subprocess.Popen([apm_exe, self._model_name], stdout=subprocess.PIPE, \
+                                   stderr=subprocess.PIPE,cwd = self._path, \
+                                   env = {"PATH" : self._path }, universal_newlines=True)
+
+            for line in iter(app.stdout.readline, ""):
+                if disp == True:
+                    try:
                         print(line.replace('\n', ''))
-                    else:
+                    except:
                         pass
-                    if debug >= 1:
-                        # Start recording output if error is detected
-                        if '@error' in line:
-                            record_error = True
-                        if record_error:
-                            apm_error+=line
-                        
+                else:
+                    pass
+                if debug >= 1:
+                    # Start recording output if error is detected
+                    if '@error' in line:
+                        record_error = True
+                    if record_error:
+                        apm_error+=line
                 app.wait()
             _, errs = app.communicate()
             # print(out)
