@@ -29,7 +29,7 @@ def package_files(directory):
 #gather all files for GUI support
 gui_files = package_files('gekko/static')
 #add APM executable file
-extra_files = gui_files + ['bin/apm.exe','bin/apm','bin/apm_arm']
+extra_files = gui_files + ['bin/apm.exe','bin/apm','bin/apm_arm','bin/apm_mac']
 
 #APM binaries based on OS (currently only available for Windows)
 #if os.name == 'nt':
