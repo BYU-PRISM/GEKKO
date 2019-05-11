@@ -3,13 +3,13 @@ All notable changes to the GEKKO project will be documented in this file.
 
 ## [Unreleased]
 
-## [0.2.1] - Version 0.2.1 Stable Release, Date: 2019-05-10
+## [v0.2.1] - Version 0.2.1 Stable Release, Date: 2019-05-10
 ### Stable release
 
 ### Added
 - APM MacOS local executable v0.8.9
 
-## [0.2.0] - Version 0.2.0 Stable Release, Date: 2019-05-04
+## [v0.2.0] - Version 0.2.0 Stable Release, Date: 2019-05-04
 ### Stable release
 
 ### Added
@@ -75,9 +75,9 @@ All notable changes to the GEKKO project will be documented in this file.
 ## 0.0.1a1 - Version 0.0.1 Alpha 1, Date: 2018-01-05
 ### Initial GEKKO public release, alpha version
 
-[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/0.2.1...HEAD
-[0.2.1]: https://github.com/BYU-PRISM/GEKKO/compare/0.2.0...0.2.1
-[0.2.0]: https://github.com/BYU-PRISM/GEKKO/compare/0.2rc6...0.2.0
+[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.1...HEAD
+[v0.2.1]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.0...v0.2.1
+[v0.2.0]: https://github.com/BYU-PRISM/GEKKO/compare/0.2rc6...v0.2.0
 [0.2rc6]: https://github.com/BYU-PRISM/GEKKO/compare/0.2rc5...0.2rc6
 [0.2rc5]: https://github.com/BYU-PRISM/GEKKO/compare/0.1...0.2rc5
 [0.1]: https://github.com/BYU-PRISM/GEKKO/compare/0.1rc7...0.1
