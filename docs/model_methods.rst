@@ -1,8 +1,3 @@
-.. Gekko documentation master file, created by
-   sphinx-quickstart on Fri Jul  7 22:01:18 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 .. _model_parts:
 
 Model Building Functions
@@ -256,7 +251,6 @@ Traditional logical expressions such as if statements cannot be used in gradient
         	Usage: y = m.if3(condition,x1,x2)
 	
     Inputs:
-
         condition: GEKKO variable, parameter, or expression
 
         x1 and x2: GEKKO variable, parameter, or expression
@@ -269,7 +263,6 @@ Traditional logical expressions such as if statements cannot be used in gradient
         y = x2 when condition>=0
 			       
     Example usage::
-
         import numpy as np
         import matplotlib.pyplot as plt
         from gekko import GEKKO
