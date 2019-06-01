@@ -263,6 +263,7 @@ Traditional logical expressions such as if statements cannot be used in gradient
         y = x2 when condition>=0
 			       
     Example usage::
+    
         import numpy as np
         import matplotlib.pyplot as plt
         from gekko import GEKKO
