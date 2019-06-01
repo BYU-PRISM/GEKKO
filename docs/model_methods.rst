@@ -1,3 +1,8 @@
+.. Gekko documentation master file, created by
+   sphinx-quickstart on Fri Jul  7 22:01:18 2017.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
 .. _model_parts:
 
 Model Building Functions
@@ -20,64 +25,64 @@ Model Building
 
 .. py:classmethod::    c =  m.Const(value, [name])
 
-    A constant value in the optimization problem. This is a static value and is not changed by the optimizer. Constants are fixed values that represent model inputs, fixed constants, or any other value that does not change. Constants are not modified by the solver as it searches for a solution. As such, constants do not contribute to the number of degrees of freedom (DOF).::
+    A constant value in the optimization problem. This is a static value and is not changed by the optimizer. Constants are fixed values that represent model inputs, fixed constants, or any other value that does not change. Constants are not modified by the solver as it searches for a solution. As such, constants do not contribute to the number of degrees of freedom (DOF).:
     
-    c = m.Const(3)
+        c = m.Const(3)
 
     The constants may be defined in one section or in multiple declarations throughout the model. Constant initialization is performed sequentially, from top to bottom. If a constant does not have an initial value given, a default value of 0.0 is assigned. Constants may also be a function of other constants. These initial conditions are processed once as the first step after the model parsing. All constants have global scope in the model.
 
 .. py:classmethod::	   p = m.Param([value], [name])
 
-    Parameters are values that are nominally fixed at initial values but can be changed with input data, by the user, or can become calculated by the optimizer to minimize an objective function if they are indicated as decision variables. Parameters are values that represent model inputs, fixed constants, or measurements that may change over time.  Parameters are not modified by the solver as it searches for a solution but they can be upgraded to an FV or MV as a decision variable for the optimizer.  As a parameter, it does not contribute to the number of degrees of freedom (DOF).::
+    Parameters are values that are nominally fixed at initial values but can be changed with input data, by the user, or can become calculated by the optimizer to minimize an objective function if they are indicated as decision variables. Parameters are values that represent model inputs, fixed constants, or measurements that may change over time.  Parameters are not modified by the solver as it searches for a solution but they can be upgraded to an FV or MV as a decision variable for the optimizer.  As a parameter, it does not contribute to the number of degrees of freedom (DOF).:
     
-    p = m.Param(value=[0,0.1,0.2])
+        p = m.Param(value=[0,0.1,0.2])
 
     The parameters may be defined in one section or in multiple declarations throughout the model.  Parameter initialization is performed sequentially, from top to bottom.  If a parameter does not have an initial value given, a default value of 0.0 is assigned.  Parameters may also be a function of other parameters or variable initial conditions.  These initial conditions are processed once as the first step after the model parsing. All parameters have global scope in the model.
 
 .. py:classmethod::	   v = m.Var([value], [lb], [ub], [integer], [name])
 
-    Variables are always calculated values as determined by the set of equations. Some variables are either measured and/or controlled to a desired target value. Variables are modified by the solver as it searches for a solution. Each additional variable adds a decision (degree of freedom) to the problem. The following is an example of declaring an integer variable (0,1,2,...) that is constrained to be between 0 and 10 with a default value of 2.::
+    Variables are always calculated values as determined by the set of equations. Some variables are either measured and/or controlled to a desired target value. Variables are modified by the solver as it searches for a solution. Each additional variable adds a decision (degree of freedom) to the problem. The following is an example of declaring an integer variable (0,1,2,...) that is constrained to be between 0 and 10 with a default value of 2.:
     
-    v = m.Var(2,lb=0,ub=10,integer=True)
+        v = m.Var(2,lb=0,ub=10,integer=True)
 
     The variables may be defined in one section or in multiple declarations throughout the model. Variable initialization is performed sequentially, from top to bottom. If a variable does not have an initial value given, a default value of 0.0 is assigned. Variables may also be initialized from parameters or variable initial conditions. These initial conditions are processed once as the first step after the model parsing. All variables have global scope in the model.
 
 .. py:classmethod::	   fv = m.FV([value], [lb], [ub], [integer], [name])
 
-    Fixed Values or Feedforward Variables (FVs) are model coefficients that change to fit process data or minimize an objective function.  These parameters can change the behavior and structure of the model.  An FV has a single value over all time points for dynamic problems. It also has a single value when fitting a model to many data points, such as with steady state regression (IMODE=2). An FV is defined with a starting value of 3 and constrained between 0 and 10. The STATUS option set to 1 tells the optimizer that it can be adjusted to minimize the objective.::
+    Fixed Values or Feedforward Variables (FVs) are model coefficients that change to fit process data or minimize an objective function.  These parameters can change the behavior and structure of the model.  An FV has a single value over all time points for dynamic problems. It also has a single value when fitting a model to many data points, such as with steady state regression (IMODE=2). An FV is defined with a starting value of 3 and constrained between 0 and 10. The STATUS option set to 1 tells the optimizer that it can be adjusted to minimize the objective.:
     
-    fv = m.FV(3,lb=0,ub=10)
-    fv.STATUS = 1
+        fv = m.FV(3,lb=0,ub=10)
+        fv.STATUS = 1
 
 .. py:classmethod::    mv = m.MV([value], [lb], [ub], [integer], [name])
 
-    Manipulated variables (MVs) are decision variables for an estimator or controller. These decision variables are adjusted by the optimizer to minimize an objective function at every time point or with every data set. Unlike FVs, MVs may have different values at the discretized time points. An MV is defined with a starting value of 4 and constrained between 5 and 10. The STATUS option set to 1 tells the optimizer that it can be adjusted to minimize the objective.::
+    Manipulated variables (MVs) are decision variables for an estimator or controller. These decision variables are adjusted by the optimizer to minimize an objective function at every time point or with every data set. Unlike FVs, MVs may have different values at the discretized time points. An MV is defined with a starting value of 4 and constrained between 5 and 10. The STATUS option set to 1 tells the optimizer that it can be adjusted to minimize the objective.:
     
-    mv = m.MV(4,lb=5,ub=10)
-    mv.STATUS = 1
+        mv = m.MV(4,lb=5,ub=10)
+        mv.STATUS = 1
 
 .. py:classmethod::    sv =  m.SV([value] [lb], [ub], [integer], [name])
 
-    State variables (SVs) are an upgraded version of a regular variable (m.Var) with additional logic to implement simple feedback and adjust the initial condition in dynamic simulations, estimators, or controllers. State variables may have upper and lower constraints but these should be used with caution to avoid an infeasible solution. A state variable is uninitialized (default=0) but is updated with a measurement of 6.::
+    State variables (SVs) are an upgraded version of a regular variable (m.Var) with additional logic to implement simple feedback and adjust the initial condition in dynamic simulations, estimators, or controllers. State variables may have upper and lower constraints but these should be used with caution to avoid an infeasible solution. A state variable is uninitialized (default=0) but is updated with a measurement of 6.:
     
-    sv = m.SV()
-    sv.FSTATUS = 1
-    sv.MEAS = 6
+        sv = m.SV()
+        sv.FSTATUS = 1
+        sv.MEAS = 6
 
 .. py:classmethod::    cv = m.CV([value] [lb], [ub], [integer], [name])
 
-    Controlled variables are model variables that are included in the objective of a controller or optimizer. These variables are controlled to a range, maximized, or minimized. Controlled variables may also be measured values that are included for data reconciliation. State variables may have upper and lower constraints but these should be used with caution to avoid an infeasible solution. A controlled variable in a model predictive control application is given a default value of 7 with a setpoint range of 30 to 40.::
+    Controlled variables are model variables that are included in the objective of a controller or optimizer. These variables are controlled to a range, maximized, or minimized. Controlled variables may also be measured values that are included for data reconciliation. State variables may have upper and lower constraints but these should be used with caution to avoid an infeasible solution. A controlled variable in a model predictive control application is given a default value of 7 with a setpoint range of 30 to 40.:
     
-    cv = m.CV(7)
-    cv.STATUS = 1
-    cv.SPHI = 40
-    cv.SPLO = 30
+        cv = m.CV(7)
+        cv.STATUS = 1
+        cv.SPHI = 40
+        cv.SPLO = 30
 
 .. py:classmethod::    i = m.Intermediate(equation, [name])
 
-    Intermediates are explicit equations where the variable is set equal to an expression that may include constants, parameters, variables, or other intermediate values that are defined previously. Intermediates are not implicit equations but are explicitly calculated with each model function evaluation. An intermediate variable is declared as the product of parameter p and variable v.::
+    Intermediates are explicit equations where the variable is set equal to an expression that may include constants, parameters, variables, or other intermediate values that are defined previously. Intermediates are not implicit equations but are explicitly calculated with each model function evaluation. An intermediate variable is declared as the product of parameter p and variable v.:
     
-    i = m.Intermediate(p*v)
+        i = m.Intermediate(p*v)
     
     Intermediate variables are useful to decrease the complexity of the model. These variables store temporary calculations with results that are not reported in the final solution reports. In many models, the temporary variables outnumber the regular variables by many factors. This model reduction often aides the solver in finding a solution by reducing the problem size.
 
@@ -113,32 +118,32 @@ Model Building
 
 .. py:classmethod::    a = m.Array(type,dimension,**args)
 
-	Create an n-dimensional array (as defined in tuple input `dimension` ) of GEKKO variables of type `type` .
-    The optional keyword arguments (`**args`) are applied to each element of the array. The following example demonstrates the use of a 3x2 Array, a Parameter, Intermediates, and an Objective. The array values are initialized to 2.0 and bounds are set to -10.0 to 10.0.::
+    Create an n-dimensional array (as defined in tuple input `dimension` ) of GEKKO variables of type `type` .
+    The optional keyword arguments (`**args`) are applied to each element of the array. The following example demonstrates the use of a 3x2 Array, a Parameter, Intermediates, and an Objective. The array values are initialized to 2.0 and bounds are set to -10.0 to 10.0.:
 
-	from gekko import GEKKO
-	m = GEKKO()
-	# variable array dimension
-	n = 3 # rows
-	p = 2 # columns
-	# create array
-	x = m.Array(m.Var,(n,p))
-	for i in range(n):
-  	  for j in range(p):
-   	    x[i,j].value = 2.0
-    	    x[i,j].lower = -10.0
-    	    x[i,j].upper = 10.0
-	# create parameter
-	y = m.Param(value = 1.0)
-	# sum columns
-	z = [None]*p
-	for j in range(p):
-	   z[j] = m.Intermediate(sum([x[i,j] for i in range(n)]))
-	# objective
-	m.Obj(sum([z[j]**2 + y for j in range(p)]))
-	# minimize objective
-	m.solve()
-	print(x)
+        from gekko import GEKKO
+        m = GEKKO()
+        # variable array dimension
+        n = 3 # rows
+        p = 2 # columns
+        # create array
+        x = m.Array(m.Var,(n,p))
+        for i in range(n):
+          for j in range(p):
+        	    x[i,j].value = 2.0
+         	    x[i,j].lower = -10.0
+         	    x[i,j].upper = 10.0
+        # create parameter
+        y = m.Param(value = 1.0)
+        # sum columns
+        z = [None]*p
+        for j in range(p):
+           z[j] = m.Intermediate(sum([x[i,j] for i in range(n)]))
+        # objective
+        m.Obj(sum([z[j]**2 + y for j in range(p)]))
+        # minimize objective
+        m.solve()
+        print(x)
 
 .. py:classmethod:: m.solve(disp=True,debug=False)
 
@@ -248,37 +253,35 @@ Traditional logical expressions such as if statements cannot be used in gradient
     IF conditional with a binary switch variable.
         The traditional method for IF statements is not continuously
         differentiable and can cause a gradient-based optimizer to fail
-        to converge. The if3 method uses a binary switching variable to determine whether y=x1 (when condition<0) or y=x2 (when condition>=0).::
+        to converge. The if3 method uses a binary switching variable to determine whether y=x1 (when condition<0) or y=x2 (when condition>=0).:
 	
         	Usage: y = m.if3(condition,x1,x2)
 	
     Inputs:
         condition: GEKKO variable, parameter, or expression
         x1 and x2: GEKKO variable, parameter, or expression
+    
     Output: 
     	GEKKO variable 
         y = x1 when condition<0
         y = x2 when condition>=0
 			       
-    Example usage::
+    Example usage:
 
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from gekko import GEKKO
-    m = GEKKO(remote=False)
-    p = m.Param()
-    
-    y = m.if3(p-4,p**2,p+1)
-    
-    # solve with condition<0
-    p.value = 3 
-    m.solve(disp=False)
-    print(y.value)
-    
-    # solve with condition>=0
-    p.value = 5 
-    m.solve(disp=False)   
-    print(y.value)
+        import numpy as np
+        import matplotlib.pyplot as plt
+        from gekko import GEKKO
+        m = GEKKO(remote=False)
+        p = m.Param()
+        y = m.if3(p-4,p**2,p+1)        
+        # solve with condition<0
+        p.value = 3 
+        m.solve(disp=False)
+        print(y.value)
+        # solve with condition>=0
+        p.value = 5 
+        m.solve(disp=False)   
+        print(y.value)
                 
 .. py:classmethod:: y = max2(x1,x2)
 
