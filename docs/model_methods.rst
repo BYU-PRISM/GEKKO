@@ -1,8 +1,3 @@
-.. Gekko documentation master file, created by
-   sphinx-quickstart on Fri Jul  7 22:01:18 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 .. _model_parts:
 
 Model Building Functions
@@ -23,29 +18,72 @@ Model Building
 	If `remote` is `True`, the problem is sent to `self.server` to be solved. If `False`, GEKKO looks for local binaries of APMonitor.
 
 
-.. py:classmethod::    c =  m.Const(value, [name]):
+.. py:classmethod::    c =  m.Const(value, [name])
 
+    A constant value in the optimization problem. This is a static value and is not changed by the optimizer. Constants are fixed values that represent model inputs, fixed constants, or any other value that does not change. Constants are not modified by the solver as it searches for a solution. As such, constants do not contribute to the number of degrees of freedom (DOF).::
+    
+    c = m.Const(3)
+
+    The constants may be defined in one section or in multiple declarations throughout the model. Constant initialization is performed sequentially, from top to bottom. If a constant does not have an initial value given, a default value of 0.0 is assigned. Constants may also be a function of other constants. These initial conditions are processed once as the first step after the model parsing. All constants have global scope in the model.
 
 .. py:classmethod::	   p = m.Param([value], [name])
 
+    Parameters are values that are nominally fixed at initial values but can be changed with input data, by the user, or can become calculated by the optimizer to minimize an objective function if they are indicated as decision variables. Parameters are values that represent model inputs, fixed constants, or measurements that may change over time.  Parameters are not modified by the solver as it searches for a solution but they can be upgraded to an FV or MV as a decision variable for the optimizer.  As a parameter, it does not contribute to the number of degrees of freedom (DOF).::
+    
+    p = m.Param(value=[0,0.1,0.2])
+
+    The parameters may be defined in one section or in multiple declarations throughout the model.  Parameter initialization is performed sequentially, from top to bottom.  If a parameter does not have an initial value given, a default value of 0.0 is assigned.  Parameters may also be a function of other parameters or variable initial conditions.  These initial conditions are processed once as the first step after the model parsing. All parameters have global scope in the model.
 
 .. py:classmethod::	   v = m.Var([value], [lb], [ub], [integer], [name])
 
+    Variables are always calculated values as determined by the set of equations. Some variables are either measured and/or controlled to a desired target value. Variables are modified by the solver as it searches for a solution. Each additional variable adds a decision (degree of freedom) to the problem. The following is an example of declaring an integer variable (0,1,2,...) that is constrained to be between 0 and 10 with a default value of 2.::
+    
+    v = m.Var(2,lb=0,ub=10,integer=True)
 
-.. py:classmethod::    m = m.MV([value], [lb], [ub], [integer], [name])
+    The variables may be defined in one section or in multiple declarations throughout the model. Variable initialization is performed sequentially, from top to bottom. If a variable does not have an initial value given, a default value of 0.0 is assigned. Variables may also be initialized from parameters or variable initial conditions. These initial conditions are processed once as the first step after the model parsing. All variables have global scope in the model.
 
+.. py:classmethod::	   fv = m.FV([value], [lb], [ub], [integer], [name])
 
-.. py:classmethod::	   f = m.FV([value], [lb], [ub], [integer], [name])
+    Fixed Values or Feedforward Variables (FVs) are model coefficients that change to fit process data or minimize an objective function.  These parameters can change the behavior and structure of the model.  An FV has a single value over all time points for dynamic problems. It also has a single value when fitting a model to many data points, such as with steady state regression (IMODE=2). An FV is defined with a starting value of 3 and constrained between 0 and 10. The STATUS option set to 1 tells the optimizer that it can be adjusted to minimize the objective.::
+    
+    fv = m.FV(3,lb=0,ub=10)
+    fv.STATUS = 1
 
+.. py:classmethod::    mv = m.MV([value], [lb], [ub], [integer], [name])
 
-.. py:classmethod::    s =  m.SV([value] [lb], [ub], [integer], [name])
+    Manipulated variables (MVs) are decision variables for an estimator or controller. These decision variables are adjusted by the optimizer to minimize an objective function at every time point or with every data set. Unlike FVs, MVs may have different values at the discretized time points. An MV is defined with a starting value of 4 and constrained between 5 and 10. The STATUS option set to 1 tells the optimizer that it can be adjusted to minimize the objective.::
+    
+    mv = m.MV(4,lb=5,ub=10)
+    mv.STATUS = 1
 
+.. py:classmethod::    sv =  m.SV([value] [lb], [ub], [integer], [name])
 
-.. py:classmethod::    c = m.CV([value] [lb], [ub], [integer], [name])
+    State variables (SVs) are an upgraded version of a regular variable (m.Var) with additional logic to implement simple feedback and adjust the initial condition in dynamic simulations, estimators, or controllers. State variables may have upper and lower constraints but these should be used with caution to avoid an infeasible solution. A state variable is uninitialized (default=0) but is updated with a measurement of 6.::
+    
+    sv = m.SV()
+    sv.FSTATUS = 1
+    sv.MEAS = 6
 
+.. py:classmethod::    cv = m.CV([value] [lb], [ub], [integer], [name])
+
+    Controlled variables are model variables that are included in the objective of a controller or optimizer. These variables are controlled to a range, maximized, or minimized. Controlled variables may also be measured values that are included for data reconciliation. State variables may have upper and lower constraints but these should be used with caution to avoid an infeasible solution. A controlled variable in a model predictive control application is given a default value of 7 with a setpoint range of 30 to 40.::
+    
+    cv = m.CV(7)
+    cv.STATUS = 1
+    cv.SPHI = 40
+    cv.SPLO = 30
 
 .. py:classmethod::    i = m.Intermediate(equation, [name])
 
+    Intermediates are explicit equations where the variable is set equal to an expression that may include constants, parameters, variables, or other intermediate values that are defined previously. Intermediates are not implicit equations but are explicitly calculated with each model function evaluation. An intermediate variable is declared as the product of parameter p and variable v.::
+    
+    i = m.Intermediate(p*v)
+    
+    Intermediate variables are useful to decrease the complexity of the model. These variables store temporary calculations with results that are not reported in the final solution reports. In many models, the temporary variables outnumber the regular variables by many factors. This model reduction often aides the solver in finding a solution by reducing the problem size.
+
+    The intermediate variables may be defined in one section or in multiple declarations throughout the model. Intermediate variables are parsed sequentially, from top to bottom. To avoid inadvertent overwrites, intermediate variable can be defined once. In the case of intermediate variables, the order of declaration is critical. If an intermediate is used before the definition, an error reports that there is an uninitialized value.
+    
+    The intermediate variables are processed before the implicit equation residuals, every time the solver requests model information.  As opposed to implicitly calculated variables, the intermediates are calculated repeatedly and substituted into other intermediate or implicit equations.
 
 .. py:classmethod::    eq = m.Equation(equation)
 
@@ -205,12 +243,12 @@ Logical Functions
 ------------------
 Traditional logical expressions such as if statements cannot be used in gradient based optimization because they create discontinuities in the problem derivatives.  The logical expressions built into Gekko provide a workaround by either using MPCC formulations (Type 2), or by introducing integer variables (Type 3).  **Please note that these functions are experimental, and may cause your solution to fail.**  Additionally, all Type 3 functions require a mixed integer solver such as APOPT (SOLVER=1) to solve, and **Gekko will change the solver to APOPT automatically if these functions are found in a model.**
 
-.. py:classmethod:: y = if3(self,condition,x1,x2)
+.. py:classmethod:: y = if3(condition,x1,x2)
 
     IF conditional with a binary switch variable.
         The traditional method for IF statements is not continuously
         differentiable and can cause a gradient-based optimizer to fail
-        to converge.::
+        to converge. The if3 method uses a binary switching variable to determine whether y=x1 (when condition<0) or y=x2 (when condition>=0).::
 	
         	Usage: y = m.if3(condition,x1,x2)
 	
@@ -219,10 +257,30 @@ Traditional logical expressions such as if statements cannot be used in gradient
         x1 and x2: GEKKO variable, parameter, or expression
     Output: 
     	GEKKO variable 
-	y = x1 when condition<0
+        y = x1 when condition<0
         y = x2 when condition>=0
 			       
-.. py:classmethod:: y = max2(self,x1,x2)
+    Example usage::
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from gekko import GEKKO
+    m = GEKKO(remote=False)
+    p = m.Param()
+    
+    y = m.if3(p-4,p**2,p+1)
+    
+    # solve with condition<0
+    p.value = 3 
+    m.solve(disp=False)
+    print(y.value)
+    
+    # solve with condition>=0
+    p.value = 5 
+    m.solve(disp=False)   
+    print(y.value)
+                
+.. py:classmethod:: y = max2(x1,x2)
 
     Generates the maximum value with continuous first and second derivatives. 
 	The traditional method for max value (max) is not
@@ -236,7 +294,7 @@ Traditional logical expressions such as if statements cannot be used in gradient
     Output: 
     	GEKKO variable
 
-.. py:classmethod:: y = max3(self,x1,x2)
+.. py:classmethod:: y = max3(x1,x2)
 
     Generates the maximum value with a binary switch variable.
         The traditional method for max value (max) is not continuously
@@ -250,7 +308,7 @@ Traditional logical expressions such as if statements cannot be used in gradient
     Output: 
     	GEKKO variable
 	
-.. py:classmethod:: y = min2(self,x1,x2)
+.. py:classmethod:: y = min2(x1,x2)
 
     Generates the minimum value with continuous first and second derivatives. 
     	The traditional method for min value (min) is not
@@ -264,7 +322,7 @@ Traditional logical expressions such as if statements cannot be used in gradient
     Output: 
     	GEKKO variable
 	
-.. py:classmethod:: y = min3(self,x1,x2)
+.. py:classmethod:: y = min3(x1,x2)
 
     Generates the maximum value with a binary switch variable.
         The traditional method for max value (max) is not continuously
@@ -278,7 +336,7 @@ Traditional logical expressions such as if statements cannot be used in gradient
     Output: 
     	GEKKO variable
 	
-.. py:classmethod:: y = sign2(self,x)
+.. py:classmethod:: y = sign2(x)
 
     Generates the sign of an argument with MPCC. 
     	The traditional method for signum (sign) is not continuously differentiable and can cause
@@ -291,7 +349,7 @@ Traditional logical expressions such as if statements cannot be used in gradient
     Output:
     	GEKKO variable 
 	
-.. py:classmethod:: y = sign3(self,x)
+.. py:classmethod:: y = sign3(x)
 
     Generates the sign of an argument with binary switching variable.
         The traditional method for signum (sign) is not continuously differentiable
@@ -304,7 +362,7 @@ Traditional logical expressions such as if statements cannot be used in gradient
     Output: 
     	GEKKO variable 
 	
-.. py:classmethod:: y = abs2(self,x)
+.. py:classmethod:: y = abs2(x)
 
     Generates the absolute value with continuous first and second derivatives. 
     	The traditional method for absolute value (abs) has
@@ -318,7 +376,7 @@ Traditional logical expressions such as if statements cannot be used in gradient
     Output: 
 	GEKKO variable
 	
-.. py:classmethod:: y = abs3(self,x)
+.. py:classmethod:: y = abs3(x)
 
     Generates the absolute value with a binary switch. 
     	The traditional method for absolute value (abs) has a point that is not continuously differentiable
@@ -331,7 +389,7 @@ Traditional logical expressions such as if statements cannot be used in gradient
     Output: 
     	GEKKO variable 
 	
-.. py:classmethod:: pwl(self, x,y,x_data,y_data,bound_x=False)
+.. py:classmethod:: pwl(x,y,x_data,y_data,bound_x=False)
 
     	Generate a 1d piecewise linear function with continuous derivatives
 	from vectors of x and y data that link to GEKKO variables x and y with a
@@ -355,7 +413,7 @@ Pre-built Objects
     The `discrete` Boolean parameter indicates a discrete-time model, which requires constant time steps and 2 :ref:`nodes`.
     The `dense` Boolean parameter indicates if A,B,C,D should be written as dense or sparse matrices. Sparse matricies will be faster unless it is known that the matricies are very dense.
     
-.. py:classmethod:: y,u = arx(self,p)
+.. py:classmethod:: y,u = arx(p)
 
 	Build a GEKKO model from ARX representation.
 	Inputs:
@@ -364,7 +422,7 @@ Pre-built Objects
            * b (coefficients for b polynomial, ny x (nb x nu))
            * c (coefficients for output bias, ny)
 	   
-.. py:classmethod:: x = axb(self,A,b,x=None,etype='=',sparse=False)
+.. py:classmethod:: x = axb(A,b,x=None,etype='=',sparse=False)
 
     Create Ax=b, Ax<b, Ax>b, Ax<=b, or Ax>=b models::
     
@@ -401,7 +459,7 @@ Pre-built Objects
 	bound_x: boolean to state that x should be bounded at the upper and lower bounds of x_data to avoid
     	extrapolation error of the cspline.
     
-.. py:classmethod:: bspline(self, x,y,z,x_data,y_data,z_data,data=True)
+.. py:classmethod:: bspline(x,y,z,x_data,y_data,z_data,data=True)
 
 	Generate a 2d Bspline with continuous first and seconds derivatives
         from 1-D arrays of x_data and y_data coordinates (in strictly ascending order)
@@ -414,7 +472,7 @@ Pre-built Objects
     Makes the variable argument periodic by adding an equation to constrains v[end] = v[0]. 
     This does not affect the default behavior of fixing initial conditions (v[0]).
     
-.. py:classmethod:: y = sum(self,x)
+.. py:classmethod:: y = sum(x)
 
     Summation using APM object.::
     
@@ -426,13 +484,13 @@ Pre-built Objects
     Output: 
     	GEKKO variable
 
-.. py:classmethod:: y = vsum(self,x)
+.. py:classmethod:: y = vsum(x)
 
     Summation of variable in the data or time direction. This is
     similar to an integral but only does the summation of all points,
     not the integral area that considers time intervals.
     
-.. py:classmethod:: x = qobj(self,b,A=[],x=None,otype='min',sparse=False)
+.. py:classmethod:: x = qobj(b,A=[],x=None,otype='min',sparse=False)
 
     Create quadratic objective  = 0.5 x^T A x + c^T x::
     
@@ -449,7 +507,7 @@ Pre-built Objects
     Output: 
     	GEKKO variables x
 
-.. py:classmethod:: y,p,K = sysid(self,t,u,y,na=1,nb=1,nk=0,shift='calc',scale=True,diaglevel=0,pred='model',objf=100)
+.. py:classmethod:: y,p,K = sysid(t,u,y,na=1,nb=1,nk=0,shift='calc',scale=True,diaglevel=0,pred='model',objf=100)
 
     Identification of linear time-invariant models::
          
@@ -585,27 +643,3 @@ These are GEKKO model attributes used internally. They are not intended for exte
 
     The absolute path of the temporary file used to store all input/output files for the APMonitor executable.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-.. |APMonitor| replace:: replacement *ThunderSnow*
