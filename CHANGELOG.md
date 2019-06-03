@@ -4,9 +4,11 @@ All notable changes to the GEKKO project will be documented in this file.
 ## [Unreleased]
 ### Added
 - Additional example problems, test suite
+- New Chemical module - see test_thermo.py in examples
 
 ### Changed
 - Improved documentation for model building and logical conditions
+- Modified Brain (Machine Learning) capabilities - see test_brain.py in examples
 
 ## [v0.2.1] - Version 0.2.1 Stable Release, Date: 2019-05-10
 ### Stable release
