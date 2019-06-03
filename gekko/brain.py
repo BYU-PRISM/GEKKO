@@ -16,8 +16,11 @@ Nevertheless, training in gekko is available.
 
 class Brain():
     
-    def __init__(self,remote=True,bfgs=True,explicit=True):
-        self.m = GEKKO(remote=remote)
+    def __init__(self,m=[],remote=True,bfgs=True,explicit=True):
+        if m==[]:
+            self.m = GEKKO(remote=remote)
+        else:
+            self.m = m
         #generic model options
         self.m.options.MAX_ITER = 4000
         self.m.options.OTOL = 1e-4
@@ -89,29 +92,41 @@ class Brain():
             if self._explicit:
             
                 # build new neuron weighted inputs
-                neuron_inputs = [self.m.Intermediate(self._biases[-1][i] + sum((self._weights[-1][(i*n_p)+j]*self._layers[-1][j]) for j in range(n_p))) for i in range(size)] #i counts nodes in this layer, j counts nodes of previous layer
+                #i counts nodes in this layer, j counts nodes of previous layer
+                neuron_inputs = [self.m.Intermediate(self._biases[-1][i] \
+                                                     + sum((self._weights[-1][(i*n_p)+j]*self._layers[-1][j]) \
+                                                           for j in range(n_p))) for i in range(size)] 
                 
                 ##neuron activation
                 self._layers.append([])
                 if linear > 0:
-                    self._layers[-1] += [self.m.Intermediate(neuron_inputs[i]) for i in range(count,count+linear)]
+                    self._layers[-1] += [self.m.Intermediate(neuron_inputs[i]) \
+                                         for i in range(count,count+linear)]
                     count += linear
                 if tanh > 0:
-                    self._layers[-1] += [self.m.Intermediate(self.m.tanh(neuron_inputs[i])) for i in range(count,count+tanh)]
+                    self._layers[-1] += [self.m.Intermediate(self.m.tanh(neuron_inputs[i])) \
+                                         for i in range(count,count+tanh)]
                     count += tanh
                 if relu > 0:
-                    self._layers[-1] += [self.m.Intermediate(self.m.log(1+self.m.exp(neuron_inputs[i]))) for i in range(count,count+relu)]
+                    self._layers[-1] += [self.m.Intermediate(self.m.log(1+self.m.exp(neuron_inputs[i]))) \
+                                         for i in range(count,count+relu)]
                     count += relu
                 if gaussian > 0:
-                    self._layers[-1] += [self.m.Intermediate(self.m.exp(-neuron_inputs[i]**2)) for i in range(count,count+gaussian)]
+                    self._layers[-1] += [self.m.Intermediate(self.m.exp(-neuron_inputs[i]**2)) \
+                                         for i in range(count,count+gaussian)]
                     count += gaussian
                 if bent > 0:
-                    self._layers[-1] += [self.m.Intermediate((self.m.sqrt(neuron_inputs[i]**2 + 1) - 1)/2 + neuron_inputs[i]) for i in range(count,count+bent)]
+                    self._layers[-1] += [self.m.Intermediate((self.m.sqrt(neuron_inputs[i]**2 + 1) - 1)/2 \
+                                                             + neuron_inputs[i]) \
+                                         for i in range(count,count+bent)]
                     count += bent
                 if leaky > 0:
                     s = [self.m.Var(lb=0) for _ in range(leaky*2)]
-                    self.m.Equations( [ (1.5*neuron_inputs[i+count]) - (0.5*neuron_inputs[i+count]) == s[2*i] - s[2*i+1] for i in range(leaky) ] )
-                    self._layers[-1] += [self.m.Intermediate(neuron_inputs[count+i] + s[2*i]) for i in range(leaky)]
+                    self.m.Equations( [ (1.5*neuron_inputs[i+count]) \
+                                        - (0.5*neuron_inputs[i+count]) \
+                                        == s[2*i] - s[2*i+1] for i in range(leaky) ] )
+                    self._layers[-1] += [self.m.Intermediate(neuron_inputs[count+i] + s[2*i]) \
+                                         for i in range(leaky)]
                     [self.m.Obj(s[2*i]*s[2*i+1]) for i in range(leaky)]
                     self.m.Equations([s[2*i]*s[2*i+1] == 0 for i in range(leaky)])
                     count += leaky
@@ -121,41 +136,50 @@ class Brain():
                  
                 # build new neuron weighted inputs
                 neuron_inputs = [self.m.Var() for i in range(size)]
-                self.m.Equations([neuron_inputs[i] == self._biases[-1][i] + sum((self._weights[-1][(i*n_p)+j]*self._layers[-1][j]) for j in range(n_p)) for i in range(size)]) #i counts nodes in this layer, j counts nodes of previous layer
+                #i counts nodes in this layer, j counts nodes of previous layer
+                self.m.Equations([neuron_inputs[i] == self._biases[-1][i] \
+                                  + sum((self._weights[-1][(i*n_p)+j]*self._layers[-1][j]) \
+                                        for j in range(n_p)) for i in range(size)]) 
                 
                 ##neuron activation
                 neurons = [self.m.Var() for i in range(size)]
                 self._layers.append(neurons)
                 
-                
                 ##neuron activation
                 if linear > 0:
-                    self.m.Equations([neurons[i] == neuron_inputs[i] for i in range(count,count+linear)])
+                    self.m.Equations([neurons[i] == neuron_inputs[i] \
+                                      for i in range(count,count+linear)])
                     count += linear
                 if tanh > 0:
-                    self.m.Equations([neurons[i] == self.m.tanh(neuron_inputs[i]) for i in range(count,count+tanh)])
+                    self.m.Equations([neurons[i] == self.m.tanh(neuron_inputs[i]) \
+                                      for i in range(count,count+tanh)])
                     for n in neurons[count:count+tanh]:
                         n.LOWER = -5
                         n.UPPER = 5
                     count += tanh
                 if relu > 0:
-                    self.m.Equations([neurons[i] == self.m.log(1+self.m.exp(neuron_inputs[i])) for i in range(count,count+relu)])
+                    self.m.Equations([neurons[i] == self.m.log(1+self.m.exp(neuron_inputs[i])) \
+                                      for i in range(count,count+relu)])
                     for n in neurons[count:count+relu]:
                         n.LOWER = -10 
                     count += relu
                 if gaussian > 0:
-                    self.m.Equations([neurons[i] == self.m.exp(-neuron_inputs[i]**2) for i in range(count,count+gaussian)])
+                    self.m.Equations([neurons[i] == self.m.exp(-neuron_inputs[i]**2) \
+                                      for i in range(count,count+gaussian)])
                     for n in neurons[count:count+gaussian]:
                         n.LOWER = -3.5
                         n.UPPER = 3.5
                     count += gaussian
                 if bent > 0:
-                    self.m.Equations([neurons[i] == ((self.m.sqrt(neuron_inputs[i]**2 + 1) - 1)/2 + neuron_inputs[i]) for i in range(count,count+bent)])
+                    self.m.Equations([neurons[i] == ((self.m.sqrt(neuron_inputs[i]**2 + 1) - 1)/2 \
+                                                     + neuron_inputs[i]) for i in range(count,count+bent)])
                     count += bent
                 if leaky > 0:
                     s = [self.m.Var(lb=0) for _ in range(leaky*2)]
-                    self.m.Equations( [ (1.5*neuron_inputs[count+i]) - (0.5*neuron_inputs[count+i]) == s[2*i] - s[2*i+1] for i in range(leaky) ] )
-                    self.m.Equations([neurons[count+i] == neuron_inputs[count+i] + s[2*i] for i in range(leaky)])
+                    self.m.Equations( [ (1.5*neuron_inputs[count+i]) - (0.5*neuron_inputs[count+i]) \
+                                        == s[2*i] - s[2*i+1] for i in range(leaky) ] )
+                    self.m.Equations([neurons[count+i] == neuron_inputs[count+i] + s[2*i] \
+                                      for i in range(leaky)])
                     [self.m.Obj(10000*s[2*i]*s[2*i+1]) for i in range(leaky)]
                     #self.m.Equations([s[2*i]*s[2*i+1] == 0 for i in range(leaky)])
                     count += leaky
