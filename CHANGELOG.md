@@ -5,6 +5,7 @@ All notable changes to the GEKKO project will be documented in this file.
 ### Added
 - Additional example problems, test suite
 - New Chemical module - see test_thermo.py in examples
+- m.remove() function to delete application directory
 
 ### Changed
 - Improved documentation for model building and logical conditions
