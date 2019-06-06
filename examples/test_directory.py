@@ -18,4 +18,4 @@ m.solve()
 
 # remove directory and files after 3 seconds
 time.sleep(3)
-m.remove()
+m.cleanup()
