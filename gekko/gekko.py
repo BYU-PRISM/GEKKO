@@ -7,6 +7,7 @@ import glob
 import re
 import tempfile #making a temporary directory for all the files
 import numpy as np #to support initializing with numpy arrays
+from shutil import rmtree
 
 #remote solve functions
 from .apm import cmd, get_file
@@ -295,71 +296,10 @@ class GEKKO(object):
     # state_space = continuous/discrete and dense/sparse state space
     # sum         = summation with APM object
     # sysid       = linear time invariant system identification (ARX / OE)
-    # thermo_*    = thermodynamic properties
     # vsum        = vertical summation (integral) of a variable in data direction
-
-    # Thermo Objects
-    #   usage: thermo('mw') for constants
-    #          thermo('lvp',T) for temperature dependent
-    # ---- Temperature Independent ----
-    # mw   = Molecular Weight (kg/kmol)
-    # tc   = Critical Temperature (K)
-    # pc   = Critical Pressure (Pa)
-    # vc   = Critical Volume (m^3/kmol)
-    # ccf  = Crit Compress Factor (unitless)
-    # mp   = Melting Point (K)
-    # tpt  = Triple Pt Temperature (K)
-    # tpp  = Triple Pt Pressure (Pa)
-    # nbp  = Normal Boiling Point (K)
-    # lmv  = Liq Molar Volume (m^3/kmol)
-    # ighf = IG Heat of Formation (J/kmol)
-    # iggf = IG Gibbs of Formation (J/kmol)
-    # igae = IG Absolute Entropy (J/kmol*K)
-    # shf  = Std Heat of Formation (J/kmol)
-    # sgf  = Std Gibbs of Formation (J/kmol)
-    # sae  = Std Absolute Entropy (J/kmol*K)
-    # hfmp = Heat Fusion at Melt Pt (J/kmol)
-    # snhc = Std Net Heat of Comb (J/kmol)
-    # af   = Acentric Factor (unitless)
-    # rg   = Radius of Gyration (m)
-    # sp   = Solubility Parameter ((J/m^3)^0.5)
-    # dm   = Dipole Moment (c*m)
-    # r    = van der Waals Volume (m^3/kmol)
-    # q    = van der Waals Area (m^2)
-    # ri   = Refractive Index (unitless)
-    # fp   = Flash Point (K)
-    # lfl  = Lower Flammability Limit (K)
-    # ufl  = Upper Flammability Limit (K)
-    # lflt = Lower Flamm Limit Temp (K)
-    # uflt = Upper Flamm Limit Temp (K)
-    # ait  = Auto Ignition Temp (K)
-    # ---- Temperature Dependent ----   
-    # sd   = Solid Density (kmol/m^3)
-    # ld   = Liquid Density (kmol/m^3) 
-    # svp  = Solid Vapor Pressure (Pa) 
-    # lvp  = Liquid Vapor Pressure (Pa) 
-    # hvap = Heat of Vaporization (J/kmol) 
-    # scp  = Solid Heat Capacity (J/kmol*K) 
-    # lcp  = Liquid Heat Capacity (J/kmol*K) 
-    # igcp = Ideal Gas Heat Capacity (J/kmol*K) 
-    # svc  = Second Virial Coefficient (m^3/kmol) 
-    # lv   = Liquid Viscosity (Pa*s) 
-    # vv   = Vapor Viscosity (Pa*s) 
-    # sk   = Solid Thermal Conductivity (W/m*K) 
-    # lk   = Liq Thermal Conductivity (W/m*K) 
-    # vk   = Vap Thermal Conductivity (W/m*K) 
-    # st   = Surface Tension (N/m) 
-    # sh   = Solid Enthalpy (J/kmol) 
-    # lh   = Liq Enthalpy (J/kmol) 
-    # vh   = Vap Enthalpy (J/kmol)                  
     
     # --- add to GEKKO ---
     # lag, lookup, table
-
-    # --- flowsheet objects in APMonitor but not GEKKO ---
-    # compounds, feedback, flash, flash_column, mass, massflow, massflows, 
-    #  molarflows, mixer, pid, poly_reactor, pump, reactor, recovery, splitter,
-    #  stage_1, stage_2, stream_lag, thermo, vessel, vesselm
 
     def abs2(self,x):
         """ Generates the absolute value with continuous first and
@@ -1964,13 +1904,24 @@ class GEKKO(object):
             subprocess.call([opener, self._path])
             
 
-    #%% Cleanup functions (use with caution)
+    #%% Remove files and directories that are no longer needed
 
     def clear(self):
+        '''Clear the gekko files but do not delete the application directory        
+        '''
         files = glob.glob(os.path.join(self._path,'*'))
         for f in files:
             os.remove(f)
+    def cleanup(self):
+        '''Remove gekko files and the application (temp) directory        
+        '''
+        try:
+            rmtree(self._path)
+        except:
+            print('Directory ' + str(self._path) + ' not found')
     def clear_data(self):
+        '''Remove the data (csv) file that contains input data
+        '''
         #csv file
         try:
             os.remove(os.path.join(self._path,self._model_name+'.csv'))
