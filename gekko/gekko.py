@@ -283,6 +283,7 @@ class GEKKO(object):
     # axb         = matrix equality (Ax=b) and inequality (Ax<b)
     # bspline     = bspline for 2D data
     # cspline     = cubic spline for 1D data
+    # delay       = discrete-time delay
     # if          = if conditional
     # max2        = max value with MPCC
     # max3        = max value with binary variable for switch
@@ -346,14 +347,20 @@ class GEKKO(object):
         self.options.SOLVER = 1
         return y
 
-    def arx(self,p):
+    def arx(self,p,y=[],u=[]):
         """
         Build a GEKKO from ARX representation.
+        Usage: arx(p,y=[],u=[])
         Inputs:
            parameter dictionary p['a'], p['b'], p['c']
            a (coefficients for a polynomial, na x ny)
            b (coefficients for b polynomial, ny x (nb x nu))
            c (coefficients for output bias, ny)
+        Optional inputs:
+           y = array of Variables of size ny such as
+                y = [self.Var() for i in np.arange(ny)]
+           u = array of Parameters or Variables of size nu such as
+                u = [self.Var() for i in np.arange(nu)]
         """
         try:
             a = p['a']
@@ -420,8 +427,16 @@ class GEKKO(object):
         self._extra_files.append(file_name) #add csv file to list of extra file to send to server
         
         #define arrays of states, outputs and inputs
-        y = [self.CV() for i in np.arange(ny)]
-        u = [self.MV() for i in np.arange(nu)]
+        if y==[]:
+            y = [self.Var() for i in np.arange(ny)]
+        else:
+            if len(y)!=ny:
+                raise Exception('arx input y must be an array of length '+str(ny))
+        if u==[]:
+            u = [self.Param() for i in np.arange(nu)]
+        else:
+            if len(u)!=nu:
+                raise Exception('arx input u must be an array of length '+str(ny))
 
         #Add connections between u, x and y with arx object
         for i in range(nu):
@@ -436,6 +451,56 @@ class GEKKO(object):
                 self._connections.append(y[i].name + ' = ' + arx_name+'.y['+str(i+1)+']')
 
         return y,u
+        
+    def delay(self,u,y,steps=1):
+        """
+        Build a delay with number of time steps between input (u) and output (y)
+        with a time series model.
+
+        Usage: delay(u,y,steps=1)
+          u = delay input
+          y = delay output
+          steps = integer number of steps (default=1)
+        """
+        # verify that u is a valid GEKKO variable or parameter
+        if isinstance(u,(GKVariable,GKParameter)):
+            uin = u
+        else:
+            # create input variable if it is an expression
+            uin = self.Var()
+            self.Equation(uin==u)
+        # verify that y is a valid GEKKO variable or parameter
+        if isinstance(y,(GKVariable,GKParameter)):
+            yin = y
+        else:
+            # create input variable if it is an expression
+            yin = self.Var()
+            self.Equation(yin==y)
+        # validate steps value
+        try:
+            isteps = int(steps)
+        except:
+            raise Exception('Gekko delay steps must be an integer number')
+        if (not np.isclose(isteps,steps)) or steps<0.99:
+            raise Exception('Gekko delay number of steps must be a positive integer >=1')
+        # create delay model in time series form
+        a = np.array([[0]]) 
+        b = np.zeros(steps)
+        b[-1] = 1.0
+        b = np.reshape(b,(1,steps,1))
+        c = np.array([0])
+        
+        # create parameter dictionary
+        # parameter dictionary p['a'], p['b'], p['c']
+        # a (coefficients for a polynomial, na x ny)
+        # b (coefficients for b polynomial, ny x (nb x nu))
+        # c (coefficients for output bias, ny)
+        p = {'a':a,'b':b,'c':c}
+        
+        # Build GEKKO ARX model
+        self.arx(p,[yin],[uin])
+
+        return
 
     ## Ax=b, Ax<=b, or Ax>=b
     def axb(self,A,b,x=None,etype='=',sparse=False):
