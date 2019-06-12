@@ -6,6 +6,7 @@ All notable changes to the GEKKO project will be documented in this file.
 - Additional example problems, test suite
 - New Chemical module - see test_thermo.py in examples
 - m.remove() function to delete application directory
+- m.delay() as a times series delay model
 
 ### Changed
 - Improved documentation for model building and logical conditions
