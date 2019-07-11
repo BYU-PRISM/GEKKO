@@ -184,21 +184,6 @@ class Properties():
         
         return y
 
-class StreamObj:
-    '''Stream Object
-          P = Pressure (Pa)
-          T = Temperature (K)
-          ndot = Molar flow rate (kmol/sec)
-          x = Array of mole fractions
-          phase = Phase (solid, liquid, vapor)
-    '''
-    name = ''
-    P = None
-    T = None
-    ndot = None
-    x = []
-    phase = None
-    
 class ReserveObj:
     '''Reserve Object
           P = Pressure (Pa)
@@ -214,11 +199,26 @@ class ReserveObj:
     x = []
     phase = None
 
+class StreamObj:
+    '''Stream Object
+          P = Pressure (Pa)
+          T = Temperature (K)
+          ndot = Molar flow rate (kmol/sec)
+          x = Array of mole fractions
+          phase = Phase (solid, liquid, vapor)
+    '''
+    name = ''
+    P = None
+    T = None
+    ndot = None
+    x = []
+    phase = None
+
 class FlashObj:
     '''Flash Object
           P = Pressure (Pa)
           T = Temperature (K)
-          Q = Heat input (kJ/sec)
+          Q = Heat input (J/sec)
           gamma = Activity coefficients
           n = Molar holdup in flash column (kmol)
           inlet = Inlet stream
@@ -236,6 +236,120 @@ class FlashObj:
     reserve = ''
     vapor = ''
     liquid = ''
+    
+class MassObj:
+    '''Mass Object
+          m = mass (kg)
+          reserve = reserve name or object
+    '''
+    name = ''
+    m = None
+    reserve = ''
+
+class MassflowObj:
+    '''Massflow Object
+          mdot = mass flow (kg/sec)
+          mdoti = mass flows of components (kg/sec)
+          stream = stream name or object
+    '''
+    name = ''
+    mdot = None
+    mdoti = []
+    stream = ''
+    
+class MolarflowObj:
+    '''Molarflow Object
+          ndot = molar flow (kmol/sec)
+          ndoti = molar flows of components (kmol/sec)
+          stream = stream name or object
+    '''
+    name = ''
+    ndot = None
+    ndoti = []
+    stream = ''
+
+class MixerObj:
+    '''Mixer Object
+          inlet = list of inlet stream names or objects
+          outlet = outlet stream name or object
+    '''
+    name = ''
+    inlet = []
+    outlet = ''
+    
+class PIDObj:
+    '''PID (Proportional Integral Derivative) Object
+          co = Controller Output (u)
+          pv = Process Variable (y)
+          sp = Process Variable Set Point (ysp)
+          Kc = PID Proportional constant
+          tauI = PID Integral constant
+          tauD = PID Derivative constant
+          i = Integral term  
+       
+       Description:  PID: Proportional Integral Derivative Controller
+       In the frequency domain the PID controller is described by
+        U(s) = Kc*Y(s) + Y(s)*Kc/s*tauI + Kc*taud*s*Y(s)
+       In the time domain the PID controller is described by
+        u(t) = Kc*(ysp-y(t)) + (Kc/taui)*Integral(t=0...t)(ysp-y(t))dt + Kc*taud*dy(t)/dt
+       This implementation splits the single equation into two equations
+       The second equation is necessary to avoid the numerical integration.
+       The equations are posed in an open equation form.  The integral time
+        constant is multiplied through to avoid potential divide by zero.
+       This form may have an advantage over placing the term taui in with the
+        integral equation for cases where taui becomes very small.
+        0 = -u*taui + Kc*((ysp-y)*taui + Integral + taud*(dy/dt)*taui)
+        0 = d(Integral)/dt - (ysp-y)          
+    '''
+    name = ''
+    co = None
+    pv = None
+    sp = None
+    Kc = None
+    tauI = None
+    tauD = None
+    i = None
+    
+class PumpObj:
+    '''Pump Object
+          dp = change in pressure
+          inlet = inlet stream name or object
+          outlet = outlet stream name or object
+    '''
+    name = ''
+    dp = None
+    inlet = ''
+    outlet = ''
+    
+    
+class ReactorObj:
+    '''Reactor Object
+       The reactor model is equivalent to the vessel model but also
+        includes generation of species through reaction.  The reaction rates
+        are defined as (+) generation and (-) consumption.
+       In addition to the reaction rates, there is a term for heat generation
+        from exothermic reactions (+) or heat removal from endothermic reactions (-)
+          V = Volume (m^3)
+          Q = Heat input (J/sec)
+          Qr = Heat generation by reaction (J/sec)
+          r = Mole generation (kmol/sec)
+          rx = Mole generation by species (kmol/sec)
+          inlet = Inlet stream names or objects
+          reserve = Molar holdup name or object
+          outlet = Outlet stream name or object
+    '''
+    name = ''
+    V = None
+    Q = None
+    Qr = None
+    r = None
+    rx = []
+    inlet = ''
+    reserve = ''
+    outlet = ''
+
+#recovery (separator), splitter,
+#    stage_1, stage_2, stream_lag, thermo, vessel, vesselm
 
 class Flowsheet():        
     def __init__(self,m,stream_level=1):
@@ -252,34 +366,111 @@ class Flowsheet():
             self.m.options.STREAM_LEVEL = 0
         return
         
-    def connect_streams(self,s1,s2):
-        '''Connect two streams
-        The first stream dictates the properties of the combined stream.
+    def add_obj(self,name='',n=None):
+        x = name.lower() + str(len(self.m._objects) + 1)
+        if n==None:
+            self.m._objects.append(x+'='+name)
+        else:
+            self.m._objects.append(x+'='+name+'('+str(n)+')')
+        return x
         
-        connect_streams(s1,s2)
+    def dfrac(self):
+        '''Generate default fraction based on number of components
         
-        s1 = stream object or name of stream 1 (string)
-        s2 = stream object or name of stream 2 (string)
+        dfrac() = 1 / max(1,n_compounds)
+        
+        The max is used to protect for cases where the number of compounds is zero.
+        '''
+        return 1.0/max(1.0,float(len(self.m._compounds)))
+
+    def cxn(self,x,val=0.5,cn='',fixed=True):
+        '''Check input for expression and create a new variable if not
+        a parameter or variable
+        
+        cxn(x,value=0.5,cn='',fixed=True)
+        
+        x = the expression or parameter
+        val = default value if new parameter or variable is created
+        cn = connection name
+        fixed = Gekko parameter (True) or variable (False) if None
+        '''
+        if x==None:
+            if fixed:
+                x = self.m.Param(val)
+            else:
+                x = self.m.Var(val)
+        else:
+            if not isinstance(x,(GKVariable,GKParameter)):
+                # create input variable if it is an expression
+                xin = self.m.Var(val)
+                self.m.Equation(xin==x)
+                x = xin
+        if cn!='':
+            self.m._connections.append(x.name+'='+cn)
+        return x
+
+    def cxnl(self,x,val=0.5,cn='',fixed=True):
+        '''Check input list for expression and create a new variable if not
+        a parameter or variable
+        
+        cxnl(x,val=0.5,cn='',fixed=True)
+        
+        x = list of constants, parameters, variables, or expressions
+        val = default value if new parameter or variable is created
+        cn = connection name base + [1]...[n]
+        fixed = Gekko parameter (True) or variable (False) if []
+        '''
+        nc = len(self.m._compounds)
+        if x==[]:
+            x = [None]*nc
+            for i in range(nc):
+                if fixed:
+                    x[i] = self.m.Param(val)
+                else:
+                    x[i] = self.m.Var(val)
+        else:
+            if len(x)!=nc:
+                raise Exception('Error: array length must match number of declared compounds: '\
+                                +str(nc))
+            for i in range(nc):
+                if not isinstance(x[i],(GKVariable,GKParameter)):
+                    # create input variable if it is an expression
+                    xi = self.m.Var(val)
+                    self.m.Equation(xi==x[i])
+                    x[i] = xi
+        if cn!='':
+            for i in range(nc):
+               self.m._connections.append(x[i].name+'='+cn+'['+str(i+1)+']')
+
+        return x
+        
+    def connect(self,s1,s2):
+        '''Connect two objects 
+        The first name dictates the properties of the combined object.
+        
+        connect(s1,s2)
+        
+        s1 = object or name of object 1 (string)
+        s2 = object or name of object 2 (string)
         '''
         try:
-            c1 = s1.name
+            c1 = s1.name # if object
         except:
-            c1 = s1
+            c1 = s1      # if string
             
         try:
-            c2 = s2.name
+            c2 = s2.name # if object
         except:
-            c2 = s2
+            c2 = s2      # if string
+
         # add connection for streams with * to connect all elements
-        try:
-            self.m._connections.append(c1+'.*='+c2+'.*')
-        except:
-            raise Exception('Function connect_streams: inputs must be strings or objects with a name property')
+        self.m._connections.append(c1+'.*='+c2+'.*')
+
         return
            
-    def set_phase(self,y,phase='liquid'):
+    def set_phase(self,y,phase='vapor'):
         '''Set Phase
-        set_phase(y,phase='liquid')
+        set_phase(y,phase='vapor')
 
         Set phase of a Stream or Reserve Object as 'solid', 'liquid', or 'vapor'
         '''
@@ -288,6 +479,7 @@ class Flowsheet():
             self.m._connections.append(y.name+'.sfrc=0')
             self.m._connections.append(y.name+'.lfrc=0')
             self.m._connections.append(y.name+'.vfrc=1')
+            phase = 'vapor'
         else:
             if not (type(phase)==type('string')):
                 raise Exception('Phase must be a string: solid, liquid, or vapor')
@@ -306,291 +498,432 @@ class Flowsheet():
             else:
                 raise Exception('Phase must be a string: solid, liquid, or vapor')
 
-        return
+        return phase
 
-    def stream(self,sobj=None):
+    def reserve(self,fixed=True):
         '''
-        stream(sobj=None)
+        reserve(fixed=True)
 
-        Stream Object: 
-        sobj = StreamObj()
+        Output: Reserve Object
+          P = Pressure (Pa)
+          T = Temperature (K)
+          n = Molar holdup (kmol)
+          x = Array of mole fractions
+          phase = Phase (solid, liquid, vapor)
+          fixed = Gekko parameter (True) or variable (False) if None or []
+        '''
+        self._thermo_obj = True
+
+        # create stream object
+        y = ReserveObj()
+        y.name = self.add_obj('Reserve')
+        
+        if self.sl>=1:
+            # pressure
+            y.P = self.cxn(y.P,101325.0,y.name+'.P',fixed)
+            # temperature
+            y.T = self.cxn(y.T,300.0,y.name+'.T',fixed)
+            # stream phase
+            y.phase = self.set_phase(y,phase=y.phase)
+        # molar holdup
+        y.n = self.cxn(y.n,1.0,y.name+'.n',fixed)
+        # mole fractions
+        y.x = self.cxnl(y.x,self.dfrac(),fixed=fixed)
+        # additional equation for last mole fraction
+        if isinstance(y.x[-1],GKVariable):
+            self.m.Equation(y.x[-1]==1-sum(y.x[0:-1]))
+
+        # don't connect last mole fraction to reserve object (explicit calc)
+        for i in range(len(self.m._compounds)-1):
+            self.m._connections.append(y.x[i].name+'='+y.name+'.x['+str(i+1)+']')
+        
+        return y   
+
+    def stream(self,fixed=True):
+        '''
+        y = stream(fixed=True)
+
+        Output: Stream Object 
+        y = StreamObj()
           P = Pressure (Pa)
           T = Temperature (K)
           ndot = Molar flow rate (kmol/sec)
           x = Array of mole fractions
-          ph = Phase (Integer with 1=solid, 2=liquid, 3=vapor)
+          phase = Phase (solid, liquid, vapor)
+          fixed = Gekko parameter (True) or variable (False) if None or []
         '''
         self._thermo_obj = True
-        if sobj==None:
-           y = StreamObj()
-        else:
-           y = sobj
 
-        # build stream (Feed) object with unique object name
-        y.name = 'stream_' + str(len(self.m._objects) + 1)
-        self.m._objects.append(y.name+'=Feed')
+        # create stream object
+        y = StreamObj()
+        y.name = self.add_obj('Feed')
         
         if self.sl>=1:
             # pressure
-            if y.P==None:
-                y.P = self.m.Param(101325.0)
-            else:
-                if not isinstance(y.P,(GKVariable,GKParameter)):
-                    # create input variable if it is an expression
-                    Pin = self.m.Var()
-                    self.m.Equation(Pin==y.P)
-                    y.P = Pin
+            y.P = self.cxn(y.P,101325.0,y.name+'.P',fixed)
             # temperature
-            if y.T==None:
-                y.T = self.m.Param(300.0)
-            else:
-                if not isinstance(y.T,(GKVariable,GKParameter)):
-                    # create input variable if it is an expression
-                    Tin = self.m.Var()
-                    self.m.Equation(Tin==y.T)
-                    y.T = Tin
+            y.T = self.cxn(y.T,300.0,y.name+'.T',fixed)
             # stream phase
-            if y.phase==None:
-                y.phase = 'liquid'
-                self.m._connections.append(y.name+'.sfrc=0')
-                self.m._connections.append(y.name+'.lfrc=0')
-                self.m._connections.append(y.name+'.vfrc=1')
-            else:
-                if not (type(y.phase)==type('string')):
-                    raise Exception('Phase must be a string: solid, liquid, or vapor')
-                if y.phase.lower()=='solid':
-                    self.m._connections.append(y.name+'.sfrc=1')
-                    self.m._connections.append(y.name+'.lfrc=0')
-                    self.m._connections.append(y.name+'.vfrc=0')
-                elif y.phase.lower()=='liquid':
-                    self.m._connections.append(y.name+'.sfrc=0')
-                    self.m._connections.append(y.name+'.lfrc=1')
-                    self.m._connections.append(y.name+'.vfrc=0')
-                elif y.phase.lower()=='vapor':
-                    self.m._connections.append(y.name+'.sfrc=0')
-                    self.m._connections.append(y.name+'.lfrc=0')
-                    self.m._connections.append(y.name+'.vfrc=1')
-                else:
-                    raise Exception('Phase must be a string: solid, liquid, or vapor')
+            y.phase = self.set_phase(y,phase=y.phase)
         # molar flow
-        if y.ndot==None:
-            y.ndot = self.m.Param(1.0)
-        else:
-            if not isinstance(ndot,(GKVariable,GKParameter)):
-                # create input variable if it is an expression
-                ndotin = self.m.Var()
-                self.m.Equation(ndotin==y.ndot)
-                y.ndot = ndotin
+        y.ndot = self.cxn(y.ndot,1.0,y.name+'.ndot',fixed)
         # mole fractions
-        if y.x==[]:
-            y.x = [None]*len(self.m._compounds)
-            for i in range(len(self.m._compounds)):
-                y.x[i] = self.m.Param(1.0/max(1.0,float(len(self.m._compounds))))
-        else:
-            if len(y.x)!=len(self.m._compounds):
-               raise Exception('Error: length of mole fraction variable array (x) must match number of declared compounds: '+str(len(self.m._compounds)))
-            for i in range(len(self.m._compounds)):
-                if not isinstance(y.x[i],(GKVariable,GKParameter)):
-                    # create input variable if it is an expression
-                    xi = self.m.Var()
-                    self.m.Equation(xi==y.x[i])
-                    y.x[i] = xi
+        y.x = self.cxnl(y.x,self.dfrac(),fixed=fixed)
         # additional equation for last mole fraction
-        if isinstance(y.x[i],GKVariable):
+        if isinstance(y.x[-1],GKVariable):
             self.m.Equation(y.x[-1]==1-sum(y.x[0:-1]))
 
-        self.m._connections.append(y.P.name+'='+y.name+'.P')
-        self.m._connections.append(y.T.name+'='+y.name+'.T')
-        self.m._connections.append(y.ndot.name+'='+y.name+'.ndot')
-        # don't connect last mole fraction to stream stream object (explicit calc)
+        # don't connect last mole fraction to stream object (explicit calc)
         for i in range(len(self.m._compounds)-1):
             self.m._connections.append(y.x[i].name+'='+y.name+'.x['+str(i+1)+']')
         
-        return y        
+        return y
 
-    def flash(self,fo=None):
+    def flash(self):
         '''
-        flash(fo=None)
+        y = flash()
 
-        Input: Flash object
+        Output: Flash object
           P = Pressure (Pa)
           T = Temperature (K)
-          Q = Heat input (kJ/sec)
+          Q = Heat input (J/sec)
+          gamma = Activity coefficients for each compound
           inlet = inlet stream name
           vapor = vapor outlet stream name
           liquid = liquid outlet stream name
         '''
         self._thermo_obj = True
-        if fo==None:
-            y = FlashObj()
-        else:
-            y = fo
             
-        # build flash object with unique object name
-        y.name = 'flash_' + str(len(self.m._objects) + 1)
-        self.m._objects.append(y.name+'=Flash')
+        # create flash object
+        y = FlashObj()
+        y.name = self.add_obj('Flash')
         
         if self.sl==0:
             raise Exception('Stream level required >=1 for flash calculation')
         
-        # pressure
-        if y.P==None:
-            y.P = self.m.Param(101325.0)
-        else:
-            if not isinstance(y.P,(GKVariable,GKParameter)):
-                # create input variable if it is an expression
-                Pin = self.m.Var()
-                self.m.Equation(Pin==y.P)
-                y.P = Pin
-        # temperature
-        if y.T==None:
-            y.T = self.m.Var(300.0)
-        else:
-            if not isinstance(y.T,(GKVariable,GKParameter)):
-                # create input variable if it is an expression
-                Tin = self.m.Var()
-                self.m.Equation(Tin==y.T)
-                y.T = Tin
-        # heat input
-        if y.Q==None:
-            y.Q = self.m.Param(0.0)
-        else:
-            if not isinstance(y.Q,(GKVariable,GKParameter)):
-                # create input variable if it is an expression
-                Qin = self.m.Var()
-                self.m.Equation(Qin==y.Q)
-                y.Q = Qin
-        # activity coefficients
-        if y.gamma==[]:
-            y.gamma = [None]*len(self.m._compounds)
-            for i in range(len(self.m._compounds)):
-                y.gamma[i] = self.m.Param(1.0)
-        else:
-            if len(y.gamma)!=len(self.m._compounds):
-               raise Exception('Error: length of activity coefficient array (gamma) must match number of declared compounds: '+str(len(self.m._compounds)))
-            for i in range(len(self.m._compounds)):
-                if not isinstance(y.gamma[i],(GKVariable,GKParameter)):
-                    # create input variable if it is an expression
-                    gi = self.m.Var()
-                    self.m.Equation(gi==y.gamma[i])
-                    y.gamma[i] = gi
         # names of inlet stream (1) and outlet streams (2)
         y.inlet = y.name + '.inlet'
         y.vapor = y.name + '.outlet_vap'
         y.liquid = y.name + '.outlet_liq'
 
-        # connect to flash and stream pressure, temperature (outlet)
-        self.m._connections.append(y.P.name+'='+y.inlet+'.P')
-        self.m._connections.append(y.T.name+'='+y.liquid+'.T')
-        self.m._connections.append(y.Q.name+'='+y.name+'.Q')
-        
-        for i in range(len(self.m._compounds)):
-            self.m._connections.append(y.gamma[i].name+'='+y.name+'.gamma['+str(i+1)+']')
+        # pressure
+        y.P = self.cxn(y.P,101325.0,y.inlet+'.P')
+        # temperature
+        y.T = self.cxn(y.T,300.0,y.liquid+'.T',fixed=False)        
+        # heat input
+        y.Q = self.cxn(y.Q,0.0,y.name+'.Q')
+        # activity coefficients
+        y.gamma = self.cxnl(y.gamma,1.0,y.name+'.gamma')
         
         return y
 
-
-    def flash_column(self,fo=None):
+    def flash_column(self):
         '''
-        flash_column(fo=None)
+        y = flash_column()
 
-        Input: Flash object
+        Output: Flash object
           P = Pressure (Pa)
           T = Temperature (K)
-          Q = Heat input (kJ/sec)
+          Q = Heat input (J/sec)
           n = Holdup (kmol)
           inlet = inlet stream name
           vapor = vapor outlet stream name
           liquid = liquid outlet stream name
         '''
         self._thermo_obj = True
-        if fo==None:
-            y = FlashObj()
-        else:
-            y = fo
             
-        # build flash object with unique object name
-        y.name = 'flash_column_' + str(len(self.m._objects) + 1)
-        self.m._objects.append(y.name+'=Flash_Column')
-        
+        # create flash_column object
+        y = FlashObj()
+        y.name = self.add_obj('Flash_Column')
+       
         if self.sl==0:
             raise Exception('Stream level required >=1 for flash calculation')
-        
-        # pressure
-        if y.P==None:
-            y.P = self.m.Param(101325.0)
-        else:
-            if not isinstance(y.P,(GKVariable,GKParameter)):
-                # create input variable if it is an expression
-                Pin = self.m.Var()
-                self.m.Equation(Pin==y.P)
-                y.P = Pin
-        # temperature
-        if y.T==None:
-            y.T = self.m.Var(300.0)
-        else:
-            if not isinstance(y.T,(GKVariable,GKParameter)):
-                # create input variable if it is an expression
-                Tin = self.m.Var()
-                self.m.Equation(Tin==y.T)
-                y.T = Tin
-        # heat input
-        if y.Q==None:
-            y.Q = self.m.Param(0.0)
-        else:
-            if not isinstance(y.Q,(GKVariable,GKParameter)):
-                # create input variable if it is an expression
-                Qin = self.m.Var()
-                self.m.Equation(Qin==y.Q)
-                y.Q = Qin
-        # molar holdup
-        if y.n==None:
-            y.n = self.m.Param(1.0)
-        else:
-            if not isinstance(y.n,(GKVariable,GKParameter)):
-                # create input variable if it is an expression
-                nin = self.m.Var()
-                self.m.Equation(nin==y.n)
-                y.n = nin
-        # activity coefficients
-        if y.gamma==[]:
-            y.gamma = [None]*len(self.m._compounds)
-            for i in range(len(self.m._compounds)):
-                y.gamma[i] = self.m.Param(1.0)
-        else:
-            if len(y.gamma)!=len(self.m._compounds):
-               raise Exception('Error: length of activity coefficient array (gamma) must match number of declared compounds: '+str(len(self.m._compounds)))
-            for i in range(len(self.m._compounds)):
-                if not isinstance(y.gamma[i],(GKVariable,GKParameter)):
-                    # create input variable if it is an expression
-                    gi = self.m.Var()
-                    self.m.Equation(gi==y.gamma[i])
-                    y.gamma[i] = gi
+
         # names of inlet stream (1) and outlet streams (2)
         y.inlet = y.name + '.feed'
         y.reserve = y.name + '.holdup.reserve'
         y.vapor = y.name + '.flash.outlet_vap'
         y.liquid = y.name + '.flash.outlet_liq'
-
-        # connect to flash and stream pressure, temperature (outlet)
-        self.m._connections.append(y.P.name+'='+y.inlet+'.P')
-        self.m._connections.append(y.T.name+'='+y.liquid+'.T')
-        self.m._connections.append(y.Q.name+'='+y.name+'.flash.Q')
-        self.m._connections.append(y.Q.name+'='+y.reserve+'.n')
         
-        for i in range(len(self.m._compounds)):
-            self.m._connections.append(y.gamma[i].name+'='+y.name+'.flash.gamma['+str(i+1)+']')
+        # pressure
+        y.P = self.cxn(y.P,101325.0,y.inlet+'.P')
+        # temperature
+        y.T = self.cxn(y.T,300.0,y.liquid+'.T',fixed=False)        
+        # heat input
+        y.Q = self.cxn(y.Q,0.0,y.name+'.flash.Q')
+        # molar holdup
+        y.n = self.cxn(y.n,1.0,y.reserve+'.n')
+        # activity coefficients
+        y.gamma = self.cxnl(y.gamma,1.0,y.name+'.flash.gamma')
+        
+        return y
+    
+    def mass(self,y=None,rn=''):
+        '''
+        mass(mo=None)
+
+        Inputs:
+          y = Mass Object (mo)
+            m = mass (kg)
+            mx = mass of components (kg)
+            reserve = ''
+          rn = Reserve name if already created
+        '''
+        self._thermo_obj = True
+        if y==None:
+            y = MassObj()
+            
+        # create mass object
+        y.name = self.add_obj('Mass')
+                
+        # reserve
+        if rn=='':
+            y.reserve = self.reserve(fixed=True)
+            self.connect(y.reserve,y.name+'.acc')            
+        else:
+            # connection
+            self.connect(rn,y.reserve)
+            y.reserve = rn
+
+        # mass
+        y.m = self.cxn(y.m,1.0,y.name + '.m',fixed=False)
+        
+        return y
+        
+    def massflow(self,y=None,sn=''):
+        '''
+        massflow(mo=None)
+
+        Inputs:
+          y = Massflow Object
+            mdot = massflow (kg)
+            stream = ''
+          sn = Stream name if already created
+        '''
+        self._thermo_obj = True
+        if y==None:
+            y = MassflowObj()
+            
+        # create mass object
+        y.name = self.add_obj('Massflow')
+                
+        # stream
+        if sn=='':
+            y.stream = self.stream(fixed=True)
+            self.connect(y.stream,y.name+'.stream')
+        else:
+            # connection
+            self.connect(sn,y.stream)
+            y.stream = sn
+
+        # massflow
+        y.mdot = self.cxn(y.mdot,1.0,y.name + '.mdot',fixed=False)
+        
+        return y
+        
+    def massflows(self,y=None,sn=''):
+        '''
+        massflows(mo=None)
+
+        Inputs:
+          y = Massflow Object
+            mdot = massflow (kg)
+            mdoti = massflow of components (kg)
+            stream = ''
+          sn = Stream name if already created
+        '''
+        self._thermo_obj = True
+        if y==None:
+            y = MassflowObj()
+            
+        # create mass object
+        y.name = self.add_obj('Massflows')
+                
+        # stream
+        if sn=='':
+            y.stream = self.stream(fixed=True)
+            self.connect(y.stream,y.name+'.stream')
+        else:
+            # connection
+            self.connect(sn,y.stream)
+            y.stream = sn
+
+        # massflow
+        y.mdot = self.cxn(y.mdot,1.0,y.name + '.mdot',fixed=False)
+        # component massflow
+        y.mdoti = self.cxnl(y.mdoti,self.dfrac(),y.name + '.mdoti',fixed=False)
         
         return y
 
-    
-#    def holdup
-        
-#    def flash(self,prop,T=300.0):
+    def molarflows(self,y=None,sn=''):
+        '''
+        molarflows(mo=None)
 
-    # --- flowsheet objects in APMonitor but not GEKKO ---
-    # feedback,
+        Inputs:
+          y = Molarflow Object
+            ndot = molarflow (kmol)
+            ndoti = molarflow of components (kmol)
+            stream = ''
+          sn = Stream name if already created
+        '''
+        self._thermo_obj = True
+        if y==None:
+            y = MolarflowObj()
+            
+        # create mass object
+        y.name = self.add_obj('Molarflows')
+                
+        # stream
+        if sn=='':
+            y.stream = self.stream(fixed=True)
+            self.connect(y.stream,y.name+'.stream')
+        else:
+            # connection
+            self.connect(sn,y.stream)
+            y.stream = sn
+
+        # component molarflows
+        y.ndoti = self.cxnl(y.ndoti,self.dfrac(),y.name + '.ndoti',fixed=False)
+        
+        return y   
+
+    def mixer(self,ni=2):
+        '''
+        mixer(ni=2)
+
+        Inputs:
+          ni = Number of inlets (default=2)
+        
+        Output:
+          y = Mixer object
+            inlet = inlet stream names
+            outlet = outlet stream name
+        '''
+        self._thermo_obj = True
+
+        # create object
+        y = MixerObj()
+        y.name = self.add_obj('Mixer',ni)
+            
+        # names of streams
+        y.inlet = [None]*ni
+        for i in range(ni):
+           y.inlet[i] = y.name+'.inlet['+str(i+1)+']'
+        y.outlet = y.name+'.outlet'
+        
+        return y
+        
+        
+    def pid(self):
+        '''PID (Proportional Integral Derivative) Object
+              co = Controller Output (u)
+              pv = Process Variable (y)
+              sp = Process Variable Set Point (ysp)
+              Kc = PID Proportional constant
+              tauI = PID Integral constant
+              tauD = PID Derivative constant
+              i = Integral term  
+           
+           Description:  PID: Proportional Integral Derivative Controller
+           In the frequency domain the PID controller is described by
+            U(s) = Kc*Y(s) + Y(s)*Kc/s*tauI + Kc*taud*s*Y(s)
+           In the time domain the PID controller is described by
+            u(t) = Kc*(ysp-y(t)) + (Kc/taui)*Integral(t=0...t)(ysp-y(t))dt + Kc*taud*dy(t)/dt
+           This implementation splits the single equation into two equations
+           The second equation is necessary to avoid the numerical integration.
+           The equations are posed in an open equation form.  The integral time
+            constant is multiplied through to avoid potential divide by zero.
+           This form may have an advantage over placing the term taui in with the
+            integral equation for cases where taui becomes very small.
+            0 = -u*taui + Kc*((ysp-y)*taui + Integral + taud*(dy/dt)*taui)
+            0 = d(Integral)/dt - (ysp-y)          
+        '''
+        self._thermo_obj = True
+            
+        # create PID object
+        y = PIDObj()
+        y.name = self.add_obj('PID')
+                
+        # connect parameters and variables
+        y.co = self.cxn(y.co,0.0,y.name + '.u',fixed=False)
+        y.pv = self.cxn(y.pv,0.0,y.name + '.y',fixed=False)
+        y.sp = self.cxn(y.sp,0.0,y.name + '.ysp',fixed=True)
+        y.Kc = self.cxn(y.Kc,0.0,y.name + '.Kc',fixed=True)
+        y.tauI = self.cxn(y.tauI,0.0,y.name + '.tauI',fixed=True)
+        y.tauD = self.cxn(y.tauD,0.0,y.name + '.tauD',fixed=True)
+        y.i = self.cxn(y.i,0.0,y.name + '.i',fixed=False)
+        
+        return y
+        
+    def pump(self):
+        '''Pump Object
+              dp = change in pressure
+              inlet = inlet stream name or object
+              outlet = outlet stream name or object
+        '''
+        self._thermo_obj = True
+            
+        # create object
+        y = PumpObj()
+        y.name = self.add_obj('Pump')
+            
+        y.dp = self.cxn(y.dp,0.0,y.name + '.dp',fixed=True)
+        
+        # names of streams
+        y.inlet = y.name+'.inlet'
+        y.outlet = y.name+'.outlet'
+        
+        return y
+                        
+    def reactor(self,ni=1):
+        '''
+        reactor(ni=1)
+           
+        Inputs:
+          ni = Number of inlets (default=2)
+        
+        Output:
+          y = Reactor object
+            V = Volume (m^3)
+            Q = Heat input (J/sec)
+            Qr = Heat generation by reaction (J/sec)
+            r = Mole generation (kmol/sec)
+            rx = Mole generation by species (kmol/sec)
+            inlet = Inlet stream names or objects
+            reserve = Molar holdup name or object
+            outlet = Outlet stream name or object
+
+           Reactor Object
+              The reactor model is equivalent to the vessel model but also
+              includes generation of species through reaction.  The reaction rates
+              are defined as (+) generation and (-) consumption.
+           
+           In addition to the reaction rates, there is a term for heat generation
+              from exothermic reactions (+) or heat removal from endothermic reactions (-)
+        '''
+        self._thermo_obj = True
+            
+        # create object
+        y = ReactorObj()
+        y.name = self.add_obj('Reactor',ni)
+
+        # V = Volume (m^3)
+        y.V = self.cxn(y.V,1.0,y.name+'.V',fixed=True)
+        # Q = Heat input (J/sec)
+        y.Q = self.cxn(y.Q,0.0,y.name+'.Q',fixed=True)
+        # Qr = Heat generation by reaction (J/sec)
+        y.Qr = self.cxn(y.Qr,0.0,y.name+'.Qr',fixed=True)
+        # r = Mole generation (kmol/sec)
+        y.r = self.cxn(y.r,0.0,y.name+'.r',fixed=False)
+        # rx = Mole generation by species (kmol/sec)
+        y.rx = self.cxnl(y.rx,0.0,y.name+'.r',fixed=True)
+
+        # names of streams and reserve
+        y.inlet = [None]*ni
+        for i in range(ni):
+           y.inlet[i] = y.name+'.inlet['+str(i+1)+']'
+        y.reserve = y.name+'.acc'
+        y.outlet = y.name+'.outlet'
     
-#    mass, massflow, massflows, molarflows 
-#    mixer, pid, poly_reactor, pump, reactor, recovery, splitter,
+#    recovery, splitter,
 #    stage_1, stage_2, stream_lag, thermo, vessel, vesselm

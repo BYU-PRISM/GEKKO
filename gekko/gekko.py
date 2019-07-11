@@ -452,56 +452,6 @@ class GEKKO(object):
 
         return y,u
         
-    def delay(self,u,y,steps=1):
-        """
-        Build a delay with number of time steps between input (u) and output (y)
-        with a time series model.
-
-        Usage: delay(u,y,steps=1)
-          u = delay input
-          y = delay output
-          steps = integer number of steps (default=1)
-        """
-        # verify that u is a valid GEKKO variable or parameter
-        if isinstance(u,(GKVariable,GKParameter)):
-            uin = u
-        else:
-            # create input variable if it is an expression
-            uin = self.Var()
-            self.Equation(uin==u)
-        # verify that y is a valid GEKKO variable or parameter
-        if isinstance(y,(GKVariable,GKParameter)):
-            yin = y
-        else:
-            # create input variable if it is an expression
-            yin = self.Var()
-            self.Equation(yin==y)
-        # validate steps value
-        try:
-            isteps = int(steps)
-        except:
-            raise Exception('Gekko delay steps must be an integer number')
-        if (not np.isclose(isteps,steps)) or steps<0.99:
-            raise Exception('Gekko delay number of steps must be a positive integer >=1')
-        # create delay model in time series form
-        a = np.array([[0]]) 
-        b = np.zeros(steps)
-        b[-1] = 1.0
-        b = np.reshape(b,(1,steps,1))
-        c = np.array([0])
-        
-        # create parameter dictionary
-        # parameter dictionary p['a'], p['b'], p['c']
-        # a (coefficients for a polynomial, na x ny)
-        # b (coefficients for b polynomial, ny x (nb x nu))
-        # c (coefficients for output bias, ny)
-        p = {'a':a,'b':b,'c':c}
-        
-        # Build GEKKO ARX model
-        self.arx(p,[yin],[uin])
-
-        return
-
     ## Ax=b, Ax<=b, or Ax>=b
     def axb(self,A,b,x=None,etype='=',sparse=False):
         """Create Ax=b, Ax<b, Ax>b, Ax<=b, or Ax>=b models
@@ -731,6 +681,56 @@ class GEKKO(object):
         if bound_x is True:
             x.lower = x_data[0]
             x.upper = x_data[-1]
+        return
+        
+    def delay(self,u,y,steps=1):
+        """
+        Build a delay with number of time steps between input (u) and output (y)
+        with a time series model.
+
+        Usage: delay(u,y,steps=1)
+          u = delay input
+          y = delay output
+          steps = integer number of steps (default=1)
+        """
+        # verify that u is a valid GEKKO variable or parameter
+        if isinstance(u,(GKVariable,GKParameter)):
+            uin = u
+        else:
+            # create input variable if it is an expression
+            uin = self.Var()
+            self.Equation(uin==u)
+        # verify that y is a valid GEKKO variable or parameter
+        if isinstance(y,(GKVariable,GKParameter)):
+            yin = y
+        else:
+            # create input variable if it is an expression
+            yin = self.Var()
+            self.Equation(yin==y)
+        # validate steps value
+        try:
+            isteps = int(steps)
+        except:
+            raise Exception('Gekko delay steps must be an integer number')
+        if (not np.isclose(isteps,steps)) or steps<0.99:
+            raise Exception('Gekko delay number of steps must be a positive integer >=1')
+        # create delay model in time series form
+        a = np.array([[0]]) 
+        b = np.zeros(steps)
+        b[-1] = 1.0
+        b = np.reshape(b,(1,steps,1))
+        c = np.array([0])
+        
+        # create parameter dictionary
+        # parameter dictionary p['a'], p['b'], p['c']
+        # a (coefficients for a polynomial, na x ny)
+        # b (coefficients for b polynomial, ny x (nb x nu))
+        # c (coefficients for output bias, ny)
+        p = {'a':a,'b':b,'c':c}
+        
+        # Build GEKKO ARX model
+        self.arx(p,[yin],[uin])
+
         return
 
     def if3(self,condition,x1,x2):
