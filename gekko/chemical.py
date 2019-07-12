@@ -320,8 +320,7 @@ class PumpObj:
     dp = None
     inlet = ''
     outlet = ''
-    
-    
+   
 class ReactorObj:
     '''Reactor Object
        The reactor model is equivalent to the vessel model but also
@@ -347,9 +346,78 @@ class ReactorObj:
     inlet = ''
     reserve = ''
     outlet = ''
+    
+class RecoveryObj:
+    '''Recovery Object
+       The recovery model is a general representation of any separation process.
+          split = Split fraction to outlet 1 (0-1)
+          inlet = Inlet stream name or objects
+          outlet = Outlet stream names or object
+    '''
+    name = ''
+    split = []
+    inlet = ''
+    outlet = []
+    
+class SplitterObj:
+    '''Splitter Object
+       The splitter model keeps the same mole fractions but divides the molar
+        flowrate into multiple streams.
+          split = Split fraction to outlet 1 (0-1)
+          inlet = Inlet stream name or objects
+          outlet = Outlet stream names or object
+    '''
+    name = ''
+    split = []
+    inlet = ''
+    outlet = []    
 
-#recovery (separator), splitter,
-#    stage_1, stage_2, stream_lag, thermo, vessel, vesselm
+class StageObj:
+    '''Stage (Distillation) Object
+       The stage model is one stage of a distillation column
+          l_in  = Inlet liquid stream
+          l_out = Outlet liquid stream
+          v_in  = Inlet vapor stream
+          v_out = Outlet vapor stream
+          q = Heat addition (+) or loss (-) rate
+          dp_in_liq = Pressure drop below stage
+          dp_in_vap = Pressure drop above stage
+    '''
+    name = ''
+    l_in = ''
+    l_out = ''
+    v_in = ''
+    v_out = ''
+    q = None
+    dp_in_liq = None
+    dp_in_vap = None
+    
+class StreamLagObj:
+    '''Stream Lag Object
+          tau = time constant
+          inlet = inlet stream name or object
+          outlet = outlet stream name or object
+    '''
+    name = ''
+    tau = None
+    inlet = ''
+    outlet = ''    
+
+class VesselObj:
+    '''Vessel Object
+       A vessel that includes inlets, mixing, and an outlet
+          V = Volume (m^3)
+          Q = Heat input (J/sec)
+          inlet = Inlet stream names or objects
+          reserve = Molar holdup name or object
+          outlet = Outlet stream name or object
+    '''
+    name = ''
+    V = None
+    Q = None
+    inlet = ''
+    reserve = ''
+    outlet = ''
 
 class Flowsheet():        
     def __init__(self,m,stream_level=1):
@@ -880,7 +948,7 @@ class Flowsheet():
         reactor(ni=1)
            
         Inputs:
-          ni = Number of inlets (default=2)
+          ni = Number of inlet streams (default=1)
         
         Output:
           y = Reactor object
@@ -924,6 +992,187 @@ class Flowsheet():
            y.inlet[i] = y.name+'.inlet['+str(i+1)+']'
         y.reserve = y.name+'.acc'
         y.outlet = y.name+'.outlet'
-    
-#    recovery, splitter,
-#    stage_1, stage_2, stream_lag, thermo, vessel, vesselm
+        
+        return y
+
+    def recovery(self):
+        '''
+        recovery()       
+                
+        Output:
+          y = Recovery Object
+             split = Split fraction to outlet 1 (0-1)
+             inlet = Inlet stream name or objects
+             outlet = Outlet stream names or object
+
+        Recovery Object
+          The recovery model is a general representation of any separation process.
+        '''
+        self._thermo_obj = True
+            
+        # create object
+        y = RecoveryObj()
+        y.name = self.add_obj('Recovery')
+
+        # split = Split fraction to outlet 1 (0-1)
+        y.split = self.cxnl(y.split,1.0,y.name+'.split',fixed=True)
+
+        # names of streams and reserve
+        y.inlet = y.name+'.inlet'
+        y.outlet = [y.name+'.outlet['+str(i+1)+']' for i in range(2)]
+        
+        return y
+
+    def splitter(self,no=2):
+        '''
+        splitter()
+
+        Input:
+          no = Number of outlet streams 
+                
+        Output:
+          y = Splitter Object
+             split = Split fraction to each outlet
+             inlet = Inlet stream name or objects
+             outlet = Outlet stream names or object
+
+        Splitter Object
+        The splitter model keeps the same mole fractions but divides the molar
+         flowrate into multiple streams.
+        '''
+        self._thermo_obj = True
+            
+        # create object
+        y = SplitterObj()
+        no = max(2,no)
+        y.name = self.add_obj('Splitter',no)
+
+        # split = Split fraction to outlets (0-1)
+        y.split = [None]*no
+        sf = 1.0/no
+        for i in range(no):
+            if i!=no-1:
+                y.split[i] = self.m.Param(sf)
+            else:
+                # last split fraction is a variable
+                y.split[i] = self.m.Var(sf)
+            cn = y.name+'.split['+str(i+1)+']'
+            self.m._connections.append(y.split[i].name+'='+cn)
+
+        # names of streams and reserve
+        y.inlet = y.name+'.inlet'
+        y.outlet = [y.name+'.outlet['+str(i+1)+']' for i in range(no)]
+        
+        return y
+        
+    def stage(self,opt=2):
+        '''
+        stage(opt=2)
+
+        Input:
+          opt = Option for stage type (1=Index-1 DAE, 2=Index-2 DAE) 
+                
+        Output:
+          y = Stage Object
+             l_in  = Inlet liquid stream
+             l_out = Outlet liquid stream
+             v_in  = Inlet vapor stream
+             v_out = Outlet vapor stream
+             q = Heat addition (+) or loss (-) rate
+             dp_in_liq = Pressure drop below stage
+             dp_in_vap = Pressure drop above stage
+        Stage Object
+        The stage model is one stage (tray, packing height) of a distillation column.
+        '''
+        self._thermo_obj = True
+            
+        # create object
+        y = StageObj()
+        if opt==2:
+           y.name = self.add_obj('stage_2')
+        else:
+           y.name = self.add_obj('stage_1')        
+
+        # names of streams
+        y.l_in = y.name+'.l_in'
+        y.l_out = y.name+'.l_out'
+        y.v_in = y.name+'.v_in'
+        y.v_out = y.name+'.v_out'
+        
+        if opt==2:
+            y.q = self.cxn(y.q,0.0,y.name + '.q',fixed=True)
+            y.dp_in_liq = self.cxn(y.dp_in_liq,0.0,y.name + '.dp_in_liq',fixed=True)
+            y.dp_in_vap = self.cxn(y.dp_in_vap,0.0,y.name + '.dp_in_vap',fixed=True)
+        
+        return y
+
+    def stream_lag(self):
+        '''
+        stream_lag()
+        
+        Stream Lag Object
+          Output
+              tau = time constant
+              inlet = inlet stream name or object
+              outlet = outlet stream name or object
+        '''
+        self._thermo_obj = True
+            
+        # create object
+        y = StreamLagObj()
+        y.name = self.add_obj('Stream_Lag')
+            
+        y.tau = self.cxn(y.tau,1.0,y.name + '.tau',fixed=True)
+        
+        # names of streams
+        y.inlet = y.name+'.inlet'
+        y.outlet = y.name+'.outlet'
+        
+        return y
+
+    def vessel(self,ni=1,mass=False):
+        '''
+        reactor(ni=1,mass=False)
+           
+        Inputs:
+          ni = Number of inlets (default=1)
+          mass = Mass flows instead of molar flows (default=False)
+        
+        Output:
+          y = Reactor object
+            V = Volume (m^3)
+            Q = Heat input (J/sec)
+            inlet = Inlet stream names or objects
+            reserve = Molar holdup name or object
+            outlet = Outlet stream name or object
+
+           Reactor Object
+              The reactor model is equivalent to the vessel model but also
+              includes generation of species through reaction.  The reaction rates
+              are defined as (+) generation and (-) consumption.
+           
+           In addition to the reaction rates, there is a term for heat generation
+              from exothermic reactions (+) or heat removal from endothermic reactions (-)
+        '''
+        self._thermo_obj = True
+            
+        # create object
+        y = ReactorObj()
+        if mass:
+            y.name = self.add_obj('Vesselm',ni)
+        else:
+            y.name = self.add_obj('Vessel',ni)
+
+        # V = Volume (m^3)
+        y.V = self.cxn(y.V,1.0,y.name+'.V',fixed=True)
+        # Q = Heat input (J/sec)
+        y.Q = self.cxn(y.Q,0.0,y.name+'.Q',fixed=True)
+
+        # names of streams and reserve
+        y.inlet = [None]*ni
+        for i in range(ni):
+           y.inlet[i] = y.name+'.inlet['+str(i+1)+']'
+        y.reserve = y.name+'.acc'
+        y.outlet = y.name+'.outlet'
+        
+        return y
