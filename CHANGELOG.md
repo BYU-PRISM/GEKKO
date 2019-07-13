@@ -3,11 +3,19 @@ All notable changes to the GEKKO project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+## [v0.2.2] - Version 0.2.2 Stable Release, Date: 2019-07-13
+### Stable release
+
+### Added
 - Additional example problems, test suite
-- New Chemical module - see test_thermo.py in examples
+- New Chemical module - see test_thermo.py and test_chemical.py in examples
 - m.remove() function to delete application directory
 - m.delay() as a times series delay model
 - Added MATLAB examples for calling Gekko functions
+- Documentation pages for Chemical module and Machine Learning module (rst files)
 
 ### Changed
 - Improved documentation for model building and logical conditions
@@ -85,7 +93,8 @@ All notable changes to the GEKKO project will be documented in this file.
 ## 0.0.1a1 - Version 0.0.1 Alpha 1, Date: 2018-01-05
 ### Initial GEKKO public release, alpha version
 
-[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.2...HEAD
+[v0.2.2]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.1...v0.2.2
 [v0.2.1]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.0...v0.2.1
 [v0.2.0]: https://github.com/BYU-PRISM/GEKKO/compare/0.2rc6...v0.2.0
 [0.2rc6]: https://github.com/BYU-PRISM/GEKKO/compare/0.2rc5...0.2rc6
