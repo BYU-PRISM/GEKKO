@@ -65,56 +65,59 @@ Thermodynamic Properties
        print(vp)
 
     **Temperature Independent**
-    mw   = Molecular Weight (kg/kmol)
-    tc   = Critical Temperature (K)
-    pc   = Critical Pressure (Pa)
-    vc   = Critical Volume (m^3/kmol)
-    ccf  = Crit Compress Factor (unitless)
-    mp   = Melting Point (K)
-    tpt  = Triple Pt Temperature (K)
-    tpp  = Triple Pt Pressure (Pa)
-    nbp  = Normal Boiling Point (K)
-    lmv  = Liq Molar Volume (m^3/kmol)
-    ighf = IG Heat of Formation (J/kmol)
-    iggf = IG Gibbs of Formation (J/kmol)
-    igae = IG Absolute Entropy (J/kmol*K)
-    shf  = Std Heat of Formation (J/kmol)
-    sgf  = Std Gibbs of Formation (J/kmol)
-    sae  = Std Absolute Entropy (J/kmol*K)
-    hfmp = Heat Fusion at Melt Pt (J/kmol)
-    snhc = Std Net Heat of Comb (J/kmol)
-    af   = Acentric Factor (unitless)
-    rg   = Radius of Gyration (m)
-    sp   = Solubility Parameter ((J/m^3)^0.5)
-    dm   = Dipole Moment (c*m)
-    r    = van der Waals Volume (m^3/kmol)
-    q    = van der Waals Area (m^2)
-    ri   = Refractive Index (unitless)
-    fp   = Flash Point (K)
-    lfl  = Lower Flammability Limit (K)
-    ufl  = Upper Flammability Limit (K)
-    lflt = Lower Flamm Limit Temp (K)
-    uflt = Upper Flamm Limit Temp (K)
-    ait  = Auto Ignition Temp (K)
+    
+    * mw   = Molecular Weight (kg/kmol)
+    * tc   = Critical Temperature (K)
+    * pc   = Critical Pressure (Pa)
+    * vc   = Critical Volume (m^3/kmol)
+    * ccf  = Crit Compress Factor (unitless)
+    * mp   = Melting Point (K)
+    * tpt  = Triple Pt Temperature (K)
+    * tpp  = Triple Pt Pressure (Pa)
+    * nbp  = Normal Boiling Point (K)
+    * lmv  = Liq Molar Volume (m^3/kmol)
+    * ighf = IG Heat of Formation (J/kmol)
+    * iggf = IG Gibbs of Formation (J/kmol)
+    * igae = IG Absolute Entropy (J/kmol*K)
+    * shf  = Std Heat of Formation (J/kmol)
+    * sgf  = Std Gibbs of Formation (J/kmol)
+    * sae  = Std Absolute Entropy (J/kmol*K)
+    * hfmp = Heat Fusion at Melt Pt (J/kmol)
+    * snhc = Std Net Heat of Comb (J/kmol)
+    * af   = Acentric Factor (unitless)
+    * rg   = Radius of Gyration (m)
+    * sp   = Solubility Parameter ((J/m^3)^0.5)
+    * dm   = Dipole Moment (c*m)
+    * r    = van der Waals Volume (m^3/kmol)
+    * q    = van der Waals Area (m^2)
+    * ri   = Refractive Index (unitless)
+    * fp   = Flash Point (K)
+    * lfl  = Lower Flammability Limit (K)
+    * ufl  = Upper Flammability Limit (K)
+    * lflt = Lower Flamm Limit Temp (K)
+    * uflt = Upper Flamm Limit Temp (K)
+    * ait  = Auto Ignition Temp (K)
+    
     **Temperature Dependent** 
-    sd   = Solid Density (kmol/m^3)
-    ld   = Liquid Density (kmol/m^3) 
-    svp  = Solid Vapor Pressure (Pa) 
-    lvp  = Liquid Vapor Pressure (Pa) 
-    hvap = Heat of Vaporization (J/kmol) 
-    scp  = Solid Heat Capacity (J/kmol*K) 
-    lcp  = Liquid Heat Capacity (J/kmol*K) 
-    igcp = Ideal Gas Heat Capacity (J/kmol*K) 
-    svc  = Second Virial Coefficient (m^3/kmol) 
-    lv   = Liquid Viscosity (Pa*s) 
-    vv   = Vapor Viscosity (Pa*s) 
-    sk   = Solid Thermal Conductivity (W/m*K) 
-    lk   = Liq Thermal Conductivity (W/m*K) 
-    vk   = Vap Thermal Conductivity (W/m*K) 
-    st   = Surface Tension (N/m) 
-    sh   = Solid Enthalpy (J/kmol) 
-    lh   = Liq Enthalpy (J/kmol) 
-    vh   = Vap Enthalpy (J/kmol)
+    
+    * sd   = Solid Density (kmol/m^3)
+    * ld   = Liquid Density (kmol/m^3) 
+    * svp  = Solid Vapor Pressure (Pa) 
+    * lvp  = Liquid Vapor Pressure (Pa) 
+    * hvap = Heat of Vaporization (J/kmol) 
+    * scp  = Solid Heat Capacity (J/kmol*K) 
+    * lcp  = Liquid Heat Capacity (J/kmol*K) 
+    * igcp = Ideal Gas Heat Capacity (J/kmol*K) 
+    * svc  = Second Virial Coefficient (m^3/kmol) 
+    * lv   = Liquid Viscosity (Pa*s) 
+    * vv   = Vapor Viscosity (Pa*s) 
+    * sk   = Solid Thermal Conductivity (W/m*K) 
+    * lk   = Liq Thermal Conductivity (W/m*K) 
+    * vk   = Vap Thermal Conductivity (W/m*K) 
+    * st   = Surface Tension (N/m) 
+    * sh   = Solid Enthalpy (J/kmol) 
+    * lh   = Liq Enthalpy (J/kmol) 
+    * vh   = Vap Enthalpy (J/kmol)
 
 Flowsheet Objects
 --------------
@@ -125,20 +128,20 @@ Flowsheet Objects
 
 .. py:class::	f = chemical.Flowsheet(m,[stream_level=1]):
 
-	Creates a chemical flowsheet object with a GEKKO model `m` and 
-   a `stream_level`. The `stream_level` either includes only chemical
-   compositions (`stream_level=0`) or also pressure and temperature
-   (`stream_level=1`). Most methods in the Flowsheet object require
-   `stream_level=1` but there are a few cases such as blending
-   applications that don't the additional equations (e.g. energy
-   balance equations to simulate temperature changes.::
+	 Creates a chemical flowsheet object with a GEKKO model `m` and 
+    a `stream_level`. The `stream_level` either includes only chemical
+    compositions (`stream_level=0`) or also pressure and temperature
+    (`stream_level=1`). Most methods in the Flowsheet object require
+    `stream_level=1` but there are a few cases such as blending
+    applications that don't the additional equations (e.g. energy
+    balance equations to simulate temperature changes.::
       
-      from gekko import GEKKO, chemical
-      m = GEKKO()
-      c = chemical.Properties(m)
-      c.compound('propane')
-      c.compound('water')
-      f = chemical.Flowsheet(m)
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
       
 .. py:classmethod::    f.connect(s1,s2):
 
@@ -149,12 +152,12 @@ Flowsheet Objects
 
    s2 = object or name of object 2 (string)::
 
-      from gekko import GEKKO, chemical
-      m = GEKKO()
-      c = chemical.Properties(m)
-      c.compound('propane')
-      c.compound('water')
-      f = chemical.Flowsheet(m)
-      mix = f.mixer()
-      spl = f.splitter()   
-      f.connect(mix.outlet,spl.inlet)
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
+       mix = f.mixer()
+       spl = f.splitter()   
+       f.connect(mix.outlet,spl.inlet)
