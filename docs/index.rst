@@ -60,8 +60,8 @@ Contents
 	MV_options
 	CV_options
 	model_methods
-   brain
-   chemical
+	brain
+	chemical
 	examples
 	support
 
