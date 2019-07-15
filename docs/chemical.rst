@@ -42,7 +42,7 @@ Thermodynamic Properties
        c.compound('water')
        c.compound('hexane')
 
-.. py:classmethod::	   prop = c.thermo(name)
+.. py:classmethod::    prop = c.thermo(name)
 
     Thermodynamic Properties::
      
@@ -124,9 +124,19 @@ Flowsheet Objects
 
     Flowsheet objects are created with the chemical library with
     basic unit operations that mix, separate, react, and model the
-    dynamics of chemical mixtures in processing equipment.
+    dynamics of chemical mixtures in processing equipment. The basis for
+    flowsheet objects is:
+    * Pressure (Pa)
+    * Temperature (K)
+    * Mole Fractions
+    * Molar Flow (kmol/sec)
+    * Moles (kmol)
+    These fundamental quantities are used to track other derived quantities
+    such as concentration (kmol/m^3), mass (kg), mass flow (kg/sec), 
+    enthalpy (J/kmol), heat capacity (J/kmol-K), mass fractions, and
+    many others for mixtures and streams.
 
-.. py:class::	f = chemical.Flowsheet(m,[stream_level=1]):
+.. py:class::    f = chemical.Flowsheet(m,[stream_level=1]):
 
 	 Creates a chemical flowsheet object with a GEKKO model `m` and 
     a `stream_level`. The `stream_level` either includes only chemical
@@ -161,3 +171,214 @@ Flowsheet Objects
        mix = f.mixer()
        spl = f.splitter()   
        f.connect(mix.outlet,spl.inlet)
+       m.solve()
+       
+.. py:classmethod::    f.set_phase(y,phase='vapor'):
+
+   Set the phase (vapor, liquid, solid) of a stream or accumulation
+
+   y = object or name of object (string)
+
+   phase = phase of the object (vapor, liquid, solid)::
+
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
+       fl = f.flash()
+       f.set_phase(fl.inlet,'liquid')
+       m.solve()
+       
+.. py:classmethod::    f.reserve(fixed=False):
+
+   Crease an accumulation that is a quantity (moles) of chemical holdup
+
+   Output: Reserve Object
+   * P = Pressure (Pa)
+   * T = Temperature (K)
+   * n = Molar holdup (kmol)
+   * x = Array of mole fractions
+   * phase = Phase (solid, liquid, vapor)
+   * fixed = Gekko parameter (True) or variable (False) if None or []::
+
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
+       r = f.reserve()
+       m.solve()
+       
+.. py:classmethod::    f.stream(fixed=True):
+
+   Create a stream that is a flow (moles/sec) of a chemicals
+
+   Output: Stream Object
+   * P = Pressure (Pa)
+   * T = Temperature (K)
+   * ndot = Molar flow rate (kmol/sec)
+   * x = Array of mole fractions
+   * phase = Phase (solid, liquid, vapor)
+   * fixed = Gekko parameter (True) or variable (False) if None or []::
+
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
+       r = f.stream()
+       m.solve()
+       
+.. py:classmethod::    f.flash():
+
+   Create a flash object that separates a stream into a liquid and vapor 
+   outlet. The flash object does not have a liquid holdup. See flash_column
+   for a flash object with holdup.   
+
+   Output: Flash object
+   * P = Pressure (Pa)
+   * T = Temperature (K)
+   * Q = Heat input (J/sec)
+   * gamma = Activity coefficients for each compound
+   * inlet = inlet stream name
+   * vapor = vapor outlet stream name
+   * liquid = liquid outlet stream name
+
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
+       fl = f.flash()
+       m.solve()
+       
+.. py:classmethod::    f.flash_column():
+
+   Create a flash column object that separates a stream into a liquid and 
+   vapor outlet. The flash object does not have a liquid holdup. See flash
+   for a flash object without holdup.   
+
+   Output: Flash column object
+   * P = Pressure (Pa)
+   * T = Temperature (K)
+   * Q = Heat input (J/sec)
+   * n = Holdup (kmol)
+   * gamma = Activity coefficients for each compound
+   * inlet = inlet stream name
+   * vapor = vapor outlet stream name
+   * liquid = liquid outlet stream name
+
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
+       fl = f.flash()
+       m.solve()
+
+.. py:classmethod::    f.mass(y=None,rn=''):
+
+   Create a mass object that calculates the mass (kg) in a mixture holdup.
+
+   Inputs:
+    y = Mass Object (mo)
+       m = mass (kg)
+       mx = mass of components (kg)
+       reserve = ''
+    rn = Reserve name if already created
+
+   Output: Mass object
+
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
+       r = f.reserve()
+       ms = f.mass(rn=r.name)
+       m.options.solver=1
+       m.solve()
+
+.. py:classmethod::    f.massflow(y=None,sn=''):
+
+   Create a mass flow object that calculates the mass flow (kg/sec) in a
+   mixture stream.
+
+   Inputs:
+    y = Mass Flow Object (mo)
+       mdot = mass flow (kg/sec)
+       mx = mass of components (kg)
+       stream = ''
+    sn = Stream name if already created
+
+   Output: Mass flow object
+
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
+       s = f.stream()
+       mf = f.massflow(sn=s.name)
+       m.options.solver=1
+       m.solve()
+       
+.. py:classmethod::    f.massflows(y=None,sn=''):
+
+   Create a mass flow object that calculates the mass flow (kg/sec) in a
+   mixture stream.
+
+   Inputs:
+    y = Mass Flow Object (mo)
+       mdot = mass flow (kg/sec)
+       mdoti = mass flow of components (kg)
+       stream = ''
+    sn = Stream name if already created
+
+   Output: Mass flows object
+
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
+       s = f.stream()
+       mf = f.massflows(sn=s.name)
+       m.options.solver=1
+       m.solve()
+       
+.. py:classmethod::    f.molarflows(y=None,sn=''):
+
+   Create a molar flows object that calculates the molar flow (kmol/sec)
+   of a mixture stream as well as the molar flow of the individual components.
+
+   Inputs:
+    y = Molar Flows Object (mo)
+       ndot = molar flow (kmol/sec)
+       ndoti = molar flow of components (kmol)
+       stream = ''
+    sn = Stream name if already created
+
+   Output: Mass flows object
+
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
+       s = f.stream()
+       mf = f.molarflows(sn=s.name)
+       m.options.solver=1
+       m.solve()
+       
+       
