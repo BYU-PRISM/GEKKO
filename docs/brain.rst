@@ -16,15 +16,15 @@ Deep Learning Properties
    GEKKO specializes in a unique subset of machine learning. However, 
    it can be used for various types of machine learning. This is a
    module to facilitate Artificial Neural Networks in GEKKO. Most ANN
-   packages uses gradient decent optimization. The solvers used in 
-   GEKKO use far more advanced techniques that gradient decent. 
+   packages use gradient decent optimization. The solvers used in 
+   GEKKO use more advanced techniques than gradient decent. 
    However, training neural networks may require extremely large 
    datasets. For these large problems, gradient decent does prove more
-   useful because of its ability to massively parallelize. 
-   Nevertheless, training in gekko is available for cases where the
+   useful because of the ability to massively parallelize. 
+   Nevertheless, training in GEKKO is available for cases where the
    data set is of moderate size, for combined physics-based and 
    empirical modeling, or for other predictive modeling and 
-   optimization applications warrant a different solution strategy.
+   optimization applications that warrant a different solution strategy.
 
 .. py:class::	b = brain.Brain(m=[],remote=True,bfgs=True,explicit=True):
 
