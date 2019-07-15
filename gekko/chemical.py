@@ -542,33 +542,41 @@ class Flowsheet():
 
         Set phase of a Stream or Reserve Object as 'solid', 'liquid', or 'vapor'
         '''
+        if type(y)==str:
+           z = y
+        else:
+           try:
+               z = y.name
+           except:
+               raise Exception('set_phase(y,phase): y must be a ' + \
+                               'string or an object with y.name')
         # stream phase
         if phase==None:
-            self.m._connections.append(y.name+'.sfrc=0')
-            self.m._connections.append(y.name+'.lfrc=0')
-            self.m._connections.append(y.name+'.vfrc=1')
+            self.m._connections.append(z+'.sfrc=0')
+            self.m._connections.append(z+'.lfrc=0')
+            self.m._connections.append(z+'.vfrc=1')
             phase = 'vapor'
         else:
-            if not (type(phase)==type('string')):
+            if not (type(phase)==str):
                 raise Exception('Phase must be a string: solid, liquid, or vapor')
             if phase.lower()=='solid':
-                self.m._connections.append(y.name+'.sfrc=1')
-                self.m._connections.append(y.name+'.lfrc=0')
-                self.m._connections.append(y.name+'.vfrc=0')
+                self.m._connections.append(z+'.sfrc=1')
+                self.m._connections.append(z+'.lfrc=0')
+                self.m._connections.append(z+'.vfrc=0')
             elif phase.lower()=='liquid':
-                self.m._connections.append(y.name+'.sfrc=0')
-                self.m._connections.append(y.name+'.lfrc=1')
-                self.m._connections.append(y.name+'.vfrc=0')
+                self.m._connections.append(z+'.sfrc=0')
+                self.m._connections.append(z+'.lfrc=1')
+                self.m._connections.append(z+'.vfrc=0')
             elif phase.lower()=='vapor':
-                self.m._connections.append(y.name+'.sfrc=0')
-                self.m._connections.append(y.name+'.lfrc=0')
-                self.m._connections.append(y.name+'.vfrc=1')
+                self.m._connections.append(z+'.sfrc=0')
+                self.m._connections.append(z+'.lfrc=0')
+                self.m._connections.append(z+'.vfrc=1')
             else:
                 raise Exception('Phase must be a string: solid, liquid, or vapor')
 
         return phase
 
-    def reserve(self,fixed=True):
+    def reserve(self,fixed=False):
         '''
         reserve(fixed=True)
 
@@ -694,6 +702,7 @@ class Flowsheet():
           T = Temperature (K)
           Q = Heat input (J/sec)
           n = Holdup (kmol)
+          gamma = Activity coefficients for each compound
           inlet = inlet stream name
           vapor = vapor outlet stream name
           liquid = liquid outlet stream name
@@ -750,7 +759,7 @@ class Flowsheet():
             self.connect(y.reserve,y.name+'.acc')            
         else:
             # connection
-            self.connect(rn,y.reserve)
+            self.connect(rn,y.name+'.acc')
             y.reserve = rn
 
         # mass
@@ -781,7 +790,7 @@ class Flowsheet():
             self.connect(y.stream,y.name+'.stream')
         else:
             # connection
-            self.connect(sn,y.stream)
+            self.connect(sn,y.name+'.stream')
             y.stream = sn
 
         # massflow
@@ -813,7 +822,7 @@ class Flowsheet():
             self.connect(y.stream,y.name+'.stream')
         else:
             # connection
-            self.connect(sn,y.stream)
+            self.connect(sn,y.name+'.stream')
             y.stream = sn
 
         # massflow
@@ -847,7 +856,7 @@ class Flowsheet():
             self.connect(y.stream,y.name+'.stream')
         else:
             # connection
-            self.connect(sn,y.stream)
+            self.connect(sn,y.name+'.stream')
             y.stream = sn
 
         # component molarflows
