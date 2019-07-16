@@ -20,8 +20,9 @@ Thermodynamic Properties
 
 .. py:class::	c = chemical.Properties(m):
 
-	 Creates a chemical property object with a GEKKO model `m`. Chemical
-    properties must be defined to specify the chemicals involved in
+    Creates a chemical property object with a GEKKO model `m`.
+    
+    Chemical properties are defined to specify the chemicals involved in 
     thermodynamic and flowsheet objects.::
 
        from gekko import GEKKO, chemical
@@ -147,7 +148,9 @@ Flowsheet Objects
 .. py:class::    f = chemical.Flowsheet(m,[stream_level=1]):
 
 	 Creates a chemical flowsheet object with a GEKKO model `m` and a
-    `stream_level`. The `stream_level` either includes only chemical
+    `stream_level`.
+    
+    The `stream_level` either includes only chemical
     compositions (`stream_level=0`) or also pressure and temperature
     (`stream_level=1`). Most methods in the Flowsheet object require
     `stream_level=1` but there are a few cases such as blending
@@ -168,9 +171,10 @@ Flowsheet Objects
     Connect two objects 
     The first name dictates the properties of the combined object.
 
-    s1 = object or name of object 1 (string)
-
-    s2 = object or name of object 2 (string)
+    Inputs:
+    
+    * s1 = object or name of object 1 (string)
+    * s2 = object or name of object 2 (string)
     
     A code example shows the use of the `connect` function::
 
@@ -278,8 +282,7 @@ Flowsheet Objects
        f = chemical.Flowsheet(m)
        fl = f.flash()
        m.solve()
-    
-   
+
 .. py:classmethod::    f.flash_column():
 
     Create a flash column object that separates a stream into a liquid and 
@@ -313,13 +316,12 @@ Flowsheet Objects
     Create a mass object that calculates the mass (kg) in a mixture holdup.
 
     Inputs:
+    
       y = Mass Object (mo)
       
-        m = mass (kg)
-      
-        mx = mass of components (kg)
-  
-        reserve = ''
+    * m = mass (kg)
+    * mx = mass of components (kg)
+    * reserve = ''
 
       rn = Reserve name if already created
 
@@ -348,11 +350,9 @@ Flowsheet Objects
     
       y = Mass Flow Object (mo)
 
-        mdot = mass flow (kg/sec)
-
-        mx = mass of components (kg)
-
-        stream = ''
+    * mdot = mass flow (kg/sec)
+    * mx = mass of components (kg)
+    * stream = ''
 
       sn = Stream name if already created
 
@@ -381,11 +381,9 @@ Flowsheet Objects
     
       y = Mass Flow Object (mo)
 
-        mdot = mass flow (kg/sec)
-
-        mdoti = mass flow of components (kg)
-
-        stream = ''
+    * mdot = mass flow (kg/sec)
+    * mdoti = mass flow of components (kg)
+    * stream = ''
 
       sn = Stream name if already created
 
@@ -404,6 +402,33 @@ Flowsheet Objects
        mf = f.massflows(sn=s.name)
        m.options.solver=1
        m.solve()
+
+.. py:classmethod::    f.mixer(ni=2):
+
+    Create a mixer object that combines two or more streams. The mixer
+    object does not have a liquid holdup. See vessel for a mixer object
+    with holdup.   
+
+    Input:
+    
+    * ni = Number of inlets (default=2)
+
+    Output: Mixer object
+    
+    * inlet = inlet stream names (inlet[1], inlet[2], ..., inlet[ni])
+    * outlet = outlet stream name
+
+    A code example demonstrates the creation and solution of a `mixer` object::
+
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
+       mx = f.mixer()
+       m.options.SOLVER=1
+       m.solve()
        
 .. py:classmethod::    f.molarflows(y=None,sn=''):
 
@@ -414,12 +439,10 @@ Flowsheet Objects
 
       y = Molar Flows Object (mo)
 
-        ndot = molar flow (kmol/sec)
-
-        ndoti = molar flow of components (kmol)
-
-        stream = ''
-
+    * ndot = molar flow (kmol/sec)
+    * ndoti = molar flow of components (kmol)
+    * stream = ''
+    
       sn = Stream name if already created
 
     Output: Mass flows object
@@ -438,4 +461,106 @@ Flowsheet Objects
        m.options.solver=1
        m.solve()
        
+.. py:classmethod::    f.pid():
+
+    Create a PID (Proportional Integral Derivative) control object that
+    relates the controller output (CO), process variable (PV), and set 
+    point (SP) of a control loop. This is a continuous form of a PID
+    controller that approximates discrete PID controllers typically used
+    in industrial practice. 
+
+    Output: PID object
+    
+    * co = Controller Output (u)
+    * pv = Process Variable (y)
+    * sp = Process Variable Set Point (ysp)
+    * Kc = PID Proportional constant
+    * tauI = PID Integral constant
+    * tauD = PID Derivative constant
+    * i = Integral term  
+    
+    Description:  PID: Proportional Integral Derivative Controller
+    In the frequency domain the PID controller is described by
+     
+       U(s) = Kc*Y(s) + Y(s)*Kc/s*tauI + Kc*taud*s*Y(s)
+    
+    In the time domain the PID controller is described by
+    
+       u(t) = Kc*(ysp-y(t)) + (Kc/taui)*Integral(t=0...t)(ysp-y(t))dt + Kc*taud*dy(t)/dt
+    
+    This implementation splits the single equation into two equations
+    The second equation is necessary to avoid the numerical integration.
+    The equations are posed in an open equation form.  The integral time
+     constant is multiplied through to avoid potential divide by zero.
+    This form may have an advantage over placing the term taui in with the
+    integral equation for cases where taui becomes very small.
+
+       0 = -u*taui + Kc*((ysp-y)*taui + Integral + taud*(dy/dt)*taui)
+
+       0 = d(Integral)/dt - (ysp-y)         
+    
+    A code example demonstrates the creation and solution of a `pid` object::
+
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       f = chemical.Flowsheet(m)
+       p = f.pid()
+       m.solve()
+       
+.. py:classmethod::    f.pump():
+
+    Create a pump object that changes the pressure of a stream.
+
+    Output: Pump object
+    
+    * dp = change in pressure (Pa)
+    * inlet = inlet stream name
+    * outlet = outlet stream name
+
+    A code example demonstrates the creation and solution of a `pump` object::
+
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
+       p = f.pump()
+       m.solve()
+       
+.. py:classmethod::    f.reactor(ni=1):
+
+    Create a reactor object that combines two or more streams and includes
+    a generation term for each chemical species. The reactor object is similar
+    to the vessel object but includes reactions. The reaction rates are
+    defined as (+) generation and (-) consumption. In addition to the
+    reaction rates, there is a term for heat generation from exothermic
+    reactions (+) or heat removal from endothermic reactions (-).
+
+    Input:
+    
+    * ni = Number of inlets (default=2)
+
+    Output: Reactor object
+    
+    * V = Volume (m^3)
+    * Q = Heat input (J/sec)
+    * Qr = Heat generation by reaction (J/sec)
+    * r = Mole generation (kmol/sec)
+    * rx = Mole generation by species (kmol/sec)
+    * inlet = inlet stream names (inlet[1], inlet[2], ..., inlet[ni])
+    * reserve = Molar holdup name
+    * outlet = Outlet stream name    
+
+    A code example demonstrates the creation and solution of a `reactor` object with two inlet streams::
+
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
+       r = f.reactor(ni=2)
+       m.options.SOLVER = 1
+       m.solve()
        
