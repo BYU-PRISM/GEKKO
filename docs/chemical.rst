@@ -3,7 +3,9 @@
 Chemical Library
 =======================================
 
-   GEKKO specializes in a optimization and control. The **chemical** module extends GEKKO with chemical compounds, thermodynamic properties, and flowsheet objects.
+    GEKKO specializes in a optimization and control. The *chemical* 
+    module extends GEKKO with chemical compounds, thermodynamic 
+    properties, and flowsheet objects.
 
 .. toctree::
 	:maxdepth: 2
@@ -12,15 +14,15 @@ Chemical Library
 Thermodynamic Properties
 --------------
 
-   Thermodynamic properties form the basis for the flowsheet objects.
-   The thermodynamic properties are also accessible as either 
-   temperature independent or temperature dependent quantities.
+    Thermodynamic properties form the basis for the flowsheet objects.
+    The thermodynamic properties are also accessible as either 
+    temperature independent or temperature dependent quantities.
 
 .. py:class::	c = chemical.Properties(m):
 
-	Creates a chemical property object with a GEKKO model `m`. Chemical
-   properties must be defined to specify the chemicals involved in
-   thermodynamic and flowsheet objects.::
+	 Creates a chemical property object with a GEKKO model `m`. Chemical
+    properties must be defined to specify the chemicals involved in
+    thermodynamic and flowsheet objects.::
 
        from gekko import GEKKO, chemical
        m = GEKKO()
