@@ -18,21 +18,23 @@ Thermodynamic Properties
 
 .. py:class::	c = chemical.Properties(m):
 
-	Creates a chemical property object with a GEKKO model `m`.::
-      
+	Creates a chemical property object with a GEKKO model `m`. Chemical
+   properties must be defined to specify the chemicals involved in
+   thermodynamic and flowsheet objects.::
+
        from gekko import GEKKO, chemical
        m = GEKKO()
        c = chemical.Properties(m)
-      
+
 .. py:classmethod::    c.compound(name)
 
     Add chemical compound to model with one of the following:
-    
+
     1. IUPAC Name  (1,2-ethanediol)
     2. Common Name (ethylene glycol) 
     3. CAS Number (107-21-1)
     4. Formula (C2H6O2)
-    
+
     Repeated compounds are permitted. All compounds should be declared
     before thermo objects are created. An error message will occur if
     the compound is not in the database and a file 'compounds.txt' will
