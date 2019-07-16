@@ -124,13 +124,15 @@ Flowsheet Objects
 
     Flowsheet objects are created with the chemical library with
     basic unit operations that mix, separate, react, and model the
-    dynamics of chemical mixtures in processing equipment. The basis for
-    flowsheet objects is:
+    dynamics of chemical mixtures in processing equipment. The basis 
+    for flowsheet objects is:
+    
     * Pressure (Pa)
     * Temperature (K)
     * Mole Fractions
     * Molar Flow (kmol/sec)
     * Moles (kmol)
+    
     These fundamental quantities are used to track other derived quantities
     such as concentration (kmol/m^3), mass (kg), mass flow (kg/sec), 
     enthalpy (J/kmol), heat capacity (J/kmol-K), mass fractions, and
@@ -201,6 +203,7 @@ Flowsheet Objects
     Create an accumulation that is a quantity (moles) of chemical holdup.
 
     Output: Reserve Object
+    
     * P = Pressure (Pa)
     * T = Temperature (K)
     * n = Molar holdup (kmol)
@@ -224,6 +227,7 @@ Flowsheet Objects
     Create a stream that is a flow (moles/sec) of a chemicals
 
     Output: Stream Object
+    
     * P = Pressure (Pa)
     * T = Temperature (K)
     * ndot = Molar flow rate (kmol/sec)
@@ -249,6 +253,7 @@ Flowsheet Objects
     for a flash object with holdup.   
 
     Output: Flash object
+    
     * P = Pressure (Pa)
     * T = Temperature (K)
     * Q = Heat input (J/sec)
@@ -276,6 +281,7 @@ Flowsheet Objects
     for a flash object without holdup.   
 
     Output: Flash column object
+    
     * P = Pressure (Pa)
     * T = Temperature (K)
     * Q = Heat input (J/sec)
@@ -302,9 +308,13 @@ Flowsheet Objects
 
     Inputs:
       y = Mass Object (mo)
+      
         m = mass (kg)
+      
         mx = mass of components (kg)
+  
         reserve = ''
+
       rn = Reserve name if already created
 
     Output: Mass object
@@ -329,10 +339,15 @@ Flowsheet Objects
     mixture stream.
 
     Inputs:
+    
       y = Mass Flow Object (mo)
+
         mdot = mass flow (kg/sec)
+
         mx = mass of components (kg)
+
         stream = ''
+
       sn = Stream name if already created
 
     Output: Mass flow object
@@ -357,10 +372,15 @@ Flowsheet Objects
     mixture stream.
 
     Inputs:
+    
       y = Mass Flow Object (mo)
+
         mdot = mass flow (kg/sec)
+
         mdoti = mass flow of components (kg)
+
         stream = ''
+
       sn = Stream name if already created
 
     Output: Mass flows object
@@ -385,10 +405,15 @@ Flowsheet Objects
    of a mixture stream as well as the molar flow of the individual components.
 
     Inputs:
+
       y = Molar Flows Object (mo)
+
         ndot = molar flow (kmol/sec)
+
         ndoti = molar flow of components (kmol)
+
         stream = ''
+
       sn = Stream name if already created
 
     Output: Mass flows object
