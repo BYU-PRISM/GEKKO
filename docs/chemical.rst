@@ -18,7 +18,7 @@ Thermodynamic Properties
 
 .. py:class::	c = chemical.Properties(m):
 
-	Creates a chemical property object with a GEKKO model `m`::
+	Creates a chemical property object with a GEKKO model `m`.::
       
        from gekko import GEKKO, chemical
        m = GEKKO()
