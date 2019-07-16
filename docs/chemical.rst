@@ -138,13 +138,15 @@ Flowsheet Objects
 
 .. py:class::    f = chemical.Flowsheet(m,[stream_level=1]):
 
-	 Creates a chemical flowsheet object with a GEKKO model `m` and 
-    a `stream_level`. The `stream_level` either includes only chemical
+	 Creates a chemical flowsheet object with a GEKKO model `m` and a
+    `stream_level`. The `stream_level` either includes only chemical
     compositions (`stream_level=0`) or also pressure and temperature
     (`stream_level=1`). Most methods in the Flowsheet object require
     `stream_level=1` but there are a few cases such as blending
     applications that don't the additional equations (e.g. energy
-    balance equations to simulate temperature changes.::
+    balance equations to simulate temperature changes.
+    
+    A code example shows the use of a `Flowsheet` object::
       
        from gekko import GEKKO, chemical
        m = GEKKO()
@@ -155,12 +157,14 @@ Flowsheet Objects
       
 .. py:classmethod::    f.connect(s1,s2):
 
-   Connect two objects 
-   The first name dictates the properties of the combined object.
+    Connect two objects 
+    The first name dictates the properties of the combined object.
 
-   s1 = object or name of object 1 (string)
+    s1 = object or name of object 1 (string)
 
-   s2 = object or name of object 2 (string)::
+    s2 = object or name of object 2 (string)
+    
+    A code example shows the use of the `connect` function::
 
        from gekko import GEKKO, chemical
        m = GEKKO()
@@ -175,11 +179,12 @@ Flowsheet Objects
        
 .. py:classmethod::    f.set_phase(y,phase='vapor'):
 
-   Set the phase (vapor, liquid, solid) of a stream or accumulation
+    Set the phase (vapor, liquid, solid) of a stream or accumulation.
 
-   y = object or name of object (string)
+    y = object or name of object (string)
 
-   phase = phase of the object (vapor, liquid, solid)::
+    phase = phase of the object (vapor, liquid, solid). A code example
+    demonstrates the `set_phase` method::
 
        from gekko import GEKKO, chemical
        m = GEKKO()
@@ -193,15 +198,17 @@ Flowsheet Objects
        
 .. py:classmethod::    f.reserve(fixed=False):
 
-   Crease an accumulation that is a quantity (moles) of chemical holdup
+    Create an accumulation that is a quantity (moles) of chemical holdup.
 
-   Output: Reserve Object
-   * P = Pressure (Pa)
-   * T = Temperature (K)
-   * n = Molar holdup (kmol)
-   * x = Array of mole fractions
-   * phase = Phase (solid, liquid, vapor)
-   * fixed = Gekko parameter (True) or variable (False) if None or []::
+    Output: Reserve Object
+    * P = Pressure (Pa)
+    * T = Temperature (K)
+    * n = Molar holdup (kmol)
+    * x = Array of mole fractions
+    * phase = Phase (solid, liquid, vapor)
+    * fixed = Gekko parameter (True) or variable (False) if None or []
+    
+    A code example demonstrates the creation of a `reserve` object::
 
        from gekko import GEKKO, chemical
        m = GEKKO()
@@ -214,15 +221,17 @@ Flowsheet Objects
        
 .. py:classmethod::    f.stream(fixed=True):
 
-   Create a stream that is a flow (moles/sec) of a chemicals
+    Create a stream that is a flow (moles/sec) of a chemicals
 
-   Output: Stream Object
-   * P = Pressure (Pa)
-   * T = Temperature (K)
-   * ndot = Molar flow rate (kmol/sec)
-   * x = Array of mole fractions
-   * phase = Phase (solid, liquid, vapor)
-   * fixed = Gekko parameter (True) or variable (False) if None or []::
+    Output: Stream Object
+    * P = Pressure (Pa)
+    * T = Temperature (K)
+    * ndot = Molar flow rate (kmol/sec)
+    * x = Array of mole fractions
+    * phase = Phase (solid, liquid, vapor)
+    * fixed = Gekko parameter (True) or variable (False) if None or []
+    
+    A code example demonstrates the creation of a `stream` object::
 
        from gekko import GEKKO, chemical
        m = GEKKO()
@@ -235,18 +244,20 @@ Flowsheet Objects
        
 .. py:classmethod::    f.flash():
 
-   Create a flash object that separates a stream into a liquid and vapor 
-   outlet. The flash object does not have a liquid holdup. See flash_column
-   for a flash object with holdup.   
+    Create a flash object that separates a stream into a liquid and vapor 
+    outlet. The flash object does not have a liquid holdup. See flash_column
+    for a flash object with holdup.   
 
-   Output: Flash object
-   * P = Pressure (Pa)
-   * T = Temperature (K)
-   * Q = Heat input (J/sec)
-   * gamma = Activity coefficients for each compound
-   * inlet = inlet stream name
-   * vapor = vapor outlet stream name
-   * liquid = liquid outlet stream name
+    Output: Flash object
+    * P = Pressure (Pa)
+    * T = Temperature (K)
+    * Q = Heat input (J/sec)
+    * gamma = Activity coefficients for each compound
+    * inlet = inlet stream name
+    * vapor = vapor outlet stream name
+    * liquid = liquid outlet stream name
+
+    A code example demonstrates the creation and solution of a `flash` object::
 
        from gekko import GEKKO, chemical
        m = GEKKO()
@@ -256,22 +267,25 @@ Flowsheet Objects
        f = chemical.Flowsheet(m)
        fl = f.flash()
        m.solve()
-       
+    
+   
 .. py:classmethod::    f.flash_column():
 
-   Create a flash column object that separates a stream into a liquid and 
-   vapor outlet. The flash object does not have a liquid holdup. See flash
-   for a flash object without holdup.   
+    Create a flash column object that separates a stream into a liquid and 
+    vapor outlet. The flash object does not have a liquid holdup. See flash
+    for a flash object without holdup.   
 
-   Output: Flash column object
-   * P = Pressure (Pa)
-   * T = Temperature (K)
-   * Q = Heat input (J/sec)
-   * n = Holdup (kmol)
-   * gamma = Activity coefficients for each compound
-   * inlet = inlet stream name
-   * vapor = vapor outlet stream name
-   * liquid = liquid outlet stream name
+    Output: Flash column object
+    * P = Pressure (Pa)
+    * T = Temperature (K)
+    * Q = Heat input (J/sec)
+    * n = Holdup (kmol)
+    * gamma = Activity coefficients for each compound
+    * inlet = inlet stream name
+    * vapor = vapor outlet stream name
+    * liquid = liquid outlet stream name
+
+    A code example demonstrates the creation and solution of a `flash_column` object::
 
        from gekko import GEKKO, chemical
        m = GEKKO()
@@ -284,16 +298,19 @@ Flowsheet Objects
 
 .. py:classmethod::    f.mass(y=None,rn=''):
 
-   Create a mass object that calculates the mass (kg) in a mixture holdup.
+    Create a mass object that calculates the mass (kg) in a mixture holdup.
 
-   Inputs:
-    y = Mass Object (mo)
-       m = mass (kg)
-       mx = mass of components (kg)
-       reserve = ''
-    rn = Reserve name if already created
+    Inputs:
+      y = Mass Object (mo)
+        m = mass (kg)
+        mx = mass of components (kg)
+        reserve = ''
+      rn = Reserve name if already created
 
-   Output: Mass object
+    Output: Mass object
+
+    A code example demonstrates how a `mass` object is created and linked to
+    a reserve object::
 
        from gekko import GEKKO, chemical
        m = GEKKO()
@@ -308,17 +325,20 @@ Flowsheet Objects
 
 .. py:classmethod::    f.massflow(y=None,sn=''):
 
-   Create a mass flow object that calculates the mass flow (kg/sec) in a
-   mixture stream.
+    Create a mass flow object that calculates the mass flow (kg/sec) in a
+    mixture stream.
 
-   Inputs:
-    y = Mass Flow Object (mo)
-       mdot = mass flow (kg/sec)
-       mx = mass of components (kg)
-       stream = ''
-    sn = Stream name if already created
+    Inputs:
+      y = Mass Flow Object (mo)
+        mdot = mass flow (kg/sec)
+        mx = mass of components (kg)
+        stream = ''
+      sn = Stream name if already created
 
-   Output: Mass flow object
+    Output: Mass flow object
+
+    A code example demonstrates how a `massflow` object is created and linked 
+    to a stream object::
 
        from gekko import GEKKO, chemical
        m = GEKKO()
@@ -333,17 +353,20 @@ Flowsheet Objects
        
 .. py:classmethod::    f.massflows(y=None,sn=''):
 
-   Create a mass flow object that calculates the mass flow (kg/sec) in a
-   mixture stream.
+    Create a mass flow object that calculates the mass flow (kg/sec) in a
+    mixture stream.
 
-   Inputs:
-    y = Mass Flow Object (mo)
-       mdot = mass flow (kg/sec)
-       mdoti = mass flow of components (kg)
-       stream = ''
-    sn = Stream name if already created
+    Inputs:
+      y = Mass Flow Object (mo)
+        mdot = mass flow (kg/sec)
+        mdoti = mass flow of components (kg)
+        stream = ''
+      sn = Stream name if already created
 
-   Output: Mass flows object
+    Output: Mass flows object
+
+    A code example demonstrates how a `massflow` object is created and linked 
+    to a stream object::
 
        from gekko import GEKKO, chemical
        m = GEKKO()
@@ -361,14 +384,17 @@ Flowsheet Objects
    Create a molar flows object that calculates the molar flow (kmol/sec)
    of a mixture stream as well as the molar flow of the individual components.
 
-   Inputs:
-    y = Molar Flows Object (mo)
-       ndot = molar flow (kmol/sec)
-       ndoti = molar flow of components (kmol)
-       stream = ''
-    sn = Stream name if already created
+    Inputs:
+      y = Molar Flows Object (mo)
+        ndot = molar flow (kmol/sec)
+        ndoti = molar flow of components (kmol)
+        stream = ''
+      sn = Stream name if already created
 
-   Output: Mass flows object
+    Output: Mass flows object
+
+    A code example demonstrates how a `molarflows` object is created and 
+    linked to a stream object::
 
        from gekko import GEKKO, chemical
        m = GEKKO()
