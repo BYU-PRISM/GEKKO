@@ -564,3 +564,149 @@ Flowsheet Objects
        m.options.SOLVER = 1
        m.solve()
        
+.. py:classmethod::    f.recovery():
+
+    Create a recovery object that splits out components of a stream. This
+    object is commonly used in applications such as separation systems
+    (membranes, filters, fluidized bed production, etc).  The last
+    split fraction is calculated as the remainder split amount that sums to
+    a total quantity of one.
+
+    Output: Recovery object
+    
+    * split = Split fraction to outlet 1 (0-1)
+    * inlet = inlet stream name
+    * outlet = outlet stream name
+
+    A code example demonstrates the creation and solution of a `recovery` object::
+
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
+       p = f.recovery()
+       m.options.SOLVER = 1
+       m.solve()
+       
+.. py:classmethod::    f.splitter(no=2):
+
+    Create a splitter object that divides a stream into two outlets. This
+    object is used in flowsheeting applications where the stream may be 
+    diverted to a different downstream process or a recycle split. The last
+    split fraction is calculated as the remainder split amount that sums to
+    a total quantity of one.
+
+    Input:
+    
+    * no = Number of outlets
+
+    Output: Splitter object
+    
+    * split = Split fraction to outlet 1 (0-1)
+    * inlet = inlet stream name
+    * outlet = outlet stream name
+
+    A code example demonstrates the creation and solution of a `splitter` object::
+
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
+       p = f.splitter()
+       m.options.SOLVER = 1
+       m.solve()
+              
+.. py:classmethod::    f.stage(opt=2):
+
+    Create an equilibrium stage distillation object that has a vapor and 
+    liquid inlet, a vapor and liquid outlet, pressure drop, and heat addition
+    or loss rate. The stage object is available either in Index-1 or Index-2
+    DAE (Differential and Algebraic Equation) form determined by the ***opt***
+    parameter. The stage model is one stage (tray, packing height) of a 
+    distillation column.
+
+    Input:
+    
+    * opt = Index-1 (1) or Index-2 (2=default) form
+
+    Output: Stage object
+    
+    * l_in  = Inlet liquid stream
+    * l_out = Outlet liquid stream
+    * v_in  = Inlet vapor stream
+    * v_out = Outlet vapor stream
+    * q = Heat addition (+) or loss (-) rate
+    * dp_in_liq = Pressure drop below stage
+    * dp_in_vap = Pressure drop above stage
+
+    A code example demonstrates the creation and solution of a `stage` object::
+
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
+       s = f.stage(opt=1)
+       m.options.SOLVER = 1
+       m.solve()
+             
+.. py:classmethod::    f.stream_lag():
+
+    Create a stream_lag object that approximates first-order blending of
+    a stream that passes through a vessel. The time constant (tau) is
+    approximately the volume divided by the volumetric flow. Molar fractions
+    in the outlet stream are blended inputs. 
+
+    Output: Stream lag object
+    
+    * tau = time constant (sec)
+    * inlet = inlet stream name
+    * outlet = outlet stream name
+
+    A code example demonstrates the creation and solution of a `stream_lag` object::
+
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
+       s = f.stream_lag()
+       m.solve()
+       
+.. py:classmethod::    f.vessel(ni=1,mass=False):
+
+    Create a vessel object that simulates a container with volume `V`. The 
+    vessel object is similar to the reactor object but does not include
+    reactions. There is a term for heat addition (+) or heat removal (-).
+    The options `mass` parameter is `True` if the inlet and outlet are
+    expressed as mass flows instead of molar flows.
+
+    Input:
+    
+    * ni = Number of inlets (default=1)
+
+    Output: Vessel object
+    
+    * V = Volume (m^3)
+    * Q = Heat input (J/sec)
+    * inlet = inlet stream names (inlet[1], inlet[2], ..., inlet[ni])
+    * reserve = Molar holdup name
+    * outlet = Outlet stream name    
+
+    A code example demonstrates the creation and solution of a `vessel` object with three inlet streams::
+
+       from gekko import GEKKO, chemical
+       m = GEKKO()
+       c = chemical.Properties(m)
+       c.compound('propane')
+       c.compound('water')
+       f = chemical.Flowsheet(m)
+       v = f.vessel(ni=3)
+       m.options.SOLVER = 1
+       m.solve()
