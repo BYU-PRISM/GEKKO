@@ -6,7 +6,7 @@ All notable changes to the GEKKO project will be documented in this file.
 
 ### Changed
 
-## [v0.2.2] - Version 0.2.2 Stable Release, Date: 2019-07-13
+## [v0.2.2] - Version 0.2.2 Stable Release, Date: 2019-07-17
 ### Stable release
 
 ### Added
