@@ -1121,7 +1121,7 @@ class Flowsheet():
         
         Stream Lag Object
           Output
-              tau = time constant
+              tau = time constant (sec)
               inlet = inlet stream name or object
               outlet = outlet stream name or object
         '''
