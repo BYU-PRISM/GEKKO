@@ -116,7 +116,7 @@ Deep Learning Properties
     
        from gekko import brain
        import numpy as np
-       import matplotlib.pyplot
+       import matplotlib.pyplot as plt
        b = brain.Brain()
        b.input_layer(1)
        b.layer(linear=2)
