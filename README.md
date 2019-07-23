@@ -2,6 +2,8 @@
 
 [GEKKO](http://gekko.readthedocs.io/en/latest/) is a Python package for [machine learning and optimization](https://machinelearning.byu.edu), specializing in time series and differential algebraic equations (DAE) systems. GEKKO provides a user-friendly interface to the [APMonitor optimization suite](http://apmonitor.com/wiki/). It is coupled with large-scale solvers for linear, quadratic, nonlinear, and mixed integer programming (LP, QP, NLP, MILP, MINLP). Modes of operation include parameter regression, dynamic data reconciliation, real-time optimization, dynamic simulation, and nonlinear predictive control.
 
+![Gekko Logo](/gekko.png)
+
 ### Installation
 
 A pip package is available:
