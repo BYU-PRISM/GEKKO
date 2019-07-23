@@ -12,20 +12,13 @@ A pip package is available:
 pip install gekko
 ```
 
-The most recent version is 0.1. You can upgrade from the command line with the upgrade flag:
+The [most recent version is listed on PyPi](https://pypi.org/project/gekko/). You can upgrade from the command line with the upgrade flag:
 
 ```sh
 pip install --upgrade gekko
 ```
 
-A [pre-release version](https://pypi.org/project/gekko/0.1/#history) is also available with the latest enhancements and bug fixes such as:
-
-```sh
-# ver=0.2rc5 (or other pre-release version)
-pip install gekko==ver 
-```
-
-GEKKO can run in remote mode (solved on high performance server) or on a local CPU. The pip package includes the Windows executable (apm.exe), a Linux executable (apm), and a Linux ARM processor executable (apm_arm). Local executables for other operating systems (MacOS) are in development but they can still be used with remote server access that is default for all operating systems.
+GEKKO runs in remote mode (solved on high performance server) or on a local CPU when option ```remote=False``` such as ```m=GEKKO(remote=False)```. The pip package includes the Windows executable (apm.exe), a Linux executable (apm), a MacOS executable (apm_mac), and a Linux ARM processor executable such as for a Raspberry Pi (apm_arm). Gekko can be used with remote server access (default option) for all operating systems.
 
 ## What does GEKKO do?
 
