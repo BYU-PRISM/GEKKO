@@ -45,7 +45,7 @@ class GKVariable(GK_Operators):
 
         GK_Operators.__init__(self, name, value=value)
 
-        #self.VALUE = value #initialized value THIS IS DONE IS GK_Operators
+        #self.VALUE = value #initialized value is done in GK_Operators
         if not hasattr(self,'type'): #don't overwrite SV and CV
             self.type = None 
             
