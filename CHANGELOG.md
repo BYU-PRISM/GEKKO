@@ -3,8 +3,12 @@ All notable changes to the GEKKO project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- Improved m.fix function to allow specification changes beyond just dynamic mode
+- Added m.free function to change a fixed value into a calculated value for both steady state and dynamic modes
+- Additional example of the Chemical library use for a simple blending problem
 
 ### Changed
+- Improved variable initialization to allow variable names, GK_Value, and number types
 
 ## [v0.2.2] - Version 0.2.2 Stable Release, Date: 2019-07-17
 ### Stable release
