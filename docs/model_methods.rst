@@ -505,46 +505,23 @@ Pre-built Objects
 
     Identification of linear time-invariant models::
          
-         y,p,K = sysid(t,u,y,na,nb,shift=0,pred='model',objf=1)
+        y,p,K = sysid(t,u,y,na,nb,shift=0,pred='model',objf=1)
              
-	Build a GEKKO model from ARX representation.
-	Inputs:
-           * parameter dictionary p['a'], p['b'], p['c']
-
-   Input:     
+    Input:     
            * t = time data
            * u = input data for the regression
            * y = output data for the regression   
            * na   = number of output coefficients (default=1)
            * nb   = number of input coefficients (default=1)
            * nk   = input delay steps (default=0)
-           * shift (optional) 
-               ** 'none' (no shift)
-               ** 'init' (initial pt),
-               ** 'mean' (mean center)
-               ** 'calc' (calculate c)
-           * scale (optional) 
-               scale data to between zero to one unless
-               data range is already less than one
-           * pred (option)
-               ** 'model' for output error regression form, implicit solution.
-			      Favors an unbiased model prediction but
-               can require more time to compute, especially for large
-               data sets.
-               ** 'meas' for ARX regression form, explicit solution. 
-               Computes the coefficients of the time series
-               model with an explicit solution.
-           * objf
-               Objective scaling factor
-               ** when pred='model':
-                   minimize objf*(model-meas)**2 + 1e-3 * (a^2 + b^2 + c^2)
-               ** when pred='meas':
-                   minimize (model-meas)**2
-           * diaglevel
-               display solver output and diagnostics (0-6)
+           * shift (optional) with ``'none'`` (no shift), ``'init'`` (initial pt), ``'mean'`` (mean center), or ``'calc'`` (calculate c)
+           * scale (optional) scale data to between zero to one unless data range is already less than one
+           * pred (option) ``'model'`` for output error regression form, implicit solution. Favors an unbiased model prediction but can require more time to compute, especially for large data sets. ``'meas'`` for ARX regression form, explicit solution. Computes the coefficients of the time series model with an explicit solution.
+           * objf  = Objective scaling factor, when ``pred='model'``: minimize objf*(model-meas)**2 + 1e-3 * (a^2 + b^2 + c^2) and when ``pred='meas'``:  minimize (model-meas)**2
+           * diaglevel sets display solver output and diagnostics (0-6)
                     
     Output:    
-	 	returns
+
            * ypred (predicted outputs)
            * p as coefficient dictionary with keys ``'a','b','c'``
            * K gain matrix
