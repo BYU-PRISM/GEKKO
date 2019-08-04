@@ -407,13 +407,6 @@ Traditional logical expressions such as if statements cannot be used in gradient
 Pre-built Objects
 ------------------
 
-.. py:classmethod:: x,y,u = state_space(A,B,C,D=None,discrete=False,dense=False)
-
-    For State Space models, input SS matricies A,B,C, and optionally D. Returns a GEKKO array of states (SV) `x`, array of outputs (CV) `y` and array of inputs (MV) `u`. A,B,C and D must be 2-dimensional matricies of the appropriate size.
-
-    The `discrete` Boolean parameter indicates a discrete-time model, which requires constant time steps and 2 :ref:`nodes`.
-    The `dense` Boolean parameter indicates if A,B,C,D should be written as dense or sparse matrices. Sparse matricies will be faster unless it is known that the matricies are very dense.
-    
 .. py:classmethod:: y,u = arx(p)
 
 	Build a GEKKO model from ARX representation.
@@ -441,6 +434,13 @@ Pre-built Objects
     Output:
     	GEKKO variables x
 
+.. py:classmethod:: bspline(x,y,z,x_data,y_data,z_data,data=True)
+
+	Generate a 2d Bspline with continuous first and seconds derivatives
+        from 1-D arrays of x_data and y_data coordinates (in strictly ascending order)
+        and 2-D z data of size (x.size,y.size). GEKKO variables x, y and z are 
+        linked with function z=f(x,y) where the function f is a bspline.
+
 .. py:classmethod:: cspline(x,y,x_data,y_data,bound_x=False)
 
 	Generate a 1d cubic spline with continuous first and seconds derivatives
@@ -460,37 +460,11 @@ Pre-built Objects
 	bound_x: boolean to state that x should be bounded at the upper and lower bounds of x_data to avoid
     	extrapolation error of the cspline.
     
-.. py:classmethod:: bspline(x,y,z,x_data,y_data,z_data,data=True)
-
-	Generate a 2d Bspline with continuous first and seconds derivatives
-        from 1-D arrays of x_data and y_data coordinates (in strictly ascending order)
-        and 2-D z data of size (x.size,y.size). GEKKO variables x, y and z are 
-        linked with function z=f(x,y) where the function f is a bspline.
-
-
 .. py:classmethod:: periodic(v)
 
     Makes the variable argument periodic by adding an equation to constrains v[end] = v[0]. 
     This does not affect the default behavior of fixing initial conditions (v[0]).
-    
-.. py:classmethod:: y = sum(x)
 
-    Summation using APM object.::
-    
-        Usage: y = m.sum(x)
-	
-    Input: 
-    	Numpy array or List of GEKKO variables, parameters,
-        constants, intermediates, or expressions
-    Output: 
-    	GEKKO variable
-
-.. py:classmethod:: y = vsum(x)
-
-    Summation of variable in the data or time direction. This is
-    similar to an integral but only does the summation of all points,
-    not the integral area that considers time intervals.
-    
 .. py:classmethod:: x = qobj(b,A=[],x=None,otype='min',sparse=False)
 
     Create quadratic objective  = 0.5 x^T A x + c^T x::
@@ -508,6 +482,25 @@ Pre-built Objects
     Output: 
     	GEKKO variables x
 
+.. py:classmethod:: x,y,u = state_space(A,B,C,D=None,discrete=False,dense=False)
+
+    For State Space models, input SS matricies A,B,C, and optionally D. Returns a GEKKO array of states (SV) `x`, array of outputs (CV) `y` and array of inputs (MV) `u`. A,B,C and D must be 2-dimensional matricies of the appropriate size.
+
+    The `discrete` Boolean parameter indicates a discrete-time model, which requires constant time steps and 2 :ref:`nodes`.
+    The `dense` Boolean parameter indicates if A,B,C,D should be written as dense or sparse matrices. Sparse matricies will be faster unless it is known that the matricies are very dense.
+    
+.. py:classmethod:: y = sum(x)
+
+    Summation using APM object.::
+    
+        Usage: y = m.sum(x)
+	
+    Input: 
+    	Numpy array or List of GEKKO variables, parameters,
+        constants, intermediates, or expressions
+    Output: 
+    	GEKKO variable
+    
 .. py:classmethod:: y,p,K = sysid(t,u,y,na=1,nb=1,nk=0,shift='calc',scale=True,diaglevel=0,pred='model',objf=100)
 
     Identification of linear time-invariant models::
@@ -550,8 +543,51 @@ Pre-built Objects
 	 	returns
                 ypred (predicted outputs)
                 p as coefficient dictionary with keys 'a','b','c'
-                K gain matrix
+                K gain matrix::
+		
+       from gekko import GEKKO
+       import pandas as pd
+       import matplotlib.pyplot as plt
+       url = 'http://apmonitor.com/do/uploads/Main/tclab_dyn_data2.txt'
+       data = pd.read_csv(url)
+       t = data['Time']
+       u = data[['H1','H2']]
+       y = data[['T1','T2']]
+       m = GEKKO()
+       na = 2 # output coefficients
+       nb = 2 # input coefficients
+       yp,p,K = m.sysid(t,u,y,na,nb,diaglevel=1)
+       plt.figure()
+       plt.subplot(2,1,1)
+       plt.plot(t,u)
+       plt.subplot(2,1,2)
+       plt.plot(t,y)
+       plt.plot(t,yp)
+       plt.xlabel('Time')
+       plt.show()
 
+.. py:classmethod:: y = vsum(x)
+
+    Summation of variable in the data or time direction. This is
+    similar to an integral but only does the summation of all points,
+    not the integral area that considers time intervals.::
+
+       from gekko import GEKKO
+       import numpy as np
+       import matplotlib.pyplot as plt  
+       xm = np.array([0,1,2,3,4,5])
+       ym = np.array([0.1,0.2,0.3,0.5,0.8,2.0])
+       m = GEKKO()
+       x = m.Param(value=xm)
+       a = m.FV()
+       a.STATUS=1
+       y = m.CV(value=ym)
+       y.FSTATUS=1
+       z = m.Var()
+       m.Equation(y==0.1*m.exp(a*x))
+       m.Equation(z==m.vsum(x))
+       m.options.IMODE = 2
+       m.solve()
 
 Internal Methods
 ------------------
