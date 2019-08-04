@@ -407,6 +407,8 @@ Traditional logical expressions such as if statements cannot be used in gradient
 Pre-built Objects
 ------------------
 
+Pre-built objects are common model constructs that facilitate data analysis, regression, and model building. `Additional object documentation <https://apmonitor.com/wiki/index.php/Main/Objects>`_ gives insight on the supported objects as well as examples for building other custom objects or libraries. Other object libraries are the :ref:`chemical` and :ref:`brain`. Additional object libraries are under development.
+
 .. py:classmethod:: y,u = arx(p)
 
 	Build a GEKKO model from ARX representation.
@@ -539,9 +541,9 @@ Pre-built Objects
            * K gain matrix
            
     An example of system identification with 2 MVs and 2 CVs with data from the
-    `Temperature Control Lab <http://apmonitor.com/do/index.php/Main/AdvancedTemperatureControl>`_
+    `Temperature Control Lab <https://apmonitor.com/do/index.php/Main/AdvancedTemperatureControl>`_
     is shown below::
-    		
+        		
        from gekko import GEKKO
        import pandas as pd
        import matplotlib.pyplot as plt
