@@ -426,7 +426,7 @@ Pre-built Objects
     	* A = numpy 2D array or list in dense or sparse form
        	* b = numpy 1D array or list in dense or sparse form
        	* x = 1D array of gekko variables (optional). If None on entry then the array is created and returned.
-        * etype = ['=','<','>','>=','<='] for equality or inequality form
+        * etype = [``'='``,``'<'``,``'>'``,``'>='``,``'<='``] for equality or inequality form
         * sparse = True if data is in sparse form, otherwise dense
 	sparse matrices are stored in COO form with [row,col,value] with
 	starting index 1 for optional matrix A and in [row,value] for 
@@ -459,7 +459,19 @@ Pre-built Objects
 
 	bound_x: boolean to state that x should be bounded at the upper and lower bounds of x_data to avoid
     	extrapolation error of the cspline.
-    
+
+.. py:classmethod:: delay(u,y,steps=1)
+
+    Build a delay with number of time steps between input (u) and output (y) with a discrete time series model.
+
+    Inputs:
+
+	u: delay input as a GEKKO variable
+
+	y: delay output as a GEKKO variable
+
+	steps: integer number of steps (default=1)
+
 .. py:classmethod:: periodic(v)
 
     Makes the variable argument periodic by adding an equation to constrains v[end] = v[0]. 
