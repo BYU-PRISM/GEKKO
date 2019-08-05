@@ -180,10 +180,40 @@ Model Building
     but will not appear in the solution files.
 
 
-.. py:classmethod:: m.fix(var,pos,val)
+.. py:classmethod:: m.fix(var,val=None,pos=None)
 
-    This function facilitates the `Connection` function when `var2` is a static value (`val`).
+    Fix a variable at a specific value so that the solver cannot adjust the value::
 
+        fix(var,val=None,pos=None)
+        
+        Inputs:
+
+        * var = variable to fix
+        * val = specified value or None to use default
+        * pos = position within the horizon or None for all
+        
+        The ``var`` variable must be a Gekko Parameter or Variable. When ``val==None``,
+        the current default value is retained. When ``pos==None``, the value is fixed
+        over all horizon nodes.
+
+        The ``fix`` function calls the ``Connection`` function with ``var2`` as a static value (``val``) and adds
+	the ``fixed`` specification.
+
+.. py:classmethod:: m.free(var,pos=None)
+
+    Fix a variable at a specific value so that the solver cannot adjust the value::
+
+        fix(var,val=None,pos=None)
+        
+        Inputs:
+
+        * var = variable to fix
+        * pos = position within the horizon or None for all
+        
+        The ``var`` variable must be a Gekko Parameter or Variable. When ``pos==None``, the value is calculated
+        over all horizon nodes.
+
+        The ``free`` function calls the ``Connection`` function with ``var2`` with the string ``calculated``.
 
 .. py:attribute::   m.solver_options
 
