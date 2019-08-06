@@ -11,6 +11,7 @@ All notable changes to the GEKKO project will be documented in this file.
 - Improved variable initialization to allow variable names, GK_Value, and number types
 - m.Connections to support fix / free (calculated) specifications
 - Updated gekko to support new functions in APM 0.9.1
+- Default phase in the Chemical library changed from vapor to liquid
 
 ## [v0.2.2] - Version 0.2.2 Stable Release, Date: 2019-07-17
 ### Stable release
