@@ -188,7 +188,7 @@ Flowsheet Objects
        f.connect(mix.outlet,spl.inlet)
        m.solve()
        
-.. py:classmethod::    f.set_phase(y,phase='vapor'):
+.. py:classmethod::    f.set_phase(y,phase='liquid'):
 
     Set the phase (vapor, liquid, solid) of a stream or accumulation.
 
@@ -204,7 +204,7 @@ Flowsheet Objects
        c.compound('water')
        f = chemical.Flowsheet(m)
        fl = f.flash()
-       f.set_phase(fl.inlet,'liquid')
+       f.set_phase(fl.inlet,'vapor')
        m.solve()
        
 .. py:classmethod::    f.reserve(fixed=False):
