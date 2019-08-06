@@ -536,9 +536,9 @@ class Flowsheet():
 
         return
            
-    def set_phase(self,y,phase='vapor'):
+    def set_phase(self,y,phase='liquid'):
         '''Set Phase
-        set_phase(y,phase='vapor')
+        set_phase(y,phase='liquid')
 
         Set phase of a Stream or Reserve Object as 'solid', 'liquid', or 'vapor'
         '''
@@ -553,9 +553,9 @@ class Flowsheet():
         # stream phase
         if phase==None:
             self.m._connections.append(z+'.sfrc=0')
-            self.m._connections.append(z+'.lfrc=0')
-            self.m._connections.append(z+'.vfrc=1')
-            phase = 'vapor'
+            self.m._connections.append(z+'.lfrc=1')
+            self.m._connections.append(z+'.vfrc=0')
+            phase = 'liquid'
         else:
             if not (type(phase)==str):
                 raise Exception('Phase must be a string: solid, liquid, or vapor')
