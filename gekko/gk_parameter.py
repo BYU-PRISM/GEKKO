@@ -203,7 +203,7 @@ class GK_MV(GK_FV):
         #register fixed values through connections to ensure consistency in the 
         #csv file, otherwise the requested fixed value will be overridden by
         #whatever initialization value is in the csv
-        self._fixed_values = []
+        self._override_csv = []
         
         
         GK_FV.__init__(self, name=name, value=value, lb=lb, ub=ub, gk_model=gk_model, model_path=model_path, integer=integer)

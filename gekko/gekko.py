@@ -21,6 +21,7 @@ from .gk_gui import GK_GUI
 
 #%% Python version compatibility
 ver = sys.version_info[0]
+subver = sys.version_info[1]
 
 if ver == 2:  # Python 2
     import string
@@ -138,7 +139,7 @@ class GEKKO(object):
         parameter = GK_FV(name=name, value=value, lb=lb, ub=ub, gk_model=self._model_name, model_path=self._path, integer=integer)
         self._parameters.append(parameter)
         if fixed_initial is False:
-            self.Connection(parameter,'CALCULATED',pos1=1,node1=1)
+            self.Connection(parameter,'calculated',pos1=1,node1=1)
         return parameter
 
     def MV(self, value=None, lb=None, ub=None, integer=False, fixed_initial=True, name=None):
@@ -153,7 +154,7 @@ class GEKKO(object):
         parameter = GK_MV(name=name, value=value, lb=lb, ub=ub, gk_model=self._model_name, model_path=self._path, integer=integer)
         self._parameters.append(parameter)
         if fixed_initial is False:
-            self.Connection(parameter,'CALCULATED',pos1=1,node1=1)
+            self.Connection(parameter,'calculated',pos1=1,node1=1)
         return parameter
 
     def Var(self, value=None, lb=None, ub=None, integer=False, fixed_initial=True, name=None):
@@ -169,7 +170,7 @@ class GEKKO(object):
         variable = GKVariable(name, value, lb, ub)
         self._variables.append(variable)
         if fixed_initial is False:
-            self.Connection(variable,'CALCULATED',pos1=1,node1=1)
+            self.Connection(variable,'calculated',pos1=1,node1=1)
         return variable
 
     def SV(self, value=None, lb=None, ub=None, integer=False, fixed_initial=True, name=None):
@@ -184,7 +185,7 @@ class GEKKO(object):
         variable = GK_SV(name=name, value=value, lb=lb, ub=ub, gk_model=self._model_name, model_path=self._path, integer=integer)
         self._variables.append(variable)
         if fixed_initial is False:
-            self.Connection(variable,'CALCULATED',pos1=1,node1=1)
+            self.Connection(variable,'calculated',pos1=1,node1=1)
         return variable
 
     def CV(self, value=None, lb=None, ub=None, integer=False, fixed_initial=True, name=None):
@@ -200,7 +201,7 @@ class GEKKO(object):
         variable = GK_CV(name=name, value=value, lb=lb, ub=ub, gk_model=self._model_name, model_path=self._path, integer=integer)
         self._variables.append(variable)
         if fixed_initial is False:
-            self.Connection(variable,'CALCULATED',pos1=1,node1=1)
+            self.Connection(variable,'calculated',pos1=1,node1=1)
         return variable
 
     def Intermediate(self,equation,name=None):
@@ -233,10 +234,23 @@ class GEKKO(object):
         
     #%% Connections
 
-    def Connection(self,var1, var2, pos1=None, pos2=None, node1='end', node2='end'):
-        #TODO add checks for types
-            #e.g. if connecting a variable position (pos1 not None) to another variable, it must be an FV
-        #make string versions of var1 and var2
+    def Connection(self,var1, var2=None, pos1=None, pos2=None, node1='end', node2='end'):
+        '''Connect two variables or a variable to a value. When
+        Variables are connected, they become a single entity and are merged.
+        The first variable retains all of the properties and the second variable
+        becomes an alias for the first.
+        
+        var1 = Variable 1 name
+        var2 = Variable 2 name (default=None)
+        pos1 = Step position in the collocation horizon for var1 (default=None)
+        pos2 = Step position in the collocation horizon for var2 (default=None)
+        node1 = Node within the pos1 step (default='end')
+        node2 = Node within the pos2 step (default='end')        
+        '''
+        # TODO: add checks for types
+            #e.g. if connecting a variable position (pos1 not None) to another variable,
+            #     it must be an FV
+        # make string versions of var1 and var2
         if pos1 is not None:
             #make sure var1 is a GEKKO param or var
             if isinstance(var1,(GKVariable,GKParameter)):
@@ -244,34 +258,78 @@ class GEKKO(object):
             else:
                 raise TypeError('Variable 1 must be GEKKO Param or Var to use position')
         else:
-            var1_str = str(var1)
+            if var1 is not None:
+                var1_str = str(var1)
+            else:
+                raise Exception('Error: var1 must not be None')
 
         if pos2 is not None:
-            #make sure var1 is a GEKKO param or var
+            # make sure var1 is a GEKKO param or var
             if isinstance(var2,(GKVariable,GKParameter)):
                 var2_str = 'p(' + str(pos2) + ').n(' + str(node2) + ').' + var2.name
+            elif (var2=='fixed'):
+                var2 = 'fixed'
+            elif (var2=='calculated'):
+                var2_str = 'calculated'
             else:
                 raise TypeError('Variable 2 must be GEKKO Param or Var to use position')
         else:
-            var2_str = str(var2)
+            if var2 is not None:
+                # don't need to check for 'fixed', 'calculated', or number
+                var2_str = str(var2)
+            else:
+                # default with pos2==None and var2==None
+                var2_str = 'fixed'
 
         #check for types
         #if matching variable point to a second variable, the second variable must be an FV
         if pos2 is not None and pos1 is None and isinstance(var1,(GKVariable,GKParameter)):
             if var1.type != 'FV':
-                raise TypeError('Must matching FV to a single fixed point')
+                raise TypeError('Must match FV to a single fixed point')
 
         #add connection to list
         self._connections.append(var1_str+'='+var2_str)
 
-        #for fixing to constants
+        #ensure that csv gets new value at pos1 location
         if isinstance(var2,(int,float)):
-            self._connections.append(var1_str + ' = FIXED')
-            var1.__dict__['_fixed_values'].append((pos1,var2))
+            self._connections.append(var1_str + '=fixed')
+            if pos1==None:
+               var1.__dict__['_override_csv'].append((0,var2))
+            else:
+               var1.__dict__['_override_csv'].append((pos1,var2))            
 
-    # Simplified Connection
-    def fix(self,var, pos, val):
-        self.Connection(var,val,pos1=pos)
+    def fix(self,var, val=None, pos=None):
+        '''Fix a variable at a specific value so that the solver cannot adjust the
+        value.
+        
+        fix(var,pos=None,val=None)
+        
+        Inputs:
+          var = variable to fix
+          val = specified value or None to use default
+          pos = position within the horizon or None for all
+        
+        The var variable must be a Gekko Parameter or Variable. When val==None,
+        the current default value is retained. When pos==None, the value is fixed
+        over all horizon nodes.
+        '''
+        self.Connection(var,var2=val,pos1=pos)
+
+    def free(self,var, pos=None):
+        '''Free a variable so that the solver can calculate the value to
+        satisfy equation constraints or minimize/maximize an objective.
+        
+        free(var,pos=None)
+        
+        Inputs:
+          var = variable to free (calculate)
+          pos = position within the horizon or None for all
+        
+        The var variable must be a Gekko Parameter or Variable. When val==None,
+        the current default value is retained. When pos==None, the value is fixed
+        over all horizon nodes.
+        '''
+        self.Connection(var,var2='calculated',pos1=pos)
 
     #%% Objects
     # There isn't generalized syntax for objects, so each one is added individually
@@ -1772,7 +1830,6 @@ class GEKKO(object):
         if timing == True:
             print('build dbs', time.time() - t)
 
-
         if timing == True:
             t = time.time()
         self._write_solver_options()
@@ -1807,35 +1864,53 @@ class GEKKO(object):
                 else: # Other Linux
                     apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm')
             else:
+                platform = 0
                 raise Exception('Platform '+sys.platform+' not supported for local solve, set remote=True')
 
             app = subprocess.Popen([apm_exe, self._model_name], stdout=subprocess.PIPE, \
-                                   stderr=subprocess.PIPE,cwd = self._path, \
+                                   stderr=subprocess.PIPE, cwd = self._path, bufsize=4096, \
                                    env = {"PATH" : self._path }, universal_newlines=True)
 
-            for line in iter(app.stdout.readline, ""):
-                if disp == True:
-                    try:
-                        print(line.replace('\n', ''))
-                    except:
-                        pass
-                else:
-                    pass
-                if debug >= 1:
-                    # Start recording output if error is detected
-                    if '@error' in line:
-                        record_error = True
-                    if record_error:
-                        apm_error+=line
-                app.wait()
-            _, errs = app.communicate()
-            # print(out)
-            if errs:
-                print("Error:", errs)
+            # blocking when buffer fills up, use app.communicate instead
+            #for line in iter(app.stdout.readline, ""):
+            #    if disp == True:
+            #        try:
+            #            print(line.replace('\n', ''))
+            #        except:
+            #            pass
+            #    if debug >= 1:
+            #        # Start recording output if error is detected
+            #        if '@error' in line:
+            #            record_error = True
+            #        if record_error:
+            #            apm_error+=line
+            #    app.wait()
+            #_, errs = app.communicate()
+            #outs, errs = app.communicate()
+
+            # limit max time to 1e6
+            max_time = min(1e6,self.options.max_time)
+            try:
+                outs, errs = app.communicate(timeout=max_time)
+            except TimeoutExpired:
+                app.kill()
+                outs, errs = app.communicate()
+                raise Exception('Time Limit Exceeded: ' + str(max_time))
+
             if timing == True:
                 print('solve', time.time() - t)
-            if record_error:
-                raise Exception(apm_error)
+            if disp == True:
+                try:
+                    print(outs)
+                except:
+                    pass
+            if errs:
+                print("Error:", errs)
+            if debug >= 1:
+                if '@error' in outs:
+                    i = outs.find('@error')
+                    apm_error = outs[i:] 
+                    raise Exception(apm_error)
 
         else: #solve on APM server
             def send_if_exists(extension):

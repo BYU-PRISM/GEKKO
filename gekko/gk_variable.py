@@ -61,7 +61,7 @@ class GKVariable(GK_Operators):
         #register fixed values through connections to ensure consistency in the 
         #csv file, otherwise the requested fixed value will be overridden by
         #whatever initialization value is in the csv
-        self._fixed_values = []
+        self._override_csv = []
         
         #register values that are changed by the user 
         #self._changed = True
