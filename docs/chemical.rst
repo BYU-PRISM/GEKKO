@@ -147,8 +147,7 @@ Flowsheet Objects
 
 .. py:class::    f = chemical.Flowsheet(m,[stream_level=1]):
 
-	 Creates a chemical flowsheet object with a GEKKO model `m` and a
-    `stream_level`.
+    Creates a chemical flowsheet object with a GEKKO model `m` and a `stream_level`.
     
     The `stream_level` either includes only chemical
     compositions (`stream_level=0`) or also pressure and temperature
@@ -234,7 +233,7 @@ Flowsheet Objects
        
 .. py:classmethod::    f.stream(fixed=True):
 
-    Create a stream that is a flow (moles/sec) of a chemicals
+    Create a stream that is a flow (moles/sec) of chemical compounds.
 
     Output: Stream Object
     
