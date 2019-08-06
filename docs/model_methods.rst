@@ -186,18 +186,18 @@ Model Building
 
         fix(var,val=None,pos=None)
         
-        Inputs:
+    Inputs:
 
         * var = variable to fix
         * val = specified value or None to use default
         * pos = position within the horizon or None for all
         
-        The ``var`` variable must be a Gekko Parameter or Variable. When ``val==None``,
-        the current default value is retained. When ``pos==None``, the value is fixed
-        over all horizon nodes.
+    The ``var`` variable must be a Gekko Parameter or Variable. When ``val==None``,
+    the current default value is retained. When ``pos==None``, the value is fixed
+    over all horizon nodes.
 
-        The ``fix`` function calls the ``Connection`` function with ``var2`` as a static value (``val``) and adds
-	the ``fixed`` specification.
+    The ``fix`` function calls the ``Connection`` function with ``var2`` as a static value (``val``) and adds
+    the ``fixed`` specification.
 
 .. py:classmethod:: m.free(var,pos=None)
 
@@ -205,22 +205,22 @@ Model Building
 
         fix(var,val=None,pos=None)
         
-        Inputs:
+    Inputs:
 
         * var = variable to fix
         * pos = position within the horizon or None for all
         
-        The ``var`` variable must be a Gekko Parameter or Variable. When ``pos==None``, the value is calculated
-        over all horizon nodes.
+    The ``var`` variable must be a Gekko Parameter or Variable. When ``pos==None``, the value is calculated
+    over all horizon nodes.
 
-        The ``free`` function calls the ``Connection`` function with ``var2`` with the string ``calculated``.
+    The ``free`` function calls the ``Connection`` function with ``var2`` with the string ``calculated``.
 
 .. py:attribute::   m.solver_options
 
     A list of strings to pass to the solver; one string for each option name and value. For example::
 
-		m = GEKKO()
-		m.solver_options = ['max_iter 100','max_cpu_time 100']
+        m = GEKKO()
+        m.solver_options = ['max_iter 100','max_cpu_time 100']
 
 .. _valid_eq_funcs:
 
