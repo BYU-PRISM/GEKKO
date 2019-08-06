@@ -28,7 +28,7 @@ Deep Learning Properties
 
 .. py:class::	b = brain.Brain(m=[],remote=True,bfgs=True,explicit=True):
 
-	Creates a new `brain` object as a GEKKO model `m`. Option `remote`
+   Creates a new `brain` object as a GEKKO model `m`. Option `remote`
    specifies if the problem is solved locally or remotely, `bfgs` uses
    only first derivative information with a BFGS update when `True`
    and otherwise uses first and second derivatives from automatic
