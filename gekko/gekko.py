@@ -408,7 +408,7 @@ class GEKKO(object):
     def arx(self,p,y=[],u=[]):
         """
         Build a GEKKO from ARX representation.
-        Usage: arx(p,y=[],u=[])
+        Usage: y,u = arx(p,y=[],u=[])
         Inputs:
            parameter dictionary p['a'], p['b'], p['c']
            a (coefficients for a polynomial, na x ny)
@@ -419,6 +419,9 @@ class GEKKO(object):
                 y = [self.Var() for i in np.arange(ny)]
            u = array of Parameters or Variables of size nu such as
                 u = [self.Var() for i in np.arange(nu)]
+        Outputs:
+           y = array of Variables of size ny
+           u = array of Parameters or Variables of size nu
         """
         try:
             a = p['a']
@@ -485,11 +488,15 @@ class GEKKO(object):
         self._extra_files.append(file_name) #add csv file to list of extra file to send to server
         
         #define arrays of states, outputs and inputs
+        if isinstance(y,(GKVariable,GKParameter)):
+            y = [y] # convert to list of size 1
         if y==[]:
             y = [self.Var() for i in np.arange(ny)]
         else:
             if len(y)!=ny:
                 raise Exception('arx input y must be an array of length '+str(ny))
+        if isinstance(u,(GKVariable,GKParameter)):
+            u = [u] # convert to list of size 1
         if u==[]:
             u = [self.Param() for i in np.arange(nu)]
         else:
@@ -804,7 +811,7 @@ class GEKKO(object):
                                y = x2 when condition>=0
         """
         # add binary (intb) and output (y) variable
-        intb = self.Var(0,lb=0,ub=1,integer=True)
+        intb = self.Var(0.01,lb=0,ub=1,integer=True)
         y = self.Var()
         # add equations for switching conditions
         #  intb=0 when condition<0  and y=x1
