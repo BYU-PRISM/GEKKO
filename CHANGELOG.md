@@ -3,6 +3,12 @@ All notable changes to the GEKKO project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+### Changed
+
+## [v0.2.3] - Version 0.2.3 Stable Release, Date: 2019-08-15
+### Stable release
+
+### Added
 - Improved m.fix function to allow specification changes beyond just dynamic mode
 - Added m.free function to change a fixed value into a calculated value for both steady state and dynamic modes
 - Additional example of the Chemical library use for a simple blending problem
@@ -12,6 +18,7 @@ All notable changes to the GEKKO project will be documented in this file.
 - m.Connections to support fix / free (calculated) specifications
 - Updated gekko to support new functions in APM 0.9.1
 - Default phase in the Chemical library changed from vapor to liquid
+- Use app.communicate instead of readline to avoid filling up child buffer and creating lock for remote=False solve
 
 ## [v0.2.2] - Version 0.2.2 Stable Release, Date: 2019-07-17
 ### Stable release
@@ -100,7 +107,8 @@ All notable changes to the GEKKO project will be documented in this file.
 ## 0.0.1a1 - Version 0.0.1 Alpha 1, Date: 2018-01-05
 ### Initial GEKKO public release, alpha version
 
-[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.3...HEAD
+[v0.2.3]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.2...v0.2.3
 [v0.2.2]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.1...v0.2.2
 [v0.2.1]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.0...v0.2.1
 [v0.2.0]: https://github.com/BYU-PRISM/GEKKO/compare/0.2rc6...v0.2.0
