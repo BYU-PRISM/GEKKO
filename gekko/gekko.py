@@ -1849,14 +1849,15 @@ class GEKKO(object):
         if timing == True:
             print('write info', time.time() - t)
 
-        if debug >= 2:
+        if debug >= 3:
             self.name_check()
 
         if self._remote == False: # local_solve
             if timing == True:
                 t = time.time()
                     
-            # initialize apm_error recording
+            # initialize printing
+            outs = ''
             record_error = False
             apm_error = ''
 
@@ -1878,47 +1879,44 @@ class GEKKO(object):
                                    stderr=subprocess.PIPE, cwd = self._path, bufsize=4096, \
                                    env = {"PATH" : self._path }, universal_newlines=True)
 
-            # blocking when buffer fills up, use app.communicate instead
-            #for line in iter(app.stdout.readline, ""):
-            #    if disp == True:
-            #        try:
-            #            print(line.replace('\n', ''))
-            #        except:
-            #            pass
-            #    if debug >= 1:
-            #        # Start recording output if error is detected
-            #        if '@error' in line:
-            #            record_error = True
-            #        if record_error:
-            #            apm_error+=line
-            #    app.wait()
-            #_, errs = app.communicate()
-            #outs, errs = app.communicate()
-
-            # limit max time to 1e6
-            max_time = min(1e6,self.options.max_time)
-            try:
-                outs, errs = app.communicate(timeout=max_time)
-            except TimeoutExpired:
-                app.kill()
+            if debug<=1:
+                # limit max time to 1e6
+                max_time = min(1e6,self.options.max_time)
+                try:
+                    outs, errs = app.communicate(timeout=max_time)
+                except TimeoutExpired:
+                    app.kill()
+                    outs, errs = app.communicate()
+                    raise Exception('Time Limit Exceeded: ' + str(max_time))
+                if '@error' in outs:
+                    i = outs.find('@error')
+                    apm_error = outs[i:]
+                    record_error = True
+            else:
+                # blocking if buffer fills up, use app.communicate instead
+                for line in iter(app.stdout.readline, ""):
+                    if disp == True:
+                        try:
+                            print(line.replace('\n', ''))
+                        except:
+                            pass
+                    # Start recording output if error is detected
+                    if '@error' in line:
+                        record_error = True
+                    if record_error:
+                        apm_error+=line
+                    app.wait()
                 outs, errs = app.communicate()
-                raise Exception('Time Limit Exceeded: ' + str(max_time))
 
             if timing == True:
                 print('solve', time.time() - t)
             if disp == True:
-                try:
-                    print(outs)
-                except:
-                    pass
+                print(outs)
             if errs:
                 print("Error:", errs)
-            if debug >= 1:
-                if '@error' in outs:
-                    i = outs.find('@error')
-                    apm_error = outs[i:] 
-                    raise Exception(apm_error)
-
+            if debug >= 1 and record_error:
+                raise Exception(apm_error)
+                
         else: #solve on APM server
             def send_if_exists(extension):
                 path = os.path.join(self._path,self._model_name + '.' + extension)
@@ -2007,7 +2005,7 @@ class GEKKO(object):
 
         if timing == True:
             t = time.time()
-        if debug >= 2:
+        if debug >= 3:
             self.verify_input_options()
             self.gk_logic_tree()
         if timing == True:
