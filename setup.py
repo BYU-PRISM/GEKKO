@@ -40,6 +40,7 @@ extra_files = gui_files + ['bin/apm.exe','bin/apm','bin/apm_arm','bin/apm_mac']
 #   apm_binary = ['gekko/bin/apmonitor' AND LA libaries]
 
 # versions: a (alpha), b (beta), rc (release candidate)
+# update version here, __init__.py, and create a GitHub release
 setup(name='gekko',
     version='0.2.3',
     description='Machine learning and optimization for dynamic systems',
