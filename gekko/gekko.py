@@ -1880,14 +1880,17 @@ class GEKKO(object):
                                    env = {"PATH" : self._path }, universal_newlines=True)
 
             if debug<=1:
-                # limit max time to 1e6
-                max_time = min(1e6,self.options.max_time)
-                try:
-                    outs, errs = app.communicate(timeout=max_time)
-                except TimeoutExpired:
-                    app.kill()
+                if ver == 2:  # Python 2 doesn't have timeout
                     outs, errs = app.communicate()
-                    raise Exception('Time Limit Exceeded: ' + str(max_time))
+                else:  # Python 3+              
+                    # limit max time to 1e6
+                    max_time = min(1e6,self.options.max_time)
+                    try:
+                        outs, errs = app.communicate(timeout=max_time)
+                    except TimeoutExpired:
+                        app.kill()
+                        outs, errs = app.communicate()
+                        raise Exception('Time Limit Exceeded: ' + str(max_time))
                 if '@error' in outs:
                     i = outs.find('@error')
                     apm_error = outs[i:]
