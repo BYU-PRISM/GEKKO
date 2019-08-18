@@ -3,6 +3,9 @@ All notable changes to the GEKKO project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+- New Special Ordered Set (SOS1) model
+- New example problem that uses the SOS1 model
+
 ### Changed
 
 ## [v0.2.3] - Version 0.2.3 Stable Release, Date: 2019-08-15
