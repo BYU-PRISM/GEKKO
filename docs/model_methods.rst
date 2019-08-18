@@ -269,7 +269,34 @@ Special function besides algebraic operators are available through GEKKO functio
 
 Logical Functions
 ------------------
-Traditional logical expressions such as if statements cannot be used in gradient based optimization because they create discontinuities in the problem derivatives.  The logical expressions built into Gekko provide a workaround by either using MPCC formulations (Type 2), or by introducing integer variables (Type 3).  **Please note that these functions are experimental, and may cause your solution to fail.**  Additionally, all Type 3 functions require a mixed integer solver such as APOPT (SOLVER=1) to solve, and **Gekko will change the solver to APOPT automatically if these functions are found in a model.**
+Traditional logical expressions such as if statements cannot be used in gradient based optimization because they create discontinuities in the problem derivatives.  The logical expressions built into Gekko provide a workaround by either using MPCC formulations (Type 2), or by introducing integer variables (Type 3).  Additionally, all Type 3 functions require a mixed integer solver such as APOPT (SOLVER=1) to solve, and **Gekko will change the solver to APOPT automatically if these functions are found in a model.**
+
+.. py:classmethod:: y = abs2(x)
+
+    Generates the absolute value with continuous first and second derivatives. 
+    	The traditional method for absolute value (abs) has
+        a point that is not continuously differentiable at an argument value
+        of zero and can cause a gradient-based optimizer to fail to converge::
+	
+        	Usage: y = m.abs2(x)
+		
+    Input: 
+	GEKKO variable, parameter, or expression
+    Output: 
+	GEKKO variable
+	
+.. py:classmethod:: y = abs3(x)
+
+    Generates the absolute value with a binary switch. 
+    	The traditional method for absolute value (abs) has a point that is not continuously differentiable
+        at an argument value of zero and can cause a gradient-based optimizer to fail to converge::
+	
+        	Usage: y = m.abs3(x)
+		
+    Input: 
+    	GEKKO variable, parameter, or expression
+    Output: 
+    	GEKKO variable 
 
 .. py:classmethod:: y = if3(condition,x1,x2)
 
@@ -366,60 +393,7 @@ Traditional logical expressions such as if statements cannot be used in gradient
     	GEKKO variable, parameter, or expression
     Output: 
     	GEKKO variable
-	
-.. py:classmethod:: y = sign2(x)
 
-    Generates the sign of an argument with MPCC. 
-    	The traditional method for signum (sign) is not continuously differentiable and can cause
-        a gradient-based optimizer to fail to converge::
-	
-        	Usage: y = m.sign2(x)
-		
-    Input: 
-    	GEKKO variable, parameter, or expression
-    Output:
-    	GEKKO variable 
-	
-.. py:classmethod:: y = sign3(x)
-
-    Generates the sign of an argument with binary switching variable.
-        The traditional method for signum (sign) is not continuously differentiable
-        and can cause a gradient-based optimizer to fail to converge::
-	
-        	Usage: y = m.sign3(x)
-		
-    Input: 
-    	GEKKO variable, parameter, or expression
-    Output: 
-    	GEKKO variable 
-	
-.. py:classmethod:: y = abs2(x)
-
-    Generates the absolute value with continuous first and second derivatives. 
-    	The traditional method for absolute value (abs) has
-        a point that is not continuously differentiable at an argument value
-        of zero and can cause a gradient-based optimizer to fail to converge::
-	
-        	Usage: y = m.abs2(x)
-		
-    Input: 
-	GEKKO variable, parameter, or expression
-    Output: 
-	GEKKO variable
-	
-.. py:classmethod:: y = abs3(x)
-
-    Generates the absolute value with a binary switch. 
-    	The traditional method for absolute value (abs) has a point that is not continuously differentiable
-        at an argument value of zero and can cause a gradient-based optimizer to fail to converge::
-	
-        	Usage: y = m.abs3(x)
-		
-    Input: 
-    	GEKKO variable, parameter, or expression
-    Output: 
-    	GEKKO variable 
-	
 .. py:classmethod:: pwl(x,y,x_data,y_data,bound_x=False)
 
     	Generate a 1d piecewise linear function with continuous derivatives
@@ -433,6 +407,54 @@ Traditional logical expressions such as if statements cannot be used in gradient
 	  * bound_x: boolean to state if x should be bounded at the upper and lower bounds of x_data to avoid extrapolation error of the piecewise linear region. 
 
     Output: none
+
+.. py:classmethod:: y = sos1(values)
+
+    Special Ordered Set (SOS), Type-1. 
+        Chose one from a set of possible numeric values that are  
+        mutually exclusive options. The SOS is a combination of binary 
+        variables with only one that is allowed to be non-zero.
+
+        values = [y0,y1,...,yn]
+
+        b0 + b1 + ... + bn = 1, 0<=bi<=1
+
+        y = y0*b0 + y1*b1 + ... + yn*bn
+
+	The binary variable (bi) signals which option is selected::
+
+               Usage: y = m.sos1(values)
+
+    Input: 
+        values (possible y numeric values as a list)
+    Output:
+        y (GEKKO variable) 
+
+.. py:classmethod:: y = sign2(x)
+
+    Generates the sign of an argument with MPCC. 
+    	The traditional method for signum (sign) is not continuously differentiable and can cause
+        a gradient-based optimizer to fail to converge::
+	
+                Usage: y = m.sign2(x)
+
+    Input: 
+        GEKKO variable, parameter, or expression
+    Output:
+        GEKKO variable 
+	
+.. py:classmethod:: y = sign3(x)
+
+    Generates the sign of an argument with binary switching variable.
+        The traditional method for signum (sign) is not continuously differentiable
+        and can cause a gradient-based optimizer to fail to converge::
+	
+        	Usage: y = m.sign3(x)
+		
+    Input: 
+    	GEKKO variable, parameter, or expression
+    Output: 
+    	GEKKO variable 
 	
 Pre-built Objects
 ------------------
