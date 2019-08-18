@@ -1180,6 +1180,38 @@ class GEKKO(object):
         # change default solver to APOPT (MINLP)
         self.options.SOLVER = 1
         return y
+        
+    def sos1(self,values):
+        """ Special Ordered Set (SOS), Type-1 
+        Chose one from a set of possible numeric values that are  
+        mutually exclusive options. The SOS is a combination of binary 
+        variables with only one that is allowed to be non-zero. The binary 
+        variable (bi) signals which option is selected.
+        
+        values = [y0,y1,...,yn]
+        b0 + b1 + ... + bn = 1, 0<=bi<=1
+        y = y0*b0 + y1*b1 + ... + yn*bn
+        
+        Usage: y = m.sos1(values)
+        Input: values (possible y numeric values as a list)
+        Output: y (GEKKO variable y)
+        """
+        # convert input to list
+        if not isinstance(values, list):
+            try:
+                values = list(values)
+            except:
+                raise Exception('Error: sos1 input must be a numeric list')         
+        # add binary variables (intb) and output (y) variable
+        intb = [self.Var(0.01,lb=0,ub=1,integer=True) for i in range(len(values))]
+        y = self.Var()
+        # add equation for selecting only one option
+        self.Equation(sum(intb)==1)
+        x = self.Intermediate(sum([values[i]*intb[i] for i in range(len(values))]))
+        self.Equation(y==x)
+        # change default solver to APOPT (MINLP)
+        self.options.SOLVER = 1
+        return y
     
     ## State Space
     def state_space(self,A,B,C,D=None,discrete=False,dense=False):
