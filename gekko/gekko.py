@@ -1194,7 +1194,7 @@ class GEKKO(object):
         
         Usage: y = m.sos1(values)
         Input: values (possible y numeric values as a list)
-        Output: y (GEKKO variable y)
+        Output: y (GEKKO variable)
         """
         # convert input to list
         if not isinstance(values, list):
