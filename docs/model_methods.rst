@@ -250,7 +250,7 @@ Special function besides algebraic operators are available through GEKKO functio
 .. py:classmethod:: m.sinh(other)
 
 
-.. py:classmethod:: m.mcosh(other)
+.. py:classmethod:: m.cosh(other)
 
 
 .. py:classmethod:: m.tanh(other)
