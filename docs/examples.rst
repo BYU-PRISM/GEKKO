@@ -19,6 +19,7 @@ Solve Linear Equations
 	
 ::
 
+	from gekko import GEKKO
 	m = GEKKO()            # create GEKKO model
 	x = m.Var()            # define new variable, default=0
 	y = m.Var()            # define new variable, default=0
@@ -39,6 +40,7 @@ Solve Nonlinear Equations
 	
 ::
 
+	from gekko import GEKKO
 	m = GEKKO()             # create GEKKO model
 	x = m.Var(value=0)      # define new variable, initial value=0
 	y = m.Var(value=1)      # define new variable, initial value=1
@@ -148,6 +150,7 @@ Solver Selection
 
 Solve y2=1 with APOPT solver. See APMonitor documentation or GEKKO documentation for additional solver options::
 
+	from gekko import GEKKO
 	m = GEKKO()           # create GEKKO model
 	y = m.Var(value=2)    # define new variable, initial value=2
 	m.Equation(y**2==1)   # define new equation
@@ -163,6 +166,7 @@ Interpolation with Cubic Spline
 
 ::
 
+	from gekko import GEKKO
 	import numpy as np
 	import matplotlib.pyplot as plt
 
@@ -187,6 +191,7 @@ Linear and Polynomial Regression
 
 ::
 
+	from gekko import GEKKO
 	import numpy as np
 	import matplotlib.pyplot as plt
 
@@ -236,6 +241,7 @@ Nonlinear Regression
 
 ::
 
+	from gekko import GEKKO
 	import numpy as np
 	import matplotlib.pyplot as plt
 
@@ -470,11 +476,11 @@ Optimization of Multiple Linked Phases
 ::
 
     	import numpy as np
-	from gekko import gekko
+	from gekko import GEKKO
 	import matplotlib.pyplot as plt
 
 	# Initialize gekko model
-	m = gekko()
+	m = GEKKO()
 	# Number of collocation nodes
 	nodes = 3
 
