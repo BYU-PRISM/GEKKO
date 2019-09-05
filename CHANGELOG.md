@@ -5,8 +5,11 @@ All notable changes to the GEKKO project will be documented in this file.
 ### Added
 - New Special Ordered Set (SOS1) model
 - New example problem that uses the SOS1 model
+- New MATLAB interface to Gekko
+- New bspline options (smoothing factor, order in x and y directions)
 
 ### Changed
+- Bug fix in bspline that prevented x and y of different sizes
 
 ## [v0.2.3] - Version 0.2.3 Stable Release, Date: 2019-08-15
 ### Stable release
