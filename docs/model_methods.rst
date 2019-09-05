@@ -526,7 +526,7 @@ Pre-built objects are common model constructs that facilitate data analysis, reg
             `sf` controls the tradeoff between smoothness and closeness of fit. 
             If `sf` is small, the approximation may follow too much signal noise. 
             If `sf` is large, the approximation does not follow the general trend.  
-            A proper sf depends on the data and level of noise 
+            A proper `sf` depends on the data and level of noise 
             when `sf` is None a default value of `nx*ny*(0.1)**2` is used 
             where 0.1 is the approximate statistical error of each point 
             the `sf` is only used when constructing the `bspline` (`data=True`)
