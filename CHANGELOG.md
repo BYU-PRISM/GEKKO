@@ -7,6 +7,7 @@ All notable changes to the GEKKO project will be documented in this file.
 - New example problem that uses the SOS1 model
 - New MATLAB interface to Gekko
 - New bspline options (smoothing factor, order in x and y directions)
+- New if2 function that uses an MPCC switch (m.sign2)
 
 ### Changed
 - Bug fix in bspline that prevented x and y of different sizes
