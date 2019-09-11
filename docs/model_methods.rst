@@ -298,12 +298,52 @@ Traditional logical expressions such as if statements cannot be used in gradient
     Output: 
     	GEKKO variable 
 
+.. py:classmethod:: y = if2(condition,x1,x2)
+
+    IF conditional with complementarity constraint switch variable.
+        The traditional method for IF statements is not continuously
+        differentiable and can cause a gradient-based optimizer to fail
+        to converge. The if2 method uses a binary switching variable to
+	determine whether y=x1 (when condition<0) or y=x2 (when condition>=0)::
+	
+        	Usage: y = m.if2(condition,x1,x2)
+	
+    Inputs:
+        condition: GEKKO variable, parameter, or expression
+
+        x1 and x2: GEKKO variable, parameter, or expression
+    
+    Output: 
+    	GEKKO variable 
+
+        y = x1 when condition<0
+
+        y = x2 when condition>=0
+			       
+    Example usage::
+    
+        import numpy as np
+        from gekko import gekko
+        m = gekko()      
+        x1 = m.Const(5)
+        x2 = m.Const(6)
+        t = m.Var(0)
+        m.Equation(t.dt()==1)
+        m.time = np.linspace(0,10)
+        y = m.if2(t-5,x1,x2)
+        m.options.IMODE = 6
+        m.solve()
+        import matplotlib.pyplot as plt
+        plt.plot(m.time,y)
+        plt.show()
+
 .. py:classmethod:: y = if3(condition,x1,x2)
 
     IF conditional with a binary switch variable.
         The traditional method for IF statements is not continuously
         differentiable and can cause a gradient-based optimizer to fail
-        to converge. The if3 method uses a binary switching variable to determine whether y=x1 (when condition<0) or y=x2 (when condition>=0)::
+        to converge. The if3 method uses a binary switching variable to
+	determine whether y=x1 (when condition<0) or y=x2 (when condition>=0)::
 	
         	Usage: y = m.if3(condition,x1,x2)
 	
