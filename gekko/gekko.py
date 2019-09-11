@@ -627,7 +627,7 @@ class GEKKO(object):
         and 2-D z data of size (x.size,y.size). GEKKO variables x, y and z are 
         linked with function z=f(x,y) where the function f is a bspline.
         
-        Usage: m.bspline(x,y,z,x_data,y_data,z_data,data=True,sf=None)
+        Usage: m.bspline(x,y,z,x_data,y_data,z_data,data=True,kx=3,ky=3,sf=None)
         Inputs:
           x,y = independent Gekko parameters or variables as predictors for z
           z   = dependent Gekko variable with z = f(x,y)
@@ -833,6 +833,28 @@ class GEKKO(object):
         self.arx(p,[yin],[uin])
 
         return
+        
+    def if2(self,condition,x1,x2):
+        """ IF conditional with complementarity constraint switch variable.
+        The traditional method for IF statements is not continuously
+        differentiable and can cause a gradient-based optimizer to fail
+        to converge.
+        Usage: y = m.if2(condition,x1,x2)
+        Inputs:
+           condition: GEKKO variable, parameter, or expression
+           x1 and x2: GEKKO variable, parameter, or expression
+        Output: GEKKO variable y = x1 when condition<0
+                               y = x2 when condition>=0
+        """
+        # add binary (intb) and output (y) variable
+        b = self.Var(0.01,lb=0,ub=1,integer=True)
+        y = self.Var()
+        # add equations for switching conditions
+        #  b=0 when condition<0  and y=x1
+        #  b=1 when condition>=0 and y=x2
+        self.Equation(b==0.5+0.5*self.sign2(condition))
+        self.Equation(y==(1-b)*x1+b*x2)
+        return y
 
     def if3(self,condition,x1,x2):
         """ IF conditional with a binary switch variable.
