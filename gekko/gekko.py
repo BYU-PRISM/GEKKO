@@ -846,8 +846,8 @@ class GEKKO(object):
         Output: GEKKO variable y = x1 when condition<0
                                y = x2 when condition>=0
         """
-        # add binary (intb) and output (y) variable
-        b = self.Var(0.01,lb=0,ub=1,integer=True)
+        # add switching (b) and output (y) variables
+        b = self.Var(0.01,lb=0,ub=1)
         y = self.Var()
         # add equations for switching conditions
         #  b=0 when condition<0  and y=x1
