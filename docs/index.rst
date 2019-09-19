@@ -28,7 +28,7 @@ The most recent version is 0.2. You can upgrade from the command line with the u
 Project Support
 ------------
 
-There are GEKKO tutorials and documentation help in:
+There are GEKKO tutorials and documentation in:
 
 - `GitHub Repository (examples folder) <https://github.com/BYU-PRISM/GEKKO/tree/master/examples>`_
 - `Dynamic Optimization Course <https://apmonitor.com/do>`_
