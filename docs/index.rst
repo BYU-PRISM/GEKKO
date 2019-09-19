@@ -30,9 +30,9 @@ Project Support
 
 There are GEKKO tutorials and documentation help in:
 
-- `GitHub Repository (examples folder) <https://github.com/BYU-PRISM/GEKKO/tree/master/examples>`
-- `Dynamic Optimization Course <https://apmonitor.com/do>`
-- `APMonitor Documentation <https://apmonitor.com/wiki>`
+- `GitHub Repository (examples folder) <https://github.com/BYU-PRISM/GEKKO/tree/master/examples>`_
+- `Dynamic Optimization Course <https://apmonitor.com/do>`_
+- `APMonitor Documentation <https://apmonitor.com/wiki>`_
 - `GEKKO Documentation <https://gekko.readthedocs.io/en/latest/examples.html>`_
 - `18 Example Applications with Videos <https://apmonitor.com/wiki/index.php/Main/GekkoPythonOptimization>`_
 
