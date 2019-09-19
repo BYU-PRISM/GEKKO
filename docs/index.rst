@@ -25,6 +25,18 @@ The most recent version is 0.2. You can upgrade from the command line with the u
 
     pip install --upgrade gekko
 
+Project Support
+------------
+
+There are GEKKO tutorials and documentation help in:
+
+- `GitHub Repository (examples folder) <https://github.com/BYU-PRISM/GEKKO/tree/master/examples>`
+- `Dynamic Optimization Course <https://apmonitor.com/do>`
+- `APMonitor Documentation <https://apmonitor.com/wiki>`
+- `GEKKO Documentation <https://gekko.readthedocs.io/en/latest/examples.html>`_
+- `18 Example Applications with Videos <https://apmonitor.com/wiki/index.php/Main/GekkoPythonOptimization>`_
+
+For project specific help, search in the `GEKKO topic tags on StackOverflow <https://stackoverflow.com/questions/tagged/gekko>`_. If there isn't a similar solution, please consider posting a question with a `Mimimal, Complete, and Verifiable example <https://stackoverflow.com/help/mcve>`_. If you give the question a `GEKKO tag with [gekko] <https://stackoverflow.com/help/tagging>`_, the subscribed community is alerted to your question.
 
 Citing GEKKO
 ---------------------
