@@ -2007,7 +2007,7 @@ class GEKKO(object):
                 print(outs)
             if errs:
                 print("Error:", errs)
-            if debug >= 1 and record_error:
+            if (debug >= 1) and record_error:
                 raise Exception(apm_error)
                 
         else: #solve on APM server
@@ -2051,7 +2051,7 @@ class GEKKO(object):
             response = cmd(self._server, self._model_name, 'solve', disp, debug)
             
             #print APM error message and die
-            if '@error' in response:
+            if (debug >= 1) and ('@error' in response):
                 raise Exception(response)
 
             #load results
