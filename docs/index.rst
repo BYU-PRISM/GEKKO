@@ -21,9 +21,19 @@ A pip package is available::
 
 	pip install gekko
 
-The most recent version is 0.2. You can upgrade from the command line with the upgrade flag::
+Use the `--user` option to install if Python is installed for all users and the account lacks administrative priviledge. The most recent version is 0.2. You can upgrade from the command line with the upgrade flag::
 
     pip install --upgrade gekko
+    
+Another method is to install in a Jupyter notebook with `!pip install gekko` or with Python code, although this is not the preferred method.
+
+```python
+try:
+    from pip import main as pipmain
+except:
+    from pip._internal import main as pipmain
+pipmain(['install','gekko'])
+```
 
 Project Support
 ------------
