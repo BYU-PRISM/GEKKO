@@ -21,7 +21,7 @@ A pip package is available::
 
 	pip install gekko
 
-Use the **--user** option to install if there is a permission error because Python is installed for all users and the account lacks administrative priviledge. The most recent version is 0.2. You can upgrade from the command line with the upgrade flag::
+Use the **----user** option to install if there is a permission error because Python is installed for all users and the account lacks administrative priviledge. The most recent version is 0.2. You can upgrade from the command line with the upgrade flag::
 
     pip install --upgrade gekko
     
