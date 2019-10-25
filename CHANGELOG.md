@@ -8,6 +8,7 @@ All notable changes to the GEKKO project will be documented in this file.
 - New MATLAB interface to Gekko
 - New bspline options (smoothing factor, order in x and y directions)
 - New if2 function that uses an MPCC switch (m.sign2)
+- New Maximize and Minimize functions (Obj minimizes)
 
 ### Changed
 - Bug fix in bspline that prevented x and y of different sizes
