@@ -3,6 +3,11 @@ All notable changes to the GEKKO project will be documented in this file.
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+## [v0.2.4] - Version 0.2.4 Stable Release, Date: 2019-10-25
+### Added
 - New Special Ordered Set (SOS1) model
 - New example problem that uses the SOS1 model
 - New MATLAB interface to Gekko
