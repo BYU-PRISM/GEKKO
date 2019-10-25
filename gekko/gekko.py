@@ -228,6 +228,12 @@ class GEKKO(object):
 
     def Obj(self,obj):
         self._objectives.append('minimize ' + str(obj))
+        
+    def Minimize(self,obj):
+        self._objectives.append('minimize ' + str(obj))
+        
+    def Maximize(self,obj):
+        self._objectives.append('maximize ' + str(obj))
 
     def Raw(self,raw):
         self._raw.append(str(raw))
@@ -621,38 +627,11 @@ class GEKKO(object):
             return
     
     ## bspline
-    def bspline(self, x,y,z,x_data,y_data,z_data,data=True,kx=3,ky=3,sf=None):
-        """Generate a 2D Bspline with continuous first and seconds derivatives
+    def bspline(self, x,y,z,x_data,y_data,z_data,data=True):
+        """Generate a 2d Bspline with continuous first and seconds derivatives
         from 1-D arrays of x_data and y_data coordinates (in strictly ascending order)
         and 2-D z data of size (x.size,y.size). GEKKO variables x, y and z are 
-        linked with function z=f(x,y) where the function f is a bspline.
-        
-        Usage: m.bspline(x,y,z,x_data,y_data,z_data,data=True,kx=3,ky=3,sf=None)
-        Inputs:
-          x,y = independent Gekko parameters or variables as predictors for z
-          z   = dependent Gekko variable with z = f(x,y)
-          If data is True (default) then the bspline is built from data
-            x_data = 1D list or array of x values, size (nx)
-            y_data = 1D list or array of y values, size (ny)
-            z_data = 2D list or matrix of z values, size (nx,ny)
-          If data is False then the bspline knots and coefficients are loaded
-            x_data = 1D list or array of x knots, size (nx)
-            y_data = 1D list or array of y knots, size (ny)
-            z_data = 2D list or matrix of c coefficients, size (nx-kx-1)*(ny-ky-1)
-          
-          kx = degree of spline in x-direction, default=3
-          ky = degree of spline in y-direction, default=3
-          sf = smooth factor (sf), only for data=True
-            sf controls the tradeoff between smoothness and closeness of fit
-            if sf is small, the approximation may follow too much signal noise
-            if sf is large, the approximation does not follow the general trend
-            a proper sf depends on the data and level of noise
-            when sf is None a default value of nx*ny*(0.1)**2 is used
-            where 0.1 is the approximate statistical error of each point
-            the sf is only used when constructing the bspline (data=True)
-        Outputs:
-          None
-        """
+        linked with function z=f(x,y) where the function f is a bspline. """
 
         #verify that x,y,z are valid GEKKO variables
         if not isinstance(x,(GKVariable,GKParameter)):
@@ -704,15 +683,6 @@ class GEKKO(object):
             self._extra_files.append(bspline_name+'_tx.csv')
             self._extra_files.append(bspline_name+'_ty.csv')
             self._extra_files.append(bspline_name+'_c.csv')
-        fname = bspline_name+'_info.csv'
-        self._extra_files.append(fname)
-        fid = open(os.path.join(self._path,fname),'w')
-        fid.write(str(kx) + '\n')
-        fid.write(str(ky) + '\n')
-        if sf==None:
-            sf = len(x_data)*len(y_data)*0.1**2
-        fid.write(str(sf) + '\n')            
-        fid.close()
 
         #Add connections between x and y with bspline object data
         self._connections.append(x.name + ' = ' + bspline_name+'.x')
@@ -833,28 +803,6 @@ class GEKKO(object):
         self.arx(p,[yin],[uin])
 
         return
-        
-    def if2(self,condition,x1,x2):
-        """ IF conditional with complementarity constraint switch variable.
-        The traditional method for IF statements is not continuously
-        differentiable and can cause a gradient-based optimizer to fail
-        to converge.
-        Usage: y = m.if2(condition,x1,x2)
-        Inputs:
-           condition: GEKKO variable, parameter, or expression
-           x1 and x2: GEKKO variable, parameter, or expression
-        Output: GEKKO variable y = x1 when condition<0
-                               y = x2 when condition>=0
-        """
-        # add binary (intb) and output (y) variable
-        b = self.Var(0.01,lb=0,ub=1)
-        y = self.Var()
-        # add equations for switching conditions
-        #  b=0 when condition<0  and y=x1
-        #  b=1 when condition>=0 and y=x2
-        self.Equation(b==0.5+0.5*self.sign2(condition))
-        self.Equation(y==(1-b)*x1+b*x2)
-        return y
 
     def if3(self,condition,x1,x2):
         """ IF conditional with a binary switch variable.
@@ -1235,38 +1183,6 @@ class GEKKO(object):
         self.Equation((1-intb)*x <= 0)
         self.Equation(intb * (-x) <= 0)
         self.Equation(y+1==intb*2)
-        # change default solver to APOPT (MINLP)
-        self.options.SOLVER = 1
-        return y
-        
-    def sos1(self,values):
-        """ Special Ordered Set (SOS), Type-1 
-        Chose one from a set of possible numeric values that are  
-        mutually exclusive options. The SOS is a combination of binary 
-        variables with only one that is allowed to be non-zero. The binary 
-        variable (bi) signals which option is selected.
-        
-        values = [y0,y1,...,yn]
-        b0 + b1 + ... + bn = 1, 0<=bi<=1
-        y = y0*b0 + y1*b1 + ... + yn*bn
-        
-        Usage: y = m.sos1(values)
-        Input: values (possible y numeric values as a list)
-        Output: y (GEKKO variable)
-        """
-        # convert input to list
-        if not isinstance(values, list):
-            try:
-                values = list(values)
-            except:
-                raise Exception('Error: sos1 input must be a numeric list')         
-        # add binary variables (intb) and output (y) variable
-        intb = [self.Var(0.01,lb=0,ub=1,integer=True) for i in range(len(values))]
-        y = self.Var()
-        # add equation for selecting only one option
-        self.Equation(sum(intb)==1)
-        x = self.Intermediate(sum([values[i]*intb[i] for i in range(len(values))]))
-        self.Equation(y==x)
         # change default solver to APOPT (MINLP)
         self.options.SOLVER = 1
         return y
@@ -2007,7 +1923,7 @@ class GEKKO(object):
                 print(outs)
             if errs:
                 print("Error:", errs)
-            if (debug >= 1) and record_error:
+            if debug >= 1 and record_error:
                 raise Exception(apm_error)
                 
         else: #solve on APM server
@@ -2051,7 +1967,7 @@ class GEKKO(object):
             response = cmd(self._server, self._model_name, 'solve', disp, debug)
             
             #print APM error message and die
-            if (debug >= 1) and ('@error' in response):
+            if '@error' in response:
                 raise Exception(response)
 
             #load results
