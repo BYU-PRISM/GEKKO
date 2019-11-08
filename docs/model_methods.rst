@@ -377,7 +377,7 @@ Traditional logical expressions such as if statements cannot be used in gradient
         p.value = 5 
         m.solve(disp=False)   
         print(y.value)
-                
+	                
 .. py:classmethod:: y = max2(x1,x2)
 
     Generates the maximum value with continuous first and second derivatives. 
@@ -469,6 +469,14 @@ Traditional logical expressions such as if statements cannot be used in gradient
         values (possible y numeric values as a list)
     Output:
         y (GEKKO variable) 
+	
+    Example usage::	
+        from gekko import GEKKO
+        m = GEKKO()
+        y = m.sos1([19.05, 25.0, 29.3, 30.2])
+        m.Obj(y) # select the minimum value
+        m.solve()
+        print(y.value)
 
 .. py:classmethod:: y = sign2(x)
 
