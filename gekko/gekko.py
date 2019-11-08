@@ -1861,10 +1861,12 @@ class GEKKO(object):
             outs = ''
             record_error = False
             apm_error = ''
+            sselect = False
 
             # Calls apmonitor through the command line
             if sys.platform=='win32' or sys.platform=='win64': # Windows 32 or 64 bit
                 apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm.exe')
+                sselect = True  # set shell=True only for Windows
             elif sys.platform=='darwin': # MacOS
                 apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm_mac')                
             elif sys.platform=='linux' or sys.platform=='linux2': # Linux
@@ -1878,7 +1880,7 @@ class GEKKO(object):
 
             app = subprocess.Popen([apm_exe, self._model_name], stdout=subprocess.PIPE, \
                                    stderr=subprocess.PIPE, cwd = self._path, bufsize=4096, \
-                                   env = {"PATH" : self._path }, universal_newlines=True, shell=True)
+                                   env = {"PATH" : self._path }, universal_newlines=True, shell=sselect)
 
             if debug<=1:
                 if ver == 2:  # Python 2 doesn't have timeout
