@@ -6,7 +6,7 @@ All notable changes to the GEKKO project will be documented in this file.
 
 ### Changed
 
-## [v0.2.4] - Version 0.2.4 Stable Release, Date: 2019-10-25
+## [v0.2.4] - Version 0.2.4 Stable Release, Date: 2019-11-7
 ### Added
 - New Special Ordered Set (SOS1) model
 - New example problem that uses the SOS1 model
@@ -17,6 +17,7 @@ All notable changes to the GEKKO project will be documented in this file.
 
 ### Changed
 - Bug fix in bspline that prevented x and y of different sizes
+- Removed Windows command window pop-up with local mode
 
 ## [v0.2.3] - Version 0.2.3 Stable Release, Date: 2019-08-15
 ### Stable release
