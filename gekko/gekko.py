@@ -1,17 +1,12 @@
-
-#%% Imports
 import os
 import sys
 import subprocess
 import glob
 import re
-import tempfile #making a temporary directory for all the files
-import numpy as np #to support initializing with numpy arrays
+import tempfile # for temporary directory
+import numpy as np
 from shutil import rmtree
-
-#remote solve functions
-from .apm import cmd, get_file
-
+from .apm import cmd, get_file # remote solve functions
 from .gk_global_options import GKGlobalOptions
 from .gk_parameter import GKParameter, GK_MV, GK_FV
 from .gk_variable import GKVariable, GK_CV, GK_SV
@@ -1883,7 +1878,7 @@ class GEKKO(object):
 
             app = subprocess.Popen([apm_exe, self._model_name], stdout=subprocess.PIPE, \
                                    stderr=subprocess.PIPE, cwd = self._path, bufsize=4096, \
-                                   env = {"PATH" : self._path }, universal_newlines=True)
+                                   env = {"PATH" : self._path }, universal_newlines=True, shell=True)
 
             if debug<=1:
                 if ver == 2:  # Python 2 doesn't have timeout
