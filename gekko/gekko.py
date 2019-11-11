@@ -1190,30 +1190,33 @@ class GEKKO(object):
         return y
     
     ## State Space
-    def state_space(self,A,B,C,D=None,discrete=False,dense=False):
+    def state_space(self,A,B,C,D=None,E=None,discrete=False,dense=False):
         """
         Build a GEKKO from SS representation.
-        Give A,B,C and D, returns:
+        Give A,B,C (D,E optional) returns:
         m (GEKKO model)
         x (states)
         y (outputs)
         u (inputs)
-        """
-        #TODO add support for E matrix
 
+        E dx/dt = Ax + Bu
+              y = Cx + Du
+        """
         #set all matricies to numpy
         A = np.array(A,dtype=float)
         B = np.array(B,dtype=float)
         C = np.array(C,dtype=float)
-        if D != None: #D is supplied
+        if D is not None:
             D = np.array(D,dtype=float)
+        if E is not None:
+            E = np.array(E,dtype=float)
 
-        # dx/dt = A * x + B * u
-        #     y = C * x + D * u
+        # E dx/dt = A * x + B * u
+        #       y = C * x + D * u
         #
         # dimensions
-        # (nx1) = (nxn)*(nx1) + (nxm)*(mx1)
-        # (px1) = (pxn)*(nx1) + (pxm)*(mx1)
+        # (nxn) (nx1) = (nxn)*(nx1) + (nxm)*(mx1)
+        #       (px1) = (pxn)*(nx1) + (pxm)*(mx1)
 
         #count number of states, inputs and outputs
         n = A.shape[0]
@@ -1225,8 +1228,10 @@ class GEKKO(object):
             raise Exception("Inconsistent matrix sizes.")
         if D is not None:
             if D.shape[0] != p or D.shape[1] != m:
-                raise Exception("Inconsistent matrix sizes (D).")
-
+                raise Exception("Inconsistent matrix size for D (pxm).")
+        if E is not None:
+            if E.shape[0] != n or E.shape[1] != n:
+                raise Exception("Inconsistent matrix size for E (nxn).")
 
         # build lti object with unique object name
         SS_name = 'statespace' + str(len(self._objects) + 1)
@@ -1250,7 +1255,7 @@ class GEKKO(object):
         self._extra_files.append(file_name) #add csv file to list of extra file to send to server
 
         if dense is True:
-            #write A,B,C,[D] matricies to objectname.A/B/C/D.txt
+            #write A,B,C,[D,E] matricies to objectname.A/B/C/D/E.txt
             file_name = SS_name + '.a.txt'
             np.savetxt(os.path.join(self._path,file_name), A, delimiter=" ", fmt='%1.25s')
             self._extra_files.append(file_name) #add csv file to list of extra file to send to server
@@ -1263,6 +1268,10 @@ class GEKKO(object):
             if D is not None:
                 file_name = SS_name + '.d.txt'
                 np.savetxt(os.path.join(self._path,file_name), D, delimiter=" ", fmt='%1.25s')
+                self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+            if E is not None:
+                file_name = SS_name + '.e.txt'
+                np.savetxt(os.path.join(self._path,file_name), E, delimiter=" ", fmt='%1.25s')
                 self._extra_files.append(file_name) #add csv file to list of extra file to send to server
         else: #sparse form
         # (nx1) = (nxn)*(nx1) + (nxm)*(mx1)
@@ -1300,12 +1309,20 @@ class GEKKO(object):
                             sparse_matrix.append([i+1,j+1,D[i,j]])
                 np.savetxt(os.path.join(self._path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
                 self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+            if E is not None:
+                file_name = SS_name + '.e.txt'
+                sparse_matrix = []
+                for j in range(n):
+                    for i in range(n):
+                        if E[i,j]  0:
+                            sparse_matrix.append([i+1,j+1,E[i,j]])
+                np.savetxt(os.path.join(self._path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
+                self._extra_files.append(file_name) #add csv file to list of extra file to send to server
 
         #define arrays of states, outputs and inputs
         x = [self.SV() for i in np.arange(n)]
         y = [self.CV() for i in np.arange(p)]
         u = [self.MV() for i in np.arange(m)]
-
 
         #Add connections between u, x and y with lti object
         for i in range(n):
@@ -1999,7 +2016,9 @@ class GEKKO(object):
                         with open(os.path.join(self._path,'results_all.csv'), 'w') as f:
                             f.write(str(results_all))
             except:
-                raise ImportError('Results files not found. APM did not find a solution or the server is unreachable.')
+                raise ImportError('No solution or server unreachable.\n'+\
+                                  '  Show errors with m.solve(disp=True).\n'+\
+                                  '  Try local solve with m=GEKKO(remote=False).')
 
         if timing == True:
             print('solve', time.time() - t)
