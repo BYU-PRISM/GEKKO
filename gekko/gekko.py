@@ -210,9 +210,16 @@ class GEKKO(object):
         return inter
 
     def Equation(self,equation):
-        EqObj = EquationObj(equation)
-        self._equations.append(EqObj)
-        return EqObj
+        if (type(equation) is list) or (type(equation) is tuple):
+            l = []
+            for eq in equation:
+                eo = self.Equation(eq)
+                l.append(eo)
+            return l
+        else:
+            EqObj = EquationObj(equation)
+            self._equations.append(EqObj)
+            return EqObj
 
     def Equations(self,eqs):
         l = []
