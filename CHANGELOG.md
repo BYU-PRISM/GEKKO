@@ -1,10 +1,14 @@
 # Changelog
-All notable changes to the GEKKO project will be documented in this file.
+All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+- Optional E matrix for state_space function: E dx/dt = Ax+Bu
 
 ### Changed
+- Equation accepts single equation, list, or tuple
+- Improved error message when remote server unreachable
+- Fix state_space function for input D when not None
 
 ## [v0.2.4] - Version 0.2.4 Stable Release, Date: 2019-11-7
 ### Added
