@@ -641,12 +641,30 @@ Generate a 2d Bspline with continuous first and seconds derivatives
     Output: 
     	GEKKO variables x
 
-.. py:classmethod:: x,y,u = state_space(A,B,C,D=None,discrete=False,dense=False)
+.. py:classmethod:: x,y,u = state_space(A,B,C,D=None,E=None,discrete=False,dense=False)
 
-    For State Space models, input SS matricies A,B,C, and optionally D. Returns a GEKKO array of states (SV) `x`, array of outputs (CV) `y` and array of inputs (MV) `u`. A,B,C and D must be 2-dimensional matricies of the appropriate size.
+    For State Space models, input SS matricies A,B,C, and optionally D and E. Returns a GEKKO array of states (SV) `x`, array of outputs (CV) `y` and array of inputs (MV) `u`. A,B,C,D, and E must be 2-dimensional matricies of the appropriate size.
 
     The `discrete` Boolean parameter indicates a discrete-time model, which requires constant time steps and 2 :ref:`nodes`.
-    The `dense` Boolean parameter indicates if A,B,C,D should be written as dense or sparse matrices. Sparse matricies will be faster unless it is known that the matricies are very dense.
+    The `dense` Boolean parameter indicates if A,B,C,D, and E should be written as dense or sparse matrices. Sparse matricies
+    will be faster unless it is known that the matricies are very dense. See examples of
+    `discrete time simulation <https://apmonitor.com/wiki/index.php/Apps/DiscreteStateSpace>`_ and `model predictive control <https://apmonitor.com/wiki/index.php/Apps/LinearStateSpace>`_ with state space models::
+    
+       import numpy as np
+       from gekko import GEKKO
+       A = np.array([[-.003, 0.039, 0, -0.322],
+                     [-0.065, -0.319, 7.74, 0],
+                     [0.020, -0.101, -0.429, 0],
+                     [0, 0, 1, 0]])
+       B = np.array([[0.01, 1, 2],
+                     [-0.18, -0.04, 2],
+                     [-1.16, 0.598, 2],
+                     [0, 0, 2]]
+                   )
+       C = np.array([[1, 0, 0, 0],
+                     [0, -1, 0, 7.74]])
+       m = GEKKO()
+       x,y,u = m.state_space(A,B,C,D=None)
     
 .. py:classmethod:: y = sum(x)
 
