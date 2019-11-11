@@ -3,7 +3,13 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+## [v0.2.5] - Version 0.2.5 Stable Release, Date: 2019-11-11
+### Added
 - Optional E matrix for state_space function: E dx/dt = Ax+Bu
+- Re-implemented changes to if2 and sos1 that were removed from v0.2.4
 
 ### Changed
 - Equation accepts single equation, list, or tuple
@@ -125,7 +131,8 @@ All notable changes to the GEKKO project are documented in this file.
 ## 0.0.1a1 - Version 0.0.1 Alpha 1, Date: 2018-01-05
 ### Initial GEKKO public release, alpha version
 
-[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.4...HEAD
+[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.5...HEAD
+[v0.2.5]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.4...v0.2.5
 [v0.2.4]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.2...v0.2.4
 [v0.2.3]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.2...v0.2.3
 [v0.2.2]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.1...v0.2.2
