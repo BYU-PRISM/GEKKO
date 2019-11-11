@@ -1314,7 +1314,7 @@ class GEKKO(object):
                 sparse_matrix = []
                 for j in range(n):
                     for i in range(n):
-                        if E[i,j]  0:
+                        if E[i,j] != 0:
                             sparse_matrix.append([i+1,j+1,E[i,j]])
                 np.savetxt(os.path.join(self._path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
                 self._extra_files.append(file_name) #add csv file to list of extra file to send to server
