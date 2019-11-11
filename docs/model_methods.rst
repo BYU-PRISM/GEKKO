@@ -470,7 +470,8 @@ Traditional logical expressions such as if statements cannot be used in gradient
     Output:
         y (GEKKO variable) 
 	
-    Example usage::	
+    Example usage::
+    
         from gekko import GEKKO
         m = GEKKO()
         y = m.sos1([19.05, 25.0, 29.3, 30.2])
