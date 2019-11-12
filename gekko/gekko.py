@@ -28,6 +28,7 @@ else:  # Python 3+
     def compatible_string_strip(s):
         return s.strip()
 
+# detect IPython
 try:
     __IPYTHON__
 except NameError:
@@ -1987,7 +1988,7 @@ class GEKKO(object):
             if sys.platform=='win32' or sys.platform=='win64': # Windows 32 or 64 bit
                 apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm.exe')
                 if not ipython:
-                    sselect = True  # set shell=True only for Windows command line and IDLE
+                    sselect = True  # set shell=False for IPython
             elif sys.platform=='darwin': # MacOS
                 apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm_mac')                
             elif sys.platform=='linux' or sys.platform=='linux2': # Linux
