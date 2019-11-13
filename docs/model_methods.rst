@@ -584,7 +584,7 @@ Pre-built objects are common model constructs that facilitate data analysis, reg
     
           None
 
-Generate a 2d Bspline with continuous first and seconds derivatives
+        Generate a 2d Bspline with continuous first and seconds derivatives
         from 1-D arrays of x_data and y_data coordinates (in strictly ascending order)
         and 2-D z data of size (x.size,y.size). GEKKO variables x, y and z are 
         linked with function z=f(x,y) where the function f is a bspline.
@@ -619,6 +619,30 @@ Generate a 2d Bspline with continuous first and seconds derivatives
 	y: delay output as a GEKKO variable
 
 	steps: integer number of steps (default=1)
+
+.. py:classmethod:: integral(x)
+
+    Integral of a constant, parameter, intermediate, variable, or expression.
+
+    Inputs:
+
+        x: input variable, parameter, or expression
+
+        y: GEKKO variable that is the integral up to that time in the horizon
+
+    Example::
+    
+       from gekko import GEKKO
+       import numpy as np
+       m = GEKKO()
+       m.time = np.linspace(0,2,5)
+       m.options.IMODE=4; m.options.NODES=6
+       x = m.Var(5)
+       m.Equation(x.dt()==-x)
+       y = m.Var(0)
+       m.Equation(y==m.integral(x))
+       m.options.SOLVER=1
+       m.solve()    
 
 .. py:classmethod:: periodic(v)
 
