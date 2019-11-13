@@ -895,6 +895,19 @@ class GEKKO(object):
         # change default solver to APOPT (MINLP)
         self.options.SOLVER = 1
         return y
+        
+    def integral(self,x):
+        """ Integral of a constant, parameter, intermediate, variable, or expression.
+        Usage: y = m.integral(x)
+        Inputs:
+           x: GEKKO variable, parameter, or expression
+        Output:
+           y: GEKKO variable that is the integral up to that time in the horizon
+        """
+        y = self.Var(0)
+        # add integral equation
+        self.Equation(y.dt()==x)
+        return y
             
     def max2(self,x1,x2):
         """ Generates the maximum value with continuous first and
