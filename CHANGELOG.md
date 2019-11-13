@@ -7,6 +7,7 @@ All notable changes to the GEKKO project are documented in this file.
 
 ### Changed
 - Local MacOS solve with linked static gcc-gfortran lib
+- Changed `shell=False` for IPython notebooks in Windows with local subprocess call
 
 ## [v0.2.5] - Version 0.2.5 Stable Release, Date: 2019-11-11
 ### Added
