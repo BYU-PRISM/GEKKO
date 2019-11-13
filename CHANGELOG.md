@@ -3,8 +3,10 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+- New integral function `m.integral` and documentation
 
 ### Changed
+- Local MacOS solve with linked static gcc-gfortran lib
 
 ## [v0.2.5] - Version 0.2.5 Stable Release, Date: 2019-11-11
 ### Added
