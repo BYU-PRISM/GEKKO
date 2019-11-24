@@ -1,4 +1,4 @@
-.. ThunderSnow documentation master file, created by
+.. Gekko documentation master file, created by
    sphinx-quickstart on Fri Jul  7 22:01:18 2017.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
@@ -24,18 +24,18 @@ IMODE
 +-----------------------+---------------+---------------+---------------+
 |                       | Simulation    | Estimation    | Control       |
 +-----------------------+---------------+---------------+---------------+
-|  Non-Dynamic          | `1` Sys of Eq | `2` MPU       | `3` RTO       |
+|  Non-Dynamic          | `1` Steady-State Simulation | `2` Steady-State Estimation | `3` Steady-State Optimization |
 +-----------------------+---------------+---------------+---------------+
-|  Dynamic Simultaneous | `4` ODE Solver| `5` MHE       | `6` MPC       |
+|  Dynamic Simultaneous | `4` Simultaneous Simulation | `5` Simultaneous Estimation | `6` Simultaneous Control |
 +-----------------------+---------------+---------------+---------------+
-|  Dynamic Sequential   | `7` ODE Solver| `8` MHE       | `9` MPC       |
+|  Dynamic Sequential   | `7` Sequential Simulation | `8` Sequential Estimation | `9` Sequential Control |
 +-----------------------+---------------+---------------+---------------+
 
 
 Dynamics
 --------
 
-Ordinary differential equations are specified by differentiation a variable with the `dt()` method. For example, velocity `v` is the derivative of position `x`::
+Differential equations are specified by differentiation a variable with the `dt()` method. For example, velocity `v` is the derivative of position `x`::
 
     m.Equation( v == x.dt() )
 
@@ -43,16 +43,14 @@ Discretization is determined by the model `time` attribute. For example, `m.time
 
 Simultaneous methods use orthogonal collocation on finite elements to implicitly solve the DAE system. Non-simulation simultaneous methods (modes 5 and 6) simultaneously optimize the objective and implicitly calculate the model/constraints. Simultaneous methods tend to perform better for problems with many degrees of freedom.
 
-Sequential methods separate the NLP optimizer and the DAE simulator. Sequential methods will satisfy the differential equations, even when the solver is unable to find a feasible optimal solution.
+Sequential methods separate the NLP optimizer and the DAE simulator. Sequential methods satisfy the differential and algebraic equations, even when the solver is unable to find a feasible optimal solution.
 
 Non-Dynamic modes sets all differential terms to zero to calculate steady-state conditions.
-
 
 Simulation
 ----------
 
-Simulation just solves the given equations. These modes provide little benefit over other equation solver or ODE integrator packages. However, successful simulation of a model within GEKKO helps debug the model and greatly facilitates the transition from model development/simulation to optimization.
-
+Steady-state simulation (IMODE=1) solves the given equations when all time-derivative terms set to zero. Dynamic simulation (IMODE=4,7) is either solved simultaneous (IMODE=4) or sequentially (IMODE=7). Both modes give the same solution but the sequential mode solves one time step and then time-shifts to solve the next time step. The simultaneous mode solves all time steps with one solve. Successful simulation of a model within GEKKO helps initialize and and facilitates the transition from model development/simulation to optimization. In all simulation modes (IMODE=1,4,7), the number of equations must equal the number of variables. 
 
 Estimation
 ----------
@@ -60,7 +58,7 @@ Estimation
 MPU
 ^^^
 
-Model Parameter Update is parameter estimation for non-dynamic conditions. 
+Model Parameter Update (IMODE=2) is parameter estimation for non-dynamic data when the process is at steady-state. 
 .. This mode implements the special variable types as follows:
 
 .. FV
@@ -78,7 +76,7 @@ Model Parameter Update is parameter estimation for non-dynamic conditions.
 MHE
 ^^^
 
-Moving Horizon Estimation is for dynamic estimation, both for states and parameter regression. The horizon to match is the discretized time horizon of the model `m.time`. `m.time` should be discretized at regular intervals. New measurements are added at the end of the horizon (e.g. `m.time[-1]`) and the oldest measurements (e.g. `m.time[0]`) are dropped off.
+Moving Horizon Estimation (IMODE=5,8) is for dynamic estimation, both for states and parameter regression. The horizon to match is the discretized time horizon of the model `m.time`. `m.time` should be discretized at regular intervals. New measurements are added at the end of the horizon (e.g. `m.time[-1]`) and the oldest measurements (e.g. `m.time[0]`) are dropped off.
 
 :ref:`timeshift` enables automatic shifting of all variables and parameters with each new solve of a model. The frequency of new measurements should match the discretization of `m.time`.
 
@@ -107,7 +105,8 @@ Manipulated variables are like FVs, but discretized with time.
 CV
 ""
 
-Controlled variables are the measurement to match.
+Controlled variables may include measurements that are aligned to model predicted values. A controlled variable
+in estimation mode has objective function terms (squared or l1-norm error equations) built-in to facilitate the alignment.
 
 If `FSTATUS` is on (`FSTATUS=1`), an objective function is added to minimize the
 model prediction to the measurements. The error is either squared or absolute depending
