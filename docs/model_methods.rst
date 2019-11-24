@@ -109,7 +109,8 @@ Model Building
 
         m.Equation( v == x.dt() )
 
-    Discretization is determined by the model `time` attribute. For example, `m.time = [0,1,2,3]` will discretize all equations and variable at the 4 points specified. Only ordinary differential equations discretized by time are available internally. Other discretization must be performed manually.
+    Discretization is determined by the model `time` attribute. For example, `m.time = [0,1,2,3]` will discretize all equations and variable at the 4 points specified. Time or space discretization is available with Gekko, but not both. If the model contains a partial differential equation, the discretization in the other dimensions is performed with Gekko array operations as shown in the 
+`hyperbolic and parabolic PDE Gekko examples <https://apmonitor.com/do/index.php/Main/PartialDifferentialEquations>`_).
 
 .. py:classmethod::    a = m.Array(type,dimension,**args)
 
