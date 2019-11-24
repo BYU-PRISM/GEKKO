@@ -39,9 +39,9 @@ Differential equations are specified by differentiation a variable with the `dt(
 
     m.Equation( v == x.dt() )
 
-Discretization is determined by the model `time` attribute. For example, `m.time = [0,1,2,3]` will discretize all equations and variable at the 4 points specified. Only ordinary differential equations discretized by time are available internally. Other discretization must be performed manually.
+Discretization is determined by the model `time` attribute. For example, `m.time = [0,1,2,3]` will discretize all equations and variable at the 4 points specified. Time or space discretization is available with Gekko. If the model is a partial differential equation, the discretization in the other dimensions is performed with Gekko array operations (see [hyperbolic and parabolic PDE Gekko examples](https://apmonitor.com/do/index.php/Main/PartialDifferentialEquations)_).
 
-Simultaneous methods use orthogonal collocation on finite elements to implicitly solve the DAE system. Non-simulation simultaneous methods (modes 5 and 6) simultaneously optimize the objective and implicitly calculate the model/constraints. Simultaneous methods tend to perform better for problems with many degrees of freedom.
+Simultaneous methods use orthogonal collocation on finite elements to implicitly solve the differential and algebraic equation (DAE) system. Non-simulation simultaneous methods (modes 5 and 6) simultaneously optimize the objective and implicitly calculate the model/constraints. Simultaneous methods tend to perform better for problems with many degrees of freedom.
 
 Sequential methods separate the NLP optimizer and the DAE simulator. Sequential methods satisfy the differential and algebraic equations, even when the solver is unable to find a feasible optimal solution.
 
@@ -124,7 +124,7 @@ Control
 RTO
 ^^^^
 
-Real-Time Optimization
+Real-Time Optimization (RTO) is a steady-state mode that allows decision variables (`FV` or `MV` types with `STATUS=1`) or additional variables in excess of the number of equations. An objective function guides the selection of the additional variables to select the optimal feasible solution. RTO is the default mode for Gekko if `m.options.IMODE` is not specified.
 
 .. FV
 .. ""
@@ -141,8 +141,7 @@ Real-Time Optimization
 MPC
 ^^^
 
-
-Model Predictive Control
+Model Predictive Control (MPC) is implemented with `IMODE=6` as a simultaneous solution or with `IMODE=9` as a sequential shooting method.
 
 .. FV
 .. ""
@@ -156,8 +155,8 @@ Model Predictive Control
 .. CV
 .. ""
 
-Controlled variables are the objective to match. When `STATUS=1` for a CV, the
-objective includes a minimization between model predictions and the setpoint.
+Controlled variables (`CV`) have a reference trajectory or set point target range as the objective.
+When `STATUS=1` for a CV, the objective includes a minimization between model predictions and the setpoint.
 
 If `m.options.CV_TYPE=1`, the objective is an l1-norm (absolute error) with
 a dead-band. The setpoint range should be specified with `SPHI` and `SPLO`.
