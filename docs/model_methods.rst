@@ -105,7 +105,7 @@ Model Building
 
 .. py:classmethod:: dt()
 
-    Ordinary differential equations are specified by differentiation a variable with the `dt()` method. For example, velocity `v` is the derivative of position `x`::
+    Differential equations are specified by differentiating a variable with the `dt()` method. For example, velocity `v` is the derivative of position `x`::
 
         m.Equation( v == x.dt() )
 
