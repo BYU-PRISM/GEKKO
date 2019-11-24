@@ -21,15 +21,15 @@ IMODE
 -----
 ``model.options.IMODE`` defines the problem type. Each problem type treats variable classes differently and builds equations behind the scenes to meet the particular objective inherit to each problem type. The modes are:
 
-+-----------------------+---------------+---------------+---------------+
-|                       | Simulation    | Estimation    | Control       |
-+-----------------------+---------------+---------------+---------------+
++-----------------------+-----------------------------+-----------------------------+-------------------------------+
+|                       | Simulation                  | Estimation                  | Control                       |
++-----------------------+-----------------------------+-----------------------------+-------------------------------+
 |  Non-Dynamic          | `1` Steady-State Simulation | `2` Steady-State Estimation | `3` Steady-State Optimization |
-+-----------------------+---------------+---------------+---------------+
-|  Dynamic Simultaneous | `4` Simultaneous Simulation | `5` Simultaneous Estimation | `6` Simultaneous Control |
-+-----------------------+---------------+---------------+---------------+
-|  Dynamic Sequential   | `7` Sequential Simulation | `8` Sequential Estimation | `9` Sequential Control |
-+-----------------------+---------------+---------------+---------------+
++-----------------------+-----------------------------+-----------------------------+-------------------------------+
+|  Dynamic Simultaneous | `4` Simultaneous Simulation | `5` Simultaneous Estimation | `6` Simultaneous Control      |
++-----------------------+-----------------------------+-----------------------------+-------------------------------+
+|  Dynamic Sequential   | `7` Sequential Simulation   | `8` Sequential Estimation   | `9` Sequential Control        |
++-----------------------+-----------------------------+-----------------------------+-------------------------------+
 
 
 Dynamics
