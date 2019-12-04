@@ -556,7 +556,10 @@ class GEKKO(object):
             raise TypeError("etype must start with either, '=', '<', or '>'")
 
         #convert data to flat numpy arrays
-        A = np.array(A,dtype=float).T
+        if sparse:
+            A = np.array(A,dtype=float).T
+        else:
+            A = np.array(A,dtype=float)
         b = np.array(b,dtype=float).T
         if sparse:
             m = np.size(b,0)
