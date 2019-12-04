@@ -42,7 +42,7 @@ extra_files = gui_files + ['bin/apm.exe','bin/apm','bin/apm_arm','bin/apm_mac']
 # versions: a (alpha), b (beta), rc (release candidate)
 # update version here, __init__.py, and create a GitHub release
 setup(name='gekko',
-    version='0.2.6',
+    version='0.2.7',
     description='Machine learning and optimization for dynamic systems',
     long_description=long_description,
     classifiers=[
@@ -54,6 +54,7 @@ setup(name='gekko',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
     keywords='differential deep learning reinforcement optimization mixed-integer',
     url='https://github.com/BYU-PRISM/GEKKO',
