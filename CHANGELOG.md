@@ -3,8 +3,10 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+- Additional documentation for modes of operation
 
 ### Changed
+- Fixed axb function with dense Ax=b (from incorrect A^T x=b)
 
 ## [v0.2.6] - Version 0.2.6 Stable Release, Date: 2019-11-12
 ### Added
