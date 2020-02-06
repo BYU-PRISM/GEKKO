@@ -5,6 +5,7 @@ All notable changes to the GEKKO project are documented in this file.
 ### Added
 - Additional documentation for modes of operation
 - Matrix (2D) optimization AX=B example problem `test_matrix.py`
+- Example for 2nd order differential equation
 
 ### Changed
 - Fixed axb function with dense Ax=b (from incorrect A^T x=b)
