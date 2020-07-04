@@ -38,7 +38,7 @@ global_options = {'inputs':global_options_inputs,'outputs':global_options_output
 
 # TODO: check if OSTATUS, OSTATUSCHG, PRED, DPRED, AWS, VLACTION, TIER are correctly exposed
 
-Param_input_options = []
+Param_input_options = ['LOWER', 'UPPER']
 Param_inout_options = ['VALUE']
 Param_output_options = []
 
