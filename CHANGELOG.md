@@ -3,14 +3,22 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+## [v0.2.7]
+### Added
+- New functions `fix_initial`, `free_initial`, `fix_final` to help with specifying degrees of freedom for common changes to the default fixed / free specifications.
 - Additional documentation for modes of operation
 - Matrix (2D) optimization AX=B example problem `test_matrix.py`
 - Example 2nd order differential equation
 - Example 3rd order differential equation with parameter estimation
-- Other examples for testing
+- A few other examples for testing
 
 ### Changed
+- Lower and Upper bounds for `Param`
 - Fixed axb function with dense Ax=b (from incorrect A^T x=b)
+- Upgrade `Param` so that new `value` updates the values in the CSV file.
 
 ## [v0.2.6] - Version 0.2.6 Stable Release, Date: 2019-11-12
 ### Added
