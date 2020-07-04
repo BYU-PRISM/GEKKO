@@ -33,17 +33,16 @@ def _build_model(self):
                 if not (parameter.VALUE==None):
                     i = 1
                     model += ' = %s' % parameter.VALUE
-            if parameter.type != None: #Only FV/MV have bounds
-                if parameter.UPPER is not None:
-                    if i == 1:
-                        model += ', '
-                    i = 1
-                    model += '<= %s' % parameter.UPPER
-                if parameter.LOWER is not None:
-                    if i == 1:
-                        model += ', '
-                    i = 1
-                    model += '>= %s' % parameter.LOWER
+            if parameter.UPPER is not None:
+                if i == 1:
+                    model += ', '
+                i = 1
+                model += '<= %s' % parameter.UPPER
+            if parameter.LOWER is not None:
+                if i == 1:
+                    model += ', '
+                i = 1
+                model += '>= %s' % parameter.LOWER
             model += '\n'
         model += 'End Parameters\n'
 

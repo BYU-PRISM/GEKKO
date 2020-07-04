@@ -115,17 +115,17 @@ class GEKKO(object):
         self._constants.append(const)
         return const
 
-    def Param(self, value=None, name=None):
+    def Param(self, value=None, lb=None, ub=None, integer=False, name=None):
         """GK parameters can become MVs and FVs. Since GEKKO defines
         MVs and FVs directly, there's not much use for parameters. Parameters
-        are effectively constants unless the resulting .spm model is used later
+        are effectively constants unless the resulting .apm model is used later
         and the parameters can be set as MVs or FVs. """
         if name is not None:
             name = re.sub(r'\W+', '_', name).lower()
         else:
             name = 'p' + str(len(self._parameters) + 1)
 
-        parameter = GKParameter(name, value)
+        parameter = GKParameter(name, value, lb, ub, integer)
         self._parameters.append(parameter)
         return parameter
 
@@ -258,7 +258,9 @@ class GEKKO(object):
         var1 = Variable 1 name
         var2 = Variable 2 name (default=None)
         pos1 = Step position in the collocation horizon for var1 (default=None)
+               Use 'end' for the last position in the horizon
         pos2 = Step position in the collocation horizon for var2 (default=None)
+               Use 'end' for the last position in the horizon
         node1 = Node within the pos1 step (default='end')
         node2 = Node within the pos2 step (default='end')        
         '''
@@ -311,7 +313,14 @@ class GEKKO(object):
             if pos1==None:
                var1.__dict__['_override_csv'].append((0,var2))
             else:
-               var1.__dict__['_override_csv'].append((pos1,var2))            
+               # catch case when 'end' is given as pos1 instead of an integer
+               if pos1=='end':  # only override_csv if integer pos1
+                  if self.time is not None:
+                     var1.__dict__['_override_csv'].append((len(self.time)-1,var2))
+                  else:
+                     print('Warning: Specify m.time before connecting to end node')
+               else:
+                  var1.__dict__['_override_csv'].append((pos1,var2))    
 
     def fix(self,var, val=None, pos=None):
         '''Fix a variable at a specific value so that the solver cannot adjust the
@@ -329,6 +338,40 @@ class GEKKO(object):
         over all horizon nodes.
         '''
         self.Connection(var,var2=val,pos1=pos)
+        
+    def fix_initial(self,var,val=None):
+        '''Fix the initial condition of a variable so the solver cannot adjust it.
+        
+        fix_initial(var,val=None)
+        
+        Inputs:
+          var = variable to fix
+          val = specified value or None to use default
+        
+        The var variable must be a Gekko Parameter or Variable. When val==None,
+        the current default value is retained. The value is fixed only at the
+        initial condition. If no val is given, the value from the time shift is used.
+        
+        Variables have fixed initial conditions by default. An example of when this
+        function is needed is after a call to the function free but when the initial
+        condition should still be fixed.
+        '''
+        self.Connection(var,var2=val,pos1=1,node1=1)
+        
+    def fix_final(self,var,val=None):
+        '''Fix the final condition of a variable so the solver cannot adjust it.
+        
+        fix_final(var,val=None)
+        
+        Inputs:
+          var = variable to fix
+          val = specified value or None to use default
+        
+        The var variable must be a Gekko Parameter or Variable. When val==None,
+        the current default value is retained. The value is fixed only at the
+        initial condition. If no val is given, the value from the time shift is used.
+        '''
+        self.Connection(var,var2=val,pos1='end',node1='end')
 
     def free(self,var, pos=None):
         '''Free a variable so that the solver can calculate the value to
@@ -556,10 +599,7 @@ class GEKKO(object):
             raise TypeError("etype must start with either, '=', '<', or '>'")
 
         #convert data to flat numpy arrays
-        if sparse:
-            A = np.array(A,dtype=float).T
-        else:
-            A = np.array(A,dtype=float)
+        A = np.array(A,dtype=float).T
         b = np.array(b,dtype=float).T
         if sparse:
             m = np.size(b,0)
@@ -2001,24 +2041,26 @@ class GEKKO(object):
             sselect = False
 
             # Calls apmonitor through the command line
+            dirname = os.path.dirname(os.path.realpath(__file__))
+            penv = {"PATH" : self._path }
             if sys.platform=='win32' or sys.platform=='win64': # Windows 32 or 64 bit
-                apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm.exe')
+                apm_exe = os.path.join(dirname,'bin','apm.exe')
                 if not ipython:
                     sselect = True  # set shell=False for IPython
             elif sys.platform=='darwin': # MacOS
-                apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm_mac')                
+                apm_exe = os.path.join(dirname,'bin','apm_mac')                
             elif sys.platform=='linux' or sys.platform=='linux2': # Linux
                 if os.uname()[4].startswith("arm"): # ARM processor (Raspberry Pi)
-                    apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm_arm')
+                    apm_exe = os.path.join(dirname,'bin','apm_arm')
                 else: # Other Linux
-                    apm_exe = os.path.join(os.path.dirname(os.path.realpath(__file__)),'bin','apm')
+                    apm_exe = os.path.join(dirname,'bin','apm')
             else:
                 platform = 0
                 raise Exception('Platform '+sys.platform+' not supported for local solve, set remote=True')
 
             app = subprocess.Popen([apm_exe, self._model_name], stdout=subprocess.PIPE, \
                                    stderr=subprocess.PIPE, cwd = self._path, bufsize=4096, \
-                                   env = {"PATH" : self._path }, universal_newlines=True, shell=sselect)
+                                   env = penv, universal_newlines=True, shell=sselect)
 
             if debug<=1:
                 if ver == 2:  # Python 2 doesn't have timeout

@@ -29,7 +29,7 @@ class GKParameter(GK_Operators):
     """Represents a parameter in a model."""
     counter = 1
 
-    def __init__(self, name='', value=None, integer=False):
+    def __init__(self, name='', value=None, lb=None, ub=None, integer=False):
         if name == '':
             name = 'p' + GKParameter.counter
             GKParameter.counter += 1
@@ -41,12 +41,28 @@ class GKParameter(GK_Operators):
         # sent if changed from their defaults
         self.__dict__['_initialized'] = False
         
+        #register fixed values through connections to ensure consistency in the 
+        #csv file, otherwise the requested fixed value will be overridden by
+        #whatever initialization value is in the csv
+        #self._override_csv = []        
+        self._override_csv = []
+                
         GK_Operators.__init__(self, name, value=value)
 
         #self.VALUE = value #initialized value SET IN GK_Operators
             
         if not hasattr(self,'type'): #don't overwrite FV and MV
             self.type = None 
+       
+        # parameters can have lower and upper bounds       
+        if lb is not None:
+            self.LOWER = lb
+        else:
+            self.LOWER = None
+        if ub is not None:
+            self.UPPER = ub
+        else:
+            self.UPPER = None
         
         # now allow options to be sent to the server
         self._initialized = True
@@ -121,7 +137,6 @@ class GK_FV(GKParameter):
         if not hasattr(self,'type'): #don't overwrite MV
             self.type = 'FV'
         self.model_name = gk_model
-        #self.path = os.path.join(os.path.dirname(os.path.realpath(__file__)), self.model_name) OLD from when model file were in the same directory; now using temp files
         self.path = model_path #use the same path as the model 
         
         # FV options
@@ -130,25 +145,17 @@ class GK_FV(GKParameter):
         self.DMAXHI = None
         self.DMAXLO = None
         self.FSTATUS = None
-        if lb is not None:
-            self.LOWER = lb
-        else:
-            self.LOWER = None
         self.LSTVAL = None
         self.MEAS = None
         self.NEWVAL = None
         self.PSTATUS = None
         self.STATUS = None
-        if ub is not None:
-            self.UPPER = ub
-        else:
-            self.UPPER = None
         self.VDVL = None
         self.VLACTION = None
         self.VLHI = None
         self.VLLO = None
        
-        GKParameter.__init__(self, name=name, value=value, integer=integer)
+        GKParameter.__init__(self, name=name, value=value, lb=None, ub=None, integer=integer)
 
 
     def meas(self,measurement):
@@ -199,11 +206,6 @@ class GK_MV(GK_FV):
         self.PRED = None
         self.REQONCTRL = None
         self.TIER = None
-
-        #register fixed values through connections to ensure consistency in the 
-        #csv file, otherwise the requested fixed value will be overridden by
-        #whatever initialization value is in the csv
-        self._override_csv = []
         
         
         GK_FV.__init__(self, name=name, value=value, lb=lb, ub=ub, gk_model=gk_model, model_path=model_path, integer=integer)
