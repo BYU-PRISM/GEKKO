@@ -389,6 +389,32 @@ class GEKKO(object):
         '''
         self.Connection(var,var2='calculated',pos1=pos)
 
+    def free_initial(self,var):
+        '''Free the initial condition of a variable so the solver can adjust it.
+        
+        free_initial(var)
+        
+        Inputs:
+          var = variable to free
+        
+        The var variable must be a Gekko Parameter or Variable.
+        
+        Variables have fixed initial conditions by default.
+        '''
+        self.Connection(var,var2='calculated',pos1=1,node1=1)
+        
+    def free_final(self,var):
+        '''Free the final condition of a parameter so the solver can adjust it.
+        
+        free_final(var)
+        
+        Inputs:
+          var = variable to free
+        
+        The var variable must be a Gekko Parameter or Variable.
+        '''
+        self.Connection(var,var2='calculated',pos1='end',node1='end')
+
     #%% Objects
     # There isn't generalized syntax for objects, so each one is added individually
 
