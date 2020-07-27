@@ -383,9 +383,7 @@ class GEKKO(object):
           var = variable to free (calculate)
           pos = position within the horizon or None for all
         
-        The var variable must be a Gekko Parameter or Variable. When val==None,
-        the current default value is retained. When pos==None, the value is fixed
-        over all horizon nodes.
+        The var variable must be a Gekko Parameter or Variable.
         '''
         self.Connection(var,var2='calculated',pos1=pos)
 
@@ -399,7 +397,9 @@ class GEKKO(object):
         
         The var variable must be a Gekko Parameter or Variable.
         
-        Variables have fixed initial conditions by default.
+        Variables have fixed initial conditions by default. The default to free
+        the initial condition is also available when declaring the variable as
+            x = m.Var(fixed_initial=False)
         '''
         self.Connection(var,var2='calculated',pos1=1,node1=1)
         
