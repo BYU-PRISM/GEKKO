@@ -109,8 +109,7 @@ Model Building
 
         m.Equation( v == x.dt() )
 
-    Discretization is determined by the model `time` attribute. For example, `m.time = [0,1,2,3]` will discretize all equations and variable at the 4 points specified. Time or space discretization is available with Gekko, but not both. If the model contains a partial differential equation, the discretization in the other dimensions is performed with Gekko array operations as shown in the 
-`hyperbolic and parabolic PDE Gekko examples <https://apmonitor.com/do/index.php/Main/PartialDifferentialEquations>`_.
+    Discretization is determined by the model `time` attribute. For example, `m.time = [0,1,2,3]` will discretize all equations and variable at the 4 points specified. Time or space discretization is available with Gekko, but not both. If the model contains a partial differential equation, the discretization in the other dimensions is performed with Gekko array operations as shown in the `hyperbolic and parabolic PDE Gekko examples <https://apmonitor.com/do/index.php/Main/PartialDifferentialEquations>`_.
 
 .. py:classmethod::    a = m.Array(type,dimension,**args)
 
@@ -181,7 +180,7 @@ Model Building
     but will not appear in the solution files.
     
     The position is 0-index and the last position is `len(m.time)-1`. Alternatively, the
-    `end` string can be used for either the position or node. `Additional node documentation
+    `end` string can be used for either the position or node. Additional documentation
     is available in the `APMonitor documentation on Nodes <https://apmonitor.com/wiki/index.php/Main/OptionApmNodes>`_.
 
 
@@ -204,21 +203,63 @@ Model Building
     The ``fix`` function calls the ``Connection`` function with ``var2`` as a static value (``val``) and adds
     the ``fixed`` specification.
 
-.. py:classmethod:: m.free(var,pos=None)
+.. py:classmethod:: m.fix_initial(var)
 
-    Fix a variable at a specific value so that the solver cannot adjust the value::
+    Fix a variable at the initial condition so that the solver cannot adjust the value::
 
-        fix(var,val=None,pos=None)
+        fix_initial(var,value=None)
         
     Inputs:
 
-        * var = variable to fix
-        * pos = position within the horizon or None for all
+        * var = variable to fix at initial condition
+        * val = specified value or None to use default
+
+.. py:classmethod:: m.fix_final(var)
+
+    Fix a variable at the final time point in the horizon so that the solver cannot adjust the value::
+
+        fix_final(var,value=None)
+        
+    Inputs:
+
+        * var = variable to fix at the final time point
+        * val = specified value or None to use default
+
+.. py:classmethod:: m.free(var,pos=None)
+
+    Free a variable at a specific position so that the solver can adjust the value::
+
+        free(var,pos=None)
+        
+    Inputs:
+
+        * var = variable to free
+        * pos = position within the horizon or ``None`` for all
         
     The ``var`` variable must be a Gekko Parameter or Variable. When ``pos==None``, the value is calculated
     over all horizon nodes.
 
     The ``free`` function calls the ``Connection`` function with ``var2`` with the string ``calculated``.
+
+.. py:classmethod:: m.free_initial(var)
+
+    Free a variable at the initial condition so that the solver can adjust the value::
+
+        free_initial(var)
+        
+    Inputs:
+
+        * var = variable to free at initial condition
+
+.. py:classmethod:: m.free_final(var)
+
+    Free a variable at the final time point in the horizon so that the solver can adjust the value::
+
+        free_final(var)
+        
+    Inputs:
+
+        * var = variable to free at the final time point
 
 .. py:attribute::   m.solver_options
 
