@@ -3,8 +3,10 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+- Added documentation for `fix_initial`, `free_initial`, `fix_final`, and `free_final`.
 
 ### Changed
+- Updated documentation for `Connection`
 
 ## [v0.2.7]
 ### Added
