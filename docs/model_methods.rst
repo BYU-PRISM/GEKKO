@@ -179,6 +179,10 @@ Model Building
     Any other references to the connected value are referred to the principal variable (`var1`).
     The alias variable (`var2`) can be referenced in other parts of the model,
     but will not appear in the solution files.
+    
+    The position is 0-index and the last position is `len(m.time)-1`. Alternatively, the
+    `end` string can be used for either the position or node. `Additional node documentation
+    is available in the `APMonitor documentation on Nodes <https://apmonitor.com/wiki/index.php/Main/OptionApmNodes>`_.
 
 
 .. py:classmethod:: m.fix(var,val=None,pos=None)
