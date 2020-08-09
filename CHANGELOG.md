@@ -8,7 +8,7 @@ All notable changes to the GEKKO project are documented in this file.
 ### Changed
 - Updated documentation for `Connection`
 
-## [v0.2.7]
+## [v0.2.7] - Version 0.2.7 Stable Release, Date: 2020-08-05
 ### Added
 - New functions `fix_initial`, `free_initial`, `fix_final` to help with specifying degrees of freedom for common changes to the default fixed / free specifications.
 - Additional documentation for modes of operation
