@@ -3,10 +3,16 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+## [v0.2.8] - Version 0.2.8 Stable Release, Date: 2020-08-11
+### Added
 - Added documentation for `fix_initial`, `free_initial`, `fix_final`, and `free_final`.
 
 ### Changed
 - Updated documentation for `Connection`
+- Fixed bug with `lb` and `ub` not used by FVs and MVs during declaration 
 
 ## [v0.2.7] - Version 0.2.7 Stable Release, Date: 2020-08-05
 ### Added
@@ -155,7 +161,8 @@ All notable changes to the GEKKO project are documented in this file.
 ## 0.0.1a1 - Version 0.0.1 Alpha 1, Date: 2018-01-05
 ### Initial GEKKO public release, alpha version
 
-[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.7...HEAD
+[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.8...HEAD
+[v0.2.8]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.7...v0.2.8
 [v0.2.7]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.6...v0.2.7
 [v0.2.6]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.5...v0.2.6
 [v0.2.5]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.4...v0.2.5
