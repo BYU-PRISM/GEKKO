@@ -155,7 +155,7 @@ class GK_FV(GKParameter):
         self.VLHI = None
         self.VLLO = None
        
-        GKParameter.__init__(self, name=name, value=value, lb=None, ub=None, integer=integer)
+        GKParameter.__init__(self, name=name, value=value, lb=lb, ub=ub, integer=integer)
 
 
     def meas(self,measurement):
