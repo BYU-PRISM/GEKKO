@@ -50,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'GEKKO'
-copyright = u'2019, Logan Beal, John Hedengren'
+copyright = u'2020, Logan Beal, John Hedengren'
 author = u'Logan Beal, John Hedengren'
 
 # The version info for the project you're documenting, acts as replacement for
