@@ -135,10 +135,11 @@ Model Building
         for j in range(p):
            z[j] = m.Intermediate(sum([x[i,j] for i in range(n)]))
         # objective
-        m.Obj(sum([z[j]**2 + y for j in range(p)]))
+        m.Obj(sum([ (z[j]-1)**2 + y for j in range(p)]))
         # minimize objective
         m.solve()
-        print(x)
+        print('x:', x)
+	print('z:', z)
 
 .. py:classmethod:: m.solve(disp=True,debug=False)
 
