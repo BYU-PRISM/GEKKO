@@ -5,6 +5,8 @@ All notable changes to the GEKKO project are documented in this file.
 ### Added
 
 ### Changed
+- Fixed bug with `axb` function executable. The `b` dense to sparse function used a dimension for `A` rows instead of `A` columns.
+- Bug fixes and GitHub issue resolutions for release 1.0.0 of `apm` executable and `gekko`.
 
 ## [v0.2.8] - Version 0.2.8 Stable Release, Date: 2020-08-11
 ### Added
