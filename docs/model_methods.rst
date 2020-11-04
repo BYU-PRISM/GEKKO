@@ -16,7 +16,9 @@ Model Building
 	Creates a GEKKO model `m`.
 
 	If `remote` is `True`, the problem is sent to `self.server` to be solved. If `False`, GEKKO looks for local binaries of APMonitor.
-
+	
+	`gcc 9+` libraries are required when solving locally with `remote=False` on MacOS. This can be obtained with `brew install gcc` or `brew upgrade gcc`.
+	Certain solver options are not available for local solve because of distribution restrictions and the requirement for solver licenses.
 
 .. py:classmethod::    c =  m.Const(value, [name])
 
