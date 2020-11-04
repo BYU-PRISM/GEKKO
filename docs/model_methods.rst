@@ -865,7 +865,7 @@ These are GEKKO model attributes used internally. They are not intended for exte
 
 .. py:attribute::   server
 
-    String representation of the server url where the model is solved. The default is 'http://xps.apmonitor.com'. This is set by the optional argument `server` when intializing a model.
+    String representation of the server url where the model is solved. The default is 'http://byu.apmonitor.com'. This is set by the optional argument `server` when intializing a model.
 
 .. py:attribute::   remote
 
