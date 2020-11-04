@@ -625,9 +625,14 @@ class GEKKO(object):
             raise TypeError("etype must start with either, '=', '<', or '>'")
 
         #convert data to flat numpy arrays
-        A = np.array(A,dtype=float).T
+        A = np.array(A,dtype=float)
+        print('A')
+        print(A)
         b = np.array(b,dtype=float).T
+        print('b')
+        print(b)
         if sparse:
+            A = A.T
             m = np.size(b,0)
             n = np.size(b,1)
             if (n!=2):
@@ -650,7 +655,7 @@ class GEKKO(object):
             # dense matrix check
             r_max = np.size(A,0)
             c_max = np.size(A,1)
-            if ((not sparse) and np.size(b)!=r_max):
+            if (np.size(b)!=r_max):
                 raise Exception('The number of A matrix rows and b vector size must be the same')
 
         if x==None:
@@ -681,7 +686,7 @@ class GEKKO(object):
             fid.write('dense, ')
         fid.write('Ax'+etype[0]+'b\n')
         fid.write(str(int(r_max)) + ' ! m = number of rows of A and b size \n')
-        fid.write(str(int(r_max)) + ' ! n = number of cols of A and x size \n')
+        fid.write(str(int(c_max)) + ' ! n = number of cols of A and x size \n')
         fid.close()
         self._extra_files.append(filename)
 
