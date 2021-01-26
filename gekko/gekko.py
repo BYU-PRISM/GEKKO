@@ -2144,10 +2144,10 @@ class GEKKO(object):
                         file = f.read()
                     cmd(self._server, self._model_name, extension+' '+file)
 
-
-            #clear apm and csv files already on the server
+            #clear .apm, .csv, measurements.dbs files already on the server
             cmd(self._server,self._model_name,'clear apm')
             cmd(self._server,self._model_name,'clear csv')
+            cmd(self._server,self._model_name,'clear meas')
 
             #send model file
             with open(os.path.join(self._path,self._model_name + '.apm')) as f:
@@ -2160,7 +2160,8 @@ class GEKKO(object):
             #send dbs file
             with open(os.path.join(self._path,'measurements.dbs')) as f:
                 dbs = f.read()
-            cmd(self._server, self._model_name, 'option '+dbs)
+            # write to measurements.dbs (meas) instead of overrides.dbs (option)
+            cmd(self._server, self._model_name, 'meas '+dbs)
             #solver options
             if self.solver_options:
                 opt_file=self._write_solver_options()
