@@ -1527,8 +1527,12 @@ class GEKKO(object):
         """
         #check for numpy array
         if isinstance(x, np.ndarray):
-            if len(str(y))<15000:
-                return y
+            if len(x)<=1000:
+                y = sum(x)
+                if len(str(y))<15000:
+                    return y
+                else:
+                    x = list(x)
             else:
                 x = list(x)
 
