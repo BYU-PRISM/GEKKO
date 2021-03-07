@@ -206,7 +206,7 @@ Model Building
     The ``fix`` function calls the ``Connection`` function with ``var2`` as a static value (``val``) and adds
     the ``fixed`` specification.
 
-.. py:classmethod:: m.fix_initial(var)
+.. py:classmethod:: m.fix_initial(var,value=None)
 
     Fix a variable at the initial condition so that the solver cannot adjust the value::
 
@@ -217,7 +217,7 @@ Model Building
         * var = variable to fix at initial condition
         * val = specified value or None to use default
 
-.. py:classmethod:: m.fix_final(var)
+.. py:classmethod:: m.fix_final(var,value=None)
 
     Fix a variable at the final time point in the horizon so that the solver cannot adjust the value::
 
