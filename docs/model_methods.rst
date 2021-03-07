@@ -559,14 +559,17 @@ Pre-built Objects
 
 Pre-built objects are common model constructs that facilitate data analysis, regression, and model building. `Additional object documentation <https://apmonitor.com/wiki/index.php/Main/Objects>`_ gives insight on the supported objects as well as examples for building other custom objects or libraries. Other object libraries are the :ref:`chemical` and :ref:`brain` Library. Additional object libraries are under development.
 
-.. py:classmethod:: y,u = arx(p,y=[],u=[])
+.. py:classmethod:: y,u = arx(p,y=None,u=None)
 
-	Build a GEKKO model from ARX representation.
-	Inputs:
+        Build a GEKKO model from ARX representation.
+	
+    Inputs:
            * parameter dictionary p['a'], p['b'], p['c']
            * a (coefficients for a polynomial, na x ny)
            * b (coefficients for b polynomial, ny x (nb x nu))
            * c (coefficients for output bias, ny)
+           * y (Optioanl: Controlled Variable Array)
+           * u (Optional: Manipulated Variable Array)
 	   
 .. py:classmethod:: x = axb(A,b,x=None,etype='=',sparse=False)
 
@@ -574,7 +577,7 @@ Pre-built objects are common model constructs that facilitate data analysis, reg
     
         Usage: x = m.axb(A,b,etype='=,<,>,<=,>=',sparse=[True,False])
 	
-    Input: 
+    Inputs: 
     	* A = numpy 2D array or list in dense or sparse form
        	* b = numpy 1D array or list in dense or sparse form
        	* x = 1D array of gekko variables (optional). If None on entry then the array is created and returned.
