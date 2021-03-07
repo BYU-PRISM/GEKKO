@@ -559,7 +559,7 @@ Pre-built Objects
 
 Pre-built objects are common model constructs that facilitate data analysis, regression, and model building. `Additional object documentation <https://apmonitor.com/wiki/index.php/Main/Objects>`_ gives insight on the supported objects as well as examples for building other custom objects or libraries. Other object libraries are the :ref:`chemical` and :ref:`brain` Library. Additional object libraries are under development.
 
-.. py:classmethod:: y,u = arx(p)
+.. py:classmethod:: y,u = arx(p,y=[],u=[])
 
 	Build a GEKKO model from ARX representation.
 	Inputs:
