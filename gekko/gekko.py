@@ -12,7 +12,6 @@ from .gk_parameter import GKParameter, GK_MV, GK_FV
 from .gk_variable import GKVariable, GK_CV, GK_SV
 from .gk_operators import GK_Operators, GK_Intermediate
 from itertools import count
-from .gk_gui import GK_GUI
 
 #%% Python version compatibility
 ver = sys.version_info[0]
@@ -2240,6 +2239,7 @@ class GEKKO(object):
         if self._gui_open:
             self.gui.update()
         elif GUI is True:
+            from .gk_gui import GK_GUI
             self._gui_open = True
             self.gui = GK_GUI(self._path)
             self.gui.display()
@@ -2364,5 +2364,6 @@ class GEKKO(object):
 
     def GUI(self):
         if not self._gui_open:
+            from .gk_gui import GK_GUI
             self.gui = GK_GUI(self._path)
             self.gui.display()
