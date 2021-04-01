@@ -8,10 +8,11 @@ import sys
 import threading
 import webbrowser
 
-
-from flask import Flask, jsonify, redirect
-
-from flask_cors import CORS
+try:
+    from flask import Flask, jsonify, redirect
+    from flask_cors import CORS
+except:
+    raise Exception("Install flask to use Gekko GUI with 'pip install flask flask-cors'")
 
 from .gk_operators import GK_Intermediate
 from .gk_parameter import GKParameter, GK_MV, GK_FV
