@@ -541,34 +541,34 @@ class GEKKO(object):
         self._objects.append(arx_name + ' = arx')
         
         # write arx object config file objectname.txt
-        file_name = arx_name + '.txt'
-        file_data = ''
-        file_data += str(nu) + ' !inputs \n'
-        file_data += str(ny) + ' !outputs \n'
-        file_data += str(nb) + ' !number of input terms \n'
-        file_data += str(na) + ' !number of output terms \n'
-        with open(os.path.join(self._path,file_name), 'w+') as f:
-            f.write(file_data)
-        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+        filename = arx_name + '.txt'
+        filedata = ''
+        filedata += str(nu) + ' !inputs \n'
+        filedata += str(ny) + ' !outputs \n'
+        filedata += str(nb) + ' !number of input terms \n'
+        filedata += str(na) + ' !number of output terms \n'
+        with open(os.path.join(self._path,filename), 'w+') as f:
+            f.write(filedata)
+        self._extra_files.append(filename) #add csv file to list of extra file to send to server
          
         #write A,B matricies to objectname.A/B.txt
-        file_name = arx_name + '.alpha.txt'
-        np.savetxt(os.path.join(self._path,file_name), a, delimiter=", ", fmt='%1.25s')
-        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
-        file_name = arx_name + '.beta.txt'
+        filename = arx_name + '.alpha.txt'
+        np.savetxt(os.path.join(self._path,filename), a, delimiter=", ", fmt='%1.25s')
+        self._extra_files.append(filename) #add csv file to list of extra file to send to server
+        filename = arx_name + '.beta.txt'
         if b.ndim==2:
             #write once for 2D array
-            np.savetxt(os.path.join(self._path,file_name), b, delimiter=", ", fmt='%1.25s')
+            np.savetxt(os.path.join(self._path,filename), b, delimiter=", ", fmt='%1.25s')
         elif b.ndim==3:
             #open file in binary mode to append for 3D array
-            f=open(os.path.join(self._path,file_name),'ab')
+            f=open(os.path.join(self._path,filename),'ab')
             for i in range(ny):
                 np.savetxt(f, b[i], delimiter=", ", fmt='%1.25s')
             f.close()
-        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
-        file_name = arx_name + '.gamma.txt'
-        np.savetxt(os.path.join(self._path,file_name), c, delimiter=", ", fmt='%1.25s')
-        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+        self._extra_files.append(filename) #add csv file to list of extra file to send to server
+        filename = arx_name + '.gamma.txt'
+        np.savetxt(os.path.join(self._path,filename), c, delimiter=", ", fmt='%1.25s')
+        self._extra_files.append(filename) #add csv file to list of extra file to send to server
         
         #define arrays of states, outputs and inputs
         if isinstance(y,(GKVariable,GKParameter)):
@@ -677,8 +677,8 @@ class GEKKO(object):
         self._objects.append(axb_name + ' = axb')
 
         # write header file
-        filename = os.path.join(self._path,axb_name+'.txt')
-        fid = open(filename,'w')
+        filename = axb_name+'.txt'
+        fid = open(os.path.join(self._path,filename),'w')
         if sparse:
             fid.write('sparse, ')
         else:
@@ -854,13 +854,13 @@ class GEKKO(object):
         self._objects.append(cspline_name + ' = cspline')
 
         #write x_data and y_data to objectname.csv
-        file_name = cspline_name + '.csv'
+        filename = cspline_name + '.csv'
         csv_data = np.hstack(('x_data',x_data.astype(object)))
         csv_data = np.vstack((csv_data,np.hstack(('y_data',y_data.astype(object)))))
-        np.savetxt(os.path.join(self._path,file_name), csv_data.T, delimiter=",", fmt='%1.25s')
+        np.savetxt(os.path.join(self._path,filename), csv_data.T, delimiter=",", fmt='%1.25s')
 
         #add csv file to list of extra file to send to server
-        self._extra_files.append(file_name)
+        self._extra_files.append(filename)
 
         #Add connections between x and y with cspline object data
         self._connections.append(x.name + ' = ' + cspline_name+'.x_data')
@@ -1158,12 +1158,12 @@ class GEKKO(object):
         self._objects.append(pwl_name + ' = pwl')
 
         #write x_data and y_data to objectname.txt
-        file_name = pwl_name + '.txt'
+        filename = pwl_name + '.txt'
         data = np.vstack((x_data,y_data))
-        np.savetxt(os.path.join(self._path,file_name), data.T, delimiter=",", fmt='%1.25s')
+        np.savetxt(os.path.join(self._path,filename), data.T, delimiter=",", fmt='%1.25s')
 
         #add txt file to list of extra file to send to server
-        self._extra_files.append(file_name)
+        self._extra_files.append(filename)
 
         #Add connections between x and y with pwl object data
         self._connections.append(x.name + ' = ' + pwl_name+'.x')
@@ -1262,8 +1262,8 @@ class GEKKO(object):
         self._objects.append(qobj_name + ' = qobj')
 
         # write header file
-        filename = os.path.join(self._path,qobj_name+'.txt')
-        fid = open(filename,'w')
+        filename = qobj_name+'.txt'
+        fid = open(os.path.join(self._path,filename),'w')
         if sparse:
             fid.write('sparse, ')
         else:
@@ -1278,13 +1278,13 @@ class GEKKO(object):
 
         # write A file
         if (len(A)>=1):
-            filename = os.path.join(self._path,qobj_name+'.a.txt')
-            np.savetxt(filename, A, delimiter=",", fmt='%1.25s')
+            filename = qobj_name+'.a.txt'
+            np.savetxt(os.path.join(self._path,filename), A, delimiter=",", fmt='%1.25s')
             self._extra_files.append(qobj_name+'.a.txt')
 
         # write b file
-        filename = os.path.join(self._path,qobj_name+'.b.txt')
-        np.savetxt(filename, b, delimiter=",", fmt='%1.25s')
+        filename = qobj_name+'.b.txt'
+        np.savetxt(os.path.join(self._path,filename), b, delimiter=",", fmt='%1.25s')
         self._extra_files.append(qobj_name+'.b.txt')
 
         #Add connections between x and qobj object x (index 1)
@@ -1421,86 +1421,86 @@ class GEKKO(object):
         self._objects.append(SS_name + ' = lti')
 
         # write lti object config file objectname.txt
-        file_name = SS_name + '.txt'
+        filename = SS_name + '.txt'
         if dense is True:
-            file_data = 'dense, '
+            filedata = 'dense, '
         else:
-            file_data = 'sparse, '
+            filedata = 'sparse, '
         if discrete is False:
-            file_data += 'continuous \n'
+            filedata += 'continuous \n'
         else:
-            file_data += 'discrete \n'
-        file_data += str(m) + ' !inputs \n'
-        file_data += str(n) + ' !states \n'
-        file_data += str(p) + ' !outputs \n'
-        with open(os.path.join(self._path,file_name), 'w+') as f:
-            f.write(file_data)
-        self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+            filedata += 'discrete \n'
+        filedata += str(m) + ' !inputs \n'
+        filedata += str(n) + ' !states \n'
+        filedata += str(p) + ' !outputs \n'
+        with open(os.path.join(self._path,filename), 'w+') as f:
+            f.write(filedata)
+        self._extra_files.append(filename) #add csv file to list of extra file to send to server
 
         if dense is True:
             #write A,B,C,[D,E] matricies to objectname.A/B/C/D/E.txt
-            file_name = SS_name + '.a.txt'
-            np.savetxt(os.path.join(self._path,file_name), A, delimiter=" ", fmt='%1.25s')
-            self._extra_files.append(file_name) #add csv file to list of extra file to send to server
-            file_name = SS_name + '.b.txt'
-            np.savetxt(os.path.join(self._path,file_name), B, delimiter=" ", fmt='%1.25s')
-            self._extra_files.append(file_name) #add csv file to list of extra file to send to server
-            file_name = SS_name + '.c.txt'
-            np.savetxt(os.path.join(self._path,file_name), C, delimiter=" ", fmt='%1.25s')
-            self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+            filename = SS_name + '.a.txt'
+            np.savetxt(os.path.join(self._path,filename), A, delimiter=" ", fmt='%1.25s')
+            self._extra_files.append(filename) #add csv file to list of extra file to send to server
+            filename = SS_name + '.b.txt'
+            np.savetxt(os.path.join(self._path,filename), B, delimiter=" ", fmt='%1.25s')
+            self._extra_files.append(filename) #add csv file to list of extra file to send to server
+            filename = SS_name + '.c.txt'
+            np.savetxt(os.path.join(self._path,filename), C, delimiter=" ", fmt='%1.25s')
+            self._extra_files.append(filename) #add csv file to list of extra file to send to server
             if D is not None:
-                file_name = SS_name + '.d.txt'
-                np.savetxt(os.path.join(self._path,file_name), D, delimiter=" ", fmt='%1.25s')
-                self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+                filename = SS_name + '.d.txt'
+                np.savetxt(os.path.join(self._path,filename), D, delimiter=" ", fmt='%1.25s')
+                self._extra_files.append(filename) #add csv file to list of extra file to send to server
             if E is not None:
-                file_name = SS_name + '.e.txt'
-                np.savetxt(os.path.join(self._path,file_name), E, delimiter=" ", fmt='%1.25s')
-                self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+                filename = SS_name + '.e.txt'
+                np.savetxt(os.path.join(self._path,filename), E, delimiter=" ", fmt='%1.25s')
+                self._extra_files.append(filename) #add csv file to list of extra file to send to server
         else: #sparse form
         # (nx1) = (nxn)*(nx1) + (nxm)*(mx1)
         # (px1) = (pxn)*(nx1) + (pxm)*(mx1)
-            file_name = SS_name + '.a.txt'
+            filename = SS_name + '.a.txt'
             sparse_matrix = []
             for j in range(n):
                 for i in range(n):
                     if A[i,j] != 0:
                         sparse_matrix.append([i+1,j+1,A[i,j]])
-            np.savetxt(os.path.join(self._path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
-            self._extra_files.append(file_name) #add csv file to list of extra file to send to server
-            file_name = SS_name + '.b.txt'
+            np.savetxt(os.path.join(self._path,filename), sparse_matrix, delimiter=" ", fmt='%1.25s')
+            self._extra_files.append(filename) #add csv file to list of extra file to send to server
+            filename = SS_name + '.b.txt'
             sparse_matrix = []
             for j in range(m):
                 for i in range(n):
                     if B[i,j] != 0:
                         sparse_matrix.append([i+1,j+1,B[i,j]])
-            np.savetxt(os.path.join(self._path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
-            self._extra_files.append(file_name) #add csv file to list of extra file to send to server
-            file_name = SS_name + '.c.txt'
+            np.savetxt(os.path.join(self._path,filename), sparse_matrix, delimiter=" ", fmt='%1.25s')
+            self._extra_files.append(filename) #add csv file to list of extra file to send to server
+            filename = SS_name + '.c.txt'
             sparse_matrix = []
             for j in range(n):
                 for i in range(p):
                     if C[i,j] != 0:
                         sparse_matrix.append([i+1,j+1,C[i,j]])
-            np.savetxt(os.path.join(self._path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
-            self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+            np.savetxt(os.path.join(self._path,filename), sparse_matrix, delimiter=" ", fmt='%1.25s')
+            self._extra_files.append(filename) #add csv file to list of extra file to send to server
             if D is not None:
-                file_name = SS_name + '.d.txt'
+                filename = SS_name + '.d.txt'
                 sparse_matrix = []
                 for j in range(m):
                     for i in range(p):
                         if D[i,j] != 0:
                             sparse_matrix.append([i+1,j+1,D[i,j]])
-                np.savetxt(os.path.join(self._path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
-                self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+                np.savetxt(os.path.join(self._path,filename), sparse_matrix, delimiter=" ", fmt='%1.25s')
+                self._extra_files.append(filename) #add csv file to list of extra file to send to server
             if E is not None:
-                file_name = SS_name + '.e.txt'
+                filename = SS_name + '.e.txt'
                 sparse_matrix = []
                 for j in range(n):
                     for i in range(n):
                         if E[i,j] != 0:
                             sparse_matrix.append([i+1,j+1,E[i,j]])
-                np.savetxt(os.path.join(self._path,file_name), sparse_matrix, delimiter=" ", fmt='%1.25s')
-                self._extra_files.append(file_name) #add csv file to list of extra file to send to server
+                np.savetxt(os.path.join(self._path,filename), sparse_matrix, delimiter=" ", fmt='%1.25s')
+                self._extra_files.append(filename) #add csv file to list of extra file to send to server
 
         #define arrays of states, outputs and inputs
         x = [self.SV() for i in np.arange(n)]
@@ -2173,9 +2173,9 @@ class GEKKO(object):
             #extra files (eg solver.opt, cspline.data)
             for f_name in self._extra_files:
                 with open(os.path.join(self._path,f_name)) as f:
-                    extra_file_data = f.read() #read data
-                    extra_file_data = 'File ' + f_name + '\n' + extra_file_data + 'End File \n' #format for appending to apm file
-                cmd(self._server,self._model_name, ' '+extra_file_data)
+                    extra_filedata = f.read() #read data
+                    extra_filedata = 'File ' + f_name + '\n' + extra_filedata + 'End File \n' #format for appending to apm file
+                cmd(self._server,self._model_name, ' '+extra_filedata)
 
             #solve remotely
             response = cmd(self._server, self._model_name, 'solve', disp, debug)
