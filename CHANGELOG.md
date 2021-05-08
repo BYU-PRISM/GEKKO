@@ -10,6 +10,7 @@ All notable changes to the GEKKO project are documented in this file.
 - Fixed bug with `sum` function to detect when symbolic string length is over the limit of 15000 for `apm`. Use `sum` objective instead.
 - Bug fixes and GitHub issue resolutions for release 1.0.0 of `apm` executable and `gekko`.
 - Removed `flask` dependency on install. Only needed when `GUI=True`.
+- Fixed bug with `remote=True` with `axb` function not sending the summary file.
 
 ## [v0.2.8] - Version 0.2.8 Stable Release, Date: 2020-08-11
 ### Added
