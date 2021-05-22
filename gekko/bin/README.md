@@ -1,4 +1,4 @@
-The local executables are used when option remote=False when creating the Gekko model.
+The local executables are used when option `remote=False` when creating the Gekko model.
 
 ```python
 m = GEKKO(remote=False)
