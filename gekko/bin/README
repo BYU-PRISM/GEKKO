@@ -1,4 +1,4 @@
-The local executables are used when option remote=False when creating the Gekko model (e.g. m = GEKKO(remote=False)).
+The local executables are used when option remote=False when creating the Gekko model (e.g. `m = GEKKO(remote=False)`).
 Versions of the local executable include:
 
 - Windows (32 or 64 bit): apm.exe
