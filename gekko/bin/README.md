@@ -11,4 +11,4 @@ Versions of the local executable include:
 - MacOS (64 bit): apm_mac
 - Linux ARM (Raspberry Pi): apm_arm
 
-Set chmod u+x on Linux or MacOS to allow local execution, if there is a permission issue.
+Set `chmod u+x` on Linux or MacOS to allow local execution, if there is a permission issue.
