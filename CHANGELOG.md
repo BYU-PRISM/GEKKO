@@ -5,6 +5,13 @@ All notable changes to the GEKKO project are documented in this file.
 ### Added
 
 ### Changed
+
+## [v1.0.0] - Version 0.2.8 Stable Release, Date: 2020-08-11
+### Added
+- Updated local solve options for MacOS and Linux that do not include dependencies
+- APMonitor v1.0.0 for remote and local solves
+
+### Changed
 - Fixed bug with `axb` function executable. The `b` dense to sparse function used a dimension for `A` rows instead of `A` columns.
 - Updated with version 1.0.0 of `apm.exe` executable for Windows
 - Fixed bug with `sum` function to detect when symbolic string length is over the limit of 15000 for `apm`. Use `sum` objective instead.
@@ -167,7 +174,8 @@ All notable changes to the GEKKO project are documented in this file.
 ## 0.0.1a1 - Version 0.0.1 Alpha 1, Date: 2018-01-05
 ### Initial GEKKO public release, alpha version
 
-[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.8...HEAD
+[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.0...HEAD
+[v1.0.0]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.8...v1.0.0
 [v0.2.8]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.7...v0.2.8
 [v0.2.7]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.6...v0.2.7
 [v0.2.6]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.5...v0.2.6
