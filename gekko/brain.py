@@ -51,7 +51,7 @@ class Brain():
         #add input layer to list of layers
         self._layers.append(self.input)
 
-    def layer(self,linear=0,relu=0,tanh=0,gaussian=0,bent=0,leaky=0,ltype='dense'):
+    def layer(self,linear=0,relu=0,tanh=0, sigmoid=0, gaussian=0,bent=0,leaky=0,ltype='dense'):
         """
         Layer types:
             dense
@@ -66,7 +66,7 @@ class Brain():
             sigmoid
             linear
         """
-        size = relu + tanh + linear + gaussian + bent + leaky
+        size = relu + tanh + linear + gaussian + bent + leaky + sigmoid
         if size < 1:
             raise Exception("Need at least one node")
         
@@ -131,6 +131,11 @@ class Brain():
                     self.m.Equations([s[2*i]*s[2*i+1] == 0 for i in range(leaky)])
                     count += leaky
                     
+                if sigmoid > 0:
+                    self._layers[-1] += [self.m.Intermediate(1 / (1 + m.exp(-neuron_inputs[i]))) \
+                                         for i in range(count,count+sigmoid)]
+                    count += sigmoid
+                    
             
             else: #type=implicit
                  
@@ -183,6 +188,14 @@ class Brain():
                     [self.m.Obj(10000*s[2*i]*s[2*i+1]) for i in range(leaky)]
                     #self.m.Equations([s[2*i]*s[2*i+1] == 0 for i in range(leaky)])
                     count += leaky
+                    
+                if sigmoid > 0:
+                    self.m.Equations([neurons[i] == 1/ (1 + self.m.exp(-neuron_inputs[i])) \
+                                      for i in range(count,count+sigmoid)])
+                    for n in neurons[count:count+sigmoid]:
+                        n.LOWER = -5
+                        n.UPPER = 5
+                    count += sigmoid
                     
                     
         else:
