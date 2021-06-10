@@ -232,12 +232,16 @@ def _write_csv(self):
                 except ValueError:
                     raise Exception('All variable value arrays must be the same length (and match the length of model time in dynamic problems).')
 
-    #print(csv_data)
     #save array to csv
     if first_array == False: #no data
         self.csv_status = 'none'
     else:
-        np.savetxt(os.path.join(self._path,file_name), csv_data.T, delimiter=",", fmt='%1.25s')
+        # create header separately for potential long variable names >=25 in length
+        hdr = csv_data[0,0]
+        for i in range(1,np.size(csv_data,0)):
+            hdr += ','+csv_data[i,0]
+        np.savetxt(os.path.join(self._path,file_name), csv_data[:,1:].T,\
+                   delimiter=",",comments='',header=hdr,fmt='%1.25s')
         self.csv_status = 'generated'
 
 
