@@ -5,6 +5,7 @@ All notable changes to the GEKKO project are documented in this file.
 ### Added
 
 ### Changed
+- Big fix to `gk_write_file.py` for long variable or parameter names that were truncated at 25 characters. There is no limit to variable names now.
 
 ## [v1.0.0] - Version 0.2.8 Stable Release, Date: 2020-08-11
 ### Added
