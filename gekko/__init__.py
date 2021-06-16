@@ -5,4 +5,4 @@ from .gekko import GEKKO
 Gekko = GEKKO
 gekko = GEKKO
 
-__version__ = '1.0.0'
+__version__ = '1.0.1'
