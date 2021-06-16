@@ -2323,6 +2323,7 @@ class GEKKO(object):
     #  sqrt(x) square root
     #  tan(x) tangent
     #  tanh(x) hyperbolic tangent
+    #  sigmoid(x) sigmoid function
     def abs(self,other):
         return GK_Operators('abs('+str(other) + ')')
     def acos(self,other):
@@ -2361,7 +2362,9 @@ class GEKKO(object):
         return GK_Operators('tan(' + str(other) + ')')
     def tanh(self,other):
         return GK_Operators('tanh(' + str(other) + ')')
-
+    def sigmoid(self,other):
+        return GK_Operators('sigmd(' + str(other) + ')')
+        
     def GUI(self):
         if not self._gui_open:
             from .gk_gui import GK_GUI
