@@ -316,6 +316,10 @@ Special function besides algebraic operators are available through GEKKO functio
 
 .. py:classmethod:: m.sqrt(other)
 
+
+.. py:classmethod:: m.sigmoid(other)
+
+
 Logical Functions
 ------------------
 Traditional logical expressions such as if statements cannot be used in gradient based optimization because they create discontinuities in the problem derivatives.  The logical expressions built into Gekko provide a workaround by either using MPCC formulations (Type 2), or by introducing integer variables (Type 3).  Additionally, all Type 3 functions require a mixed integer solver such as APOPT (SOLVER=1) to solve, and **Gekko changes the solver to APOPT automatically if these functions are found in a model.** See additional information on `logical conditions in optimization <https://apmonitor.com/me575/index.php/Main/LogicalConditions>`_ and `if statements in Gekko <https://apmonitor.com/wiki/index.php/Main/ConditionalStatements>`_ for additional examples and explanations of the methods.
