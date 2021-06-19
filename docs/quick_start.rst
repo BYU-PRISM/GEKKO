@@ -159,10 +159,13 @@ Objectives
 ----------
 
 Objectives are defined like equations, except they must not be equality or inequality
-expressions. Objectives are always minimized (maximization is possible by multiplying
-the objective by -1)::
+expressions. Objectives with `m.Obj()` are minimized (maximization is possible by multiplying
+the objective by -1) or by using the `m.Maximize()` function. It is best practice to use 
+`m.Minimize()` or `m.Maximize()` for a more readable model.::
 
 	m.Obj(obj)
+	m.Minimize(obj)
+	m.Maximize(obj)
 
 
 Example
@@ -192,7 +195,7 @@ Here's an example script for solving problem `HS71 <https://youtu.be/SH753YX2K1A
     m.Equation(x1**2+x2**2+x3**2+x4**2==eq)
 
     #Objective
-    m.Obj(x1*x4*(x1+x2+x3)+x3)
+    m.Minimize(x1*x4*(x1+x2+x3)+x3)
 
     #Set global options
     m.options.IMODE = 3 #steady state optimization
