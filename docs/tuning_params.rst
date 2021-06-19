@@ -621,7 +621,7 @@ WSP
 
 Type: Real, Input
 
-Default Value: 1.0
+Default Value: 20.0
 
 Description: Objective function weight on set point for squared error model
 
@@ -635,7 +635,7 @@ WSPHI
 
 Type: Real, Input
 
-Default Value: 1.0
+Default Value: 20.0
 
 Description: Objective function weight on upper set point for linear error model
 
@@ -649,7 +649,7 @@ WSPLO
 
 Type: Real, Input
 
-Default Value: 1.0
+Default Value: 20.0
 
 Description: Objective function weight on lower set point for linear error model
 
