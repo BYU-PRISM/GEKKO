@@ -59,20 +59,44 @@ Estimation
 MPU
 ^^^
 
-Model Parameter Update (IMODE=2) is parameter estimation for non-dynamic data when the process is at steady-state. 
+Model Parameter Update (IMODE=2) is parameter estimation for non-dynamic data when the process is at steady-state. The same model instance is used for all data point sets that are rows in the data file. The purpose of MPU is to fit large data sets to the model and update parameters to match the predicted outcome with the measured outcome.  
 .. This mode implements the special variable types as follows:
 
-.. FV
-.. ""
+FV
+""
 
-.. MV
-.. ""
+Fixed variables are the same across all instances of the model that are calculated for each data row.
+
+`STATUS` adds one degree of freedom for the optimizer, i.e. a parameter to adjust for fitting the predicted outcome to measured values.
+
+`FSTATUS` allows a `MEAS` value to provide an initial guess (when `STATUS=1`) or a fixed measurement (when `STATUS=0`).
+
+MV
+""
+
+Manipulated variables are like FVs, but can change with each data row, either calculated by the optimizer (`STATUS=1`) or specified by the user (`STATUS=0`).
+
+`STATUS` adds one degree of freedom for each data row for the optimizer, i.e. an adjustable parameter that changes with each data row.
+
+`FSTATUS` allows a `MEAS` value to provide an initial guess (when `STATUS=1`) or a fixed measurement (when `STATUS=0`).
 
 .. SV
 .. ""
 
-.. CV
-.. ""
+CV
+""
+
+Controlled variables may include measurements that are aligned to model predicted values. A controlled variable
+in estimation mode has objective function terms (squared or l1-norm error equations) built-in to facilitate the alignment.
+
+If `FSTATUS` is on (`FSTATUS=1`), an objective function is added to minimize the
+model prediction to the measurements. The error is either squared or absolute depending
+on if `m.options.EV_TYPE` is 2 or 1, respectively. `FSTATUS` enables receiving measurements
+through the `MEAS` attribute.
+
+If `m.options.EV_TYPE = 1`, `CV.MEAS_GAP=v` will provide a dead-band of size `v` around the measurement to avoid fitting to measurement noise.
+
+`STATUS` is ignored in MPU.
 
 MHE
 ^^^
@@ -88,7 +112,7 @@ Fixed variables are fixed through the horizon.
 
 `STATUS` adds one degree of freedom for the optimizer, i.e. a fixed parameter for fit.
 
-`FSTATUS` allows giving a fixed measurement.
+`FSTATUS` allows a `MEAS` value to provide an initial guess (when `STATUS=1`) or a fixed measurement (when `STATUS=0`).
 
 
 MV
@@ -98,7 +122,7 @@ Manipulated variables are like FVs, but discretized with time.
 
 `STATUS` adds one degree of freedom for each time point for the optimizer, i.e. a dynamic parameter for fit.
 
-`FSTATUS` allows giving a measurements for each time.
+`FSTATUS` allows a `MEAS` value to provide an initial guess (when `STATUS=1`) or a fixed measurement (when `STATUS=0`).
 
 .. SV
 .. ""
