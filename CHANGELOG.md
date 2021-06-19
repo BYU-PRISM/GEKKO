@@ -9,7 +9,7 @@ All notable changes to the GEKKO project are documented in this file.
 ### Changed
 - Updated APM local and remote server to APM v1.0.1 for Windows, Linux, MacOS
 - Big fix to `gk_write_file.py` for long variable or parameter names that were truncated at 25 characters. There is no limit to variable names now.
-- Change default for WSP, WSPLO, WSPHI to 1.0 (from 20.0) to be consistent with APM
+- Change documentation default for WSP, WSPLO, WSPHI to 20.0 (from 1.0) to be consistent with APM
 
 ## [v1.0.0] - Version 0.2.8 Stable Release, Date: 2020-08-11
 ### Added
