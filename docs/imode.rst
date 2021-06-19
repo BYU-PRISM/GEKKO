@@ -140,7 +140,35 @@ through the `MEAS` attribute.
 
 If `m.options.EV_TYPE = 1`, `CV.MEAS_GAP=v` will provide a dead-band of size `v` around the measurement to avoid fitting to measurement noise.
 
-`STATUS` is ignored in MHE.
+`STATUS` is ignored in MHE. Example `IMODE=5` application::
+
+    from gekko import GEKKO
+    
+    t_data = [0, 0.1, 0.2, 0.4, 0.8, 1]
+    x_data = [2.0,  1.6,  1.2, 0.7,  0.3,  0.15]
+    
+    m = GEKKO(remote=False)
+    m.time = t_data
+    x = m.CV(value=x_data); x.FSTATUS = 1  # fit to measurement
+    k = m.FV(); k.STATUS = 1               # adjustable parameter
+    m.Equation(x.dt()== -k * x)            # differential equation
+    
+    m.options.IMODE = 5   # dynamic estimation
+    m.options.NODES = 5   # collocation nodes
+    m.solve(disp=False)   # display solver output
+    k = k.value[0]
+    
+    import numpy as np
+    import matplotlib.pyplot as plt  # plot solution
+    plt.plot(m.time,x.value,'bo',\
+             label='Predicted (k='+str(np.round(k,2))+')')
+    plt.plot(m.time,x_data,'rx',label='Measured')
+    # plot exact solution
+    t = np.linspace(0,1); xe = 2*np.exp(-k*t)
+    plt.plot(t,xe,'k:',label='Exact Solution')
+    plt.legend()
+    plt.xlabel('Time'), plt.ylabel('Value')
+    plt.show()
 
 
 Control
@@ -187,6 +215,58 @@ If `m.options.CV_TYPE=1`, the objective is an l1-norm (absolute error) with
 a dead-band. The setpoint range should be specified with `SPHI` and `SPLO`.
 If `m.options.CV_TYPE=2`, the objective is an l2-norm (squared error). The
 setpoint should be specified with `SP`.
+
+Example MPC (`IMODE=6`) application::
+
+    from gekko import GEKKO
+    import numpy as np
+    import matplotlib.pyplot as plt  
+    
+    m = GEKKO()
+    m.time = np.linspace(0,20,41)
+    
+    # Parameters
+    mass = 500
+    b = m.Param(value=50)
+    K = m.Param(value=0.8)
+    
+    # Manipulated variable
+    p = m.MV(value=0, lb=0, ub=100)
+    p.STATUS = 1  # allow optimizer to change
+    p.DCOST = 0.1 # smooth out gas pedal movement
+    p.DMAX = 20   # slow down change of gas pedal
+    
+    # Controlled Variable
+    v = m.CV(value=0)
+    v.STATUS = 1  # add the SP to the objective
+    m.options.CV_TYPE = 2 # squared error
+    v.SP = 40     # set point
+    v.TR_INIT = 1 # set point trajectory
+    v.TAU = 5     # time constant of trajectory
+    
+    # Process model
+    m.Equation(mass*v.dt() == -v*b + K*b*p)
+    
+    m.options.IMODE = 6 # control
+    m.solve(disp=False)
+    
+    # get additional solution information
+    import json
+    with open(m.path+'//results.json') as f:
+        results = json.load(f)
+    
+    plt.figure()
+    plt.subplot(2,1,1)
+    plt.plot(m.time,p.value,'b-',label='MV Optimized')
+    plt.legend()
+    plt.ylabel('Input')
+    plt.subplot(2,1,2)
+    plt.plot(m.time,results['v1.tr'],'k-',label='Reference Trajectory')
+    plt.plot(m.time,v.value,'r--',label='CV Response')
+    plt.ylabel('Output')
+    plt.xlabel('Time')
+    plt.legend(loc='best')
+    plt.show()
 
 The other setpoint options include
 :ref:`tau`,
