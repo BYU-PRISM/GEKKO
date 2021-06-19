@@ -89,8 +89,8 @@ This is a list of all available options for CVs and their default values:
 
     :ref:`wmodel` = 2.0
 
-    :ref:`wsp` = 1.0
+    :ref:`wsp` = 20.0
 
-    :ref:`wsphi` = 1.0
+    :ref:`wsphi` = 20.0
 
-    :ref:`wsplo` = 1.0
+    :ref:`wsplo` = 20.0
