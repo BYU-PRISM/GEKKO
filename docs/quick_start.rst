@@ -161,7 +161,7 @@ Objectives
 Objectives are defined like equations, except they must not be equality or inequality
 expressions. Objectives with `m.Obj()` are minimized (maximization is possible by multiplying
 the objective by -1) or by using the `m.Maximize()` function. It is best practice to use 
-`m.Minimize()` or `m.Maximize()` for a more readable model.::
+`m.Minimize()` or `m.Maximize()` for a more readable model::
 
 	m.Obj(obj)
 	m.Minimize(obj)
