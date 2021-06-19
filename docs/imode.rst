@@ -96,7 +96,7 @@ through the `MEAS` attribute.
 
 If `m.options.EV_TYPE = 1`, `CV.MEAS_GAP=v` will provide a dead-band of size `v` around the measurement to avoid fitting to measurement noise.
 
-`STATUS` is ignored in MPU.
+`STATUS` is ignored in MPU. Example applications with [parameter regression](http://apmonitor.com/wiki/index.php/Main/ParameterFit) and [oil price regression](https://apmonitor.com/me575/index.php/Main/NonlinearRegression) demonstrate the MPU mode.
 
 MHE
 ^^^
