@@ -50,8 +50,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'GEKKO'
-copyright = u'2021, John Hedengren, Logan Beal'
-author = u'John Hedengren, Logan Beal'
+copyright = u'2021, Logan Beal, John Hedengren'
+author = u'Logan Beal, John Hedengren'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -226,7 +226,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'GEKKO.tex', u'GEKKO Documentation',
-     u'John Hedengren, Logan Beal', 'manual'),
+     u'Logan Beal, John Hedengren', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
