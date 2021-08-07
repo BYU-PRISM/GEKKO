@@ -6,7 +6,7 @@ All notable changes to the GEKKO project are documented in this file.
 
 ### Changed
 
-## [v1.0.1]
+## [v1.0.1] - Version 1.0.1 Stable Release, Date: 2021-08-07
 ### Added
 - New sigmoid function `m.sigmoid()` in Gekko
 - New sigmoid function `sigmd(x)` in APMonitor with v1.0.1 release
@@ -16,7 +16,7 @@ All notable changes to the GEKKO project are documented in this file.
 - Big fix to `gk_write_file.py` for long variable or parameter names that were truncated at 25 characters. There is no limit to variable names now.
 - Change documentation default for WSP, WSPLO, WSPHI to 20.0 (from 1.0) to be consistent with APM
 
-## [v1.0.0] - Version 0.2.8 Stable Release, Date: 2020-08-11
+## [v1.0.0] - Version 1.0.0 Stable Release, Date: 2021-05-16
 ### Added
 - Updated local solve options for MacOS and Linux that do not include dependencies
 - APMonitor v1.0.0 for remote and local solves
