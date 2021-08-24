@@ -529,7 +529,9 @@ Default Value: 1
 
 Description: Value of the variable
 
-Explanation: 
+Explanation: `VALUE` is a floating point number of a variable.
+
+
 .. _vdvl:
 
 VDVL
