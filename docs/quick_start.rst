@@ -230,4 +230,16 @@ but will not appear in the solution files. ::
 is the (0-indexed) time-discretized index of the variable.
 
 
+Clean Up
+--------------------
+
+Delete the temporary folder (`m.path`) and any files associated with the application 
+with the command ::
+
+    m.cleanup()
+
+Do not call the `m.cleanup()` function if the application requires another calls to
+`m.solve()` with updated inputs or objectives.
+
+
 .. |APMonitor| replace:: replacement *GEKKO*
