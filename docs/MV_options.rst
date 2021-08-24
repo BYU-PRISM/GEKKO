@@ -37,7 +37,7 @@ This is a list of all available options for FVs and their default values:
 
 	:ref:`pstatus` = 1
 
-	:ref:`status` = 1
+	:ref:`status` = 0
 
 	:ref:`upper` = 1.0e20
 
@@ -91,7 +91,7 @@ This is a list of all available options for MVs and their default values:
 
     :ref:`reqonctrl` = 0
 
-    :ref:`status` = 1
+    :ref:`status` = 0
 
     :ref:`tier` = 1
 
