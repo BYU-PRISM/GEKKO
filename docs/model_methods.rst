@@ -938,7 +938,7 @@ with the `cleanup` command.
 
 .. py:classmethod:: m.cleanup()
 
-    Remove temporary folder and application files.::
+    Remove temporary folder and application files::
     
         Usage: m.cleanup()
 	
