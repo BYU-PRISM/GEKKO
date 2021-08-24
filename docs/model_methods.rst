@@ -923,4 +923,26 @@ These are GEKKO model attributes used internally. They are not intended for exte
 .. py:attribute::   _path
 
     The absolute path of the temporary file used to store all input/output files for the APMonitor executable.
+    
+    
+Clean Up an Application
+--------------------    
+    
+Gekko creates a temporary folder `m.path` for each model instance that is created with
+`m.GEKKO()`. With a local solution `m.GEKKO(remote=False)`, all processing is done in
+the local folder with input and output files. The folder is viewable with `m.open_folder()`.
+Linux, MacOS, and Windows manage the temporary folder differently. Windows does not automatically
+delete temporary folder files while Linux and MacOS remove the files on reboot or after a certain
+period of time. Gekko deletes the temporary folder and any files associated with the application 
+with the `cleanup` command.
+
+.. py:classmethod:: m.cleanup()
+
+    Remove temporary folder and application files.::
+    
+        Usage: m.cleanup()
+	
+Users that are processing many thousands of large jobs may need to use the `m.cleanup()` function
+to free up disk space. The function is not automatically called because of several applications (e.g.
+Model Predictive Control) that repeatedly solve with updated inputs or objectives.
 
