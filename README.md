@@ -60,15 +60,16 @@ Once the solution is complete, APMonitor writes the results in results.csv that 
 
 When the system of equations does not converge, APMonitor produces a convergence report in ‘infeasibilities.txt’. There are other levels of debugging that help expose the steps that APMonitor is taking to analyze or solve the problem. Setting APM.diaglevel to higher levels (0-10) gives more output to the user. Setting APM.coldstart to 2 decomposes the problem into irreducible sets of variables and equations to identify infeasible equations or properly initialize a model.
 
-.. |Travis-CI| image:: https://travis-ci.comBYU-PRISM/GEKKO.svg?branch=master
-    :target: https://travis-ci.comBYU-PRISM/GEKKO
+.. |Travis-CI| image:: https://travis-ci.com/BYU-PRISM/GEKKO.svg?branch=master
+    :target: https://travis-ci.com/BYU-PRISM/GEKKO
 .. |License| image:: https://img.shields.io/github/license/mashape/apistatus.svg
-   :target: https://github.comBYU-PRISM/GEKKO/blob/master/LICENSE
-.. |Coveralls| image:: https://coveralls.io/repos/githubBYU-PRISM/GEKKO/badge.svg?branch=master
-    :target: https://coveralls.io/githubBYU-PRISM/GEKKO?branch=master
+   :target: https://github.com/BYU-PRISM/GEKKO/blob/master/LICENSE
+.. |Coveralls| image:: https://coveralls.io/repos/github/BYU-PRISM/GEKKO/badge.svg?branch=master
+    :target: https://coveralls.io/github/BYU-PRISM/GEKKO?branch=master
 .. |ReadTheDocs| image:: https://readthedocs.org/projects/gekko/badge/?version=latest
     :target: http://gekko.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 .. |Downloads| image:: http://pepy.tech/badge/gekko
     :target: http://pepy.tech/count/gekko
     :alt: Download Counts
+
