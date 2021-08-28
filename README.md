@@ -1,3 +1,5 @@
+|Travis-CI| |License| |Coveralls| |ReadTheDocs| |Downloads|
+
 # GEKKO
 
 [GEKKO](http://gekko.readthedocs.io/en/latest/) is a Python package for [machine learning and optimization](https://machinelearning.byu.edu), specializing in time series and differential algebraic equations (DAE) systems. GEKKO provides a user-friendly interface to the [APMonitor optimization suite](http://apmonitor.com/wiki/). It is coupled with large-scale solvers for linear, quadratic, nonlinear, and mixed integer programming (LP, QP, NLP, MILP, MINLP). Modes of operation include parameter regression, dynamic data reconciliation, real-time optimization, dynamic simulation, and nonlinear predictive control.
@@ -57,3 +59,16 @@ APMonitor provides the following to a Nonlinear Programming Solver (APOPT, BPOPT
 Once the solution is complete, APMonitor writes the results in results.csv that is loaded back into the python variables by GEKKO
 
 When the system of equations does not converge, APMonitor produces a convergence report in ‘infeasibilities.txt’. There are other levels of debugging that help expose the steps that APMonitor is taking to analyze or solve the problem. Setting APM.diaglevel to higher levels (0-10) gives more output to the user. Setting APM.coldstart to 2 decomposes the problem into irreducible sets of variables and equations to identify infeasible equations or properly initialize a model.
+
+.. |Travis-CI| image:: https://travis-ci.comBYU-PRISM/GEKKO.svg?branch=master
+    :target: https://travis-ci.comBYU-PRISM/GEKKO
+.. |License| image:: https://img.shields.io/github/license/mashape/apistatus.svg
+   :target: https://github.comBYU-PRISM/GEKKO/blob/master/LICENSE
+.. |Coveralls| image:: https://coveralls.io/repos/githubBYU-PRISM/GEKKO/badge.svg?branch=master
+    :target: https://coveralls.io/githubBYU-PRISM/GEKKO?branch=master
+.. |ReadTheDocs| image:: https://readthedocs.org/projects/gekko/badge/?version=latest
+    :target: http://gekko.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+.. |Downloads| image:: http://pepy.tech/badge/gekko
+    :target: http://pepy.tech/count/gekko
+    :alt: Download Counts
