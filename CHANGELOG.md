@@ -3,8 +3,10 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+- Added `m.Minimize()` and `m.Maximize()` documentation for improved readability of objective functions
 
 ### Changed
+- Improve documentation of variable declarations
 
 ## [v1.0.1] - Version 1.0.1 Stable Release, Date: 2021-08-07
 ### Added
