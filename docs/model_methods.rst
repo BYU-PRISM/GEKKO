@@ -17,7 +17,6 @@ Model Building
 
 	If `remote` is `True`, the problem is sent to `self.server` to be solved. If `False`, GEKKO looks for local binaries of APMonitor.
 	
-	`gcc 9+` libraries are required when solving locally with `remote=False` on MacOS. This can be obtained with `brew install gcc` or `brew upgrade gcc`.
 	Certain solver options are not available for local solve because of distribution restrictions and the requirement for solver licenses.
 
 .. py:classmethod::    c =  m.Const(value, [name])
@@ -36,7 +35,7 @@ Model Building
 
     The parameters may be defined in one section or in multiple declarations throughout the model.  Parameter initialization is performed sequentially, from top to bottom.  If a parameter does not have an initial value given, a default value of 0.0 is assigned.  Parameters may also be a function of other parameters or variable initial conditions.  These initial conditions are processed once as the first step after the model parsing. All parameters have global scope in the model.
 
-.. py:classmethod::	   v = m.Var([value], [lb], [ub], [integer], [name])
+.. py:classmethod::	   v = m.Var([value=None], [lb=None], [ub=None], [integer=False], [fixed_initial=True], [name=None])
 
     Variables are always calculated values as determined by the set of equations. Some variables are either measured and/or controlled to a desired target value. Variables are modified by the solver as it searches for a solution. Each additional variable adds a decision (degree of freedom) to the problem. The following is an example of declaring an integer variable (0,1,2,...) that is constrained to be between 0 and 10 with a default value of 2::
     
@@ -44,21 +43,21 @@ Model Building
 
     The variables may be defined in one section or in multiple declarations throughout the model. Variable initialization is performed sequentially, from top to bottom. If a variable does not have an initial value given, a default value of 0.0 is assigned. Variables may also be initialized from parameters or variable initial conditions. These initial conditions are processed once as the first step after the model parsing. All variables have global scope in the model.
 
-.. py:classmethod::	   fv = m.FV([value], [lb], [ub], [integer], [name])
+.. py:classmethod::	   fv = m.FV([value=None], [lb=None], [ub=None], [integer=False], [fixed_initial=True], [name=None])
 
     Fixed Values or Feedforward Variables (FVs) are model coefficients that change to fit process data or minimize an objective function.  These parameters can change the behavior and structure of the model.  An FV has a single value over all time points for dynamic problems. It also has a single value when fitting a model to many data points, such as with steady state regression (IMODE=2). An FV is defined with a starting value of 3 and constrained between 0 and 10. The STATUS option set to 1 tells the optimizer that it can be adjusted to minimize the objective::
     
         fv = m.FV(3,lb=0,ub=10)
         fv.STATUS = 1
 
-.. py:classmethod::    mv = m.MV([value], [lb], [ub], [integer], [name])
+.. py:classmethod::    mv = m.MV([value=None], [lb=None], [ub=None], [integer=False], [fixed_initial=True], [name=None])
 
     Manipulated variables (MVs) are decision variables for an estimator or controller. These decision variables are adjusted by the optimizer to minimize an objective function at every time point or with every data set. Unlike FVs, MVs may have different values at the discretized time points. An MV is defined with a starting value of 4 and constrained between 5 and 10. The STATUS option set to 1 tells the optimizer that it can be adjusted to minimize the objective::
     
         mv = m.MV(4,lb=5,ub=10)
         mv.STATUS = 1
 
-.. py:classmethod::    sv =  m.SV([value] [lb], [ub], [integer], [name])
+.. py:classmethod::    sv =  m.SV([value=None], [lb=None], [ub=None], [integer=False], [fixed_initial=True], [name=None])
 
     State variables (SVs) are an upgraded version of a regular variable (m.Var) with additional logic to implement simple feedback and adjust the initial condition in dynamic simulations, estimators, or controllers. State variables may have upper and lower constraints but these should be used with caution to avoid an infeasible solution. A state variable is uninitialized (default=0) but is updated with a measurement of 6::
     
@@ -66,7 +65,7 @@ Model Building
         sv.FSTATUS = 1
         sv.MEAS = 6
 
-.. py:classmethod::    cv = m.CV([value] [lb], [ub], [integer], [name])
+.. py:classmethod::    cv = m.CV([value=None], [lb=None], [ub=None], [integer=False], [fixed_initial=True], [name=None])
 
     Controlled variables are model variables that are included in the objective of a controller or optimizer. These variables are controlled to a range, maximized, or minimized. Controlled variables may also be measured values that are included for data reconciliation. State variables may have upper and lower constraints but these should be used with caution to avoid an infeasible solution. A controlled variable in a model predictive control application is given a default value of 7 with a setpoint range of 30 to 40::
     
