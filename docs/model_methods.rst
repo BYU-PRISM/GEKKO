@@ -100,6 +100,18 @@ Model Building
 
     The problem objective to minimize. If multiple objective are provided, they are summed.
 
+.. py:classmethod::    m.Minimize(obj)
+
+    The problem objective to minimize. The `m.Minimize(obj)` function is the same as `m.Obj(obj)` but it improves the optimization problem understanding by specifying that the objective function is minimized.
+
+.. py:classmethod::    m.Maximize(obj)
+
+    The problem objective to maximize. This is the same as function `m.Obj(-obj)` or `m.Minimize(-obj)`. Multiplying `-1` converts an objective function from a maximization to a minimization problem. All optimization problems are converted to minimize form for solution by the solvers. As such, `m.options.OBJFCNVAL` reports the minimized result with a successful solution. Multiple objectives can be part of a single optimization problem. Multiple objectives are added together to create an overall objective::
+    
+        m.Maximize(revenue)         # maximize revenue
+        m.Minimize(operating_cost)  # minimize operating costs
+        m.Minimize(10*emissions)    # increase importance of minimizing emissions by 10x
+
 .. py:attribute::   m.time
 
     Sets the time array indicating the discrete elements of time discretization for dynamic modes (`IMODE > 3`). Accepts a python list of a numpy array.
