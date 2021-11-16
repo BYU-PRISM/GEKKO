@@ -236,7 +236,6 @@ def _write_csv(self):
     if first_array == False: #no data
         self.csv_status = 'none'
     else:
-        print(csv_data.ndim)
         # create header separately for potential long variable names >=25 in length
         if csv_data.ndim==1:
             # with only one variable
