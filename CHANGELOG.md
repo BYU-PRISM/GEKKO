@@ -7,6 +7,7 @@ All notable changes to the GEKKO project are documented in this file.
 
 ### Changed
 - Improve documentation of variable declarations
+- Fixed bug with CSV file write in gk_write_files.py when only one column (time)
 
 ## [v1.0.1] - Version 1.0.1 Stable Release, Date: 2021-08-07
 ### Added
