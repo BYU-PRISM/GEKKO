@@ -236,10 +236,13 @@ def _write_csv(self):
     if first_array == False: #no data
         self.csv_status = 'none'
     else:
+        print(csv_data.ndim)
         # create header separately for potential long variable names >=25 in length
         if csv_data.ndim==1:
             # with only one variable
             hdr = csv_data[0]
+            np.savetxt(os.path.join(self._path,file_name), csv_data[1:],\
+                       delimiter=",",comments='',header=hdr,fmt='%1.25s')
         else:
             # with multiple variables
             hdr = csv_data[0,0]
@@ -247,7 +250,7 @@ def _write_csv(self):
                 hdr += ','+csv_data[i,0]
             np.savetxt(os.path.join(self._path,file_name), csv_data[:,1:].T,\
                        delimiter=",",comments='',header=hdr,fmt='%1.25s')
-            self.csv_status = 'generated'
+        self.csv_status = 'generated'
 
 
 def _write_info(self):
