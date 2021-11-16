@@ -42,7 +42,7 @@ extra_files = gui_files + ['bin/apm.exe','bin/apm','bin/apm_arm','bin/apm_mac']
 # versions: a (alpha), b (beta), rc (release candidate)
 # update version here, __init__.py, and create a GitHub release
 setup(name='gekko',
-    version='1.0.1',
+    version='1.0.2',
     description='Machine learning and optimization for dynamic systems',
     long_description=long_description,
     classifiers=[
