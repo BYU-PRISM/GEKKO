@@ -3,6 +3,11 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+## [v1.0.2] - Version 1.0.2 Stable Release, Date: 2021-11-16
+### Added
 - Added `m.Minimize()` and `m.Maximize()` documentation for improved readability of objective functions
 
 ### Changed
@@ -187,7 +192,8 @@ All notable changes to the GEKKO project are documented in this file.
 ## 0.0.1a1 - Version 0.0.1 Alpha 1, Date: 2018-01-05
 ### Initial GEKKO public release, alpha version
 
-[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.2...HEAD
+[v1.0.2]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.1...v1.0.2
 [v1.0.1]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.0...v1.0.1
 [v1.0.0]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.8...v1.0.0
 [v0.2.8]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.7...v0.2.8
