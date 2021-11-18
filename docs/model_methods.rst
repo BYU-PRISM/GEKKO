@@ -114,7 +114,7 @@ Model Building
 
 .. py:attribute::   m.time
 
-    Sets the time array indicating the discrete elements of time discretization for dynamic modes (`IMODE > 3`). Accepts a python list of a numpy array.
+    Sets the time array indicating the discrete elements of time discretization for dynamic modes (`IMODE > 3`). Accepts a python list or a numpy array.
 
 .. py:classmethod:: dt()
 
