@@ -224,7 +224,10 @@ A more compact version of the same problem::
     m.Minimize(x1*x4*(x1+x2+x3)+x3) # objective
     m.solve()
     print(x)
-    
+
+Diagnostics and Troubleshooting
+--------------------
+
 The run directory `m.path` contains the model file `gk0_model.apm` and other files required
 to run the optimization problem either remotely (default) or locally (`m=GEKKO(remote=False)`).
 Use `m.open_folder()` to open the run directory. The run directory also contains diagnostic files
@@ -248,6 +251,19 @@ run directory can be changed::
     m.Minimize(x1*x4*(x1+x2+x3)+x3) # objective
     m.solve(disp=False)
     print(x)
+
+The `diagnostic level <https://apmonitor.com/wiki/index.php/Main/OptionApmDiaglevel>`_ can
+be adjusted with `m.options.DIAGLEVEL` between 0 and 10. At level 0, there is minimal information
+reported that typically includes a summary of the problem and the solver output. At level 1,
+there are more information messages and timing information for the different parts of the program
+execution. At level 2, there are diagnostic files created at every major step of the program
+execution. A diagnostic level of >=2 slows down the application because of increased file input
+and output, validation steps, and reports on problem structure. Additional diagnostic files are
+created at level 4. The analytic 1st derivatives are verified with finite differences at level 5
+and analytic 2nd derivatives are verified with finite differences at level 6. The DIAGLEVEL is
+also sent to the solver to indicate a desire for more verbose output as the level is increased. 
+Some solvers do not support increased output as the diagnostic level is increased. A diagnostic
+level up to 10 is allowed.
 
 Connections
 --------------------
