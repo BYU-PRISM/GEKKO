@@ -211,6 +211,43 @@ Here's an example script for solving problem `HS71 <https://youtu.be/SH753YX2K1A
     print('x3: ' + str(x3.value))
     print('x4: ' + str(x4.value))
 
+A more compact version of the same problem::
+
+    from gekko import GEKKO
+    import numpy as np
+    m = GEKKO()
+    x = m.Array(m.Var,4,value=1,lb=1,ub=5)
+    x1,x2,x3,x4 = x                 # rename variables
+    x2.value = 5; x3.value = 5      # change guess
+    m.Equation(np.prod(x)>=25)      # prod>=25
+    m.Equation(m.sum([xi**2 for xi in x])==40) # sum=40
+    m.Minimize(x1*x4*(x1+x2+x3)+x3) # objective
+    m.solve()
+    print(x)
+    
+The run directory `m.path` contains the model file `gk0_model.apm` and other files required
+to run the optimization problem either remotely (default) or locally (`m=GEKKO(remote=False)`).
+Use `m.open_folder()` to open the run directory. The run directory also contains diagnostic files
+such as `infeasibilities.txt` that is produced if the solver fails to find a solution. The default 
+run directory can be changed::
+
+    from gekko import GEKKO
+    import numpy as np
+    import os
+    # create and change run directory
+    rd=r'.\RunDir'
+    if not os.path.isdir(os.path.abspath(rd)):
+        os.mkdir(os.path.abspath(rd))
+    m = GEKKO(remote=False)         # solve locally
+    m.path = os.path.abspath(rd)   # change run directory
+    x = m.Array(m.Var,4,value=1,lb=1,ub=5)
+    x1,x2,x3,x4 = x                 # rename variables
+    x2.value = 5; x3.value = 5      # change guess
+    m.Equation(np.prod(x)>=25)      # prod>=25
+    m.Equation(m.sum([xi**2 for xi in x])==40) # sum=40
+    m.Minimize(x1*x4*(x1+x2+x3)+x3) # objective
+    m.solve(disp=False)
+    print(x)
 
 Connections
 --------------------
