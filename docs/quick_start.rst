@@ -167,6 +167,22 @@ the objective by -1) or by using the `m.Maximize()` function. It is best practic
 	m.Minimize(obj)
 	m.Maximize(obj)
 
+Connections
+--------------------
+
+Connections are processed after the parameters and variables are parsed, but before
+the initialization of the values. Connections are the merging of two variables
+or connecting specific nodes of a discretized variable.
+Once the variable is connected to another, the variable is only listed as an alias.
+Any other references to the connected value are referred to the principal variable (`var1`).
+The alias variable (`var2`) can be referenced in other parts of the model,
+but will not appear in the solution files. ::
+
+    m.Connection(var1,var2,pos1=None,pos2=None,node1='end',node2='end')
+
+`var1` must be a GEKKO variable, but `var2` can be a static value. If `pos1` or
+`pos2` is not `None`, the associated var must be a GEKKO variable and the position
+is the (0-indexed) time-discretized index of the variable.
 
 Example
 -------
@@ -225,7 +241,7 @@ A more compact version of the same problem::
     m.solve()
     print(x)
 
-Diagnostics and Troubleshooting
+Diagnostics
 --------------------
 
 The run directory `m.path` contains the model file `gk0_model.apm` and other files required
@@ -264,23 +280,6 @@ and analytic 2nd derivatives are verified with finite differences at level 6. Th
 also sent to the solver to indicate a desire for more verbose output as the level is increased. 
 Some solvers do not support increased output as the diagnostic level is increased. A diagnostic
 level up to 10 is allowed.
-
-Connections
---------------------
-
-Connections are processed after the parameters and variables are parsed, but before
-the initialization of the values. Connections are the merging of two variables
-or connecting specific nodes of a discretized variable.
-Once the variable is connected to another, the variable is only listed as an alias.
-Any other references to the connected value are referred to the principal variable (`var1`).
-The alias variable (`var2`) can be referenced in other parts of the model,
-but will not appear in the solution files. ::
-
-    m.Connection(var1,var2,pos1=None,pos2=None,node1='end',node2='end')
-
-`var1` must be a GEKKO variable, but `var2` can be a static value. If `pos1` or
-`pos2` is not `None`, the associated var must be a GEKKO variable and the position
-is the (0-indexed) time-discretized index of the variable.
 
 
 Clean Up
