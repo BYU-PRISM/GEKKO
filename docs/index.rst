@@ -17,7 +17,7 @@ More of the backend details are available at :ref:`what_APM_does` and in the `GE
 Installation
 ------------
 
-A pip package is available::
+A pip package is available (see `current download stats <https://pypistats.org/packages/gekko>`_)::
 
 	pip install gekko
 
