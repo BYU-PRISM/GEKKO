@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use GEKKO software, please cite the journal article."
+authors:
+- family-names: "Beal"
+  given-names: "Logan"
+  orcid: "https://orcid.org/0000-0002-5634-0683"
+- family-names: "Hill"
+  given-names: "Daniel"
+- family-names: "Martin"
+  given-names: "R. Abraham"
+- family-names: "Hedengren"
+  given-names: "John"
+  orcid: "https://orcid.org/0000-0002-5535-5277"
+title: "GEKKO Optimization Suite"
+journal: "Processes"
+doi: 10.3390/pr6080106
+url: "https://www.mdpi.com/2227-9717/6/8/106"
+month: 7
+issue: 106
+volume: 6
+year: 2018
