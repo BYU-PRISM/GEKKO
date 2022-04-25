@@ -3,6 +3,7 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+- Example problem `test_count_bins.py` on counting discrete options in a list.
 
 ### Changed
 
