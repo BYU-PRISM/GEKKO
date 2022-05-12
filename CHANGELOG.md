@@ -6,7 +6,7 @@ All notable changes to the GEKKO project are documented in this file.
 
 ### Changed
 
-## [v1.0.3] - Version 1.0.3 Stable Release, Date: 2022-05-12
+## [v1.0.4] - Version 1.0.4 Stable Release, Date: 2022-05-12
 ### Added
 - Example problem `test_count_bins.py` on counting discrete options in a list.
 - Example problem `test_arc_hyperbolics.py` for `asinh()`, `acosh()`, and `atanh()`.
@@ -202,8 +202,8 @@ All notable changes to the GEKKO project are documented in this file.
 ## 0.0.1a1 - Version 0.0.1 Alpha 1, Date: 2018-01-05
 ### Initial GEKKO public release, alpha version
 
-[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.3...HEAD
-[v1.0.3]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.2...v1.0.3
+[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.4...HEAD
+[v1.0.4]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.2...v1.0.4
 [v1.0.2]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.1...v1.0.2
 [v1.0.1]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.0...v1.0.1
 [v1.0.0]: https://github.com/BYU-PRISM/GEKKO/compare/v0.2.8...v1.0.0
