@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup, find_packages
-# To use a consistent encoding
 from codecs import open
 import os
 
 here = os.path.abspath(os.path.dirname(__file__))
-# Get the long description from the README file
-#with open(os.path.join(here, 'description.rst'), encoding='utf-8') as f:
-#    long_description = f.read()
 long_description = """GEKKO
 =====
 
@@ -63,11 +59,6 @@ setup(name='gekko',
         'numpy>=1.8'#,
         #'ujson',
     ],
-#    include_package_data=True,
-#    package_dir={'':'gekko'},
     package_data={'gekko': extra_files},
-#   TODO add testing
-#    test_suite='pytest.collector',
-#    tests_require=['pytest'],
-    python_requires='>=2.7',
+    python_requires='>=2.6',
     zip_safe=False)
