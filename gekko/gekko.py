@@ -2329,15 +2329,18 @@ class GEKKO(object):
     def acos(self,other):
         return GK_Operators('acos('+str(other) + ')')
     def acosh(self,other):
-        return GK_Operators('acosh('+str(other) + ')')
+        z = str(other)
+        return GK_Operators('log('+z+'+sqrt(('+z+')^2-1))')
     def asin(self,other):
         return GK_Operators('asin('+str(other) + ')')
     def asinh(self,other):
-        return GK_Operators('asinh('+str(other) + ')')
+        z = str(other)
+        return GK_Operators('log('+z+'+sqrt(('+z+')^2+1))')
     def atan(self,other):
         return GK_Operators('atan('+str(other) + ')')
     def atanh(self,other):
-        return GK_Operators('atanh('+str(other) + ')')
+        z = str(other)
+        return GK_Operators('0.5*log((1+'+z+')/(1-'+z+'))')
     def cos(self,other):
         return GK_Operators('cos(' + str(other) + ')')
     def cosh(self,other):
