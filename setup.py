@@ -31,18 +31,10 @@ gui_files = package_files('gekko/static')
 #add APM executable file
 extra_files = gui_files + ['bin/apm.exe','bin/apm','bin/apm_arm','bin/apm_mac']
 
-#APM binaries based on OS (currently only available for Windows)
-#if os.name == 'nt':
-#    apm_binary = {'gekko': ['bin/apm.exe']}
-#else:
-#    apm_binary = []
-#elif linux:
-#   apm_binary = ['gekko/bin/apmonitor' AND LA libaries]
-
 # versions: a (alpha), b (beta), rc (release candidate)
 # update version here, __init__.py, and create a GitHub release
 setup(name='gekko',
-    version='1.0.2',
+    version='1.0.3',
     description='Machine learning and optimization for dynamic systems',
     long_description=long_description,
     classifiers=[
@@ -57,6 +49,7 @@ setup(name='gekko',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
     ],
     keywords='differential deep learning reinforcement optimization mixed-integer',
     url='https://github.com/BYU-PRISM/GEKKO',
@@ -65,7 +58,6 @@ setup(name='gekko',
     license='MIT',
     packages=find_packages(),
     install_requires=[
-        # 'APMonitor>=0.33',
         #'flask',
         #'flask_cors',
         'numpy>=1.8'#,
@@ -73,9 +65,9 @@ setup(name='gekko',
     ],
 #    include_package_data=True,
 #    package_dir={'':'gekko'},
-    package_data={'gekko': extra_files},#['bin/apm.exe','static/*']},
+    package_data={'gekko': extra_files},
 #   TODO add testing
 #    test_suite='pytest.collector',
 #    tests_require=['pytest'],
-    python_requires='>=2.6',
+    python_requires='>=2.7',
     zip_safe=False)
