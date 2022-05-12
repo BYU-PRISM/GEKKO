@@ -3,9 +3,17 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
-- Example problem `test_count_bins.py` on counting discrete options in a list.
 
 ### Changed
+
+## [v1.0.3] - Version 1.0.3 Stable Release, Date: 2022-05-12
+### Added
+- Example problem `test_count_bins.py` on counting discrete options in a list.
+- Example problem `test_arc_hyperbolics.py` for `asinh()`, `acosh()`, and `atanh()`.
+
+### Changed
+- Bug fix for `asinh()`, `acosh()`, and `atanh()`.
+- Placeholder file (copy of `apm` for Linux) for `apm_arm` until new version is available.
 
 ## [v1.0.2] - Version 1.0.2 Stable Release, Date: 2021-11-16
 ### Added
