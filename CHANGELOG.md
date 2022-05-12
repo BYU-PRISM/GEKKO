@@ -14,6 +14,7 @@ All notable changes to the GEKKO project are documented in this file.
 ### Changed
 - Bug fix for `asinh()`, `acosh()`, and `atanh()`.
 - Placeholder file (copy of `apm` for Linux) for `apm_arm` until new version is available.
+- Prepare `meta.yaml` and `LICENSE` for `conda-forge` release with package `grayskull`.
 
 ## [v1.0.2] - Version 1.0.2 Stable Release, Date: 2021-11-16
 ### Added
