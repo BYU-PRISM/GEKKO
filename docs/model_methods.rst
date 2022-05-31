@@ -382,7 +382,10 @@ Traditional logical expressions such as if statements cannot be used in gradient
 
         y = x1 when condition<0
 
-        y = x2 when condition>=0
+        y = x2 when condition>0
+	
+    When condition~0, the solution may be `x1`, `x2`, or a linear combination of the two with `if2`.
+    Use `if3` to avoid the linear combination of the two values `x1` and `x2`. 
 			       
     Example usage::
     
@@ -422,7 +425,9 @@ Traditional logical expressions such as if statements cannot be used in gradient
         y = x1 when condition<0
 
         y = x2 when condition>=0
-			       
+
+    When condition~0, the solution may be x1 or x2. Gekko computes a numerical solution with a solver tolerance that is 1e-6 by default.
+
     Example usage::
     
         import numpy as np
