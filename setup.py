@@ -8,12 +8,35 @@ long_description = """GEKKO
 =====
 
 GEKKO is a python package for machine learning and optimization, specializing in
-dynamic optimization of differential algebraic equations (DAE) systems. GEKKO 
-provides a user-friendly interface to the powerful APMonitor optimization suite
-on the back end. It is coupled with large-scale solvers for linear, quadratic,
-nonlinear, and mixed integer programming (LP, QP, NLP, MILP, MINLP). Capabilities
-include machine learning, discrete or continuous models, real-time optimization, 
-simulation, moving horizon estimation, and nonlinear predictive control."""
+dynamic optimization of differential algebraic equations (DAE) systems. It is coupled 
+with large-scale solvers APOPT and IPOPT for linear, quadratic, nonlinear, and mixed integer 
+programming. Capabilities include machine learning, discrete or continuous state space
+models, simulation, estimation, and control.
+
+Gekko models consist of equations and variables that create a symbolic representation of the
+problem for a single data point or single time instance. Solution modes then create the full model
+over all data points or time horizon. Gekko supports a wide range of problem types, including:
+
+- Linear programming (LP)
+- Quadratic programming (QP)
+- Nonlinear programming (NLP)
+- Mixed-integer linear programming (MILP)
+- Mixed-integer quadratic programming (MIQP)
+- Mixed-integer nonlinear programming (MINLP)
+- Differential algebraic equations (DAEs)
+- Mathematical programming with complementarity constraints (MPCCs)
+- Data regression / Machine learning
+- Moving Horizon Estimation (MHE)
+- Model Predictive Control (MPC)
+- Real-Time Optimization (RTO)
+- Sequential or Simultaneous DAE solution
+
+Gekko compiles the model into byte-code and provides sparse derivatives to the solver with
+automatic differentiation. Gekko is built for industrially hardened control and optimization on Windows,
+Linux, MacOS, ARM processors, or any other platform that runs Python. Options are available for local,
+edge, or cloud computing.
+
+"""
 
 def package_files(directory):
     paths = []
