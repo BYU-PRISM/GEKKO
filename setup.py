@@ -32,10 +32,15 @@ over all data points or time horizon. Gekko supports a wide range of problem typ
 - Sequential or Simultaneous DAE solution
 
 Gekko compiles the model into byte-code and provides sparse derivatives to the solver with
-automatic differentiation. Gekko includes data cleansing functions and automatic safe-mode actions for industrially 
+automatic differentiation. Gekko includes data cleansing functions and standard tag actions for industrially 
 hardened control and optimization on Windows, Linux, MacOS, ARM processors, or any other platform that 
 runs Python. Options are available for local, edge, and cloud solutions to manage memory or compute 
 resources.
+
+- [Gekko Homepage](https://machinelearning.byu.edu/)
+- [Gekko Documentation](https://gekko.readthedocs.io/en/latest/)
+- [Gekko Examples](https://apmonitor.com/wiki/index.php/Main/GekkoPythonOptimization)
+- [Get Gekko Help on Stack Overflow](https://stackoverflow.com/questions/tagged/gekko)
 
 """
 
