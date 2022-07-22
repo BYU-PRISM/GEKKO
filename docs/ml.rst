@@ -713,7 +713,7 @@ Conformal Prediction Uncertainty Quantification
       m = GEKKO()
       x = m.Var(.1,lb=0,ub=1)
       #needs to be modified due to feature engineering
-      y = Conformist([icp.get_params()['nc_function__model'].get_params()['model'],margin],m).predict([x]) #function is used here
+      y = Conformist([icp.get_params()['nc_function__model'].get_params()['model'],margin],m).predict([x])
       m.Obj(y)
       m.solve(disp=False)
       print('solution:',y.value[0])
