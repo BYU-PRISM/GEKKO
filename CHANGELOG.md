@@ -3,6 +3,12 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+
+## [v1.0.5] - Version 1.0.5 Stable Release, Date: 2022-07-22
+### Added
 - New Gekko import functions for GPFlow models from `gpflow`
 - New Gekko import functions for Gaussian Processes models from `scikit-learn`
 - New Gekko import functions for SVR models from `scikit-learn`
@@ -207,7 +213,8 @@ All notable changes to the GEKKO project are documented in this file.
 ## 0.0.1a1 - Version 0.0.1 Alpha 1, Date: 2018-01-05
 ### Initial GEKKO public release, alpha version
 
-[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.4...HEAD
+[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.5...HEAD
+[v1.0.5]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.4...v1.0.5
 [v1.0.4]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.2...v1.0.4
 [v1.0.2]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.1...v1.0.2
 [v1.0.1]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.0...v1.0.1
