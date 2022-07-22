@@ -238,11 +238,13 @@ this function.
    .. code:: python
 
       #Import the ML interface functions
-      from Gekko.ML import Gekko_GPR,Gekko_SVR,Gekko_NN_SKlearn,Gekko_NN_TF,Gekko_LinearRegression,Bootstrap,Conformist,CustomMinMaxGekkoScaler
+      from Gekko.ML import Gekko_GPR,Gekko_SVR,Gekko_NN_SKlearn
+      from Gekko.ML import Gekko_NN_TF,Gekko_LinearRegression
+      from Gekko.ML import Bootstrap,Conformist,CustomMinMaxGekkoScaler
       import pandas as pd
       from sklearn.model_selection import train_test_split
 
-      #Training the Data and splitting it
+      #Training the Data and split it
       data = pd.DataFrame(np.array([xl,y_measured]).T,columns=['x','y'])
       features = ['x']
       label = ['y']
@@ -279,8 +281,10 @@ this function.
 
       trains,tests = train_test_split(ds,test_size=0.2,shuffle=True)
       hl= [25,15]
-      mlp = MLPRegressor(hidden_layer_sizes= hl, activation='relu', solver='adam', batch_size = 32,
-                         learning_rate = 'adaptive',learning_rate_init = .0005, tol=1e-6 ,n_iter_no_change = 200,
+      mlp = MLPRegressor(hidden_layer_sizes= hl, activation='relu', 
+                         solver='adam', batch_size = 32,
+                         learning_rate = 'adaptive',learning_rate_init = .0005,
+                         tol=1e-6 ,n_iter_no_change = 200,
                          max_iter=12000)
       mlp.fit(trains[features],np.ravel(trains[label]))
       r2 = mlp.score(tests[features],np.ravel(tests[label]))
@@ -347,7 +351,6 @@ this function.
    :align: center
    
 
-
 Now that the models have been trained, they can be used for
 optimization. The same optimization code used for the source function
 will be used for these models, with the exception that the y variable
@@ -376,7 +379,7 @@ is now calculated from these machine learning models.
          Gekko Solvetime: 0.0609 s
 
 
-   Gekko_GPR interfaces gpr from sklearn or gpflow into Gekko. Gaussian
+   Gekko_GPR interfaces gpr from `sklearn` or `gpflow` into Gekko. Gaussian
    Processes allows for the calculation of prediction intervals in the
    model. While this isn't shown here, for more complicated problems
    this uncertainty can be used with optimization and decision making
@@ -394,7 +397,7 @@ is now calculated from these machine learning models.
       from gekko import GEKKO
       m = GEKKO()
       x = m.Var(0,lb=0,ub=1)
-      y = Gekko_SVR(svr,m).predict(x) #function is used here
+      y = Gekko_SVR(svr,m).predict(x)
       m.Obj(y)
       m.solve(disp=False)
       print('solution:',y.value[0])
@@ -409,7 +412,7 @@ is now calculated from these machine learning models.
          x: 0.49993325357
          Gekko Solvetime: 0.015799999999 s
 
-   Gekko_SVR interfaces svr from sklearn into Gekko. Support vector
+   Gekko_SVR interfaces `svr` from `sklearn` into Gekko. Support vector
    machines are more simple than GPR, but do not produce the same
    uncertainty calculations. All 4 kernels from sklearn are implemented
    and compatible with Gekko.
@@ -421,7 +424,7 @@ is now calculated from these machine learning models.
       from gekko import GEKKO
       m = GEKKO()
       x = m.Var(0,lb=0,ub=1)
-      y = Gekko_NN_SKlearn(mlp,mma,m).predict([x]) #function is used here
+      y = Gekko_NN_SKlearn(mlp,mma,m).predict([x])
       m.Obj(y)
       m.solve(disp=False)
       print('solution:',y.value[0])
@@ -436,7 +439,7 @@ is now calculated from these machine learning models.
          x: 0.47205029204
          Gekko Solvetime: 0.1068 s
 
-   Gekko_NN_SKlearn implements the ANN from SKlearn, specifically the
+   Gekko_NN_SKlearn implements the ANN from `sklearn`, specifically the
    one created by MLPRegressor. Since scaling is necessary for neural
    networks, a custom min max scaler was replicated so that the
    interface could automatically scale and unscale data for prediction.
@@ -649,7 +652,8 @@ Conformal Prediction Uncertainty Quantification
       from nonconformist.base import RegressorAdapter
       from nonconformist.icp import IcpRegressor
       from nonconformist.nc import RegressorNc, RegressorNormalizer
-      from nonconformist.nc import InverseProbabilityErrFunc,MarginErrFunc,AbsErrorErrFunc,SignErrorErrFunc
+      from nonconformist.nc import InverseProbabilityErrFunc
+      from nonconformist.nc import MarginErrFunc,AbsErrorErrFunc,SignErrorErrFunc
       from sklearn.neural_network import MLPRegressor
       import sklearn.gaussian_process as gp
       from sklearn import svm
@@ -894,7 +898,7 @@ Sci-kit Learn: https://scikit-learn.org/stable/
 
 Tensorflow: https://www.tensorflow.org/
 
-Gpflow: https://github.com/GPflow/GPflow
+GPflow: https://github.com/GPflow/GPflow
 
 Non-conformist: https://github.com/donlnz/nonconformist
 
