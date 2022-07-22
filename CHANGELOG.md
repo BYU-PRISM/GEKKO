@@ -3,8 +3,13 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+- New Gekko import functions for GPFlow models from `gpflow`
+- New Gekko import functions for Gaussian Processes models from `scikit-learn`
+- New Gekko import functions for SVR models from `scikit-learn`
+- New Gekko import functions for Neural Network Regressor models from `scikit-learn`
 
 ### Changed
+- Documentation updated for new `ML.py` capabilities with example problems.
 
 ## [v1.0.4] - Version 1.0.4 Stable Release, Date: 2022-05-12
 ### Added
