@@ -37,10 +37,10 @@ hardened control and optimization on Windows, Linux, MacOS, ARM processors, or a
 runs Python. Options are available for local, edge, and cloud solutions to manage memory or compute 
 resources.
 
-- [Gekko Homepage](https://machinelearning.byu.edu/)
-- [Gekko Documentation](https://gekko.readthedocs.io/en/latest/)
-- [Gekko Examples](https://apmonitor.com/wiki/index.php/Main/GekkoPythonOptimization)
-- [Get Gekko Help on Stack Overflow](https://stackoverflow.com/questions/tagged/gekko)
+- `Gekko Homepage <https://machinelearning.byu.edu>`_
+- `Gekko Documentation <https://gekko.readthedocs.io/en/latest/`_
+- `Gekko Examples <https://apmonitor.com/wiki/index.php/Main/GekkoPythonOptimization`_
+- `Get Gekko Help on Stack Overflow <https://stackoverflow.com/questions/tagged/gekko`_
 
 """
 
