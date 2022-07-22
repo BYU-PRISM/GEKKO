@@ -81,6 +81,7 @@ Contents
 	CV_options
 	model_methods
 	brain
+      ml
 	chemical
 	examples
 	support
