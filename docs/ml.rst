@@ -894,12 +894,19 @@ Remarks
 
 All of these functions import trained models and tools provided by other packages. The packages used for this extension to Gekko are:
 
-Sci-kit Learn: https://scikit-learn.org/stable/
+Scikit-learn: https://scikit-learn.org/stable/
 
 Tensorflow: https://www.tensorflow.org/
 
 GPflow: https://github.com/GPflow/GPflow
 
-Non-conformist: https://github.com/donlnz/nonconformist
+Nonconformist: https://github.com/donlnz/nonconformist
 
-As well as other standard packages like Numpy, Pandas, and others.
+as well as other standard packages like Numpy, Pandas, and others.
+
+Authors of the Machine Learning package for Gekko are graduate research assistants 
+`LaGrande Gunnell <https://www.linkedin.com/in/lagrande-gunnell-715a2b194/>` and
+`Kyle Manwaring <https://www.linkedin.com/in/kyle-manwaring-1310a1177/>`. Thanks to 
+`John Vienna <https://www.linkedin.com/in/john-vienna-66b7a3219/>` and 
+`Xiaonan Lu <https://www.linkedin.com/in/xiaonan-lu-55775280/>`_ of
+Pacific Northwest National Laboratory for providing technical direction and sponsorship of the work.
