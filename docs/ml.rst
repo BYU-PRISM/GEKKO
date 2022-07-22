@@ -905,8 +905,9 @@ Nonconformist: https://github.com/donlnz/nonconformist
 as well as other standard packages like Numpy, Pandas, and others.
 
 Authors of the Machine Learning package for Gekko are graduate research assistants 
-`LaGrande Gunnell <https://www.linkedin.com/in/lagrande-gunnell-715a2b194/>` and
-`Kyle Manwaring <https://www.linkedin.com/in/kyle-manwaring-1310a1177/>`. Thanks to 
-`John Vienna <https://www.linkedin.com/in/john-vienna-66b7a3219/>` and 
+`LaGrande Gunnell <https://www.linkedin.com/in/lagrande-gunnell-715a2b194/>`_ and
+`Kyle Manwaring <https://www.linkedin.com/in/kyle-manwaring-1310a1177/>`_. Thanks to 
+`John Vienna <https://www.linkedin.com/in/john-vienna-66b7a3219/>`_ and 
 `Xiaonan Lu <https://www.linkedin.com/in/xiaonan-lu-55775280/>`_ of
-Pacific Northwest National Laboratory for providing technical direction and sponsorship of the work.
+Pacific Northwest National Laboratory for providing technical direction and sponsorship of the work
+through a Department of Energy (DOE) grant.
