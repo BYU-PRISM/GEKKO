@@ -37,10 +37,10 @@ hardened control and optimization on Windows, Linux, MacOS, ARM processors, or a
 runs Python. Options are available for local, edge, and cloud solutions to manage memory or compute 
 resources.
 
-- `Gekko Homepage <https://machinelearning.byu.edu>`_
-- `Gekko Documentation <https://gekko.readthedocs.io/en/latest/>`_
-- `Gekko Examples <https://apmonitor.com/wiki/index.php/Main/GekkoPythonOptimization>`_
-- `Get Gekko Help on Stack Overflow <https://stackoverflow.com/questions/tagged/gekko>`_
+- [Gekko Homepage](https://machinelearning.byu.edu)
+- [Gekko Documentation](https://gekko.readthedocs.io/en/latest/)
+- [Gekko Examples](https://apmonitor.com/wiki/index.php/Main/GekkoPythonOptimization)
+- [Get Gekko Help on Stack Overflow](https://stackoverflow.com/questions/tagged/gekko)
 
 """
 
@@ -59,10 +59,10 @@ extra_files = gui_files + ['bin/apm.exe','bin/apm','bin/apm_arm','bin/apm_mac']
 # versions: a (alpha), b (beta), rc (release candidate)
 # update version here, __init__.py, and create a GitHub release
 setup(name='gekko',
-    version='1.0.5',
+    version='1.0.6',
     description='Machine learning and optimization for dynamic systems',
-    long_description_content_type="text/markdown",
     long_description=long_description,
+    long_description_content_type = 'text/markdown',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Programming Language :: Python :: 2',
