@@ -3,11 +3,11 @@
 Machine Learning
 ==========================
 
-   Gekko specializes in dynamic optimization and control. The ML module
-   implemented in GEKKO interfaces compatible machine learning
-   algorithms into the optimization suite to be used for data based
-   optimization. Trained models can be imported into Gekko and then used
-   to solve optimization problems.
+   Gekko specializes in optimization, dynamic simulation, and control. The ML module
+   in GEKKO interfaces compatible machine learning
+   algorithms into the optimization suite to be used for data-based
+   optimization. Trained models from `scikit-learn`, `gpflow`, `nonconformist`, and `tensorflow` are imported into Gekko for 
+   design optimization, model predictive control, and physics-informed hybrid modeling.
    
 .. toctree::
 	:maxdepth: 10
@@ -18,153 +18,153 @@ Machine Learning Interface models
 
    These functions allows interfaces of various models into Gekko.
 
-.. py:class:: Model = ML.Gekko_GPR(model,Gekko_Model,modelType = 'sklearn',fixedKernel=True)
+.. py:class:: Model = ML.Gekko_GPR(model,Gekko_Model,modelType='sklearn',fixedKernel=True)
 
-   This line converts a gaussian process model from an outside library
+   Convert a gaussian process model from `sklearn`
    into the Gekko package.
 
-   The first argument is the trained gaussian model, either from
-   sklearn's GaussianProcessRegressor or a model from gpflow. Custom
-   kernels are not implemented; but all kernels in sklearn and
-   combinations of them are.
+   `model`: The first argument is the trained gaussian model, either from
+   `sklearn` GaussianProcessRegressor or a model from `gpflow`. Custom
+   kernels are not implemented, but all kernels and combinations of kernel in `sklearn` 
+   are allowed.
 
-   The second argument, Gekko_Model, is the model created by GEKKO().
+   `Gekko_Model`: Gekko model (created by `GEKKO()`) that is appended with the new GPR model.
 
-   The third argument is the modeltype; sklearn indicates that the model
-   is from sklearn. For any other models, it will assume it to be from
-   gpflow. If it is not sklearn, it will convert it from gpflow to
-   sklearn.
+   `modeltype`: sklearn indicates that the model
+   is from scikit-learn, otherwise from gpflow. If it is not sklearn, 
+   it convert from gpflow to sklearn.
 
-   The fourth argument fixedKernel, affects the conversion from gpflow
-   to sklearn. if it is set to true, then the kernel hyperparameters are
-   set to fixed; otherwise, it will allow the hyperparameters to be
+   `fixedKernel`: conversion from gpflow
+   to sklearn. If it is set to `True`, the kernel hyperparameters are
+   set to fixed; otherwise, `False` allows the hyperparameters to be
    changed during training.
 
 .. py:class:: Model = ML.Gekko_SVR(model,Gekko_Model)
 
-   This line imports an SVR model into Gekko.
+   Imports an SVR model into Gekko.
 
-   The first argument is the trained model. The model must be a variant
-   of sklearn's svm.SVR() or svm.NuSVR().
+   `model`: Model must be a variant
+   of sklearn `svm.SVR()` or `svm.NuSVR()`.
 
-   The second argument, Gekko_Model, is the model created by GEKKO().
+   `Gekko_Model`: Gekko model (created by `GEKKO()`) that is appended with the new SVR model.
 
-.. py:class:: Model = ML.Gekko_NN_SKlearn(model,minMaxArray,m)
+.. py:class:: Model = ML.Gekko_NN_SKlearn(model,minMaxArray,Gekko_Model)
 
-   This line imports an sklearn Neural network into Gekko.
+   Import an sklearn Neural Network into Gekko.
 
-   The first argument is the trained model. this model is trained with
-   the MLPRegressor function from sklearn.
+   `model`: model trained with the MLPRegressor function from sklearn.
 
-   The second argument is the min-max array for scaling created by the
+   `minMaxArray`: min-max array for scaling created by the
    custom min max scaler. This is necessary as neural networks often use
    a scaled dataset.
 
-   The third argument is the Gekko_Model, created by GEKKO().
+   `Gekko_Model`: Gekko model (created by `GEKKO()`) that is appended with the new NN model.
 
-.. py:class:: Model = ML.Gekko_LinearRegression(model,Xtrain,RMSE,m)
+.. py:class:: Model = ML.Gekko_LinearRegression(model,Xtrain,RMSE,Gekko_Model)
 
-   This model imports a trained linear regression model from sklearn.
-   This model also calculates uncertainty through the delta method for
+   Import a trained linear regression model from sklearn.
+   This model calculates uncertainty through the delta method for
    regression methods.
 
-   The first argument is the trained model from sklearn. This can be a
+   `model`: trained model from sklearn as a
    Ridge Regression or Linear Regression model.
 
-   The second argument is the input training set, needed to calculate
+   `Xtrain`: input training set, needed to calculate
    the prediction interval.
 
-   The third argument is the root mean squared error calculated during
-   training for the entire data set - this is used to calculate the
+   `RMSE`: root mean squared error calculated during
+   training for the entire data set. This is used to calculate the
    prediction interval.
 
-   The fourth argument is the Gekko_Model, created by GEKKO().
+   `Gekko_Model`: Gekko model (created by `GEKKO()`) that is appended with the new Linear Regression model.
 
-.. py:class:: Model = ML.Gekko_NN_TF(model,minMaxArray,m,n_output=2,activationFxn)
+.. py:class:: Model = ML.Gekko_NN_TF(model,minMaxArray,Gekko_Model,n_output=2,activationFxn)
 
-   This line imports an Tensorflow and keras Neural network into Gekko.
+   Import a Tensorflow and Keras Neural Network into Gekko.
    A specific loss function must be used during training to calculate
    uncertainty.
 
-   The first argument is the trained model. this model is trained with
-   the MLPRegressor function from sklearn.
+   `model`: trained model from the TensorFlow.
 
-   The second argument is the min-max array for scaling created by the
+   `minMaxArray`: min-max array for scaling created by the
    custom min max scaler. This is necessary as neural networks often use
    a scaled dataset.
 
-   The third argument is the Gekko_Model, created by GEKKO().
+   `Gekko_Model`: Gekko model (created by `GEKKO()`) that is appended with the new Neural Network model.
 
-   The fourth argument is the output dimensions; 1 is just the
-   prediction, and 2 allows for uncertainty through a loss function.
+   `output`: output dimensions; 1=prediction only, 2=predictions and uncertainty through a loss function.
 
-   The fifth argument is the activation function, indicating which
-   activation function is used between layers.
+   `activationFxn`: activation function used between layers.
 
-.. py:class:: Model = ML.Boootstrap(models,m)
+.. py:class:: Model = ML.Boootstrap(models,Gekko_Model)
 
-   This line does an ensemble/bootstrap method of calculation.
+   Perform an ensemble/bootstrap calculation method.
 
-   The first argument, models, is an array of models - either GPR, SVR,
-   or sklearn-NN models.
+   `models`: an array of models including GPR, SVR, and/or sklearn-NN models.
 
-   The second argument is the Gekko_Model, created by GEKKO().
+   `Gekko_Model`: Gekko model (created by `GEKKO()`) that is appended with the new Ensemble model.
 
-.. py:class:: Model = ML.Conformist(modelinfo,m)
+.. py:class:: Model = ML.Conformist(modelinfo,Gekko_Model)
 
-   This line is a conformal prediction wrapper for the previous listed
+   Conformal prediction wrapper for the previous listed
    machine learning models.
 
-   modelinfo is a 2-length array; the first item is the model (one of
+   `modelinfo`: a 2-length array; the first item is the model (one of
    the above ones), and the second is a constant margin used for
    prediction intervals; it can be calulculated through conformal
    prediction methods.
 
-   The second argument is the Gekko_Model, created by GEKKO().
+   `Gekko_Model`: Gekko model (created by `GEKKO()`) that is appended with the new conformal prediction method.
 
-.. py:class:: Model = ML.Delta(modelinfo,m)
+.. py:class:: Model = ML.Delta(modelinfo,Gekko_Model)
 
-   This line is a delta uncertainty wrapper for previous listed machine
+   Delta uncertainty wrapper for previous listed machine
    learning models.
 
-   modelinfo is a 3-length array; the first item is the model, the
+   `modelinfo`: a 3-length array; the first item is the model, the
    second is the RMSE from training, and the third is the x component of
    the training set.
 
-   The second argument is the Gekko_Model, created by GEKKO().
+   `Gekko_Model`: Gekko model (created by `GEKKO()`) that is appended with the new conformal prediction method.
 
 .. py:class:: Model = ML.ScalerWrapper(model,Scaler,m)
 
-   This line acts as a scaler wrapper for the models previously listed
+   Scaler wrapper for the models previously listed
    (unnecesary for neural networks); based on the custom Gekko min max
    scaler, it scales the input and unscales the output for model usage
    and prediction.
 
-   The first argument is the model.
+   `model`: Machine learned model.
 
-   The second argument is the custom scaler with data.
+   `Scaler`: custom scaler with data.
 
-   The third argument is the Gekko_Model, created by GEKKO().
-   
+   `Gekko_Model`: Gekko model (created by `GEKKO()`) that is appended with the new Scaler wrapper.
   
 .. py:classmethod:: prediction = Model.predict(xi,return_std=True):
 
-For any model class built by the above functions, the function predict can be called to generate the prediction.
+   For any model class built by the above functions, the function predict is called to generate a prediction.
 
-xi is the input array. It must be the same shape as the features used to train the model. It can be scalar/array quantities, or it can be gekko variables - as the input can be gekko variables, it allows optimization and control to be accessible to these models.
+   `xi`: input array. It must be the same shape as the features used to train the model. 
+   It can be scalar/array quantities, or it can be gekko variables as the input can be gekko variables.
+   It allows optimization and control to be accessible to these models.
 
-The second parameter is a boolean to return standard deviation of prediction. For most models, this will return 0 as this is not natively calculated. If the model is a gaussian model or is wrapped in one of the wrappers, then it will provide an uncertainty. Some methods may increase runtime of the process, especially if the training set is large for the model.
+   `return_std`: return standard deviation of prediction. For most models, this return 0 as this is not 
+   natively calculated. If the model is a gaussian model or is wrapped in one of the wrappers, 
+   then it provides an uncertainty. Some methods may increase runtime of the process, especially 
+   if the training set is large for the model.
 
 .. py:class:: Scaler = ML.CustomMinMaxGekkoScaler(data,features,label)
 
 .. container:: cell markdown
 
-   This scaler wraps around a dataset and scales it for use of neural networks or models wrapped in the scaler wrapper. It provides the same functionality as the min-max scaler in Sci-kit learn, except it is done in Gekko variables.
+   This scaler wraps around a dataset and scales it for use of neural networks 
+   or models wrapped in the scaler wrapper. It provides the same functionality as 
+   the min-max scaler in `scikit-learn`, except it is performed with Gekko variables.
 
 Example problem
 ------------
 
-   below is a function that will be used as a simple case study for the
+   The example problem is a simple case study for the
    integration of Machine Learning models into Gekko. Noise is added to
    the data to represent measurement uncertainty and create a necessity
    for fitting a regression model to the data.
@@ -199,8 +199,7 @@ Example problem
    
    
 
-Gekko's optimization functionality will be used to find a minimum of
-this function.
+Gekko's optimization functionality is used to find a minimum of this function.
 
 .. container:: cell code
 
@@ -214,7 +213,7 @@ this function.
       m.solve(disp=False)
       print('solution:',y.value[0])
       print('x:',x.value[0])
-      print('Gekko Solvetime:',m.options.SOLVETIME,'s')
+      print('Gekko Solve Time:',m.options.SOLVETIME,'s')
 
    .. container:: output stream stdout
 
@@ -222,7 +221,7 @@ this function.
 
          solution: -1.0
          x: 0.5
-         Gekko Solvetime: 0.0078999999996 s
+         Gekko Solve Time: 0.0078999999996 s
 
    If the original source function is unknown, but the data is
    available, data can be used to train machine learning models and then
@@ -328,7 +327,7 @@ this function.
          nnTF r2: 0.8136166599386209
 
 
-   Here are the models plotted against the source function and data
+   Models are plotted against the source function and data.
 
 .. container:: cell code
 
@@ -351,10 +350,10 @@ this function.
    :align: center
    
 
-Now that the models have been trained, they can be used for
-optimization. The same optimization code used for the source function
-will be used for these models, with the exception that the y variable
-is now calculated from these machine learning models.
+   Now that the models have been trained, they can be used for
+   optimization. The same optimization code used for the source function 
+   is used for these models, with the exception that the y variable
+   is now calculated from these machine learning models.
 
 .. container:: cell code
 
@@ -383,12 +382,12 @@ is now calculated from these machine learning models.
    Processes allows for the calculation of prediction intervals in the
    model. While this isn't shown here, for more complicated problems
    this uncertainty can be used with optimization and decision making
-   when these models are used. All kernels implemented in Sklearn,
-   anisotropic and isotropic, are working in Gekko - however some may
+   when these models are used. All kernels implemented in `sklearn`,
+   anisotropic and isotropic, are working in Gekko, however, some may
    converge to an infeasibility during solving, so careful kernel
    consideration is key. These kernels can be combined together, and a
    custom kernel can be used if a corresponding function is implemented
-   in both sklearn and Gekko.
+   in both `sklearn` and `Gekko`.
 
 .. container:: cell code
 
