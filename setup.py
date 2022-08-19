@@ -38,9 +38,9 @@ runs Python. Options are available for local, edge, and cloud solutions to manag
 resources.
 
 - `Gekko Homepage <https://machinelearning.byu.edu>`_
-- `Gekko Documentation <https://gekko.readthedocs.io/en/latest/`_
-- `Gekko Examples <https://apmonitor.com/wiki/index.php/Main/GekkoPythonOptimization`_
-- `Get Gekko Help on Stack Overflow <https://stackoverflow.com/questions/tagged/gekko`_
+- `Gekko Documentation <https://gekko.readthedocs.io/en/latest/>`_
+- `Gekko Examples <https://apmonitor.com/wiki/index.php/Main/GekkoPythonOptimization>`_
+- `Get Gekko Help on Stack Overflow <https://stackoverflow.com/questions/tagged/gekko>`_
 
 """
 
@@ -61,6 +61,7 @@ extra_files = gui_files + ['bin/apm.exe','bin/apm','bin/apm_arm','bin/apm_mac']
 setup(name='gekko',
     version='1.0.5',
     description='Machine learning and optimization for dynamic systems',
+    long_description_content_type="text/markdown",
     long_description=long_description,
     classifiers=[
         'Development Status :: 5 - Production/Stable',
