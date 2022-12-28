@@ -5,7 +5,7 @@ All notable changes to the GEKKO project are documented in this file.
 ### Added
 
 ### Changed
-
+- Removed `np.warnings.filterwarnings()` function call in `gekko.py` for the `sysid()` method. This was removed in `numpy-1.24.1`.
 
 ## [v1.0.5] - Version 1.0.5 Stable Release, Date: 2022-07-22
 ### Added
