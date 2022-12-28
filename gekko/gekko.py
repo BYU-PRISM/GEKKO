@@ -1687,7 +1687,7 @@ class GEKKO(object):
         beta = np.empty((ny,nbk,nu))
         gamma = np.zeros((ny))
         ypred = np.zeros((n,ny))
-        np.warnings.filterwarnings('ignore')
+        #np.warnings.filterwarnings('ignore')
         #%% Least Square fitting
         # y(k+1) = A*y(k) + B*u(k)
         for i in range(ny):
