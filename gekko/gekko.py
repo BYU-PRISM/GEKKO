@@ -2106,7 +2106,7 @@ class GEKKO(object):
                     max_time = min(1e6,self.options.max_time)
                     try:
                         outs, errs = app.communicate(timeout=max_time)
-                    except TimeoutExpired:
+                    except subprocess.TimeoutExpired:
                         app.kill()
                         outs, errs = app.communicate()
                         raise Exception('Time Limit Exceeded: ' + str(max_time))
