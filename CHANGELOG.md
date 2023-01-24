@@ -5,6 +5,9 @@ All notable changes to the GEKKO project are documented in this file.
 ### Added
 
 ### Changed
+
+## [v1.0.6] - Version 1.0.6 Stable Release, Date: 2023-01-24
+### Changed
 - Removed `np.warnings.filterwarnings()` function call in `gekko.py` for the `sysid()` method. This was removed in `numpy-1.24.1`.
 - Fixed bug on `m.options.max_time` to use subprocess Timeout error exception
 
@@ -214,7 +217,8 @@ All notable changes to the GEKKO project are documented in this file.
 ## 0.0.1a1 - Version 0.0.1 Alpha 1, Date: 2018-01-05
 ### Initial GEKKO public release, alpha version
 
-[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.5...HEAD
+[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.6...HEAD
+[v1.0.6]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.5...v1.0.6
 [v1.0.5]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.4...v1.0.5
 [v1.0.4]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.2...v1.0.4
 [v1.0.2]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.1...v1.0.2
