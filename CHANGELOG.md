@@ -3,6 +3,7 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+- Added [LP, QP, NLP, MILP, and MINLP examples](https://github.com/BYU-PRISM/GEKKO/blob/master/examples/Optimization_Introduction.ipynb).
 
 ### Changed
 
