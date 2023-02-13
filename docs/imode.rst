@@ -26,7 +26,7 @@ IMODE
 +----------------------+------------------------+------------------------+------------------------+
 | Non-Dynamic          | `1` Steady-State (SS)  | `2` Steady-State (MPU) | `3` Steady-State (RTO) |
 +----------------------+------------------------+------------------------+------------------------+
-| Dynamic Simultaneous | `4` Simultaneous (SIM) | `5` Simultaneous (SIM) | `6` Simultaneous (CTL) |
+| Dynamic Simultaneous | `4` Simultaneous (SIM) | `5` Simultaneous (EST) | `6` Simultaneous (EST) |
 +----------------------+------------------------+------------------------+------------------------+
 | Dynamic Sequential   | `7` Sequential (SQS)   | `8` Sequential (SIM)   | `9` Sequential (CTL)   |
 +----------------------+------------------------+------------------------+------------------------+
