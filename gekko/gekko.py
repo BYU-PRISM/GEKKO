@@ -625,11 +625,11 @@ class GEKKO(object):
 
         #convert data to flat numpy arrays
         A = np.array(A,dtype=float)
-        print('A')
-        print(A)
+        #print('A')
+        #print(A)
         b = np.array(b,dtype=float).T
-        print('b')
-        print(b)
+        #print('b')
+        #print(b)
         if sparse:
             A = A.T
             m = np.size(b,0)
