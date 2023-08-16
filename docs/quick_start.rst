@@ -244,7 +244,7 @@ A more compact version of the same problem::
 Diagnostics
 --------------------
 
-The run directory `m.path` contains the model file `gk0_model.apm` and other files required
+The run directory `m._path` (with `m.path` alias) contains the model file `gk0_model.apm` and other files required
 to run the optimization problem either remotely (default) or locally (`m=GEKKO(remote=False)`).
 Use `m.open_folder()` to open the run directory. The run directory also contains diagnostic files
 such as `infeasibilities.txt` that is produced if the solver fails to find a solution. The default 
