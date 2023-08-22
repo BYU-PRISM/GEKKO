@@ -311,8 +311,7 @@ def _write_solver_options(self):
             raise TypeError("Solver options only available for APOPT(1) and IPOPT(3)")
 
         #write each option to a line
-        for option in self.solver_options:
-            opt_file += option + '\n'
+        opt_file += '\n'.join(self.solver_options)
 
         #If remote solve, pass string to append to .apm file
         if self._remote is True:
