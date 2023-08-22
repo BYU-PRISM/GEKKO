@@ -244,9 +244,7 @@ def _write_csv(self):
                        delimiter=",",comments='',header=hdr,fmt='%1.25s')
         else:
             # with multiple variables
-            hdr = csv_data[0,0]
-            for i in range(1,np.size(csv_data,0)):
-                hdr += ','+csv_data[i,0]
+            hdr = csv_data[0,0] + ',' + ','.join([csv_data[i,0] for i in range(1,np.size(csv_data,0))])
             np.savetxt(os.path.join(self._path,file_name), csv_data[:,1:].T,\
                        delimiter=",",comments='',header=hdr,fmt='%1.25s')
         self.csv_status = 'generated'
@@ -313,8 +311,7 @@ def _write_solver_options(self):
             raise TypeError("Solver options only available for APOPT(1) and IPOPT(3)")
 
         #write each option to a line
-        for option in self.solver_options:
-            opt_file += option + '\n'
+        opt_file += '\n'.join(self.solver_options)
 
         #If remote solve, pass string to append to .apm file
         if self._remote is True:
