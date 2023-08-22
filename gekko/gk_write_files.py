@@ -298,7 +298,6 @@ def _generate_dbs_file(self):
                     if vp.__dict__[o] is not None:
                         f.write(vp.name+'.'+o+' = '+str(vp.__dict__[o])+'\n')
 
-
 def _write_solver_options(self):
     opt_file = ''
     if self.solver_options:
@@ -315,7 +314,7 @@ def _write_solver_options(self):
 
         #If remote solve, pass string to append to .apm file
         if self._remote is True:
-            return 'File ' + filename + '\n' + opt_file + 'End File\n'
+            return 'File ' + filename + '\n' + opt_file + '\nEnd File\n'
         #write file for local solve
         else:
             with open(os.path.join(self._path,filename), 'w+') as f:
