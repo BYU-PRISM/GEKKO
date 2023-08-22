@@ -6,6 +6,7 @@ All notable changes to the GEKKO project are documented in this file.
 - Added [LP, QP, NLP, MILP, and MINLP examples](https://github.com/BYU-PRISM/GEKKO/blob/master/examples/Optimization_Introduction.ipynb).
 
 ### Changed
+- Changes to `gk_write_files.py` with `.join()` instead of `+` to create data file and solver options files `ipopt.opt` and `apopt.opt`.
 
 ## [v1.0.6] - Version 1.0.6 Stable Release, Date: 2023-01-24
 ### Changed
