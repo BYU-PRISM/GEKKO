@@ -1,5 +1,6 @@
 from amplpy import AMPL, modules
 
+# check amplpy modules are installed
 if modules.installed() == []:
     raise Exception("Amplpy base module not installed. Try running `$ python -m amplpy.modules install`. See https://dev.ampl.com/ampl/python/modules.html")
 modules.load()
@@ -207,8 +208,10 @@ def check_valid_model(gekko_model):
     """Checks to make sure the gekko model is valid and can be converted to AMPL equivalent. """
     # Some functions are not supported by AMPL, while others may not be implemented in the converter yet.
     # Some error checking is done during the conversion process as well.
+    if gekko_model._raw:
+        raise Exception("Cannot convert a GEKKO model containing raw .apm syntax")
     if gekko_model._compounds:
-        raise Exception("Cannot convert a GEKKO model that is using compounds; there is no equivalent in AMPL")
+        raise Exception("Cannot convert a GEKKO model using compounds; there is no equivalent in AMPL")
     if gekko_model._objects:
         raise Exception("Model building functions/objects are not implemented to convert to AMPL.")
     if gekko_model._connections:
