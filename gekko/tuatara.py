@@ -4,6 +4,7 @@ if modules.installed() == []:
     raise Exception("Amplpy base module not installed. Try running `$ python -m amplpy.modules install`. See https://dev.ampl.com/ampl/python/modules.html")
 modules.load()
 
+
 def solve(gekko_model, solver, ampl_options={}, converter_options={}):
     """solve a gekko model using a solver supported by ampl"""
 
@@ -24,7 +25,6 @@ def solve(gekko_model, solver, ampl_options={}, converter_options={}):
 
     # put values back into the gekko model
     replace_gekko_values(gekko_model, ampl_model)
-
 
 
 def set_ampl_options(ampl_model, ampl_options):
@@ -74,6 +74,8 @@ def generate_file(gekko_model, file_name="model.mod", converter_options={}):
 
 def get_ampl_file_as_list(gekko_model, converter_options={}):
     """returns a list where each item represents a line of an ampl model file"""
+    # check whether the model is valid
+    check_valid_model(gekko_model)
 
     # list of ampl statements
     ampl_file = []
@@ -161,8 +163,10 @@ def get_ampl_file_as_list(gekko_model, converter_options={}):
 
     # add equations/constraints
     for equation in gekko_model._equations:
-        constraint_num += 1
+        # check the equation can be converted to AMPL equivalent
+        check_valid_equation(equation.value)
         # each constraint needs its own name
+        constraint_num += 1
         constraint_name = "constraint%s" % str(constraint_num)
         constraint_value = convert_equation(equation.value, converter_options=converter_options)
         data = { 
@@ -198,6 +202,27 @@ def get_ampl_file_as_list(gekko_model, converter_options={}):
 
     return ampl_file
 
+
+def check_valid_model(gekko_model):
+    """Checks to make sure the gekko model is valid and can be converted to AMPL equivalent. """
+    # Some functions are not supported by AMPL, while others may not be implemented in the converter yet.
+    # Some error checking is done during the conversion process as well.
+    if gekko_model._compounds:
+        raise Exception("Cannot convert a GEKKO model that is using compounds; there is no equivalent in AMPL")
+    if gekko_model._objects:
+        raise Exception("Model building functions/objects are not implemented to convert to AMPL.")
+    if gekko_model._connections:
+        raise Exception("Connections are not implemented to convert to AMPL.")
+
+    
+def check_valid_equation(equation):
+    """check the equation can be converted to AMPL equivalent"""
+    # some equations cannot be converted into AMPL equivalent, so raise an exception
+
+    # "$" denotes differential equations, which are not supported by AMPL.
+    if "$" in equation:
+        raise Exception("Differential equations are not supported by AMPL. The model cannot be converted to AMPL equivalent.")
+    
 
 def set_converter_options(converter_options={}):
     """validates the converter options, and sets non-set options to their default value"""
