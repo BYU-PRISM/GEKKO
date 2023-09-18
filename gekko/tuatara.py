@@ -1,118 +1,137 @@
-from amplpy import AMPL, modules
-
-def solve(gekko_model, solver, ampl_options={}, converter_options={}):
-    """solve a gekko model using a solver supported by ampl"""
-
-    # check that amplpy base module is installed (in order to solve)
-    check_amplpy_modules_installed()
-
-    # create an ampl model
-    ampl_model = convert(gekko_model, converter_options=converter_options)
-
-    # which solver to use
-    ampl_model.setOption("solver", solver)
-
-    # set solver options
-    set_ampl_options(ampl_model, ampl_options)
-
-    # solve the ampl model
-    ampl_model.solve()
-
-    # check to see if the solution was found
-    check_solution_found(ampl_model)
-
-    # put values back into the gekko model
-    replace_gekko_values(gekko_model, ampl_model)
+class Tuatara:
+    def __init__(self, gekko_model):
+        # the gekko model
+        self._gekko_model = gekko_model
+        # ampl model
+        self._ampl_model = None
+        # which solver
+        self._solver = ""
 
 
-def check_amplpy_modules_installed():
-    """check that the amplpy base module is installed"""
-    if modules.installed() == []:
-        raise Exception("Amplpy base module not installed. Try running `$ python -m amplpy.modules install`. See https://dev.ampl.com/ampl/python/modules.html")
-    modules.load()
+    def solve(self):
+        """solve a gekko model using a solver supported by ampl"""
+        # create an ampl model
+        self.convert_to_ampl()
+        # set solver options
+        self.set_options()
+        # solve the ampl model
+        self._ampl_model.solve()
+        # check to see if the solution was found
+        self.check_solution_found()
+        # put values back into the gekko model
+        self.replace_gekko_values()
 
 
-def set_ampl_options(ampl_model, ampl_options):
-    """set the ampl model options"""
-    for option in ampl_options.keys():
-        ampl_model.setOption(option, ampl_options[option])
+    def set_options(self):
+        """set the ampl model options"""
+        # set the solver
+        self._ampl_model.setOption("solver", self._solver)
+        ampl_options ={}
+        for option in ampl_options.keys():
+            self._ampl_model.setOption(option, ampl_options[option])
 
 
-def convert(gekko_model, converter_options={}):
-    """converts a gekko model to an equivalent ampl model"""
+    def convert_to_ampl(self):
+        """converts a gekko model to an equivalent ampl model"""
 
-    # check modules are installed
-    check_amplpy_modules_installed()
-
-    # create an ampl model
-    ampl_model = AMPL()
-
-    # create an ampl file
-    ampl_file = convert_to_ampl_list(gekko_model, converter_options=converter_options)
-
-    line_num = 0
-    # evaluate the lines in the list
-    for line in ampl_file:
-        line_num += 1
+        # check amplpy is installed
         try:
-            ampl_model.eval(line)
-        except Exception:
-            raise Exception("Couldn't convert the GEKKO model into an equivalent AMPL model. One of the functions in the GEKKO model may not be convertible to AMPL, or the conversion was done incorrectly. \nLine %s: \"%s\"" % (line_num, line))
+            from amplpy import AMPL, modules
+        except:
+            raise Exception("@Error: AMPLPY not installed. Run `$ pip install amplpy` to install AMPLPY in order to access more solvers.")
+        """check that the amplpy base module is installed"""
+        if modules.installed() == []:
+            raise Exception("@Error: AMPLPY base module not installed. Try running `$ python -m amplpy.modules install`. See https://dev.ampl.com/ampl/python/modules.html")
+        modules.load()
 
-    return ampl_model
+        # create an ampl model
+        self._ampl_model = AMPL()
+
+        # get ampl file as list of ampl statements
+        ampl_statements = self.convert_to_ampl_statements()
+
+        line_num = 0
+        # evaluate the lines in the list
+        for statement in ampl_statements:
+            line_num += 1
+            try:
+                self._ampl_model.eval(statement)
+            except Exception:
+                raise Exception("@Error: Couldn't convert the GEKKO model into an equivalent AMPL model. One of the functions in the GEKKO model may not be convertible to AMPL, or the conversion was done incorrectly. \nLine %s: \"%s\"" % (line_num, statement))
 
 
-def generate_file(gekko_model, file_name="model.mod", converter_options={}):
-    """generates an ampl model file. this can be read using ampl_model.read()"""
+    def generate_file(self, file_name="model.mod"):
+        """generates an ampl model file. this can be read using ampl_model.read()"""
 
-    # get ampl file as list
-    ampl_file_as_list = convert_to_ampl_list(gekko_model, converter_options=converter_options)
-    try:
+        # get ampl file as list of ampl statements
+        ampl_statements = self.convert_to_ampl_statements()
         file = open(file_name, "w")
 
-        for line in ampl_file_as_list:
+        for line in ampl_statements:
             file.write(line + "\n")
         
         file.close()
+        
 
-    except Exception as e:
-        print("An error occurred:", str(e))
-        return None
+    def convert_to_ampl_statements(self):
+        """returns a list where each item represents a statement of an ampl model file"""
+
+        # check whether the model is valid
+        self.check_valid_model()
+
+        # create a converter
+        converter = Converter(self._gekko_model)
+
+        # create ampl equivalent
+        converter.convert()
+
+        # return the statements of the ampl model file
+        return converter._statements
+
+
+    def check_valid_model(self):
+        """Checks to make sure the gekko model is valid and can be converted to AMPL equivalent. """
+        # Some functions are not supported by AMPL, while others may not be implemented in the converter yet.
+        # Some error checking is done during the conversion process as well.
+        if self._gekko_model._raw:
+            raise Exception("@Error: Cannot convert a GEKKO model containing raw .apm syntax")
+        if self._gekko_model._compounds:
+            raise Exception("@Error: Cannot convert a GEKKO model using compounds; there is no equivalent in AMPL")
     
-
-def convert_to_ampl_list(gekko_model, converter_options={}):
-    """returns a list where each item represents a line of an ampl model file"""
-
-    # check whether the model is valid
-    check_valid_model(gekko_model)
-
-    # create a converter
-    converter = ampl_converter(gekko_model, converter_options)
-
-    # some basic checking as to whether the model can be converted
-    converter.check_can_convert()
-
-    # create ampl equivalent
-    converter.convert()
-
-    # return the lines of the ampl model file
-    return converter._lines
+    
+    def check_solution_found(self):
+        """checks that a valid solution was found, otherwise raise an error."""
+        solve_result = self._ampl_model.get_value("solve_result")
+        if solve_result != "solved":
+            raise Exception("@Error: " + solve_result)
 
 
-def check_valid_model(gekko_model):
-    """Checks to make sure the gekko model is valid and can be converted to AMPL equivalent. """
-    # Some functions are not supported by AMPL, while others may not be implemented in the converter yet.
-    # Some error checking is done during the conversion process as well.
-    if gekko_model._raw:
-        raise Exception("Cannot convert a GEKKO model containing raw .apm syntax")
-    if gekko_model._compounds:
-        raise Exception("Cannot convert a GEKKO model using compounds; there is no equivalent in AMPL")
+    def replace_gekko_values(self):
+        """puts results from the solved ampl model into the gekko model"""
+
+        # loop through the gekko model variables and update their values
+        for variable in self._gekko_model._variables:
+            variable.value = [self._ampl_model.get_variable(variable.name).value()]
+
+        # loop through the gekko model intermediates and update their values
+        for intermediate in self._gekko_model._intermediates:
+            intermediate.value = [self._ampl_model.get_variable(intermediate.name).value()]
+
+            # loop through the gekko model intermediates and update their values
+        for parameter in self._gekko_model._parameters:
+            parameter.value = [self._ampl_model.get_parameter(parameter.name).value()]
+
+        # set the gekko objective output
+        # OBJFCNVAL is the sum of the objective values
+        objective_sum = 0
+        for objective in self._ampl_model.get_objectives():
+            objective_sum += objective[1].value()
+        self._gekko_model.options.OBJFCNVAL = (True, objective_sum)
 
 
-class ampl_converter:
+class Converter:
     """class for holding data relating to the ampl model file"""
-
-    def __init__(self, gekko_model, converter_options):
+    def __init__(self, gekko_model):
         self._gekko_model = gekko_model
         # number of extra variables
         self._variable_num = 0
@@ -123,17 +142,7 @@ class ampl_converter:
         # number of objectives
         self._objective_num = 0
         # list of ampl statements (lines in a file)
-        self._lines = []
-        # set the converter options
-        self._converter_options = converter_options
-        self.set_converter_options()
-
-
-    def check_can_convert(self):
-        """some basic checks as to whether the model can be converted"""
-        if self._gekko_model.time is not None:
-            # time function is currently unsupported
-            raise Exception("The time function in GEKKO is not implemented in Tuatara, so the model could not be converted.")
+        self._statements = []
         
 
     def convert(self):
@@ -191,7 +200,7 @@ class ampl_converter:
             text += " := %s" % data["value"]
         text += ";"
         # add to file
-        self._lines.append(text)
+        self._statements.append(text)
     
 
     def add_variable(self, data):
@@ -208,7 +217,7 @@ class ampl_converter:
             text += " := %s" % data["value"]
         text += ";"
         # add to file
-        self._lines.append(text)
+        self._statements.append(text)
     
 
     def add_intermediate(self, data):
@@ -220,14 +229,14 @@ class ampl_converter:
         """add a constraint"""
         text = "subject to %s: %s;" % (data["name"], data["value"])
         # add to file
-        self._lines.append(text)
+        self._statements.append(text)
 
     
     def add_objective(self, data):
         """add an objective"""
         text = "%s %s:%s;" % (data["type"], data["name"], data["value"])
         # add to file
-        self._lines.append(text)
+        self._statements.append(text)
 
     
     def add_set(self, data):
@@ -235,7 +244,7 @@ class ampl_converter:
         ordered_text = "ordered " * data["ordered"]
         text = "set %s %s:= %s;" % (data["name"], ordered_text, data["value"])
         # add to file
-        self._lines.append(text)
+        self._statements.append(text)
 
     
     def get_data(self, variable):
@@ -382,9 +391,9 @@ class ampl_converter:
 
             # some checking to make sure the pwl function is valid
             if len(x_values) < 3:
-                raise Exception("The pwl function requires at least 3 data points")
+                raise Exception("@Error: The pwl function requires at least 3 data points")
             if len(x_values) != len(y_values):
-                raise Exception("The pwl function should have the same number of x and y values")
+                raise Exception("@Error: The pwl function should have the same number of x and y values")
             
             equations = []
             x = parameters["x"]
@@ -425,50 +434,27 @@ class ampl_converter:
 
         else:
             # object not supported or implemented yet
-            raise Exception("The %s object could not be converted to AMPL equivalent. It may not be supported or not implemented yet." % obj["type"])
-
-
-    def set_converter_options(self):
-        """validates the converter options, and sets non-set options to their default value"""
-
-        # valid options:
-        # non_strict_equalities: convert instances of ">" (strict equality) into ">=" because some solvers seem to not support strict equality
-
-        # set default converter options
-        default_converter_options = { 
-            "non_strict_equalities": True,
-            "integer": False
-        }
-
-        # check options passed in are valid
-        for option in self._converter_options.keys():
-            if default_converter_options.get(option) is None:
-                raise Exception("Invalid option provided: " + option + " is not a valid converter option")
-        # set default converter options for options that aren't set
-        for option in default_converter_options.keys():
-            if self._converter_options.get(option) is None:
-                self._converter_options[option] = default_converter_options[option]
+            raise Exception("@Error: The %s object could not be converted to AMPL equivalent. It may not be supported or not implemented yet." % obj["type"])
 
 
     def convert_equation(self, equation):
         """converts a gekko equation, such as a constraint or objective, into the ampl equivalent"""
         # also does some checking as to whether the equation can be converted
-        # expects converter_options to be complete. Use converter_options = set_converter_options() to get default options
 
         # check the equation can be converted
         if "$" in equation:
             # "$" denotes differential equations in GEKKO, which are not support by AMPL
-            raise Exception("Differential equations are not supported by AMPL, so the model could not be converted.")
+            raise Exception("@Error: Differential equations are not supported by AMPL, so the model could not be converted.")
+        
         # convert instances of ">" or "<=" (strict equality) into ">=" or "<="
-        if self._converter_options["non_strict_equalities"]:
-            new_equation = ""
-            i = 0
-            while i < len(equation):
-                new_equation += equation[i]
-                if (equation[i] == ">" or equation[i] == "<") and equation[i + 1] != "=":
-                    new_equation += "="
-                i += 1
-            equation = new_equation
+        new_equation = ""
+        i = 0
+        while i < len(equation):
+            new_equation += equation[i]
+            if (equation[i] == ">" or equation[i] == "<") and equation[i + 1] != "=":
+                new_equation += "="
+            i += 1
+        equation = new_equation
 
         # replace sigmoid function with its mathematical equivalent
         while "sigmd" in equation:
@@ -489,33 +475,3 @@ class ampl_converter:
         equation = equation.replace('++','+').replace('--','+').replace('+-','-').replace('-+','-')
 
         return equation
-
-
-def check_solution_found(ampl_model):
-    """checks that a valid solution was found, otherwise raise an error."""
-    solve_result = ampl_model.get_value("solve_result")
-    if solve_result != "solved":
-        raise Exception("error: " + solve_result)
-
-
-def replace_gekko_values(gekko_model, ampl_model):
-    """puts results from the solved ampl model into the gekko model"""
-
-    # loop through the gekko model variables and update their values
-    for variable in gekko_model._variables:
-        variable.value = [ampl_model.get_variable(variable.name).value()]
-
-    # loop through the gekko model intermediates and update their values
-    for intermediate in gekko_model._intermediates:
-        intermediate.value = [ampl_model.get_variable(intermediate.name).value()]
-
-        # loop through the gekko model intermediates and update their values
-    for parameter in gekko_model._parameters:
-        parameter.value = [ampl_model.get_parameter(parameter.name).value()]
-
-    # set the gekko objective output
-    # OBJFCNVAL is the sum of the objective values
-    objective_sum = 0
-    for objective in ampl_model.get_objectives():
-        objective_sum += objective[1].value()
-    gekko_model.options.objfcnval = (True, objective_sum)
