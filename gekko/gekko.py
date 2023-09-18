@@ -5,12 +5,14 @@ import glob
 import re
 import tempfile # for temporary directory
 import numpy as np
+import tuatara
 from shutil import rmtree
 from .apm import cmd, get_file # remote solve functions
 from .gk_global_options import GKGlobalOptions
 from .gk_parameter import GKParameter, GK_MV, GK_FV
 from .gk_variable import GKVariable, GK_CV, GK_SV
 from .gk_operators import GK_Operators, GK_Intermediate
+from .tuatara import Tuatara
 from itertools import count
 
 #%% Python version compatibility
@@ -80,6 +82,11 @@ class GEKKO(object):
         self._model_initialized = False #probably not needed
         self._csv_status = None #indicate 'provided' or 'generated'
         self._model = ''
+
+        #tuatara functions for using AMPL solvers
+        self._tuatara = Tuatara(self)
+        self._use_tuatara = False
+        self._tuatara_solver = ""
 
         #Default model name, numbered to allow multiple models
         if name == None:
@@ -2025,12 +2032,29 @@ class GEKKO(object):
         if 'remote' in kwargs:
             raise TypeError('"remote" argument has been moved to model initialization (GEKKO(remote=True))')
 
+        use_tuatara = False
+        try:
+            self.options.SOLVER = int(self.options.SOLVER)
+        except:
+            gekko_solvers = ["APOPT", "BPOPT", "IPOPT", "SNOPT", "MINOS"]
+            try:
+                solver_index = gekko_solvers.index(self.options.SOLVER)
+                self.options.SOLVER = solver_index + 1 #0 based index
+            except:
+                use_tuatara = True
+        
+        if use_tuatara:
+            self._tuatara._solver = self.options.SOLVER
+            self._tuatara.solve()
+            return
+
         timing = False
         if timing == True:
             import time
 
         if timing == True:
             t = time.time()
+
         # Build the model
         if self._model != 'provided': #no model was provided
             self._build_model()
