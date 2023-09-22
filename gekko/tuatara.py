@@ -332,7 +332,7 @@ class Converter:
         obj["type"] = obj_type
         obj["parameters"] = {}
         for connection in self._gekko_model._connections:
-            if obj_name in connection:
+            if obj_name + "." in connection:
                 connection_values = connection.split(" = ")
                 variable = connection_values[0]
                 parameter = connection_values[1].split(obj_name + ".")[1]
