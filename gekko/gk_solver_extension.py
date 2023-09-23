@@ -1,132 +1,132 @@
-class Tuatara:
-    def __init__(self, gekko_model):
-        # the gekko model
-        self._gekko_model = gekko_model
-        # ampl model
-        self._ampl_model = None
-        # which solver
-        self._solver = ""
+amplpy_installed = True
+try:
+    from amplpy import AMPL, modules
+except:
+    amplpy_installed = False
 
 
-    def solve(self):
-        """solve a gekko model using a solver supported by ampl"""
-        # create an ampl model
-        self.convert_to_ampl()
-        # set solver options
-        self.set_options()
-        # solve the ampl model
-        self._ampl_model.solve()
-        # check to see if the solution was found
-        self.check_solution_found()
-        # put values back into the gekko model
-        self.replace_gekko_values()
+def solve_with_ampl(self):
+    """solve a gekko model using a solver supported by ampl"""
+    # check if we are going to use AMPLPY to solve
+    use_amplpy = False
+    solver = self.options.SOLVER
+                    
+    try:
+        int(solver)
+    except:
+        # value is string, pass
+        pass
+    else:
+        raise ValueError("@error: Solver extension requires a string for m.options.SOLVER for the solver you want to use")
 
-
-    def set_options(self):
-        """set the ampl model options"""
-        # set the solver
-        self._ampl_model.setOption("solver", self._solver)
-        ampl_options ={}
-        for option in ampl_options.keys():
-            self._ampl_model.setOption(option, ampl_options[option])
-
-
-    def convert_to_ampl(self):
-        """converts a gekko model to an equivalent ampl model"""
-
-        # check amplpy is installed
+    if self._remote:
+        print("WARNING: Remote solve not supported by solver extension; defaulted to local solve.")
+        self._remote = False
+    if amplpy_installed:
+        # check if the solver is installed
         try:
-            from amplpy import AMPL, modules
+            modules.find(solver)
+            use_amplpy = True
         except:
-            raise Exception("@Error: AMPLPY not installed. Run `$ pip install amplpy` to install AMPLPY in order to access more solvers.")
-        """check that the amplpy base module is installed"""
-        if modules.installed() == []:
-            raise Exception("@Error: AMPLPY base module not installed. Try running `$ python -m amplpy.modules install`. See https://dev.ampl.com/ampl/python/modules.html")
+            if self.options.SOLVER in modules.available():
+                # solver not installed
+                raise ValueError("@error: Solver `%s` not installed. Try running `$ python -m amplpy.modules install %s`. See https://dev.ampl.com/ampl/python/modules.html" % (solver, solver))
+            else:
+                raise ValueError("@error: Unknown solver `%s`. Refer to the AMPLPY documentation or run `$ python -m amplpy.modules available` to view available solvers." % solver)
+    else:
+        # amplpy not installed
+        raise ImportError("@error: AMPLPY not installed. Run `$ pip install amplpy` to install AMPLPY in order to use solver extension to access more solvers.")
+    
+    if use_amplpy:
+        # load the amplpy modules
         modules.load()
+        # create a amplpy model
+        amplpy_model = self.create_amplpy_object()
+        # solve the ampl model
+        amplpy_model.solve()
 
-        # create an ampl model
-        self._ampl_model = AMPL()
-
-        # get ampl file as list of ampl statements
-        ampl_statements = self.convert_to_ampl_statements()
-
-        line_num = 0
-        # evaluate the lines in the list
-        for statement in ampl_statements:
-            line_num += 1
-            try:
-                self._ampl_model.eval(statement)
-            except Exception:
-                raise Exception("@Error: Couldn't convert the GEKKO model into an equivalent AMPL model. One of the functions in the GEKKO model may not be convertible to AMPL, or the conversion was done incorrectly. \nLine %s: \"%s\"" % (line_num, statement))
-
-
-    def generate_file(self, file_name="model.mod"):
-        """generates an ampl model file. this can be read using ampl_model.read()"""
-
-        # get ampl file as list of ampl statements
-        ampl_statements = self.convert_to_ampl_statements()
-        file = open(file_name, "w")
-
-        for line in ampl_statements:
-            file.write(line + "\n")
-        
-        file.close()
-        
-
-    def convert_to_ampl_statements(self):
-        """returns a list where each item represents a statement of an ampl model file"""
-
-        # check whether the model is valid
-        self.check_valid_model()
-
-        # create a converter
-        converter = Converter(self._gekko_model)
-
-        # create ampl equivalent
-        converter.convert()
-
-        # return the statements of the ampl model file
-        return converter._statements
-
-
-    def check_valid_model(self):
-        """Checks to make sure the gekko model is valid and can be converted to AMPL equivalent. """
-        # Some functions are not supported by AMPL, while others may not be implemented in the converter yet.
-        # Some error checking is done during the conversion process as well.
-        if self._gekko_model._raw:
-            raise Exception("@Error: Cannot convert a GEKKO model containing raw .apm syntax")
-        if self._gekko_model._compounds:
-            raise Exception("@Error: Cannot convert a GEKKO model using compounds; there is no equivalent in AMPL")
-    
-    
-    def check_solution_found(self):
-        """checks that a valid solution was found, otherwise raise an error."""
-        solve_result = self._ampl_model.get_value("solve_result")
+        # checks that a valid solution was found, otherwise raise an error.
+        solve_result = amplpy_model.get_value("solve_result")
         if solve_result != "solved":
-            raise Exception("@Error: " + solve_result)
-
-
-    def replace_gekko_values(self):
-        """puts results from the solved ampl model into the gekko model"""
-
+            raise Exception("@error: " + solve_result)
+        
+        # put results back into the gekko model
         # loop through the gekko model variables and update their values
-        for variable in self._gekko_model._variables:
-            variable.value = [self._ampl_model.get_variable(variable.name).value()]
-
+        for variable in self._variables:
+            variable.value = [amplpy_model.get_variable(variable.name).value()]
         # loop through the gekko model intermediates and update their values
-        for intermediate in self._gekko_model._intermediates:
-            intermediate.value = [self._ampl_model.get_variable(intermediate.name).value()]
-
+        for intermediate in self._intermediates:
+            intermediate.value = [amplpy_model.get_variable(intermediate.name).value()]
             # loop through the gekko model intermediates and update their values
-        for parameter in self._gekko_model._parameters:
-            parameter.value = [self._ampl_model.get_parameter(parameter.name).value()]
-
+        for parameter in self._parameters:
+            parameter.value = [amplpy_model.get_parameter(parameter.name).value()]
         # set the gekko objective output
         # OBJFCNVAL is the sum of the objective values
         objective_sum = 0
-        for objective in self._ampl_model.get_objectives():
+        for objective in amplpy_model.get_objectives():
             objective_sum += objective[1].value()
-        self._gekko_model.options.OBJFCNVAL = (True, objective_sum)
+        self.options.OBJFCNVAL = (True, objective_sum)
+    else:
+        # access user-installed executable solvers
+        # not implemented yet
+        pass
+
+
+def create_amplpy_object(self):
+    """converts a GEKKO model to an equivalent AMPLPY model"""
+    # AMPLPY must be installed
+    # create an ampl model
+    amplpy_model = AMPL()
+
+    # get ampl file as list of ampl statements
+    ampl_statements = self.generate_ampl_statements()
+
+    line_num = 0
+    # evaluate the statements in the list
+    for statement in ampl_statements:
+        line_num += 1
+        try:
+            amplpy_model.eval(statement)
+        except Exception:
+            raise Exception("@error: Couldn't convert the GEKKO model into an equivalent AMPLPY model. One of the functions in the GEKKO model may not be convertible to AMPL, or the conversion was done incorrectly. \nLine %s: \"%s\"" % (line_num, statement))
+    
+    """set the ampl model options"""
+    # set the solver
+    amplpy_model.setOption("solver", self.options.SOLVER)
+    # more options not implemented yet
+    return amplpy_model
+
+
+def generate_ampl_file(self, file_name="model.mod"):
+    """generates an ampl model file."""
+
+    # get ampl file as list of ampl statements
+    ampl_statements = self.generate_ampl_statements()
+    file = open(file_name, "w")
+
+    for line in ampl_statements:
+        file.write(line + "\n")
+    
+    file.close()
+
+
+def generate_ampl_statements(self):
+    """returns a list where each item represents a statement of an ampl model file"""
+
+    # Checks to make sure the gekko model is valid and can be converted to AMPL equivalent.
+    # Some functions are not supported by AMPL, while others may not be implemented in the converter yet.
+    # Some error checking is done during the conversion process as well.
+    if self._raw:
+        raise Exception("@error: Cannot convert a GEKKO model containing raw .apm syntax")
+    if self._compounds:
+        raise Exception("@error: Cannot convert a GEKKO model using compounds; there is no equivalent in AMPL")
+    
+    # create a converter
+    converter = Converter(self)
+    # create ampl equivalent
+    converter.convert()
+    # return the statements of the ampl model file
+    return converter._statements
 
 
 class Converter:
@@ -391,9 +391,9 @@ class Converter:
 
             # some checking to make sure the pwl function is valid
             if len(x_values) < 3:
-                raise Exception("@Error: The pwl function requires at least 3 data points")
+                raise Exception("@error: The pwl function requires at least 3 data points")
             if len(x_values) != len(y_values):
-                raise Exception("@Error: The pwl function should have the same number of x and y values")
+                raise Exception("@error: The pwl function should have the same number of x and y values")
             
             equations = []
             x = parameters["x"]
@@ -434,7 +434,7 @@ class Converter:
 
         else:
             # object not supported or implemented yet
-            raise Exception("@Error: The %s object could not be converted to AMPL equivalent. It may not be supported or not implemented yet." % obj["type"])
+            raise Exception("@error: The %s object could not be converted to AMPL equivalent. It may not be supported or not implemented in GEKKO yet." % obj["type"])
 
 
     def convert_equation(self, equation):
@@ -444,7 +444,7 @@ class Converter:
         # check the equation can be converted
         if "$" in equation:
             # "$" denotes differential equations in GEKKO, which are not support by AMPL
-            raise Exception("@Error: Differential equations are not supported by AMPL, so the model could not be converted.")
+            raise Exception("@error: Differential equations are not supported by AMPL, so the model could not be converted.")
         
         # convert instances of ">" or "<=" (strict equality) into ">=" or "<="
         new_equation = ""
