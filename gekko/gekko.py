@@ -12,7 +12,6 @@ from .gk_global_options import GKGlobalOptions
 from .gk_parameter import GKParameter, GK_MV, GK_FV
 from .gk_variable import GKVariable, GK_CV, GK_SV
 from .gk_operators import GK_Operators, GK_Intermediate
-from .tuatara import Tuatara
 from itertools import count
 
 #%% Python version compatibility
@@ -83,10 +82,8 @@ class GEKKO(object):
         self._csv_status = None #indicate 'provided' or 'generated'
         self._model = ''
 
-        #tuatara functions for using AMPL solvers
-        self._tuatara = Tuatara(self)
-        self._use_tuatara = False
-        self._tuatara_solver = ""
+        #solver extension for using more solvers
+        self.solver_extension = False
 
         #Default model name, numbered to allow multiple models
         if name == None:
@@ -2016,6 +2013,7 @@ class GEKKO(object):
     from .gk_debug import gk_logic_tree, verify_input_options, like, name_check
     from .gk_write_files import _write_solver_options, _generate_dbs_file, _write_info, _write_csv, _build_model
     from .gk_post_solve import load_JSON, load_results
+    from .gk_solver_extension import solve_with_ampl, create_amplpy_object, generate_ampl_file, generate_ampl_statements
 
 
     #%% Get a solution
@@ -2032,241 +2030,238 @@ class GEKKO(object):
         if 'remote' in kwargs:
             raise TypeError('"remote" argument has been moved to model initialization (GEKKO(remote=True))')
 
-        use_tuatara = False
-        try:
-            self.options.SOLVER = int(self.options.SOLVER)
-        except:
-            gekko_solvers = ["APOPT", "BPOPT", "IPOPT", "SNOPT", "MINOS"]
+        if self.solver_extension:
+            self.solve_with_ampl()
+        else:
             try:
-                solver_index = gekko_solvers.index(self.options.SOLVER)
-                self.options.SOLVER = solver_index + 1 #0 based index
+                int(self.options.SOLVER)
             except:
-                use_tuatara = True
-        
-        if use_tuatara:
-            self._tuatara._solver = self.options.SOLVER
-            self._tuatara.solve()
-            return
+                # allow solver to be specified by string
+                available_solvers = ["ALL", "APOPT", "BPOPT", "IPOPT", "MINOS", "SNOPT"]
+                try:
+                    self.options.SOLVER = available_solvers.index(self.options.SOLVER)
+                except:
+                    raise ValueError("@error: Solver `%s` not found. If you are trying to use solver extension make sure you set m.solver_extension = True." % self.options.SOLVER)
+                
+            timing = False
+            if timing == True:
+                import time
 
-        timing = False
-        if timing == True:
-            import time
-
-        if timing == True:
-            t = time.time()
-
-        # Build the model
-        if self._model != 'provided': #no model was provided
-            self._build_model()
-        if timing == True:
-            print('build model', time.time() - t)
-
-
-        if timing == True:
-            t = time.time()
-        if self._csv_status != 'provided':
-            self._write_csv()
-        if timing == True:
-            print('build csv', time.time() - t)
-
-        if timing == True:
-            t = time.time()
-        self._generate_dbs_file()
-        if timing == True:
-            print('build dbs', time.time() - t)
-
-        if timing == True:
-            t = time.time()
-        self._write_solver_options()
-        if timing == True:
-            print('build solver options', time.time() - t)
-
-        if timing == True:
-            t = time.time()
-        self._write_info()
-        if timing == True:
-            print('write info', time.time() - t)
-
-        if debug >= 3:
-            self.name_check()
-
-        if self._remote == False: # local_solve
             if timing == True:
                 t = time.time()
-                    
-            # initialize printing
-            outs = ''
-            record_error = False
-            apm_error = ''
-            sselect = False
 
-            # Calls apmonitor through the command line
-            dirname = os.path.dirname(os.path.realpath(__file__))
-            penv = {"PATH" : self._path }
-            if sys.platform=='win32' or sys.platform=='win64': # Windows 32 or 64 bit
-                apm_exe = os.path.join(dirname,'bin','apm.exe')
-                if not ipython:
-                    sselect = True  # set shell=False for IPython
-            elif sys.platform=='darwin': # MacOS
-                apm_exe = os.path.join(dirname,'bin','apm_mac')                
-            elif sys.platform=='linux' or sys.platform=='linux2': # Linux
-                if os.uname()[4].startswith("arm"): # ARM processor (Raspberry Pi)
-                    apm_exe = os.path.join(dirname,'bin','apm_arm')
-                else: # Other Linux
-                    apm_exe = os.path.join(dirname,'bin','apm')
-            else:
-                platform = 0
-                raise Exception('Platform '+sys.platform+' not supported for local solve, set remote=True')
+            # Build the model
+            if self._model != 'provided': #no model was provided
+                self._build_model()
+            if timing == True:
+                print('build model', time.time() - t)
 
-            app = subprocess.Popen([apm_exe, self._model_name], stdout=subprocess.PIPE, \
-                                   stderr=subprocess.PIPE, cwd = self._path, bufsize=4096, \
-                                   env = penv, universal_newlines=True, shell=sselect)
 
-            if debug<=1:
-                if ver == 2:  # Python 2 doesn't have timeout
-                    outs, errs = app.communicate()
-                else:  # Python 3+              
-                    # limit max time to 1e6
-                    max_time = min(1e6,self.options.max_time)
-                    try:
-                        outs, errs = app.communicate(timeout=max_time)
-                    except subprocess.TimeoutExpired:
-                        app.kill()
+            if timing == True:
+                t = time.time()
+            if self._csv_status != 'provided':
+                self._write_csv()
+            if timing == True:
+                print('build csv', time.time() - t)
+
+            if timing == True:
+                t = time.time()
+            self._generate_dbs_file()
+            if timing == True:
+                print('build dbs', time.time() - t)
+
+            if timing == True:
+                t = time.time()
+            self._write_solver_options()
+            if timing == True:
+                print('build solver options', time.time() - t)
+
+            if timing == True:
+                t = time.time()
+            self._write_info()
+            if timing == True:
+                print('write info', time.time() - t)
+
+            if debug >= 3:
+                self.name_check()
+
+            if self._remote == False: # local_solve
+                if timing == True:
+                    t = time.time()
+                        
+                # initialize printing
+                outs = ''
+                record_error = False
+                apm_error = ''
+                sselect = False
+
+                # Calls apmonitor through the command line
+                dirname = os.path.dirname(os.path.realpath(__file__))
+                penv = {"PATH" : self._path }
+                if sys.platform=='win32' or sys.platform=='win64': # Windows 32 or 64 bit
+                    apm_exe = os.path.join(dirname,'bin','apm.exe')
+                    if not ipython:
+                        sselect = True  # set shell=False for IPython
+                elif sys.platform=='darwin': # MacOS
+                    apm_exe = os.path.join(dirname,'bin','apm_mac')                
+                elif sys.platform=='linux' or sys.platform=='linux2': # Linux
+                    if os.uname()[4].startswith("arm"): # ARM processor (Raspberry Pi)
+                        apm_exe = os.path.join(dirname,'bin','apm_arm')
+                    else: # Other Linux
+                        apm_exe = os.path.join(dirname,'bin','apm')
+                else:
+                    platform = 0
+                    raise Exception('Platform '+sys.platform+' not supported for local solve, set remote=True')
+
+                app = subprocess.Popen([apm_exe, self._model_name], stdout=subprocess.PIPE, \
+                                    stderr=subprocess.PIPE, cwd = self._path, bufsize=4096, \
+                                    env = penv, universal_newlines=True, shell=sselect)
+
+                if debug<=1:
+                    if ver == 2:  # Python 2 doesn't have timeout
                         outs, errs = app.communicate()
-                        raise Exception('Time Limit Exceeded: ' + str(max_time))
-                if '@error' in outs:
-                    i = outs.find('@error')
-                    apm_error = outs[i:]
-                    record_error = True
-            else:
-                # blocking if buffer fills up, use app.communicate instead
-                for line in iter(app.stdout.readline, ""):
-                    if disp == True:
+                    else:  # Python 3+              
+                        # limit max time to 1e6
+                        max_time = min(1e6,self.options.max_time)
                         try:
-                            print(line.replace('\n', ''))
-                        except:
-                            pass
-                    # Start recording output if error is detected
-                    if '@error' in line:
+                            outs, errs = app.communicate(timeout=max_time)
+                        except subprocess.TimeoutExpired:
+                            app.kill()
+                            outs, errs = app.communicate()
+                            raise Exception('Time Limit Exceeded: ' + str(max_time))
+                    if '@error' in outs:
+                        i = outs.find('@error')
+                        apm_error = outs[i:]
                         record_error = True
-                    if record_error:
-                        apm_error+=line
-                    app.wait()
-                outs, errs = app.communicate()
+                else:
+                    # blocking if buffer fills up, use app.communicate instead
+                    for line in iter(app.stdout.readline, ""):
+                        if disp == True:
+                            try:
+                                print(line.replace('\n', ''))
+                            except:
+                                pass
+                        # Start recording output if error is detected
+                        if '@error' in line:
+                            record_error = True
+                        if record_error:
+                            apm_error+=line
+                        app.wait()
+                    outs, errs = app.communicate()
+
+                if timing == True:
+                    print('solve', time.time() - t)
+                if disp == True:
+                    print(outs)
+                if errs:
+                    print("Error:", errs)
+                if (debug >= 1) and record_error:
+                    raise Exception(apm_error)
+                    
+            else: #solve on APM server
+                def send_if_exists(extension):
+                    path = os.path.join(self._path,self._model_name + '.' + extension)
+                    if os.path.isfile(path):
+                        with open(path) as f:
+                            file = f.read()
+                        cmd(self._server, self._model_name, extension+' '+file)
+
+                #clear .apm, .csv, measurements.dbs files already on the server
+                cmd(self._server,self._model_name,'clear apm')
+                cmd(self._server,self._model_name,'clear csv')
+                cmd(self._server,self._model_name,'clear meas')
+
+                #send model file
+                with open(os.path.join(self._path,self._model_name + '.apm')) as f:
+                    model = f.read()
+                cmd(self._server, self._model_name, ' '+model)
+                #send csv file
+                send_if_exists('csv')
+                #send info file
+                send_if_exists('info')
+                #send dbs file
+                with open(os.path.join(self._path,'measurements.dbs')) as f:
+                    dbs = f.read()
+                # write to measurements.dbs (meas) instead of overrides.dbs (option)
+                cmd(self._server, self._model_name, 'meas '+dbs)
+                #solver options
+                if self.solver_options:
+                    opt_file=self._write_solver_options()
+                    cmd(self._server,self._model_name, ' '+opt_file)
+
+                #extra files (eg solver.opt, cspline.data)
+                for f_name in self._extra_files:
+                    with open(os.path.join(self._path,f_name)) as f:
+                        extra_filedata = f.read() #read data
+                        extra_filedata = 'File ' + f_name + '\n' + extra_filedata + 'End File \n' #format for appending to apm file
+                    cmd(self._server,self._model_name, ' '+extra_filedata)
+
+                #solve remotely
+                response = cmd(self._server, self._model_name, 'solve', disp, debug)
+                
+                #print APM error message and die
+                if (debug >= 1) and ('@error' in response):
+                    raise Exception(response)
+
+                #load results
+                def byte2str(byte):
+                    if type(byte) is bytes:
+                        return byte.decode().replace('\r','')
+                    else:
+                        return byte
+
+                try:
+                    results = byte2str(get_file(self._server,self._model_name,'results.json'))
+                    f = open(os.path.join(self._path,'results.json'), 'w')
+                    f.write(str(results))
+                    f.close()
+                    options = byte2str(get_file(self._server,self._model_name,'options.json'))
+                    f = open(os.path.join(self._path,'options.json'), 'w')
+                    f.write(str(options))
+                    f.close()
+                    if self.options.CSV_WRITE >= 1:
+                        results = byte2str(get_file(self._server,self._model_name,'results.csv'))
+                        with open(os.path.join(self._path,'results.csv'), 'w') as f:
+                            f.write(str(results))
+                        if self.options.CSV_WRITE >1:
+                            results_all = byte2str(get_file(self._server,self._model_name,'results_all.csv'))
+                            with open(os.path.join(self._path,'results_all.csv'), 'w') as f:
+                                f.write(str(results_all))
+                except:
+                    raise ImportError('No solution or server unreachable.\n'+\
+                                    '  Show errors with m.solve(disp=True).\n'+\
+                                    '  Try local solve with m=GEKKO(remote=False).')
 
             if timing == True:
                 print('solve', time.time() - t)
-            if disp == True:
-                print(outs)
-            if errs:
-                print("Error:", errs)
-            if (debug >= 1) and record_error:
-                raise Exception(apm_error)
-                
-        else: #solve on APM server
-            def send_if_exists(extension):
-                path = os.path.join(self._path,self._model_name + '.' + extension)
-                if os.path.isfile(path):
-                    with open(path) as f:
-                        file = f.read()
-                    cmd(self._server, self._model_name, extension+' '+file)
 
-            #clear .apm, .csv, measurements.dbs files already on the server
-            cmd(self._server,self._model_name,'clear apm')
-            cmd(self._server,self._model_name,'clear csv')
-            cmd(self._server,self._model_name,'clear meas')
+            if timing == True:
+                t = time.time()
+            self.load_results()
+            if timing == True:
+                print('load results', time.time() - t)
 
-            #send model file
-            with open(os.path.join(self._path,self._model_name + '.apm')) as f:
-                model = f.read()
-            cmd(self._server, self._model_name, ' '+model)
-            #send csv file
-            send_if_exists('csv')
-            #send info file
-            send_if_exists('info')
-            #send dbs file
-            with open(os.path.join(self._path,'measurements.dbs')) as f:
-                dbs = f.read()
-            # write to measurements.dbs (meas) instead of overrides.dbs (option)
-            cmd(self._server, self._model_name, 'meas '+dbs)
-            #solver options
-            if self.solver_options:
-                opt_file=self._write_solver_options()
-                cmd(self._server,self._model_name, ' '+opt_file)
+            if timing == True:
+                t = time.time()
+            self.load_JSON()
+            if timing == True:
+                print('load JSON', time.time() - t)
 
-            #extra files (eg solver.opt, cspline.data)
-            for f_name in self._extra_files:
-                with open(os.path.join(self._path,f_name)) as f:
-                    extra_filedata = f.read() #read data
-                    extra_filedata = 'File ' + f_name + '\n' + extra_filedata + 'End File \n' #format for appending to apm file
-                cmd(self._server,self._model_name, ' '+extra_filedata)
+            if timing == True:
+                t = time.time()
+            if debug >= 3:
+                self.verify_input_options()
+                self.gk_logic_tree()
+            if timing == True:
+                print('debug', time.time() - t)
 
-            #solve remotely
-            response = cmd(self._server, self._model_name, 'solve', disp, debug)
-            
-            #print APM error message and die
-            if (debug >= 1) and ('@error' in response):
-                raise Exception(response)
-
-            #load results
-            def byte2str(byte):
-                if type(byte) is bytes:
-                    return byte.decode().replace('\r','')
-                else:
-                    return byte
-
-            try:
-                results = byte2str(get_file(self._server,self._model_name,'results.json'))
-                f = open(os.path.join(self._path,'results.json'), 'w')
-                f.write(str(results))
-                f.close()
-                options = byte2str(get_file(self._server,self._model_name,'options.json'))
-                f = open(os.path.join(self._path,'options.json'), 'w')
-                f.write(str(options))
-                f.close()
-                if self.options.CSV_WRITE >= 1:
-                    results = byte2str(get_file(self._server,self._model_name,'results.csv'))
-                    with open(os.path.join(self._path,'results.csv'), 'w') as f:
-                        f.write(str(results))
-                    if self.options.CSV_WRITE >1:
-                        results_all = byte2str(get_file(self._server,self._model_name,'results_all.csv'))
-                        with open(os.path.join(self._path,'results_all.csv'), 'w') as f:
-                            f.write(str(results_all))
-            except:
-                raise ImportError('No solution or server unreachable.\n'+\
-                                  '  Show errors with m.solve(disp=True).\n'+\
-                                  '  Try local solve with m=GEKKO(remote=False).')
-
-        if timing == True:
-            print('solve', time.time() - t)
-
-        if timing == True:
-            t = time.time()
-        self.load_results()
-        if timing == True:
-            print('load results', time.time() - t)
-
-        if timing == True:
-            t = time.time()
-        self.load_JSON()
-        if timing == True:
-            print('load JSON', time.time() - t)
-
-        if timing == True:
-            t = time.time()
-        if debug >= 3:
-            self.verify_input_options()
-            self.gk_logic_tree()
-        if timing == True:
-            print('debug', time.time() - t)
-
-        if self._gui_open:
-            self.gui.update()
-        elif GUI is True:
-            from .gk_gui import GK_GUI
-            self._gui_open = True
-            self.gui = GK_GUI(self._path)
-            self.gui.display()
+            if self._gui_open:
+                self.gui.update()
+            elif GUI is True:
+                from .gk_gui import GK_GUI
+                self._gui_open = True
+                self.gui = GK_GUI(self._path)
+                self.gui.display()
 
     #%% Name matching
     
