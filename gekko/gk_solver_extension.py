@@ -6,7 +6,7 @@ except:
 
 
 def solve_with_ampl(self):
-    """solve a gekko model using a solver supported by ampl"""
+    """solve a gekko model by converting it to AMPL and running a solver"""
     # check if we are going to use AMPLPY to solve
     use_amplpy = False
     solver = self.options.SOLVER
@@ -92,8 +92,18 @@ def create_amplpy_object(self):
     
     """set the ampl model options"""
     # set the solver
-    amplpy_model.setOption("solver", self.options.SOLVER)
-    # more options not implemented yet
+    solver = self.options.SOLVER
+    amplpy_model.setOption("solver", solver)
+    options_str = ""
+
+    # combine solver options to str
+    for option in self.solver_options:
+        data = option.split(" ")
+        options_str += "%s=%s " % (data[0], data[1])
+
+    # set solver options
+    amplpy_model.setOption(solver+"_options", options_str)
+
     return amplpy_model
 
 

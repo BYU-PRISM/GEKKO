@@ -2029,6 +2029,12 @@ class GEKKO(object):
         """
         if 'remote' in kwargs:
             raise TypeError('"remote" argument has been moved to model initialization (GEKKO(remote=True))')
+        
+        if isinstance(self.solver_options, dict):
+            options = []
+            for option in self.solver_options.keys():
+                options.append("%s %s" % (option, self.solver_options[option]))
+            self.solver_options = options
 
         if self.solver_extension:
             self.solve_with_ampl()
