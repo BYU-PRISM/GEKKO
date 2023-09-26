@@ -1,20 +1,13 @@
-amplpy_installed = True
-try:
-    from amplpy import AMPL, modules
-except:
-    amplpy_installed = False
+def solve_extension(self):
+    """solve a gekko model by converting it to AMPL syntax and running a solver"""
 
-
-def solve_with_ampl(self):
-    """solve a gekko model by converting it to AMPL and running a solver"""
-    # check if we are going to use AMPLPY to solve
-    use_amplpy = False
+    solve_method = ""
     solver = self.options.SOLVER
-                    
+
     try:
         int(solver)
     except:
-        # value is string, pass
+        # value is string, expected
         pass
     else:
         raise ValueError("@error: Solver extension requires a string for m.options.SOLVER for the solver you want to use")
@@ -22,22 +15,25 @@ def solve_with_ampl(self):
     if self._remote:
         print("WARNING: Remote solve not supported by solver extension; defaulted to local solve.")
         self._remote = False
-    if amplpy_installed:
+
+    # decide what we are going to use to solve (currently only AMPLPY is supported)
+    try:
+        from amplpy import modules
         # check if the solver is installed
         try:
             modules.find(solver)
-            use_amplpy = True
+            solve_method = "AMPLPY"
         except:
             if self.options.SOLVER in modules.available():
                 # solver not installed
                 raise ValueError("@error: Solver `%s` not installed. Try running `$ python -m amplpy.modules install %s`. See https://dev.ampl.com/ampl/python/modules.html" % (solver, solver))
             else:
                 raise ValueError("@error: Unknown solver `%s`. Refer to the AMPLPY documentation or run `$ python -m amplpy.modules available` to view available solvers." % solver)
-    else:
+    except:
         # amplpy not installed
         raise ImportError("@error: AMPLPY not installed. Run `$ pip install amplpy` to install AMPLPY in order to use solver extension to access more solvers.")
     
-    if use_amplpy:
+    if solve_method == "AMPLPY":  # solve with AMPLPY
         # load the amplpy modules
         modules.load()
         # create a amplpy model
@@ -66,15 +62,12 @@ def solve_with_ampl(self):
         for objective in amplpy_model.get_objectives():
             objective_sum += objective[1].value()
         self.options.OBJFCNVAL = (True, objective_sum)
-    else:
-        # access user-installed executable solvers
-        # not implemented yet
-        pass
 
 
 def create_amplpy_object(self):
     """converts a GEKKO model to an equivalent AMPLPY model"""
-    # AMPLPY must be installed
+    from amplpy import AMPL
+
     # create an ampl model
     amplpy_model = AMPL()
 
@@ -132,15 +125,15 @@ def generate_ampl_statements(self):
         raise Exception("@error: Cannot convert a GEKKO model using compounds; there is no equivalent in AMPL")
     
     # create a converter
-    converter = Converter(self)
-    # create ampl equivalent
+    converter = AMPLConverter(self)
+    # create ampl equivalent model
     converter.convert()
     # return the statements of the ampl model file
     return converter._statements
 
 
-class Converter:
-    """class for holding data relating to the ampl model file"""
+class AMPLConverter:
+    """class for holding data relating to the amplpy model file"""
     def __init__(self, gekko_model):
         self._gekko_model = gekko_model
         # number of extra variables
