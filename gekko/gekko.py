@@ -5,7 +5,6 @@ import glob
 import re
 import tempfile # for temporary directory
 import numpy as np
-import tuatara
 from shutil import rmtree
 from .apm import cmd, get_file # remote solve functions
 from .gk_global_options import GKGlobalOptions
@@ -2013,7 +2012,7 @@ class GEKKO(object):
     from .gk_debug import gk_logic_tree, verify_input_options, like, name_check
     from .gk_write_files import _write_solver_options, _generate_dbs_file, _write_info, _write_csv, _build_model
     from .gk_post_solve import load_JSON, load_results
-    from .gk_solver_extension import solve_with_ampl, create_amplpy_object, generate_ampl_file, generate_ampl_statements
+    from .gk_solver_extension import solve_extension, create_amplpy_object, generate_ampl_file, generate_ampl_statements
 
 
     #%% Get a solution
@@ -2037,7 +2036,7 @@ class GEKKO(object):
             self.solver_options = options
 
         if self.solver_extension:
-            self.solve_with_ampl()
+            self.solve_extension()
         else:
             try:
                 int(self.options.SOLVER)
