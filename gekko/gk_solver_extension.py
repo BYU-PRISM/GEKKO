@@ -65,7 +65,7 @@ def solve_extension(self):
 
 
 def create_amplpy_object(self):
-    """converts a GEKKO model to an equivalent AMPLPY model"""
+    """returns the AMPLPY equivalent of the GEKKO model"""
     from amplpy import AMPL
 
     # create an ampl model
@@ -115,15 +115,6 @@ def generate_ampl_file(self, file_name="model.mod"):
 
 def generate_ampl_statements(self):
     """returns a list where each item represents a statement of an ampl model file"""
-
-    # Checks to make sure the gekko model is valid and can be converted to AMPL equivalent.
-    # Some functions are not supported by AMPL, while others may not be implemented in the converter yet.
-    # Some error checking is done during the conversion process as well.
-    if self._raw:
-        raise Exception("@error: Cannot convert a GEKKO model containing raw .apm syntax")
-    if self._compounds:
-        raise Exception("@error: Cannot convert a GEKKO model using compounds; there is no equivalent in AMPL")
-    
     # create a converter
     converter = AMPLConverter(self)
     # create ampl equivalent model
@@ -151,6 +142,14 @@ class AMPLConverter:
     def convert(self):
         """runs through all the components of the gekko model and adds to the ampl model"""
 
+        # Checks to make sure the gekko model is valid and can be converted to AMPL equivalent.
+        # Some functions are not supported by AMPL, while others may not be implemented in the converter yet.
+        # Some error checking is done during the conversion process as well.
+        if self._raw:
+            raise Exception("@error: Cannot convert a GEKKO model containing raw .apm syntax")
+        if self._compounds:
+            raise Exception("@error: Cannot convert a GEKKO model using compounds; there is no equivalent in AMPL")
+        
         # add constants
         for constant in self._gekko_model._constants:
             self.add_constant(self.get_data(constant))
@@ -166,7 +165,7 @@ class AMPLConverter:
         # declare intermediate variables (which are unique to GEKKO)
         for intermediate in self._gekko_model._intermediates:
             self.add_intermediate(self.get_data(intermediate))
-            
+
         # constrain intermediate variables to their equation
         for i in range(len(self._gekko_model._inter_equations)):
             intermediate_name = self._gekko_model._intermediates[i].name
@@ -251,6 +250,7 @@ class AMPLConverter:
 
     
     def get_data(self, variable):
+        """get data from a variable"""
         data = {}
         for attribute in ["name", "value", "lower", "upper"]:
             if hasattr(variable, attribute):
@@ -262,6 +262,7 @@ class AMPLConverter:
     
 
     def create_variable(self, variable_data={}):
+        """create a variable"""
         data = {}
         self._variable_num += 1
         data["name"] = "ampl_v%s" % str(self._variable_num)
@@ -355,32 +356,27 @@ class AMPLConverter:
         # object parameters
         parameters = obj["parameters"]
 
-        # only some prebuilt objects are implemented yet, more are to come
+        # not all prebuilt objects are implemented
 
-        if obj["type"] == "sum":
-            # sum object
+        if obj["type"] == "sum":  # sum object
             equation = "%s = 0" % parameters["y"]
             for variable in parameters["x"]:
                 equation += " + %s" % variable
             self.add_constraint(self.create_constraint(equation))
 
-        elif obj["type"] == "abs":
-            # abs function
+        elif obj["type"] == "abs":  # abs function
             equation = "%s = abs(%s)" % (parameters["y"], parameters["x"])
             self.add_constraint(self.create_constraint(equation))
         
-        elif obj["type"] == "sign":
-            # sign function
+        elif obj["type"] == "sign":  # sign function
             equation = "%s = if %s>=0 then 1 else -1" % (parameters["y"], parameters["x"])
             self.add_constraint(self.create_constraint(equation))
         
-        elif obj["type"] in ["max", "min"]:
-            # max/min function
+        elif obj["type"] in ["max", "min"]:  # max/min function
             equation = "%s = %s(%s, %s)" % (parameters["y"], obj["type"], parameters["x"][0], parameters["x"][1])
             self.add_constraint(self.create_constraint(equation))
         
-        elif obj["type"] == "pwl":
-            # piece-wise linear function
+        elif obj["type"] == "pwl":  # piece-wise linear function
             x_values = []
             y_values = []
             # file path to pwl values
@@ -449,6 +445,7 @@ class AMPLConverter:
             # "$" denotes differential equations in GEKKO, which are not support by AMPL
             raise Exception("@error: Differential equations are not supported by AMPL, so the model could not be converted.")
         
+        # some solvers seem to not support strict equality
         # convert instances of ">" or "<=" (strict equality) into ">=" or "<="
         new_equation = ""
         i = 0
