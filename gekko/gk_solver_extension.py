@@ -145,9 +145,9 @@ class AMPLConverter:
         # Checks to make sure the gekko model is valid and can be converted to AMPL equivalent.
         # Some functions are not supported by AMPL, while others may not be implemented in the converter yet.
         # Some error checking is done during the conversion process as well.
-        if self._raw:
+        if self._gekko_model._raw:
             raise Exception("@error: Cannot convert a GEKKO model containing raw .apm syntax")
-        if self._compounds:
+        if self._gekko_model._compounds:
             raise Exception("@error: Cannot convert a GEKKO model using compounds; there is no equivalent in AMPL")
         
         # add constants
