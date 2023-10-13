@@ -83,6 +83,7 @@ Contents
 	brain
 	ml
 	chemical
+	solver_extension
 	examples
 	support
 
