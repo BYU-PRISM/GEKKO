@@ -81,9 +81,6 @@ class GEKKO(object):
         self._csv_status = None #indicate 'provided' or 'generated'
         self._model = ''
 
-        #solver extension for using more solvers
-        self.solver_extension = False
-
         #Default model name, numbered to allow multiple models
         if name == None:
             name = 'gk_model'+str(self._id)
@@ -2035,9 +2032,11 @@ class GEKKO(object):
                 options.append("%s %s" % (option, self.solver_options[option]))
             self.solver_options = options
 
-        if self.solver_extension:
+        if self.options.SOLVER_EXTENSION:
+            # solve using solver extension
             self.solve_extension()
         else:
+            # solve normally
             try:
                 int(self.options.SOLVER)
             except:
@@ -2046,7 +2045,7 @@ class GEKKO(object):
                 try:
                     self.options.SOLVER = available_solvers.index(self.options.SOLVER)
                 except:
-                    raise ValueError("@error: Solver `%s` not found. If you are trying to use solver extension make sure you set m.solver_extension = True." % self.options.SOLVER)
+                    raise ValueError("Solver `%s` not found. If you are trying to use solver extension make sure you set m.options.SOLVER_EXTENSION = True." % self.options.SOLVER)
                 
             timing = False
             if timing == True:

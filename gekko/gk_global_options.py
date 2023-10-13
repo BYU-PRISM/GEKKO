@@ -8,7 +8,7 @@ global_option_list = ['APPINFO', 'APPINFOCHG', 'APPSTATUS', 'BNDS_CHK', 'COLDSTA
                       'ITERATIONS', 'MAX_ITER', 'MAX_TIME', 'MEAS_CHK', 'MV_DCOST_SLOPE',
                       'MV_STEP_HOR', 'MV_TYPE', 'NODES', 'OBJFCNVAL', 'OTOL', 'PRED_HOR',
                       'PRED_TIME', 'REDUCE', 'REQCTRLMODE', 'RTOL', 'SCALING', 'SENSITIVITY',
-                      'SOLVESTATUS', 'SOLVER', 'SOLVETIME', 'SPECS', 'TIME_SHIFT',
+                      'SOLVESTATUS', 'SOLVER', 'SOLVER_EXTENSION', 'SOLVETIME', 'SPECS', 'TIME_SHIFT',
                       'WEB', 'WEB_MENU', 'WEB_REFRESH']
 """                      
 global_options_inputs =  ['AUTO_COLD', 'BNDS_CHK', 'CSV_READ', 'CSV_WRITE', 
@@ -17,7 +17,7 @@ global_options_inputs =  ['AUTO_COLD', 'BNDS_CHK', 'CSV_READ', 'CSV_WRITE',
 'FRZE_CHK', 'HIST_HOR', 'HIST_UNITS', 'ICD_CALC', 'IMODE', 'LINEAR', 'MAX_ITER', 
 'MAX_MEMORY', 'MAX_TIME', 'MEAS_CHK', 'MV_DCOST_SLOPE', 'MV_STEP_HOR', 
 'MV_TYPE', 'NODES', 'OTOL', 'REDUCE', 'REPLAY', 'REQCTRLMODE', 'RTOL', 
-'SCALING', 'SENSITIVITY', 'SEQUENTIAL', 'SOLVER', 'SPECS', 'SPC_CHART', 
+'SCALING', 'SENSITIVITY', 'SEQUENTIAL', 'SOLVER', 'SOLVER_EXTENSION', 'SPECS', 'SPC_CHART', 
 'STREAM_LEVEL', 'TIME_SHIFT', 'WEB', 'WEB_MENU', 'WEB_REFRESH', 'WEB_PLOT_FREQ']
 
 global_options_outputs= ['APPINFO', 'APPINFOCHG', 'APPSTATUS', 'CTRLMODE', 
@@ -81,6 +81,7 @@ class GKGlobalOptions():
         self.SENSITIVITY = 0
         self.SEQUENTIAL = 0
         self.SOLVER = 3
+        self.SOLVER_EXTENSION = False
         self.SPC_CHART = 0
         self.SPECS = 1
         self.STREAM_LEVEL = 0
