@@ -7,10 +7,13 @@
 Solver extension
 =======================================
 
-    GEKKO includes a limited interface to access more solvers. GEKKO can convert the
-    model to AMPL syntax, making use of the AMPLPY library and allowing access to various 
-    supported solvers. Alternatively, a .mod file (AMPL model file) can be output 
+    GEKKO includes a limited interface to access more solvers. The solver extension module 
+    can convert the model to AMPL syntax, allowing access to various supported solvers by
+    making use of the AMPLPY library. Alternatively, a .mod file (AMPL model file) can be output 
     and solved by uploading to `NEOS <https://neos-server.org>`_. 
+
+    The free version of AMPL limits a model to 300 variables and 300 constraints. Licensing
+    and more details can be obtained from the `AMPL website <https://ampl.com>`_.
 
     The converter between GEKKO model to AMPL syntax is limited and does not support
     the full range of model building functions and options available in GEKKO. However,
@@ -27,6 +30,10 @@ Solver extension
 
 Example
 --------
+    To use the solver extension module, set m.SOLVER_EXTENSION = 1 and specify the 
+    solver you want to use. The GEKKO model can be declared like normal. The results 
+    from the solve are placed back into the GEKKO model variables.
+
     Example use of the solver extension module is shown below::
 
         from gekko import GEKKO
@@ -34,7 +41,7 @@ Example
         x = m.Var()
         y = m.Var()
         m.Equations([3*x+2*y==1, x+2*y==0])  
-        m.options.SOLVER_EXTENSION = True   # enable solver extension
+        m.options.SOLVER_EXTENSION = 1   # enable solver extension
         m.options.SOLVER = "BONMIN"         # use BONMIN solver
         m.solve()    # solve
         print(x.value,y.value)
@@ -61,12 +68,12 @@ Solver extension methods
     Returns an amplpy model object::
 
         ampl = m.create_amplpy_object()
-        # do some stuff with the ampl object
+        # do some stuff with the amplpy object
         #...
 
 .. py:classmethod:: m.generate_ampl_file(filename="model.mod")
 
-    Generates an ampl model (.mod) file in the current directory or where specified by ``filename``::
+    Generates an ampl model (.mod) file in the current directory or as specified by ``filename``::
 
         m.generate_ampl_file()
 
