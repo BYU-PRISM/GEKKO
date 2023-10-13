@@ -812,7 +812,7 @@ Explanation: SEQUENTIAL determines whether a the solution is attempted with a si
 SOLVER
 ------------------------
 
-Type: Integer, Input
+Type: Integer*, Input
 
 Default Value: 3
 
@@ -820,6 +820,21 @@ Description: Solver options: 0 = Benchmark All Solvers, 1-5 = Available Solvers 
 
 Explanation: SOLVER selects the solver to use in an attempt to find a solution. There are free solvers: 1: APOPT, 2: BPOPT, 3: IPOPT distributed with the public version of the software. There are additional solvers that are not included with the public version and require a commercial license. IPOPT is generally the best for problems with large numbers of degrees of freedom or when starting without a good initial guess. BPOPT has been found to be the best for systems biology applications. APOPT is generally the best when warm-starting from a prior solution or when the number of degrees of freedom (Number of Variables - Number of Equations) is less than 2000. APOPT is also the only solver that handles Mixed Integer problems. Use option 0 to compare all available solvers. Some solvers and solver options are not available when switching to `remote=False` due to licensing requirements. There is `additional information on solver options <https://apmonitor.com/wiki/index.php/Main/OptionApmSolver>`_.
 
+\* SOLVER can also be declared with a string (required for solver_extension module). It is converted to integer prior to passing to APMonitor.
+
+
+.. _solve_extension:
+
+SOLVER_EXTENSION
+------------------------
+
+Type: Integer, Input
+
+Default Value: 0
+
+Description: Solver extension module, 0=Off, 1=On
+
+Explanation: Whether to use the solver extension module to solve, allowing access to a wider range of solvers. For more information see the `solver extension <solver_extension.html>`_ module.
 
 
 .. _solvestatus:
