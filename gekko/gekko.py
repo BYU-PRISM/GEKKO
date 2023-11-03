@@ -2178,6 +2178,8 @@ class GEKKO(object):
                 cmd(self._server,self._model_name, ' '+extra_filedata)
 
             #solve remotely
+            if disp:
+                print("Solving on APM Server, switch to GEKKO(remote=False) to solve locally")
             response = cmd(self._server, self._model_name, 'solve', disp, debug)
             
             #print APM error message and die
