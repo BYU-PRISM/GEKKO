@@ -237,23 +237,23 @@ class GEKKO(object):
 
     def Obj(self,obj):
         self._objectives.append('minimize ' + str(obj))
-        
+
     def Minimize(self,obj):
         self._objectives.append('minimize ' + str(obj))
-        
+
     def Maximize(self,obj):
         self._objectives.append('maximize ' + str(obj))
 
     def Raw(self,raw):
         self._raw.append(str(raw))
-        
+
     #%% Connections
     def Connection(self,var1, var2=None, pos1=None, pos2=None, node1='end', node2='end'):
         '''Connect two variables or a variable to a value. When
         Variables are connected, they become a single entity and are merged.
         The first variable retains all of the properties and the second variable
         becomes an alias for the first.
-        
+
         var1 = Variable 1 name
         var2 = Variable 2 name (default=None)
         pos1 = Step position in the collocation horizon for var1 (default=None)
@@ -261,7 +261,7 @@ class GEKKO(object):
         pos2 = Step position in the collocation horizon for var2 (default=None)
                Use 'end' for the last position in the horizon
         node1 = Node within the pos1 step (default='end')
-        node2 = Node within the pos2 step (default='end')        
+        node2 = Node within the pos2 step (default='end')
         '''
         # TODO: add checks for types
             #e.g. if connecting a variable position (pos1 not None) to another variable,
@@ -319,53 +319,53 @@ class GEKKO(object):
                   else:
                      print('Warning: Specify m.time before connecting to end node')
                else:
-                  var1.__dict__['_override_csv'].append((pos1,var2))    
+                  var1.__dict__['_override_csv'].append((pos1,var2))
 
     def fix(self,var, val=None, pos=None):
         '''Fix a variable at a specific value so that the solver cannot adjust the
         value.
-        
+
         fix(var,pos=None,val=None)
-        
+
         Inputs:
           var = variable to fix
           val = specified value or None to use default
           pos = position within the horizon or None for all
-        
+
         The var variable must be a Gekko Parameter or Variable. When val==None,
         the current default value is retained. When pos==None, the value is fixed
         over all horizon nodes.
         '''
         self.Connection(var,var2=val,pos1=pos)
-        
+
     def fix_initial(self,var,val=None):
         '''Fix the initial condition of a variable so the solver cannot adjust it.
-        
+
         fix_initial(var,val=None)
-        
+
         Inputs:
           var = variable to fix
           val = specified value or None to use default
-        
+
         The var variable must be a Gekko Parameter or Variable. When val==None,
         the current default value is retained. The value is fixed only at the
         initial condition. If no val is given, the value from the time shift is used.
-        
+
         Variables have fixed initial conditions by default. An example of when this
         function is needed is after a call to the function free but when the initial
         condition should still be fixed.
         '''
         self.Connection(var,var2=val,pos1=1,node1=1)
-        
+
     def fix_final(self,var,val=None):
         '''Fix the final condition of a variable so the solver cannot adjust it.
-        
+
         fix_final(var,val=None)
-        
+
         Inputs:
           var = variable to fix
           val = specified value or None to use default
-        
+
         The var variable must be a Gekko Parameter or Variable. When val==None,
         the current default value is retained. The value is fixed only at the
         initial condition. If no val is given, the value from the time shift is used.
@@ -375,41 +375,41 @@ class GEKKO(object):
     def free(self,var, pos=None):
         '''Free a variable so that the solver can calculate the value to
         satisfy equation constraints or minimize/maximize an objective.
-        
+
         free(var,pos=None)
-        
+
         Inputs:
           var = variable to free (calculate)
           pos = position within the horizon or None for all
-        
+
         The var variable must be a Gekko Parameter or Variable.
         '''
         self.Connection(var,var2='calculated',pos1=pos)
 
     def free_initial(self,var):
         '''Free the initial condition of a variable so the solver can adjust it.
-        
+
         free_initial(var)
-        
+
         Inputs:
           var = variable to free
-        
+
         The var variable must be a Gekko Parameter or Variable.
-        
+
         Variables have fixed initial conditions by default. The default to free
         the initial condition is also available when declaring the variable as
             x = m.Var(fixed_initial=False)
         '''
         self.Connection(var,var2='calculated',pos1=1,node1=1)
-        
+
     def free_final(self,var):
         '''Free the final condition of a parameter so the solver can adjust it.
-        
+
         free_final(var)
-        
+
         Inputs:
           var = variable to free
-        
+
         The var variable must be a Gekko Parameter or Variable.
         '''
         self.Connection(var,var2='calculated',pos1='end',node1='end')
@@ -439,7 +439,7 @@ class GEKKO(object):
     # sum         = summation with APM object
     # sysid       = linear time invariant system identification (ARX / OE)
     # vsum        = vertical summation (integral) of a variable in data direction
-    
+
     # --- add to GEKKO ---
     # lag, lookup, table
 
@@ -475,7 +475,7 @@ class GEKKO(object):
         at an argument value of zero and can cause a gradient-based optimizer to fail to converge.
         Usage: y = m.abs3(x)
         Input: GEKKO variable, parameter, or expression
-        Output: GEKKO variable 
+        Output: GEKKO variable
         """
         # add binary (intb) and output (y) variable
         intb = self.Var(0,lb=0,ub=1,integer=True)
@@ -527,7 +527,7 @@ class GEKKO(object):
             c = np.array(c,dtype=float)
         #check consistency
         if b.ndim<=1:
-            raise TypeError('b dimension must be (nb,nu,ny) or (nb,nu) when ny=1')        
+            raise TypeError('b dimension must be (nb,nu,ny) or (nb,nu) when ny=1')
         if b.ndim==2 and ny!=1:
             raise TypeError('b (ny x (nb,nu)) dimension must by consistent with ny=1')
         if b.ndim==3:
@@ -535,11 +535,11 @@ class GEKKO(object):
                 raise TypeError('b (ny x (nb,nu)) dimension must by consistent with a matrix (na,ny)')
         if ny!=np.size(c):
             raise TypeError('c (ny) dimension must be length ' + str(ny))
- 
+
         # build arx object with unique object name
         arx_name = 'sysa'  + str(len(self._objects) + 1)
         self._objects.append(arx_name + ' = arx')
-        
+
         # write arx object config file objectname.txt
         filename = arx_name + '.txt'
         filedata = ''
@@ -550,7 +550,7 @@ class GEKKO(object):
         with open(os.path.join(self._path,filename), 'w+') as f:
             f.write(filedata)
         self._extra_files.append(filename) #add csv file to list of extra file to send to server
-         
+
         #write A,B matricies to objectname.A/B.txt
         filename = arx_name + '.alpha.txt'
         np.savetxt(os.path.join(self._path,filename), a, delimiter=", ", fmt='%1.25s')
@@ -569,7 +569,7 @@ class GEKKO(object):
         filename = arx_name + '.gamma.txt'
         np.savetxt(os.path.join(self._path,filename), c, delimiter=", ", fmt='%1.25s')
         self._extra_files.append(filename) #add csv file to list of extra file to send to server
-        
+
         #define arrays of states, outputs and inputs
         if isinstance(y,(GKVariable,GKParameter)):
             y = [y] # convert to list of size 1
@@ -595,11 +595,11 @@ class GEKKO(object):
         for i in range(ny):
             if ny == 1:
                 self._connections.append(y[i].name + ' = ' + arx_name+'.y')
-            else:    
+            else:
                 self._connections.append(y[i].name + ' = ' + arx_name+'.y['+str(i+1)+']')
 
         return y,u
-        
+
     ## Ax=b, Ax<=b, or Ax>=b
     def axb(self,A,b,x=None,etype='=',sparse=False):
         """Create Ax=b, Ax<b, Ax>b, Ax<=b, or Ax>=b models
@@ -611,7 +611,7 @@ class GEKKO(object):
                etype = ['=','<','>','>=','<='] for equality or inequality form
                sparse = True if data is in sparse form, otherwise dense
                  sparse matrices are stored in COO form with [row,col,value] with
-                 starting index 1 for optional matrix A and in [row,value] for 
+                 starting index 1 for optional matrix A and in [row,value] for
                  vector b
         Output: GEKKO variables x
         """
@@ -625,11 +625,11 @@ class GEKKO(object):
 
         #convert data to flat numpy arrays
         A = np.array(A,dtype=float)
-        #print('A')
-        #print(A)
+        print('A')
+        print(A)
         b = np.array(b,dtype=float).T
-        #print('b')
-        #print(b)
+        print('b')
+        print(b)
         if sparse:
             A = A.T
             m = np.size(b,0)
@@ -638,7 +638,7 @@ class GEKKO(object):
                 raise Exception('The b vector must be in COO form as [row,value] with 2 columns')
         else:
             b = b.flatten()
-        
+
         # check sizes
         if sparse:
             m = np.size(A,0)
@@ -666,12 +666,12 @@ class GEKKO(object):
                 raise TypeError("Optional x must be a python list or numpy array of GEKKO variables or parameters")
             nx = len(x)
             if nx!=c_max:
-                raise TypeError("Optional x must have same length as number of A columns")            
+                raise TypeError("Optional x must have same length as number of A columns")
             for i in range(nx):
                 if not isinstance(x[i],(GKVariable,GKParameter)):
                     raise TypeError("List x must be composed of GEKKO parameters or variables")
             xin = x
-            
+
         #build axb object with unique object name
         axb_name = 'axb' + str(len(self._objects) + 1)
         self._objects.append(axb_name + ' = axb')
@@ -707,14 +707,14 @@ class GEKKO(object):
             return xin
         else:
             return
-    
+
     ## bspline
     def bspline(self, x,y,z,x_data,y_data,z_data,data=True,kx=3,ky=3,sf=None):
         """Generate a 2D Bspline with continuous first and seconds derivatives
         from 1-D arrays of x_data and y_data coordinates (in strictly ascending order)
-        and 2-D z data of size (x.size,y.size). GEKKO variables x, y and z are 
+        and 2-D z data of size (x.size,y.size). GEKKO variables x, y and z are
         linked with function z=f(x,y) where the function f is a bspline.
-        
+
         Usage: m.bspline(x,y,z,x_data,y_data,z_data,data=True,kx=3,ky=3,sf=None)
         Inputs:
           x,y = independent Gekko parameters or variables as predictors for z
@@ -727,7 +727,7 @@ class GEKKO(object):
             x_data = 1D list or array of x knots, size (nx)
             y_data = 1D list or array of y knots, size (ny)
             z_data = 2D list or matrix of c coefficients, size (nx-kx-1)*(ny-ky-1)
-          
+
           kx = degree of spline in x-direction, default=3
           ky = degree of spline in y-direction, default=3
           sf = smooth factor (sf), only for data=True
@@ -771,7 +771,7 @@ class GEKKO(object):
 
         #Raw data vs pre-built splines
         if data:
-            #verify matching data sizes 
+            #verify matching data sizes
             if  z_data.shape != (x_data.size,y_data.size):
                 raise Exception('z_data must be of size (x_data.size,y_data.size)')
             #save x,y,z data
@@ -782,7 +782,7 @@ class GEKKO(object):
             self._extra_files.append(bspline_name+'_x.csv')
             self._extra_files.append(bspline_name+'_y.csv')
             self._extra_files.append(bspline_name+'_z.csv')
-        
+
         else: #data is knots and coeffs
             #save tx,ty,c data
             np.savetxt(os.path.join(self._path,bspline_name+'_tx.csv'), x_data, delimiter=",", fmt='%1.25s')
@@ -799,7 +799,7 @@ class GEKKO(object):
         fid.write(str(ky) + '\n')
         if sf==None:
             sf = len(x_data)*len(y_data)*0.1**2
-        fid.write(str(sf) + '\n')            
+        fid.write(str(sf) + '\n')
         fid.close()
 
         #Add connections between x and y with bspline object data
@@ -807,7 +807,7 @@ class GEKKO(object):
         self._connections.append(y.name + ' = ' + bspline_name+'.y')
         self._connections.append(z.name + ' = ' + bspline_name+'.z')
         return
-        
+
     ## cubic Spline
     def cspline(self, x,y,x_data,y_data,bound_x=False):
         """Generate a 1d cubic spline with continuous first and seconds derivatives
@@ -819,10 +819,10 @@ class GEKKO(object):
           y: GEKKO variable
           x_data: array of x data
           y_data: array of y data that matches x_data size
-          bound_x: boolean to state if x should be bounded 
+          bound_x: boolean to state if x should be bounded
                    at the upper and lower bounds of x_data to avoid
-                   extrapolation error of the cubic spline 
-                   
+                   extrapolation error of the cubic spline
+
         Output: none"""
 
 
@@ -871,7 +871,7 @@ class GEKKO(object):
             x.lower = x_data[0]
             x.upper = x_data[-1]
         return
-        
+
     def delay(self,u,y,steps=1):
         """
         Build a delay with number of time steps between input (u) and output (y)
@@ -904,24 +904,24 @@ class GEKKO(object):
         if (not np.isclose(isteps,steps)) or steps<0.99:
             raise Exception('Gekko delay number of steps must be a positive integer >=1')
         # create delay model in time series form
-        a = np.array([[0]]) 
+        a = np.array([[0]])
         b = np.zeros(steps)
         b[-1] = 1.0
         b = np.reshape(b,(1,steps,1))
         c = np.array([0])
-        
+
         # create parameter dictionary
         # parameter dictionary p['a'], p['b'], p['c']
         # a (coefficients for a polynomial, na x ny)
         # b (coefficients for b polynomial, ny x (nb x nu))
         # c (coefficients for output bias, ny)
         p = {'a':a,'b':b,'c':c}
-        
+
         # Build GEKKO ARX model
         self.arx(p,[yin],[uin])
 
         return
-        
+
     def if2(self,condition,x1,x2):
         """ IF conditional with complementarity constraint switch variable.
         The traditional method for IF statements is not continuously
@@ -968,7 +968,7 @@ class GEKKO(object):
         # change default solver to APOPT (MINLP)
         self.options.SOLVER = 1
         return y
-        
+
     def integral(self,x):
         """ Integral of a constant, parameter, intermediate, variable, or expression.
         Usage: y = m.integral(x)
@@ -981,7 +981,7 @@ class GEKKO(object):
         # add integral equation
         self.Equation(y.dt()==x)
         return y
-            
+
     def max2(self,x1,x2):
         """ Generates the maximum value with continuous first and
         second derivatives. The traditional method for max value (max) is not
@@ -1124,10 +1124,10 @@ class GEKKO(object):
           y: GEKKO variable
           x_data: array of x data
           y_data: array of y data that matches x_data size
-          bound_x: boolean to state if x should be bounded 
+          bound_x: boolean to state if x should be bounded
                    at the upper and lower bounds of x_data to avoid
-                   extrapolation error of the piecewise linear region. 
-                   
+                   extrapolation error of the piecewise linear region.
+
         Output: none"""
 
         #verify that x and y are valid GEKKO variables
@@ -1172,9 +1172,9 @@ class GEKKO(object):
         #Bound x to x_data limits
         if bound_x is True:
             x.lower = x_data[0]
-            x.upper = x_data[-1]            
+            x.upper = x_data[-1]
         return
-                
+
     ## qobj
     def qobj(self,b,A=[],x=None,otype='min',sparse=False):
         """Create quadratic objective  = 0.5 x^T A x + c^T x
@@ -1186,7 +1186,7 @@ class GEKKO(object):
                etype = ['=','<','>','>=','<='] for equality or inequality form
                sparse = True if data is in sparse form, otherwise dense
                  sparse matrices are stored in COO form with [row,col,value] with
-                 starting index 1 for optional matrix A and in [row,value] for 
+                 starting index 1 for optional matrix A and in [row,value] for
                  vector b
                sparse matrices must have 3 columns
         Output: GEKKO variables x
@@ -1212,14 +1212,14 @@ class GEKKO(object):
         if (len(A)>=1):
             if not isinstance(A, (list,np.ndarray)):
                 raise TypeError("QOBJ input A must be a python list or numpy array")
-            A = np.array(A,dtype=float).T        
+            A = np.array(A,dtype=float).T
             # check sizes
             if sparse:
                 m = np.size(A,0)
                 n = np.size(A,1)
                 if (n!=3):
                     raise Exception('The A matrix must be in COO form as [row,col,value] with 3 rows')
-            
+
             if sparse:
                 # sparse matrix size
                 r_max = np.max(A[:,0])
@@ -1245,18 +1245,18 @@ class GEKKO(object):
             nx = len(x)
             if sparse:
                 if (nx!=int(np.max(b[:,0]))):
-                    raise TypeError("Optional x must have same dimension as sparse b")            
+                    raise TypeError("Optional x must have same dimension as sparse b")
             else:
                 if nx!=np.size(b):
-                    raise TypeError("Optional x must have same dimension as b")            
+                    raise TypeError("Optional x must have same dimension as b")
             if len(A)>=1:
                 if nx!=c_max:
-                    raise TypeError("Optional x must have same dimension as A")            
+                    raise TypeError("Optional x must have same dimension as A")
             for i in range(nx):
                 if not isinstance(x[i],(GKVariable,GKParameter)):
                     raise TypeError("List x must be composed of GEKKO parameters or variables")
             xin = x
-            
+
         #build qobj object with unique object name
         qobj_name = 'qobj' + str(len(self._objects) + 1)
         self._objects.append(qobj_name + ' = qobj')
@@ -1271,7 +1271,7 @@ class GEKKO(object):
         if (otype[0:min(3,len(otype))].lower()=='min'):
             fid.write('minimize\n')
         else:
-            fid.write('maximize\n')        
+            fid.write('maximize\n')
         fid.write(str(int(nx)) + ' ! n = number of variables \n')
         fid.close()
         self._extra_files.append(filename)
@@ -1302,7 +1302,7 @@ class GEKKO(object):
         a gradient-based optimizer to fail to converge.
         Usage: y = m.sign2(x)
         Input: GEKKO variable, parameter, or expression
-        Output: GEKKO variable 
+        Output: GEKKO variable
         """
         # verify that x is a valid GEKKO variable or parameter
         if isinstance(x,(GKVariable,GKParameter)):
@@ -1320,14 +1320,14 @@ class GEKKO(object):
         y = self.Var()
         self._connections.append(y.name + ' = ' + sign_name+'.y')
         return y
-        
+
     def sign3(self,x):
         """ Generates the sign of an argument with binary switching variable.
         The traditional method for signum (sign) is not continuously differentiable
         and can cause a gradient-based optimizer to fail to converge.
         Usage: y = m.sign3(x)
         Input: GEKKO variable, parameter, or expression
-        Output: GEKKO variable 
+        Output: GEKKO variable
         """
         # add binary (intb) and output (y) variable
         intb = self.Var(0,lb=0,ub=1,integer=True)
@@ -1339,18 +1339,18 @@ class GEKKO(object):
         # change default solver to APOPT (MINLP)
         self.options.SOLVER = 1
         return y
-        
+
     def sos1(self,values):
-        """ Special Ordered Set (SOS), Type-1 
-        Chose one from a set of possible numeric values that are  
-        mutually exclusive options. The SOS is a combination of binary 
-        variables with only one that is allowed to be non-zero. The binary 
+        """ Special Ordered Set (SOS), Type-1
+        Chose one from a set of possible numeric values that are
+        mutually exclusive options. The SOS is a combination of binary
+        variables with only one that is allowed to be non-zero. The binary
         variable (bi) signals which option is selected.
-        
+
         values = [y0,y1,...,yn]
         b0 + b1 + ... + bn = 1, 0<=bi<=1
         y = y0*b0 + y1*b1 + ... + yn*bn
-        
+
         Usage: y = m.sos1(values)
         Input: values (possible y numeric values as a list)
         Output: y (GEKKO variable)
@@ -1360,7 +1360,7 @@ class GEKKO(object):
             try:
                 values = list(values)
             except:
-                raise Exception('Error: sos1 input must be a numeric list')         
+                raise Exception('Error: sos1 input must be a numeric list')
         # add binary variables (intb) and output (y) variable
         intb = [self.Var(0.01,lb=0,ub=1,integer=True) for i in range(len(values))]
         y = self.Var()
@@ -1371,7 +1371,7 @@ class GEKKO(object):
         # change default solver to APOPT (MINLP)
         self.options.SOLVER = 1
         return y
-    
+
     ## State Space
     def state_space(self,A,B,C,D=None,E=None,discrete=False,dense=False):
         """
@@ -1516,7 +1516,7 @@ class GEKKO(object):
             self._connections.append(y[i].name + ' = ' + SS_name+'.y['+str(i+1)+']')
 
         return x,y,u
-        
+
     def sum(self,x):
         """ Summation using APM object.
         Usage: y = m.sum(x)
@@ -1565,29 +1565,29 @@ class GEKKO(object):
         self._connections.append(y.name + ' = ' + sum_name+'.y')
 
         return y
-        
+
     ## System identification of time series model
     def sysid(self,t,u,y,na=1,nb=1,nk=0,shift='calc',scale=True,diaglevel=0,pred='model',objf=100):
         '''
          Identification of linear time-invariant models
-         
+
          y,p,K = sysid(t,u,y,na,nb,shift=0,pred='model',objf=1)
-             
+
          Input:     t = time data
                     u = input data for the regression
-                    y = output data for the regression   
+                    y = output data for the regression
                     na   = number of output coefficients (default=1)
                     nb   = number of input coefficients (default=1)
                     nk   = input delay steps (default=0)
-                    shift (optional) = 
+                    shift (optional) =
                        'none' (no shift)
                        'init' (initial pt),
                        'mean' (mean center)
                        'calc' (calculate c)
-                    scale (optional) = 
+                    scale (optional) =
                        scale data to between zero to one unless
                          data range is already less than one
-                    pred (option) = 
+                    pred (option) =
                        'model' for output error regression form, implicit solution
                        'meas' for ARX regression form, explicit solution
                        Using 'model' favors an unbiased model prediction but
@@ -1601,7 +1601,7 @@ class GEKKO(object):
                        when pred='meas':
                           minimize (model-meas)**2
                     diaglevel = display solver output and diagnostics (0-6)
-                    
+
          Output:    returns
                     ypred (predicted outputs)
                     p as coefficient dictionary with keys 'a','b','c'
@@ -1661,7 +1661,7 @@ class GEKKO(object):
             for i in range(ny):
                 for j in range(nu):
                     Ks[i][j] = y_range[i]/u_range[j]
-    
+
         # shift options
         if shift=='init':
             u_ss = u[0].copy()
@@ -1673,7 +1673,7 @@ class GEKKO(object):
             # all other cases
             u_ss = np.zeros(nu)
             y_ss = np.zeros(ny)
-        
+
         # shift down to initial or mean values
         if shift=='init' or shift=='mean':
             for i in range(n):
@@ -1681,7 +1681,7 @@ class GEKKO(object):
                     u[i][j] = u[i][j] - u_ss[j]
                 for j in range(ny):
                     y[i][j] = y[i][j] - y_ss[j]
-                    
+
         # explicit solution
         alpha = np.empty((na,ny))
         beta = np.empty((ny,nbk,nu))
@@ -1726,7 +1726,7 @@ class GEKKO(object):
                     for k in range(nbk):
                         ypred[j][i] += beta[i][k][iu] * u[j-1-k][iu]
                 ypred[j][i] += gamma[i]
-            
+
             # Predict using prior measurements
             # This makes predictions look better, but it is not a
             #   good assessment because it is just the error in one
@@ -1751,9 +1751,9 @@ class GEKKO(object):
             if n>=1000:
                print("sysid recommendation: switch to pred='meas' for faster solution")
             # create new GEKKO model
-            syid = GEKKO(remote=self._remote,server=self._server) 
-            #syid.open_folder()        
-            
+            syid = GEKKO(remote=self._remote,server=self._server)
+            #syid.open_folder()
+
             syid.Raw('Objects')
             syid.Raw('  sum_a[1:ny] = sum(%i)'%na)
             syid.Raw('  sum_b[1:ny][1::nu] = sum(%i)'%nbk)
@@ -1798,38 +1798,38 @@ class GEKKO(object):
                 eqn = '  y[m+1:n][1::ny] = a[1][1::ny]*z[m:n-1][1::ny]'
             for j in range(1,nu+1):
                 eqn += '+b[1][%i][1::ny]*u[m:n-1][%i]'%(j,j,)
-                for i in range(2,nbk+1): 
+                for i in range(2,nbk+1):
                     eqn += '+b[%i][%i][1::ny]*u[m-%i:n-%i][%i]'%(i,j,i-1,i,j,)
             if pred=='model':
                 # use model to predict next y (Output error)
                 seqn = '+a[%i][1::ny]*y[m-%i:n-%i][1::ny]'
             else:
                 # use measurement to predict next y (ARX)
-                seqn = '+a[%i][1::ny]*z[m-%i:n-%i][1::ny]'        
-            for i in range(2,na+1): 
+                seqn = '+a[%i][1::ny]*z[m-%i:n-%i][1::ny]'
+            for i in range(2,na+1):
                 eqn += seqn%(i,i-1,i,)
             eqn += '+c[1::ny]'
             syid.Raw(eqn)
             syid.Raw('')
-            syid.Raw('  K[1:ny][1::nu] * (1 - sum_a[1:ny]) = Ks[1:ny][1::nu] * sum_b[1:ny][1::nu]')        
+            syid.Raw('  K[1:ny][1::nu] * (1 - sum_a[1:ny]) = Ks[1:ny][1::nu] * sum_b[1:ny][1::nu]')
             syid.Raw('  minimize %e * (y[m+1:n][1::ny] - z[m+1:n][1::ny])^2'%objf)
             syid.Raw('  minimize 1e-3 * a[1:na][1::ny]^2')
             syid.Raw('  minimize 1e-3 * b[1:nb][1::nu][1:::ny]^2')
             syid.Raw('  minimize 1e-3 * c[1:ny]^2')
-            
+
             syid.Raw('File *.csv')
-            for j in range(1,nu+1): 
-                for i in range(1,n+1): 
+            for j in range(1,nu+1):
+                for i in range(1,n+1):
                     syid.Raw('u[%i][%i], %e'%(i,j,u[i-1][j-1]))
             for k in range(1,ny+1):
                 for i in range(1,n+1):
                     syid.Raw('z[%i][%i], %e'%(i,k,y[i-1][k-1]))
-            for k in range(1,ny+1): 
-                for i in range(1,n+1): 
+            for k in range(1,ny+1):
+                for i in range(1,n+1):
                     syid.Raw('y[%i][%i], %e'%(i,k,y[i-1][k-1]))
             for k in range(1,ny+1):
                 for j in range(1,nu+1):
-                    syid.Raw('Ks[%i][%i], %e'%(k,j,Ks[k-1][j-1]))            
+                    syid.Raw('Ks[%i][%i], %e'%(k,j,Ks[k-1][j-1]))
                     syid.Raw('K[%i][%i], %e'%(k,j,K[k-1][j-1]))
             for j in range(1,na+1):
                 for k in range(1,ny+1):
@@ -1840,56 +1840,56 @@ class GEKKO(object):
                         syid.Raw('b[%i][%i][%i], %e'%(j,kk,k,beta[k-1][j-1][kk-1]))
             for j in range(1,ny+1):
                 syid.Raw('c[%i], %e'%(j,gamma[j-1]))
-                
+
             syid.Raw('End File')
-            
+
             syid.Raw('File overrides.dbs')
             syid.Raw(' apm.solver=3')
             syid.Raw(' apm.imode=2')
             syid.Raw(' apm.max_iter=800')
-            syid.Raw(' apm.diaglevel='+str(diaglevel-1))        
-            for i in range(1,ny+1): 
+            syid.Raw(' apm.diaglevel='+str(diaglevel-1))
+            for i in range(1,ny+1):
                 name = ' c[' + str(i) + ']'
                 if shift=='calc':
                     syid.Raw(name+'.status=1')
                 else:
-                    syid.Raw(name+'.status=0')            
-            for k in range(1,ny+1): 
-                for i in range(1,na+1): 
+                    syid.Raw(name+'.status=0')
+            for k in range(1,ny+1):
+                for i in range(1,na+1):
                     name = ' a[' + str(i) + '][' + str(k) + ']'
                     syid.Raw(name+'.status=1')
-            for k in range(1,ny+1): 
-                for j in range(1,nu+1): 
-                    for i in range(1,nbk+1): 
+            for k in range(1,ny+1):
+                for j in range(1,nu+1):
+                    for i in range(1,nbk+1):
                         name = ' b[' + str(i) + '][' + str(j) + '][' + str(k) + ']'
                         if i<=nk:
                             syid.Raw(name+'.status=0')
                         else:
                             syid.Raw(name+'.status=1')
             syid.Raw('End File')
-            
+
             syid.Raw('File *.info')
-            for i in range(1,ny+1): 
+            for i in range(1,ny+1):
                 name = 'c[' + str(i) + ']'
                 syid.Raw('FV, '+name)
-            for k in range(1,ny+1): 
-                for i in range(1,na+1): 
+            for k in range(1,ny+1):
+                for i in range(1,na+1):
                     name = 'a[' + str(i) + '][' + str(k) + ']'
                     syid.Raw('FV, '+name)
-            for k in range(1,ny+1): 
-                for j in range(1,nu+1): 
-                    for i in range(1,nbk+1): 
+            for k in range(1,ny+1):
+                for j in range(1,nu+1):
+                    for i in range(1,nbk+1):
                         name = 'b[' + str(i) + '][' + str(j) + '][' + str(k) + ']'
                         syid.Raw('FV, '+name)
             syid.Raw('End File')
-            
+
             # solve system ID
             syid.solve(disp=(diaglevel>=1))
             # retrieve and visualize solution
             import json
             with open(syid.path+'//results.json') as f:
                 sol = json.load(f)
-            
+
             for j in range(ny):
                 for i in range(n):
                     yn = 'y['+str(i+1)+']['+str(j+1)+']'
@@ -1924,7 +1924,7 @@ class GEKKO(object):
         for i in range(n):
             for j in range(ny):
                 ypred[i,j] = ypred[i,j] + y_ss[j]
-                    
+
         if scale:
             # scaled form with:
             #    ys = (y-ym)/yr (yr=y_range, ym=y_min)
@@ -1966,10 +1966,10 @@ class GEKKO(object):
             print(beta)
             print('gamma')
             print(gamma)
-        
+
         # predictions, parameters, gain matrix
         return ypred,p,K
-        
+
     def vsum(self,x):
         """ Summation of variable in the data or time direction. This is
         similar to an integral but only does the summation of all points,
@@ -2069,7 +2069,7 @@ class GEKKO(object):
         if self._remote == False: # local_solve
             if timing == True:
                 t = time.time()
-                    
+
             # initialize printing
             outs = ''
             record_error = False
@@ -2084,9 +2084,11 @@ class GEKKO(object):
                 if not ipython:
                     sselect = True  # set shell=False for IPython
             elif sys.platform=='darwin': # MacOS
-                apm_exe = os.path.join(dirname,'bin','apm_mac')                
+                apm_exe = os.path.join(dirname,'bin','apm_mac')
             elif sys.platform=='linux' or sys.platform=='linux2': # Linux
-                if os.uname()[4].startswith("arm"): # ARM processor (Raspberry Pi)
+                if (os.uname()[4].startswith("aarch64") or os.uname()[4].startswith("arm64")): # ARM64 / AARCH64 processor
+                    apm_exe = os.path.join(dirname,'bin','apm_aarch64')
+                elif (os.uname()[4].startswith("arm") or os.uname()[4].startswith("aarch")): # ARM / AARCH processor 32-bit
                     apm_exe = os.path.join(dirname,'bin','apm_arm')
                 else: # Other Linux
                     apm_exe = os.path.join(dirname,'bin','apm')
@@ -2101,7 +2103,7 @@ class GEKKO(object):
             if debug<=1:
                 if ver == 2:  # Python 2 doesn't have timeout
                     outs, errs = app.communicate()
-                else:  # Python 3+              
+                else:  # Python 3+
                     # limit max time to 1e6
                     max_time = min(1e6,self.options.max_time)
                     try:
@@ -2138,7 +2140,6 @@ class GEKKO(object):
                 print("Error:", errs)
             if (debug >= 1) and record_error:
                 raise Exception(apm_error)
-                
         else: #solve on APM server
             def send_if_exists(extension):
                 path = os.path.join(self._path,self._model_name + '.' + extension)
@@ -2178,10 +2179,8 @@ class GEKKO(object):
                 cmd(self._server,self._model_name, ' '+extra_filedata)
 
             #solve remotely
-            if disp:
-                print("Solving on APM Server, switch to GEKKO(remote=False) to solve locally")
             response = cmd(self._server, self._model_name, 'solve', disp, debug)
-            
+
             #print APM error message and die
             if (debug >= 1) and ('@error' in response):
                 raise Exception(response)
@@ -2247,11 +2246,10 @@ class GEKKO(object):
             self.gui.display()
 
     #%% Name matching
-    
     def get_names(self):
         """ Matches names of constants, parameters, intermediates and variables
         to the python name from scope __main__. Name is converted to lowercase.
-        The function cannot be used after a variable is used (including in 
+        The function cannot be used after a variable is used (including in
         defining intermediate equations). USE WITH CAUTION. """
         import __main__ as main
         main_dict = vars(main)
@@ -2268,25 +2266,25 @@ class GEKKO(object):
 
 
     def open_folder(self):
-        """Opens the backend folder that holds the APM model and csv files that 
+        """Opens the backend folder that holds the APM model and csv files that
         Gekko writes.  Mainly used for debugging."""
         if sys.platform == "win32":
             os.startfile(self._path)
         else:
             opener ="open" if sys.platform == "darwin" else "xdg-open"
             subprocess.call([opener, self._path])
-            
+
 
     #%% Remove files and directories that are no longer needed
 
     def clear(self):
-        '''Clear the gekko files but do not delete the application directory        
+        '''Clear the gekko files but do not delete the application directory
         '''
         files = glob.glob(os.path.join(self._path,'*'))
         for f in files:
             os.remove(f)
     def cleanup(self):
-        '''Remove gekko files and the application (temp) directory        
+        '''Remove gekko files and the application (temp) directory
         '''
         try:
             rmtree(self._path)
@@ -2369,7 +2367,7 @@ class GEKKO(object):
         return GK_Operators('tanh(' + str(other) + ')')
     def sigmoid(self,other):
         return GK_Operators('sigmd(' + str(other) + ')')
-        
+
     def GUI(self):
         if not self._gui_open:
             from .gk_gui import GK_GUI
