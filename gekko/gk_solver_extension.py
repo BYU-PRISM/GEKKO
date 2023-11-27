@@ -1,4 +1,6 @@
-def solve_extension(self):
+import sys
+
+def solve_extension(self,disp=True):
     """solve a gekko model by converting it to AMPL syntax and running a solver"""
 
     solver = self.options.SOLVER
@@ -35,8 +37,20 @@ def solve_extension(self):
     modules.load()
     # create a amplpy model
     amplpy_model = self.create_amplpy_object()
+                
+    # direct stdout to a file
+    output_file = open(self._path + "/output.txt", "w")
+    if disp:
+        sys.stdout = OutputRedirector(sys.stdout, output_file)
+    else:
+        # dont display output on console
+        sys.stdout = OutputRedirector(output_file)
+
     # solve the ampl model
     amplpy_model.solve()
+
+    sys.stdout = sys.__stdout__
+    output_file.close()
 
     # checks that a valid solution was found, otherwise raise an error.
     solve_result = amplpy_model.get_value("solve_result")
@@ -123,6 +137,19 @@ def generate_ampl_statements(self):
     converter.convert()
     # return the statements of the ampl model file
     return converter._statements
+
+
+class OutputRedirector:
+    """used to redirect stdout to given files."""
+    def __init__(self, *files):
+        self.files = files
+    def write(self, obj):
+        for f in self.files:
+            f.write(obj)
+            f.flush()
+    def flush(self) :
+        for f in self.files:
+            f.flush()
 
 
 class AMPLConverter:

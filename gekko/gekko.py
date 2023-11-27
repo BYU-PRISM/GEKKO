@@ -2034,7 +2034,7 @@ class GEKKO(object):
 
         if self.options.SOLVER_EXTENSION:
             # solve using solver extension
-            self.solve_extension()
+            self.solve_extension(disp=disp)
         else:
             # solve normally
             try:
