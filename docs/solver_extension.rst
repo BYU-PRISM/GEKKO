@@ -8,7 +8,7 @@ Solver extension
 =======================================
 
     GEKKO includes a limited interface to access more solvers. The solver extension module 
-    can convert the model to AMPL syntax, allowing access to various supported solvers by
+    converts the model to AMPL, allowing access to various supported solvers by
     making use of the AMPLPY library. Alternatively, a .mod file (AMPL model file) can be output 
     and solved by uploading to `NEOS <https://neos-server.org>`_. 
 
@@ -17,8 +17,9 @@ Solver extension
 
     The converter between GEKKO model to AMPL syntax is limited and does not support
     the full range of model building functions and options available in GEKKO. However,
-    basic model building functions such as variables, parameters, constraints, and objectives
-    are supported by the converter and can be used within the solver extension module.
+    basic model building functions such as (but not limited to) variables, parameters, 
+    constraints, and objectives are supported by the converter and can be used within 
+    the solver extension module. A full list of supported properties is included below.
 
     The solver extension module requires AMPLPY to solve within GEKKO::
 
@@ -49,7 +50,7 @@ Example
 Solver Options
 ---------------
 
-    Solver options can be specified like normal::
+    Solver options are specified within m.solver_options::
 
         # Use options relevant to the solver you are using.
         m.solver_options = ['max_iter 10', \
@@ -57,7 +58,7 @@ Solver Options
                             'outlev 1' \
                             # etc... 
                             ]
-    
+        
 Solver extension methods
 -------------------------
 
@@ -70,6 +71,8 @@ Solver extension methods
         ampl = m.create_amplpy_object()
         # do some stuff with the amplpy object
         #...
+    
+    For more information view the `amplpy documentation <https://amplpy.readthedocs.io/>`_.
 
 .. py:classmethod:: m.generate_ampl_file(filename="model.mod")
 
@@ -77,4 +80,61 @@ Solver extension methods
 
         m.generate_ampl_file()
 
+
+Supported properties
+-----------------------
+
+    Included below is the full list of supported model methods for conversion with the solver extension module. 
+    Functions not mentioned are either not implemented within the module or entirely incompatible with AMPL.
+
+    - Model Building Functions
+
+        - ``Const``
+        - ``Param``
+        - ``Var``
+        - ``Intermediate``
+        - ``Equation``
+        - ``Equations``
+        - ``Obj``
+        - ``Minimize``
+        - ``Maximize``
+        - ``Array``
+        - ``solve``
+        - ``solver_options``
+
+    - Equation Functions
+
+        - ``sin``
+        - ``cos``
+        - ``tan``
+        - ``asin``
+        - ``acos``
+        - ``atan``
+        - ``sinh``
+        - ``cosh``
+        - ``tanh``
+        - ``exp``
+        - ``log``
+        - ``log10``
+        - ``sqrt``
+        - ``sigmoid``
+
+    - Logical Functions
+
+        - ``abs2``
+        - ``abs3``
+        - ``if2``
+        - ``if3``
+        - ``max2``
+        - ``max3``
+        - ``min2``
+        - ``min3``
+        - ``pwl``
+        - ``sos1``
+        - ``sign2``
+        - ``sign3``
+    
+    - Pre-built Objects
+
+        - ``sum``
 
