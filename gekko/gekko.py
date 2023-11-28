@@ -2238,6 +2238,19 @@ class GEKKO(object):
 
             if timing == True:
                 print('solve', time.time() - t)
+            if disp == True:
+                print(outs)
+            if errs:
+                print("Error:", errs)
+            if (debug >= 1) and record_error:
+                raise Exception(apm_error)
+        else: #solve on APM server
+            def send_if_exists(extension):
+                path = os.path.join(self._path,self._model_name + '.' + extension)
+                if os.path.isfile(path):
+                    with open(path) as f:
+                        file = f.read()
+                    cmd(self._server, self._model_name, extension+' '+file)
 
             if timing == True:
                 t = time.time()
