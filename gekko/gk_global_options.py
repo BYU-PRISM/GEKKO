@@ -81,7 +81,7 @@ class GKGlobalOptions():
         self.SENSITIVITY = 0
         self.SEQUENTIAL = 0
         self.SOLVER = 3
-        self.SOLVER_EXTENSION = False
+        self.SOLVER_EXTENSION = 0
         self.SPC_CHART = 0
         self.SPECS = 1
         self.STREAM_LEVEL = 0
