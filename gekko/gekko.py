@@ -625,11 +625,11 @@ class GEKKO(object):
 
         #convert data to flat numpy arrays
         A = np.array(A,dtype=float)
-        #print('A')
-        #print(A)
+        print('A')
+        print(A)
         b = np.array(b,dtype=float).T
-        #print('b')
-        #print(b)
+        print('b')
+        print(b)
         if sparse:
             A = A.T
             m = np.size(b,0)
@@ -2053,7 +2053,6 @@ class GEKKO(object):
 
             if timing == True:
                 t = time.time()
-
             # Build the model
             if self._model != 'provided': #no model was provided
                 self._build_model()
@@ -2109,7 +2108,9 @@ class GEKKO(object):
                 elif sys.platform=='darwin': # MacOS
                     apm_exe = os.path.join(dirname,'bin','apm_mac')                
                 elif sys.platform=='linux' or sys.platform=='linux2': # Linux
-                    if os.uname()[4].startswith("arm"): # ARM processor (Raspberry Pi)
+                    if (os.uname()[4].startswith("aarch64") or os.uname()[4].startswith("arm64")): # ARM64 / AARCH64 processor
+                        apm_exe = os.path.join(dirname,'bin','apm_aarch64')
+                    elif (os.uname()[4].startswith("arm") or os.uname()[4].startswith("aarch")): # ARM / AARCH processor 32-bit
                         apm_exe = os.path.join(dirname,'bin','apm_arm')
                     else: # Other Linux
                         apm_exe = os.path.join(dirname,'bin','apm')
@@ -2161,7 +2162,6 @@ class GEKKO(object):
                     print("Error:", errs)
                 if (debug >= 1) and record_error:
                     raise Exception(apm_error)
-                    
             else: #solve on APM server
                 def send_if_exists(extension):
                     path = os.path.join(self._path,self._model_name + '.' + extension)
@@ -2268,7 +2268,6 @@ class GEKKO(object):
                 self.gui.display()
 
     #%% Name matching
-    
     def get_names(self):
         """ Matches names of constants, parameters, intermediates and variables
         to the python name from scope __main__. Name is converted to lowercase.
