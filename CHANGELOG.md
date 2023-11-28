@@ -4,9 +4,11 @@ All notable changes to the GEKKO project are documented in this file.
 ## [Unreleased]
 ### Added
 - Added [LP, QP, NLP, MILP, and MINLP examples](https://github.com/BYU-PRISM/GEKKO/blob/master/examples/Optimization_Introduction.ipynb).
+- Added `apm_aarch64` binary for local solve on ARM64 / AARCH64 devices, only BPOPT solver for ARM 32 and 64-bit
 
 ### Changed
 - Changes to `gk_write_files.py` with `.join()` instead of `+` to create data file and solver options files `ipopt.opt` and `apopt.opt`.
+- Print message when using `remote=True` for greater transparency
 
 ## [v1.0.6] - Version 1.0.6 Stable Release, Date: 2023-01-24
 ### Changed
