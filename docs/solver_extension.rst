@@ -12,7 +12,8 @@ Solver extension
     making use of the AMPLPY library. Alternatively, a .mod file (AMPL model file) can be output 
     and solved by uploading to `NEOS <https://neos-server.org>`_. 
 
-    The free version of AMPL limits a model to 300 variables and 300 constraints. Licensing
+    The base version of AMPL limits a model to 300 variables and 300 constraints. AMPL offers a 
+    free Community Edition license with no limitations on variables or constraints. Licensing
     and more details can be obtained from the `AMPL website <https://ampl.com>`_.
 
     The converter between GEKKO model to AMPL syntax is limited and does not support
