@@ -13,10 +13,6 @@ def solve_extension(self,disp=True):
     else:
         raise ValueError("Solver extension requires a string for m.options.SOLVER for the solver you want to use")
 
-    if self._remote:
-        print("WARNING: Remote solve not supported by solver extension; defaulted to local solve.")
-        self._remote = False
-
     # decide what we are going to use to solve (currently only AMPLPY is supported)
     try:
         from amplpy import modules
@@ -29,9 +25,9 @@ def solve_extension(self,disp=True):
     except:
         if self.options.SOLVER in modules.available():
             # solver not installed
-            raise ValueError("Solver `%s` not installed. Try running `$ python -m amplpy.modules install %s`. See https://dev.ampl.com/ampl/python/modules.html" % (solver, solver))
+            raise ImportError("Solver `%s` not installed. Try running `$ python -m amplpy.modules install %s`. See https://dev.ampl.com/ampl/python/modules.html" % (solver, solver))
         else:
-            raise ValueError("Unknown solver `%s`. Refer to the AMPLPY documentation or run `$ python -m amplpy.modules available` to view available solvers." % solver)
+            raise ModuleNotFoundError("Unknown solver `%s`. Refer to the AMPLPY documentation or run `$ python -m amplpy.modules available` to view available solvers." % solver)
     
     # load the amplpy modules
     modules.load()
@@ -45,6 +41,10 @@ def solve_extension(self,disp=True):
     else:
         # dont display output on console
         sys.stdout = OutputRedirector(output_file)
+    
+    if self._remote:
+        print("WARNING: Remote solve not supported by solver extension; defaulted to local solve.")
+        self._remote = False
 
     # solve the ampl model
     amplpy_model.solve()
@@ -420,8 +420,6 @@ class AMPLConverter:
             # some checking to make sure the pwl function is valid
             if len(x_values) < 3:
                 raise Exception("The pwl function requires at least 3 data points")
-            if len(x_values) != len(y_values):
-                raise Exception("The pwl function should have the same number of x and y values")
             
             equations = []
             x = parameters["x"]
@@ -462,7 +460,7 @@ class AMPLConverter:
 
         else:
             # object not supported or implemented yet
-            raise Exception("The %s object could not be converted to AMPL equivalent. It may not be supported or not implemented in GEKKO yet." % obj["type"])
+            raise Exception("The %s object could not be converted to AMPL equivalent. It may not implemented within the module or entirely incompatible with AMPL." % obj["type"])
 
 
     def convert_equation(self, equation):
