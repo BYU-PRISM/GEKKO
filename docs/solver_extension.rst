@@ -7,19 +7,20 @@
 Solver extension
 =======================================
 
-    GEKKO includes a limited interface to access more solvers. The solver extension module 
+    GEKKO includes a limited interface to access more solvers. The solver extension module
     converts the model to AMPL, allowing access to various supported solvers by
-    making use of the AMPLPY library. Alternatively, a .mod file (AMPL model file) can be output 
-    and solved by uploading to `NEOS <https://neos-server.org>`_. 
+    making use of the AMPLPY library. Alternatively, a .mod file (AMPL model file) can be output
+    and solved by uploading to `NEOS <https://neos-server.org>`_.
 
-    The base version of AMPL limits a model to 300 variables and 300 constraints. AMPL offers a 
-    free Community Edition license with no limitations on variables or constraints. Licensing
-    and more details can be obtained from the `AMPL website <https://ampl.com>`_.
+    The base version of AMPL limits a model to 500 variables and 500 constraints (300 for
+    nonlinear problems, and fewer for certain solvers). AMPL offers a free Community Edition
+    license with no limitations on variables or constraints. Licensing and more details can
+    be obtained from the `AMPL website <https://ampl.com>`_.
 
     The converter between GEKKO model to AMPL syntax is limited and does not support
     the full range of model building functions and options available in GEKKO. However,
-    basic model building functions such as (but not limited to) variables, parameters, 
-    constraints, and objectives are supported by the converter and can be used within 
+    basic model building functions such as (but not limited to) variables, parameters,
+    constraints, and objectives are supported by the converter and can be used within
     the solver extension module. A full list of supported properties is included below.
 
     The solver extension module requires AMPLPY to solve within GEKKO::
@@ -32,8 +33,8 @@ Solver extension
 
 Example
 --------
-    To use the solver extension module, set m.SOLVER_EXTENSION = 1 and specify the 
-    solver you want to use. The GEKKO model can be declared like normal. The results 
+    To use the solver extension module, set m.SOLVER_EXTENSION = 1 and specify the
+    solver you want to use. The GEKKO model can be declared like normal. The results
     from the solve are placed back into the GEKKO model variables.
 
     Example use of the solver extension module is shown below::
@@ -42,7 +43,7 @@ Example
         m = GEKKO()
         x = m.Var()
         y = m.Var()
-        m.Equations([3*x+2*y==1, x+2*y==0])  
+        m.Equations([3*x+2*y==1, x+2*y==0])
         m.options.SOLVER_EXTENSION = 1   # enable solver extension
         m.options.SOLVER = "BONMIN"         # use BONMIN solver
         m.solve()    # solve
@@ -57,9 +58,9 @@ Solver Options
         m.solver_options = ['max_iter 10', \
                             'tol 0.01', \
                             'outlev 1' \
-                            # etc... 
+                            # etc...
                             ]
-        
+
 Solver extension methods
 -------------------------
 
@@ -72,7 +73,7 @@ Solver extension methods
         ampl = m.create_amplpy_object()
         # do some stuff with the amplpy object
         #...
-    
+
     For more information view the `amplpy documentation <https://amplpy.readthedocs.io/>`_.
 
 .. py:classmethod:: m.generate_ampl_file(filename="model.mod")
@@ -85,7 +86,7 @@ Solver extension methods
 Supported properties
 -----------------------
 
-    Included below is the full list of supported model methods for conversion with the solver extension module. 
+    Included below is the full list of supported model methods for conversion with the solver extension module.
     Functions not mentioned are either not implemented within the module or entirely incompatible with AMPL.
 
     - Model Building Functions
@@ -134,7 +135,7 @@ Supported properties
         - ``sos1``
         - ``sign2``
         - ``sign3``
-    
+
     - Pre-built Objects
 
         - ``sum``
