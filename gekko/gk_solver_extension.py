@@ -5,12 +5,7 @@ def solve_extension(self,disp=True):
 
     solver = self.options.SOLVER
 
-    try:
-        int(solver)
-    except:
-        # value is string, expected
-        pass
-    else:
+    if isinstance(solver, int):
         raise ValueError("Solver extension requires a string for m.options.SOLVER for the solver you want to use")
 
     # decide what we are going to use to solve (currently only AMPLPY is supported)
