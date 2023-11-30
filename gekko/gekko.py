@@ -2120,8 +2120,8 @@ class GEKKO(object):
                 raise Exception('Platform '+sys.platform+' not supported for local solve, set remote=True')
 
             app = subprocess.Popen([apm_exe, self._model_name], stdout=subprocess.PIPE, \
-                                stderr=subprocess.PIPE, cwd = self._path, bufsize=4096, \
-                                env = penv, universal_newlines=True, shell=sselect)
+                                   stderr=subprocess.PIPE, cwd = self._path, bufsize=4096, \
+                                   env = penv, universal_newlines=True, shell=sselect)
 
             if debug<=1:
                 if ver == 2:  # Python 2 doesn't have timeout
@@ -2234,8 +2234,8 @@ class GEKKO(object):
                             f.write(str(results_all))
             except:
                 raise ImportError('No solution or server unreachable.\n'+\
-                                '  Show errors with m.solve(disp=True).\n'+\
-                                '  Try local solve with m=GEKKO(remote=False).')
+                                  '  Show errors with m.solve(disp=True).\n'+\
+                                  '  Try local solve with m=GEKKO(remote=False).')
 
         if timing == True:
             print('solve', time.time() - t)
