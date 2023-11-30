@@ -2026,6 +2026,7 @@ class GEKKO(object):
         if 'remote' in kwargs:
             raise TypeError('"remote" argument has been moved to model initialization (GEKKO(remote=True))')
 
+        # allow solver options to be submitted as dictionary
         if isinstance(self.solver_options, dict):
             options = []
             for option in self.solver_options.keys():
