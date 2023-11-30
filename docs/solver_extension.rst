@@ -40,7 +40,7 @@ Example
     Example use of the solver extension module is shown below::
 
         from gekko import GEKKO
-        m = GEKKO()
+        m = GEKKO(remote=False)  # remote=True not supported
         x = m.Var()
         y = m.Var()
         m.Equations([3*x+2*y==1, x+2*y==0])
