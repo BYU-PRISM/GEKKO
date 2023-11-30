@@ -28,12 +28,12 @@ def solve_extension(self,disp=True):
             raise ImportError("Solver `%s` not installed. Try running `$ python -m amplpy.modules install %s`. See https://dev.ampl.com/ampl/python/modules.html" % (solver, solver))
         else:
             raise ModuleNotFoundError("Unknown solver `%s`. Refer to the AMPLPY documentation or run `$ python -m amplpy.modules available` to view available solvers." % solver)
-
+    
     # load the amplpy modules
     modules.load()
     # create a amplpy model
     amplpy_model = self.create_amplpy_object()
-
+                
     # direct stdout to a file
     output_file = open(self._path + "/output.txt", "w")
     if disp:
@@ -41,7 +41,7 @@ def solve_extension(self,disp=True):
     else:
         # dont display output on console
         sys.stdout = OutputRedirector(output_file)
-
+    
     if self._remote:
         print("WARNING: Remote solve not supported by solver extension; defaulted to local solve.")
         self._remote = False
@@ -56,7 +56,7 @@ def solve_extension(self,disp=True):
     solve_result = amplpy_model.get_value("solve_result")
     if solve_result != "solved":
         raise Exception("@error: " + solve_result)
-
+    
     # put results back into the gekko model
     # loop through the gekko model variables and update their values
     for variable in self._variables:
@@ -84,7 +84,7 @@ def create_amplpy_object(self):
     ampl_statements = self.generate_ampl_statements()
     # write to a file in self._path
     write_file(ampl_statements, self._path + "/" + self._model_name + ".mod")
-
+    
     line_num = 0
     # evaluate the statements in the list
     for statement in ampl_statements:
@@ -93,7 +93,7 @@ def create_amplpy_object(self):
             amplpy_model.eval(statement)
         except Exception:
             raise Exception("Couldn't convert the GEKKO model into an equivalent AMPLPY model. One of the functions in the GEKKO model may not be convertible to AMPL, or the conversion was done incorrectly. \nLine %s: \"%s\"" % (line_num, statement))
-
+    
     """set the ampl model options"""
     # set the solver
     solver = self.options.SOLVER
@@ -125,7 +125,7 @@ def write_file(statements, file_name):
 
     for line in statements:
         file.write(line + "\n")
-
+    
     file.close()
 
 
@@ -166,7 +166,7 @@ class AMPLConverter:
         self._objective_num = 0
         # list of ampl statements (lines in a file)
         self._statements = []
-
+        
 
     def convert(self):
         """runs through all the components of the gekko model and adds to the ampl model"""
@@ -178,7 +178,7 @@ class AMPLConverter:
             raise Exception("Cannot convert a GEKKO model containing raw .apm syntax")
         if self._gekko_model._compounds:
             raise Exception("Cannot convert a GEKKO model using compounds; there is no equivalent in AMPL")
-
+        
         # add constants
         for constant in self._gekko_model._constants:
             self.add_constant(self.get_data(constant))
@@ -232,7 +232,7 @@ class AMPLConverter:
         text += ";"
         # add to file
         self._statements.append(text)
-
+    
 
     def add_variable(self, data):
         """add a variable"""
@@ -249,27 +249,27 @@ class AMPLConverter:
         text += ";"
         # add to file
         self._statements.append(text)
-
+    
 
     def add_intermediate(self, data):
         """add an intermediate variable"""
         self.add_variable(data)
 
-
+    
     def add_constraint(self, data):
         """add a constraint"""
         text = "subject to %s: %s;" % (data["name"], data["value"])
         # add to file
         self._statements.append(text)
 
-
+    
     def add_objective(self, data):
         """add an objective"""
         text = "%s %s:%s;" % (data["type"], data["name"], data["value"])
         # add to file
         self._statements.append(text)
 
-
+    
     def add_set(self, data):
         """add a set"""
         ordered_text = "ordered " * data["ordered"]
@@ -277,7 +277,7 @@ class AMPLConverter:
         # add to file
         self._statements.append(text)
 
-
+    
     def get_data(self, variable):
         """get data from a variable"""
         data = {}
@@ -288,7 +288,7 @@ class AMPLConverter:
                 data[attribute] = None
         data["integer"] = variable.name.startswith("int_")
         return data
-
+    
 
     def create_variable(self, variable_data={}):
         """create a variable"""
@@ -310,9 +310,9 @@ class AMPLConverter:
         self._constraint_num += 1
         constraint_name = "constraint%s" % str(self._constraint_num)
         constraint_value = self.convert_equation(constraint_value)
-        data = {
-            "name": constraint_name,
-            "value": constraint_value
+        data = { 
+            "name": constraint_name, 
+            "value": constraint_value 
         }
         return data
 
@@ -330,13 +330,13 @@ class AMPLConverter:
         objective_value = self.convert_equation(objective_value)
         # each objective needs its own name
         objective_name = "objective%s" % str(self._objective_num)
-        data = {
-            "type": objective_type,
-            "name": objective_name,
-            "value": objective_value
+        data = { 
+            "type": objective_type, 
+            "name": objective_name, 
+            "value": objective_value 
         }
         return data
-
+    
 
     def create_set(self, set_data):
         """create a set"""
@@ -347,14 +347,14 @@ class AMPLConverter:
         elif "value" in set_data:
             set_value = "{ %s }" % set_data["value"]
         set_ordered = "ordered" in set_data and set_data["ordered"]
-        data = {
-            "name": set_name,
+        data = { 
+            "name": set_name, 
             "value": set_value,
             "ordered": set_ordered
         }
         return data
-
-
+    
+    
     def add_prebuilt_object(self, prebuilt_object):
         """add a prebuilt object"""
         obj = {}
@@ -396,15 +396,15 @@ class AMPLConverter:
         elif obj["type"] == "abs":  # abs function
             equation = "%s = abs(%s)" % (parameters["y"], parameters["x"])
             self.add_constraint(self.create_constraint(equation))
-
+        
         elif obj["type"] == "sign":  # sign function
             equation = "%s = if %s>=0 then 1 else -1" % (parameters["y"], parameters["x"])
             self.add_constraint(self.create_constraint(equation))
-
+        
         elif obj["type"] in ["max", "min"]:  # max/min function
             equation = "%s = %s(%s, %s)" % (parameters["y"], obj["type"], parameters["x"][0], parameters["x"][1])
             self.add_constraint(self.create_constraint(equation))
-
+        
         elif obj["type"] == "pwl":  # piece-wise linear function
             x_values = []
             y_values = []
@@ -420,7 +420,7 @@ class AMPLConverter:
             # some checking to make sure the pwl function is valid
             if len(x_values) < 3:
                 raise Exception("The pwl function requires at least 3 data points")
-
+            
             equations = []
             x = parameters["x"]
             y = parameters["y"]
@@ -454,7 +454,7 @@ class AMPLConverter:
 
                 # add the equation
                 equations.append(f"({segment_equation}) * ({condition})")
-
+            
             # add a constraint as the sum of the equations
             self.add_constraint(self.create_constraint(f"{y} = " + " + ".join(equations)))
 
@@ -471,7 +471,7 @@ class AMPLConverter:
         if "$" in equation:
             # "$" denotes differential equations in GEKKO, which are not support by AMPL
             raise Exception("Differential equations are not supported by AMPL, so the model could not be converted.")
-
+        
         # some solvers seem to not support strict equality
         # convert instances of ">" or "<=" (strict equality) into ">=" or "<="
         new_equation = ""
