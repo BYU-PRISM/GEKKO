@@ -4,7 +4,7 @@
 .. toctree::
 	:maxdepth: 2
 
-Solver extension
+Solver Extension
 =======================================
 
     GEKKO includes a limited interface to access more solvers. The solver extension module
@@ -61,7 +61,7 @@ Solver Options
                             # etc...
                             ]
 
-Solver extension methods
+Solver Extension Methods
 -------------------------
 
     The solver extension module provides some utility methods to the GEKKO model object:
@@ -83,7 +83,7 @@ Solver extension methods
         m.generate_ampl_file()
 
 
-Supported properties
+Supported Properties
 -----------------------
 
     Included below is the full list of supported model methods for conversion with the solver extension module.
