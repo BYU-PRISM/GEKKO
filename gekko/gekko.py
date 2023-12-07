@@ -2009,6 +2009,7 @@ class GEKKO(object):
     from .gk_debug import gk_logic_tree, verify_input_options, like, name_check
     from .gk_write_files import _write_solver_options, _generate_dbs_file, _write_info, _write_csv, _build_model
     from .gk_post_solve import load_JSON, load_results
+    from .gk_solver_extension import solve_extension, create_amplpy_object, generate_ampl_file, generate_ampl_statements
 
 
     #%% Get a solution
@@ -2024,6 +2025,29 @@ class GEKKO(object):
         """
         if 'remote' in kwargs:
             raise TypeError('"remote" argument has been moved to model initialization (GEKKO(remote=True))')
+
+        # allow solver options to be submitted as dictionary
+        if isinstance(self.solver_options, dict):
+            options = []
+            for option in self.solver_options.keys():
+                options.append("%s %s" % (option, self.solver_options[option]))
+            self.solver_options = options
+
+        if self.options.SOLVER_EXTENSION:
+            # solve using solver extension
+            self.solve_extension(disp=disp)
+            return
+
+        # else solve normally
+        try:
+            int(self.options.SOLVER)
+        except:
+            # allow solver to be specified by string
+            available_solvers = ["ALL", "APOPT", "BPOPT", "IPOPT", "MINOS", "SNOPT"]
+            try:
+                self.options.SOLVER = available_solvers.index(self.options.SOLVER)
+            except:
+                raise ValueError("Solver `%s` not found. If you are trying to use solver extension make sure you set m.options.SOLVER_EXTENSION = True." % self.options.SOLVER)
 
         timing = False
         if timing == True:
