@@ -328,6 +328,12 @@ Special function besides algebraic operators are available through GEKKO functio
 .. py:classmethod:: m.sqrt(other)
 
 
+.. py:classmethod:: m.erf(other)
+
+
+.. py:classmethod:: m.erfc(other)
+
+
 .. py:classmethod:: m.sigmoid(other)
 
 
