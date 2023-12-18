@@ -2039,13 +2039,13 @@ class GEKKO(object):
             return
 
         # else solve normally
-        try:
-            int(self.options.SOLVER)
-        except:
+        if isinstance(self.options.SOLVER, float):
+            self.options.SOLVER = int(self.options.SOLVER)
+        if isinstance(self.options.SOLVER, str):
             # allow solver to be specified by string
             available_solvers = ["ALL", "APOPT", "BPOPT", "IPOPT", "MINOS", "SNOPT"]
             try:
-                self.options.SOLVER = available_solvers.index(self.options.SOLVER)
+                self.options.SOLVER = available_solvers.index(self.options.SOLVER.upper())
             except:
                 raise ValueError("Solver `%s` not found. If you are trying to use solver extension make sure you set m.options.SOLVER_EXTENSION = True." % self.options.SOLVER)
 
