@@ -66,8 +66,6 @@ The BibTeX entry is::
 	doi={10.3390/pr6080106},
 	publisher={Multidisciplinary Digital Publishing Institute}}
 
-A PDF of the complete Gekko documentation is available from this `link <https://buildmedia.readthedocs.org/media/pdf/gekko/latest/gekko.pdf>`_.
-
 Contents
 --------
 
@@ -88,6 +86,8 @@ Contents
 	solver_extension
 	examples
 	support
+
+A PDF of the complete Gekko documentation is available from this `link <https://buildmedia.readthedocs.org/media/pdf/gekko/latest/gekko.pdf>`_.
 
 Overview of GEKKO
 --------
