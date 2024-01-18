@@ -13,10 +13,15 @@ If you would like to contribute to GEKKO development, please make pull requests 
 Questions
 ---------
 
-Further clarification regarding the APMonitor functionality on the back end of GEKKO, please join the `APMonitor User Group <https://groups.google.com/forum/#!forum/apmonitor>`_.
-
+Further clarification regarding GEKKO, please visit `Stack Overflow <https://stackoverflow.com/questions/tagged/gekko>`_ with questions tagged `gekko`.
 
 Advanced Debugging
 ------------------
 
-The files read/written by GEKKO and APMonitor are in the folder indicated in `m._path`. Information on debugging these files is available on `APMonitor <http://apmonitor.com/wiki/>`_.
+The files read/written by GEKKO are in the folder indicated in `m._path`. Information on debugging these files is available on `APMonitor <http://apmonitor.com/wiki/>`_.
+
+Generative AI can also help with basic and advanced debugging. Most Large Language Models (LLMs) have knowledge of the Gekko syntax and are able to help with generating prototype applications, suggesting performance improvements, answering questions that would be found in the documentation, designing applications, and working through errors. A specially trained OpenAI GPT4 model is available for `Gekko Support <https://chat.openai.com/g/g-sl8WNWdO7-gekko-support>`_.
+
+.. image:: /ML_Gekko_pics/gekko_support.png
+   :width: 60%
+   :align: center
