@@ -1,7 +1,7 @@
 
 .. _MV_options:
 
-Manipulated Variable Options
+MV Options
 ====================================
 
 .. toctree::
