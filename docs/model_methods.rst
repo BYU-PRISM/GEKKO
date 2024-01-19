@@ -1,6 +1,6 @@
 .. _model_parts:
 
-Model Building Functions
+Model Building
 =======================================
 
 
@@ -8,7 +8,7 @@ Model Building Functions
 	:maxdepth: 2
 
 
-Model Building
+Model Functions
 --------------
 
 .. py:class::	m = GEKKO(remote=True, [server], [name]):
