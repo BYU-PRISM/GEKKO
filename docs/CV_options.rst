@@ -2,7 +2,7 @@
 
 .. _CV_options:
 
-Controlled Variable Options
+CV Options
 ====================================
 
 .. toctree::
