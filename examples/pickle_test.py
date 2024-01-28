@@ -1,12 +1,8 @@
-# -*- coding: utf-8 -*-
-
 from gekko import GEKKO
 import pickle
 
 # Initialize Model
 m = GEKKO(remote=False)
-
-#help(m)
 
 #define parameter
 eq = m.Param(value=40)
@@ -54,10 +50,8 @@ print('x3: ' + str(x3.value))
 print('x4: ' + str(x4.value))
 print(m._path)
 
-pickle.dump(m,open('/media/DATA/Downloads/gekko_pickle_test_hs71.p','wb'))
-
-pkl_file = open('/media/DATA/Downloads/gekko_pickle_test_hs71.p', 'rb')
-
+pickle.dump(m,open('gekko_pickle_test_hs71.pkl','wb'))
+pkl_file = open('gekko_pickle_test_hs71.p', 'rb')
 m2 = pickle.load(pkl_file)
 
 m2.solve()
