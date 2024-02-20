@@ -54,7 +54,7 @@ def package_files(directory):
 #gather all files for GUI support
 gui_files = package_files('gekko/static')
 #add APM executable file
-extra_files = gui_files + ['bin/apm.exe','bin/apm','bin/apm_aarch64','bin/apm_mac','bin/apm_mac']
+extra_files = gui_files + ['bin/apm.exe','bin/apm','bin/apm_aarch64','bin/apm_arm','bin/apm_mac']
 
 # versions: a (alpha), b (beta), rc (release candidate)
 # update version here, __init__.py, and create a GitHub release
