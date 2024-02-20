@@ -9,6 +9,7 @@ Versions of the local executable include:
 - Windows (32 or 64 bit): apm.exe
 - Linux (64 bit): apm
 - MacOS (64 bit): apm_mac
-- Linux ARM (Raspberry Pi): apm_arm (temporarily removed until new version is available)
+- Linux ARM (64-bit): apm_aarch64
+- Linux ARM (32-bit): apm_arm
 
 Set `chmod u+x` on Linux or MacOS to allow local execution, if there is a permission issue.
