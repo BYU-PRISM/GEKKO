@@ -12,6 +12,7 @@ All notable changes to the GEKKO project are documented in this file.
 - Print message when using `remote=True` for greater transparency
 - `m.options.SOLVER` can now be specified with the solver name such as `APOPT`, `BPOPT`, `IPOPT`, etc
 - Updated documentation for gekko `m.erf()` and `m.erfc()` functions.
+- Added `apm_aarch64` executable to `setup.py` to be included in `bin` folder
 
 ## [v1.0.6] - Version 1.0.6 Stable Release, Date: 2023-01-24
 ### Changed
