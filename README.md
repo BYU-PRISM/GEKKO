@@ -66,4 +66,4 @@ When the system of equations does not converge, APMonitor produces a convergence
 > Hedengren, J. D. and Asgharzadeh Shishavan, R., Powell, K.M., and Edgar, T.F., [Nonlinear Modeling, Estimation and Predictive Control in APMonitor](https://www.sciencedirect.com/science/article/pii/S0098135414001306), Computers and Chemical Engineering, Volume 70, pg. 133–148, 2014, doi: 10.1016/j.compchemeng.2014.04.013. [Preprint](https://apmonitor.com/wiki/uploads/Main/APMonitor_2014.pdf)
 > Beal, L.D.R., Hill, D., Martin, R.A., and Hedengren, J. D., [GEKKO Optimization Suite](https://www.mdpi.com/2227-9717/6/8/106), Processes, Volume 6, Number 8, 2018, doi: 10.3390/pr6080106. [Article (Open Access)](https://www.mdpi.com/2227-9717/6/8/106)
 
-[![Star History Chart](https://api.star-history.com/svg?repos=BYU-PRISM/GEKKO,Pyomo/pyomo,casadi/casadi,jump-dev/JuMP.jl&type=Date)](https://star-history.com/#BYU-PRISM/GEKKO&Pyomo/pyomo&casadi/casadi&jump-dev/JuMP.jl&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=BYU-PRISM/GEKKO,Pyomo/pyomo,casadi/casadi&type=Date)](https://star-history.com/#BYU-PRISM/GEKKO&Pyomo/pyomo&casadi/casadi&Date)
