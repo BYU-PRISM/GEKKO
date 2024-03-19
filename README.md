@@ -60,7 +60,7 @@ When the system of equations does not converge, APMonitor produces a convergence
 
 ## Open-Source Modeling
 
-[Open-source modeling languages](https://apm.byu.edu/prism/index.php/Projects/OpenSourceModeling) are essential tools for data analysis and scientific computing. Pyomo, Gekko, and CasADi are mathematical programming languages for optimization problems. The importance of a collaborative development effort in these open-source modeling languages cannot be overstated. Collaboration allows developers to pool their resources and knowledge, leading to faster and more robust development. Additionally, collaboration fosters a culture of sharing and support, helping to ensure the longevity and continued improvement of these essential tools. Below are [select references to the Gekko Optimization Suite](https://apmonitor.com/wiki/index.php/Main/APMonitorReferences).
+[Open-source modeling languages](https://apm.byu.edu/prism/index.php/Projects/OpenSourceModeling) are essential tools for data analysis and scientific computing. Gekko is a mathematical programming language for optimization problems with physics-based and data-driven models. The importance of a collaborative development effort in open-source modeling languages cannot be overstated. Collaboration allows developers to pool their resources and knowledge, leading to faster and more robust development. Additionally, collaboration fosters a culture of sharing and support, helping to ensure the longevity and continued improvement of these essential tools. Below are [select references to the Gekko Optimization Suite](https://apmonitor.com/wiki/index.php/Main/APMonitorReferences).
 
 > Gunnell, L., Nicholson, B., Hedengren, J.D., [Equation-based and data-driven modeling: Open-source software current state and future directions](https://www.sciencedirect.com/science/article/abs/pii/S0098135414001306), Computers & Chemical Engineering, 2024, 108521, ISSN 0098-1354, DOI: 10.1016/j.compchemeng.2023.108521. [Preprint](https://apm.byu.edu/prism/uploads/Members/2023_Open_Source_Modeling.pdf)
 
@@ -68,4 +68,4 @@ When the system of equations does not converge, APMonitor produces a convergence
 
 > Beal, L.D.R., Hill, D., Martin, R.A., and Hedengren, J. D., [GEKKO Optimization Suite](https://www.mdpi.com/2227-9717/6/8/106), Processes, Volume 6, Number 8, 2018, doi: 10.3390/pr6080106. [Article (Open Access)](https://www.mdpi.com/2227-9717/6/8/106)
 
-[![Star History Chart](https://api.star-history.com/svg?repos=BYU-PRISM/GEKKO,Pyomo/pyomo,casadi/casadi&type=Date)](https://star-history.com/#BYU-PRISM/GEKKO&Pyomo/pyomo&casadi/casadi&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=BYU-PRISM/GEKKO&type=Date)](https://star-history.com/#BYU-PRISM/GEKKO&Date)
