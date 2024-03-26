@@ -19,6 +19,8 @@ Questions
 
 Further clarification regarding GEKKO, please visit `Stack Overflow <https://stackoverflow.com/questions/tagged/gekko>`_ with questions tagged `gekko` for human-generated questions and answers. Generative AI is built into Gekko with the `support` module.
 
+::
+
 	from gekko import support
 	a = support.agent()
 	a.ask("Can you optimize the Rosenbrock function?")
