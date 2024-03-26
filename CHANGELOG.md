@@ -3,6 +3,11 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+## [v1.0.7] - Version 1.0.7 Stable Release, Date: 2024-03-5
+### Added
 - Added [LP, QP, NLP, MILP, and MINLP examples](https://github.com/BYU-PRISM/GEKKO/blob/master/examples/Optimization_Introduction.ipynb).
 - Added `apm_aarch64` binary for local solve on ARM64 / AARCH64 devices, only BPOPT solver for ARM 32 and 64-bit
 - Added `pyampl` interface to use ampl / pyomo solvers
@@ -226,7 +231,8 @@ All notable changes to the GEKKO project are documented in this file.
 ## 0.0.1a1 - Version 0.0.1 Alpha 1, Date: 2018-01-05
 ### Initial GEKKO public release, alpha version
 
-[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.6...HEAD
+[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.7...HEAD
+[v1.0.7]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.6...v1.0.7
 [v1.0.6]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.5...v1.0.6
 [v1.0.5]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.4...v1.0.5
 [v1.0.4]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.2...v1.0.4
