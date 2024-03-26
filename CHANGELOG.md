@@ -7,6 +7,7 @@ All notable changes to the GEKKO project are documented in this file.
 - Added examples that use the `support` module to create an agent to answer questions
 
 ### Changed
+- Modified documentation to include information about the `support` module
 
 ## [v1.0.7] - Version 1.0.7 Stable Release, Date: 2024-03-5
 ### Added
