@@ -3,6 +3,8 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+- Added `support` library for RAG-based Chatbot Support in Gekko
+- Added examples that use the `support` module to create an agent to answer questions
 
 ### Changed
 
