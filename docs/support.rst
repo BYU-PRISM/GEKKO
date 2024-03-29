@@ -17,7 +17,7 @@ If you would like to contribute to GEKKO development, please make pull requests 
 Questions
 ---------
 
-Further clarification regarding GEKKO, please visit `Stack Overflow <https://stackoverflow.com/questions/tagged/gekko>`_ with questions tagged `gekko` for human-generated questions and answers. Generative AI is built into Gekko with the `support` module. Queries are sent to a web service and a text response is returned. The web service searches a list of hundreds of related `Gekko questions and answers <https://github.com/BYU-PRISM/GEKKO/blob/master/docs/llm/train.jsonl>`_ to add question context and receive a more relevant answer. User questions are not stored for LLM training. The Gekko AI Assistant web service may be unavailable or slow down during periods of high use. Advanced Process Solutions, LLC (APS) is not responsible in any way for the accuracy, completeness, performance, timeliness, reliability, content, upgrades, or availability of any information and/or software received by you as a result of your use of the service. See APS `terms and conditions <https://apmonitor.com/wiki/index.php/Main/TermsConditions>`_.
+Further clarification regarding GEKKO, please visit `Stack Overflow <https://stackoverflow.com/questions/tagged/gekko>`_ with questions tagged `gekko` for human-generated questions and answers. Generative AI is built into Gekko with the `support` module. Queries are sent to a web service and a text response is returned. The web service searches a list of hundreds of related `Gekko questions and answers <https://github.com/BYU-PRISM/GEKKO/blob/master/docs/llm/train.jsonl>`_ to add question context and receive a more relevant answer.
 
 ::
 
@@ -25,7 +25,7 @@ Further clarification regarding GEKKO, please visit `Stack Overflow <https://sta
 	a = support.agent()
 	a.ask("Can you optimize the Rosenbrock function?")
 
-Create a support agent with `support.agent()` and then ask any questions. Prior questions and answers are stored as context for follow-up questions.
+Create a support agent with `support.agent()` and then ask any questions. Prior questions and answers are stored as context for follow-up questions. User questions are not stored for LLM training. The Gekko AI Assistant web service may be unavailable or slow down during periods of high use. Advanced Process Solutions, LLC (APS) is not responsible in any way for the accuracy, completeness, performance, timeliness, reliability, content, upgrades, or availability of any information and/or software received by you as a result of your use of the service. See APS `terms and conditions <https://apmonitor.com/wiki/index.php/Main/TermsConditions>`_.
 
 Advanced Debugging
 ------------------
