@@ -25,7 +25,9 @@ Further clarification regarding GEKKO, please visit `Stack Overflow <https://sta
 	a = support.agent()
 	a.ask("Can you optimize the Rosenbrock function?")
 
-Create a support agent with `support.agent()` and then ask any questions. Prior questions and answers are stored as context for follow-up questions. User questions are not stored for LLM training. The Gekko AI Assistant web service may be unavailable or slow down during periods of high use. Advanced Process Solutions, LLC (APS) is not responsible in any way for the accuracy, completeness, performance, timeliness, reliability, content, upgrades, or availability of any information and/or software received by you as a result of your use of the service. See APS `terms and conditions <https://apmonitor.com/wiki/index.php/Main/TermsConditions>`_.
+Create a support agent with `support.agent()` and then ask any questions. Prior questions and answers are stored as context for follow-up questions. User questions are not stored for LLM training. The Gekko AI Assistant web service may be unavailable or slow down during periods of high use. 
+
+A `local Gekko AI Assistant <https://apmonitor.com/dde/index.php/Main/RAGLargeLanguageModel>`_ can be run with Retrieval Augmented Generation (RAG) and choice of LLM on a local `ollama` server. Advanced Process Solutions, LLC (APS) is not responsible in any way for the Gekko AI Assistant accuracy, completeness, performance, timeliness, reliability, content, upgrades, or availability of any information and/or software received as a result of the use of the service. See APS `terms and conditions <https://apmonitor.com/wiki/index.php/Main/TermsConditions>`_.
 
 Advanced Debugging
 ------------------
