@@ -6,6 +6,7 @@ All notable changes to the GEKKO project are documented in this file.
 
 ### Changed
 - Fix Gekko arx bug for MIMO systems
+- Fix Gekko GPR bug for multiple features
 
 ## [v1.1.0] - Version 1.1.0 Stable Release, Date: 2024-03-26
 ### Added
