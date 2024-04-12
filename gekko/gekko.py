@@ -573,14 +573,14 @@ class GEKKO(object):
         #define arrays of states, outputs and inputs
         if isinstance(y,(GKVariable,GKParameter)):
             y = [y] # convert to list of size 1
-        if not y:
+        if len(y)==0:
             y = [self.Var() for i in np.arange(ny)]
         else:
             if len(y)!=ny:
                 raise Exception('arx input y must be an array of length '+str(ny))
         if isinstance(u,(GKVariable,GKParameter)):
             u = [u] # convert to list of size 1
-        if not u:
+        if len(u)==0:
             u = [self.Param() for i in np.arange(nu)]
         else:
             if len(u)!=nu:
