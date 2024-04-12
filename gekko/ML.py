@@ -289,7 +289,7 @@ class Gekko_GPR():
             def __init__(self,length_scale,m):
                 super().__init__('RBF',length_scale,m)
             def __call__(self,xi,xp):
-                if(xp == []):
+                if not xp:
                     xp = xi
                 l = self.value
                 if(len(l) == 1):
@@ -301,7 +301,7 @@ class Gekko_GPR():
             def __init__(self,sigma_0,m):
                 super().__init__('DotProduct',sigma_0,m)
             def __call__(self,xi,xp):
-                if(xp == []):
+                if not xp:
                     xp = xi
                 dotsum = self.m.Intermediate(xi[0]*xp[0])
                 for i in range(1,len(xi)):
@@ -312,7 +312,7 @@ class Gekko_GPR():
             def __init__(self,alpha,length_scale,m):
                 super().__init__('RationalQuadratic',[alpha,length_scale],m)
             def __call__(self,xi,xp):
-                if(xp == []):
+                if not xp:
                     xp = xi
                 alpha = self.value[0]
                 l = self.value[1]
@@ -325,7 +325,7 @@ class Gekko_GPR():
             def __init__(self,periodicity,length_scale,m):
                 super().__init__('ExpSineSquared',[periodicity,length_scale],m)
             def __call__(self,xi,xp):
-                if(xp == []):
+                if not xp:
                     xp = xi
                 p = self.value[0]
                 l = self.value[1][0]
@@ -337,7 +337,7 @@ class Gekko_GPR():
                 super().__init__(f'Matern{nu}',length_scale,m)
                 self.nu = nu
             def __call__(self,xi,xp):
-                if(xp == []):
+                if not xp:
                     xp = xi
                 l = self.value
                 if(self.nu == 0.5):
@@ -374,7 +374,7 @@ class Gekko_GPR():
             def __init__(self,noise_level,m):
                 super().__init__('White',noise_level,m)
             def __call__(self,xi,xp):
-                if(xp == []):
+                if not xp:
                     return self.m.Intermediate(self.value[0])
                 else:
                     return self.m.Intermediate(0)
@@ -651,7 +651,7 @@ class Gekko_NN_SKlearn():
         a_scaled = scale_x(a)
         aNext = []
         for n in range(len(layer_sizes) - 1):
-            if aNext == []:
+            if not aNext:
                 aNext = feedforward(a_scaled,n,self.W,self.b)
             else:
                 aNext = feedforward(aNext,n,self.W,self.b)
@@ -813,14 +813,14 @@ class Gekko_NN_TF():
         a_scaled = scale_x(a)
         aNext = []
         for n in range(len(self.layer_sizes) - 1):
-            if aNext == []:
+            if not aNext:
                 aNext = feedforward(a_scaled,n,self.W,self.b)
             else:
                 aNext = feedforward(aNext,n,self.W,self.b)
         if return_std:
             aNextSigma = []
             for n in range(len(self.layer_sizes) - 1):
-                if aNextSigma == []:
+                if not aNextSigma:
                     aNextSigma = feedforward(a_scaled,n,self.W,self.b)
                 else:
                     aNextSigma = feedforward_sigma(aNextSigma,n,self.W,self.b)
