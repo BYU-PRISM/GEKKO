@@ -245,7 +245,7 @@ All notable changes to the GEKKO project are documented in this file.
 ### Initial GEKKO public release, alpha version
 
 [Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.1...HEAD
-[v1.1.0]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.0...v1.1.1
+[v1.1.1]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.0...v1.1.1
 [v1.1.0]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.7...v1.1.0
 [v1.0.7]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.6...v1.0.7
 [v1.0.6]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.5...v1.0.6
