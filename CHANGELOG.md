@@ -5,6 +5,8 @@ All notable changes to the GEKKO project are documented in this file.
 ### Added
 
 ### Changed
+- Improve model initialization (Timer 47) with improved duplicate variable name searching for larger models
+- Update local APM executables to v1.0.3
 
 ## [v1.1.1] - Version 1.1.1 Stable Release, Date: 2024-04-11
 ### Changed
