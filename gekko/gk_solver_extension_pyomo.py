@@ -48,7 +48,13 @@ class PyomoConverter(GKConverter):
             SolverFactory,
             SolverStatus,
             TerminationCondition,
-            value
+            value,
+            sin,
+            cos,
+            tan,
+            exp,
+            log,
+            sqrt
         )
         self.ConcreteModel = ConcreteModel
         self.Var = Var
@@ -61,6 +67,13 @@ class PyomoConverter(GKConverter):
         self.Integers = Integers
         self.Reals = Reals
         self.value = value
+
+        self.sin = sin
+        self.cos = cos
+        self.tan = tan
+        self.exp = exp
+        self.log = log
+        self.sqrt = sqrt
 
 
     def convert(self) -> None:
@@ -130,11 +143,21 @@ class PyomoConverter(GKConverter):
         """
         find a sub-expression
         """
-        left = self.expr_var(expr, left=True)
+        # find the left side of the expression
+        # try to find a math function
+        math_fn = self.expr_get_math_fn(expr)
+        if math_fn is not None:
+            self._expr_index += len(math_fn)
+            left = self.expr_math_fn()[math_fn](self.expr_var(expr))
+        else:
+            left = self.expr_var(expr, left=True)
         if self._expr_index == len(expr) or expr[self._expr_index] == ")":
+            # reached the end
             return left
-        operator = expr[self._expr_index]
-        self._expr_index += 1
+        # get the operator
+        operator = self.expr_get_operator(expr)
+        self._expr_index += len(operator)
+        # find the right side of the expression
         right = self.expr_var(expr, left=False)
         return self.expr_operators()[operator](left, right)
     
@@ -151,7 +174,7 @@ class PyomoConverter(GKConverter):
             return subexp
         var = ""
         # loop until we reach an operator, a closing bracket or the end of the expression
-        while self._expr_index < len(expr) and not (left and expr[self._expr_index] in self.expr_operators()):
+        while self._expr_index < len(expr) and not (left and self.expr_get_operator(expr) is not None):
             if expr[self._expr_index] == ")":
                 break
             var += expr[self._expr_index]
@@ -162,6 +185,26 @@ class PyomoConverter(GKConverter):
             # if the variable is not found, it is a constant
             return float(var)
         return pyomo_obj
+    
+
+    def expr_get_operator(self, expr):
+        """
+        look for an operator in an expression
+        """
+        for operator in self.expr_operators():
+            if expr[self._expr_index:self._expr_index + len(operator)] == operator:
+                return operator
+        return None
+    
+
+    def expr_get_math_fn(self, expr):
+        """
+        look for a math function in an expression
+        """
+        for math_fn in self.expr_math_fn():
+            if expr[self._expr_index:self._expr_index + len(math_fn)] == math_fn:
+                return math_fn
+        return None
 
 
     def expr_operators(self):
@@ -169,12 +212,32 @@ class PyomoConverter(GKConverter):
         return a dictionary of operators
         """
         return {
+            "<=": lambda x, y: x <= y,
+            ">=": lambda x, y: x >= y,
+            "<": lambda x, y: x <= y,
+            ">": lambda x, y: x >= y,
             "=": lambda x, y: x == y,
             "+": lambda x, y: x + y,
             "-": lambda x, y: x - y,
-            "*": lambda x, y: x * y,
+            "^": lambda x, y: x ** y,
             "/": lambda x, y: x / y,
-            "^": lambda x, y: x ** y
+            "*": lambda x, y: x * y,
+        }
+    
+
+    def expr_math_fn(self):
+        """
+        return a dictionary of prefix operators
+        """
+        return {
+            "-": lambda x: -x,
+            "abs": lambda x: abs(x),
+            "sin": lambda x: self.sin(x),
+            "cos": lambda x: self.cos(x),
+            "tan": lambda x: self.tan(x),
+            "exp": lambda x: self.exp(x),
+            "log": lambda x: self.log(x),
+            "sqrt": lambda x: self.sqrt(x),
         }
     
 
