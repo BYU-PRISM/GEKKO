@@ -213,13 +213,13 @@ class GKConverter(ABC):
         """
         # variables
         for variable in self._gekko_model._variables:
-            variable.value = [self.get_variable_value(variable.name)]
+            variable.VALUE = [self.get_variable_value(variable.name)]
         # intermediates
         for intermediate in self._gekko_model._intermediates:
-            intermediate.value = [self.get_intermediate_value(intermediate.name)]
+            intermediate.VALUE = [self.get_intermediate_value(intermediate.name)]
         # parameters
         for parameter in self._gekko_model._parameters:
-            parameter.value = [self.get_parameter_value(parameter.name)]
+            parameter.VALUE = [self.get_parameter_value(parameter.name)]
         # objective
         objective_values = self.get_objective_values()
         if not isinstance(objective_values, list):
