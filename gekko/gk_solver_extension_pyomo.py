@@ -2,6 +2,9 @@ from .gk_solver_extension import GKConverter, solve
 
 
 def solver_extension_pyomo(gekko_model, disp=True):
+    """
+    solve the gekko model using the pyomo solver extension
+    """
     try:
         import pyomo
     except:
@@ -26,23 +29,37 @@ class PyomoConverter(GKConverter):
     Class for holding data relating to the pyomo model
     """
 
-    from pyomo.environ import (
-        ConcreteModel, 
-        Var,
-        Param,
-        Integers,
-        Reals,
-        Objective, 
-        Constraint, 
-        SolverFactory,
-        SolverStatus,
-        TerminationCondition,
-        value
-    )
-
     def __init__(self, gekko_model) -> None:
         super().__init__(gekko_model)
-        from pyomo.environ import value
+        
+        """
+        import pyomo objects
+        we import them here so the basic GEKKO functionality can be used without pyomo
+        if the user wants to use the pyomo solver extension, they need to have pyomo installed
+        """
+        from pyomo.environ import (
+            ConcreteModel, 
+            Var,
+            Param,
+            Integers,
+            Reals,
+            Objective, 
+            Constraint, 
+            SolverFactory,
+            SolverStatus,
+            TerminationCondition,
+            value
+        )
+        self.ConcreteModel = ConcreteModel
+        self.Var = Var
+        self.Param = Param
+        self.Objective = Objective
+        self.Constraint = Constraint
+        self.SolverFactory = SolverFactory
+        self.SolverStatus = SolverStatus
+        self.TerminationCondition = TerminationCondition
+        self.Integers = Integers
+        self.Reals = Reals
         self.value = value
 
 
