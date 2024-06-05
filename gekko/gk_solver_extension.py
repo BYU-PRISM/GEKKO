@@ -7,13 +7,15 @@ Solver extension module for GEKKO
 To use this module:
 1. Install the required python packages for the solver extension you want to use (Amplpy or Pyomo)
 2. set m.options.SOLVER (string for the solver you want to use - e.g. "ipopt")
-3. set m.options.SOLVER_EXTENSION = 1
-4. set m.options.SOLVER_EXTENSION_LIBRARY (string for the library you want to use - e.g. "AMPL" or "Pyomo")
-5. call m.solve() - the results will be stored back into the gekko model
+3. set m.options.SOLVER_EXTENSION (string for the library you want to use - e.g. "AMPL" or "Pyomo").
+   This defaults to 0 if not set, and will not use the solver extension module.
+4. call m.solve() - the results will be stored back into the gekko model
 
-Currently the solver extension module supports two libraries:
-(0) Amplpy
-(1) Pyomo
+Currently the solver extension module extends the gekko model to use Amplpy or Pyomo as the solver.
+You should set the m.options.SOLVER_EXTENSION to one of the following:
+(0) GEKKO
+(1) Amplpy
+(2) Pyomo
 """
 
 def solver_extension(self, disp=True):
@@ -23,15 +25,18 @@ def solver_extension(self, disp=True):
     """
 
     solver = self.options.SOLVER
-    solver_library = self.options.SOLVER_EXTENSION_LIBRARY
+    solver_library = self.options.SOLVER_EXTENSION
 
     if isinstance(solver, int):
         raise ValueError("Solver extension requires a string for m.options.SOLVER for the solver you want to use")
-    
-    if solver_library.upper() in [0, "AMPL", "AMPLPY"]:
+
+    # go to the relevant solver extension function
+    if not isinstance(solver_library, int):
+        solver_library = solver_library.upper()
+    if solver_library in [1, "AMPL", "AMPLPY"]:
         # use AMPLPY as the solver extension library
-        self.amplpy_solve_extension(disp)
-    elif solver_library.upper() in [1, "PYOMO"]:
+        self.solver_extension_amplpy(disp)
+    elif solver_library in [2, "PYOMO"]:
         # use PYOMO as the solver extension library
         self.solver_extension_pyomo(disp)
     else:

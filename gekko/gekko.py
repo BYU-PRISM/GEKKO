@@ -2035,7 +2035,8 @@ class GEKKO(object):
                 options.append("%s %s" % (option, self.solver_options[option]))
             self.solver_options = options
 
-        if self.options.SOLVER_EXTENSION:
+        solver_extension = self.options.SOLVER_EXTENSION
+        if solver_extension and not (isinstance(solver_extension, str) and solver_extension.upper() == "GEKKO"):
             # solve using solver extension
             self.solver_extension(disp=disp)
             return
