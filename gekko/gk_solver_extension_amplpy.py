@@ -118,16 +118,16 @@ class AMPLConverter(GKConverter):
         self.add_variable(data)
 
 
-    def add_constraint(self, data, constraint_name=None):
+    def add_constraint(self, constraint, constraint_name=None):
         """
         add a constraint
         """
-        super().add_constraint(data)
+        super().add_constraint(constraint)
         if constraint_name is None:
             constraint_name = "constraint%s" % str(self._equations_num)
         constraint = {
             "name": constraint_name,
-            "value": self.convert_equation(data["value"])
+            "value": self.convert_equation(constraint)
         }
         text = "subject to %s: %s;" % (constraint["name"], constraint["value"])
         # add to file
