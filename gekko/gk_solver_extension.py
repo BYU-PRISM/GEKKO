@@ -43,23 +43,23 @@ def solver_extension(self, disp=True):
         raise ValueError("Solver extension library not recognized. Use 0 or 'AMPL' for AMPLPY, or 1 or 'PYOMO' for PYOMO.")
 
 
-def solve(gekko_model, converter, disp=True):
+def solve_with_converter(self, converter, disp=True):
     # create a converter object
-    c = converter(gekko_model)
+    c = converter(self)
     # generate the model
     c.convert()
 
     # direct stdout to a file
-    output_file = open(gekko_model._path + "/output.txt", "w")
+    output_file = open(self._path + "/output.txt", "w")
     if disp:
         sys.stdout = OutputRedirector(sys.stdout, output_file)
     else:
         # dont display output on console
         sys.stdout = OutputRedirector(output_file)
 
-    if gekko_model._remote:
+    if self._remote:
         print("WARNING: Remote solve not supported by solver extension; defaulted to local solve.")
-        gekko_model._remote = False
+        self._remote = False
     
     # setup solve options
     c.set_options()

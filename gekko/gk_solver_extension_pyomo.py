@@ -1,7 +1,7 @@
-from .gk_solver_extension import GKConverter, solve
+from .gk_solver_extension import GKConverter
 
 
-def solver_extension_pyomo(gekko_model, disp=True):
+def solver_extension_pyomo(self, disp=True):
     """
     solve the gekko model using the pyomo solver extension
     """
@@ -9,7 +9,7 @@ def solver_extension_pyomo(gekko_model, disp=True):
         import pyomo
     except:
         raise ImportError("Pyomo not installed. Run `$ pip install Pyomo` to install Pyomo in order to use solver extension to access more solvers.")
-    solve(gekko_model, PyomoConverter, disp)
+    self.solve_with_converter(PyomoConverter, disp)
 
 
 def create_pyomo_object(self):

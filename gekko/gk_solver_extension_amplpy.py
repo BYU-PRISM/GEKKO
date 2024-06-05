@@ -1,4 +1,4 @@
-from .gk_solver_extension import GKConverter, solve
+from .gk_solver_extension import GKConverter
 
 
 def solver_extension_amplpy(self, disp=True):
@@ -23,7 +23,7 @@ def solver_extension_amplpy(self, disp=True):
         else:
             raise ModuleNotFoundError("Unknown solver `%s`. Refer to the AMPLPY documentation or run `$ python -m amplpy.modules available` to view available solvers." % solver)
 
-    solve(self, AMPLConverter, disp)
+    self.solve_with_converter(AMPLConverter, disp)
 
 
 def create_amplpy_object(self):
