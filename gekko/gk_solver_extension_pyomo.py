@@ -68,12 +68,29 @@ class PyomoConverter(GKConverter):
         self.Reals = Reals
         self.value = value
 
-        self.sin = sin
-        self.cos = cos
-        self.tan = tan
-        self.exp = exp
-        self.log = log
-        self.sqrt = sqrt
+        self._equation_operators = {
+            "<=": lambda x, y: x <= y,
+            ">=": lambda x, y: x >= y,
+            "<": lambda x, y: x <= y,
+            ">": lambda x, y: x >= y,
+            "=": lambda x, y: x == y,
+            "+": lambda x, y: x + y,
+            "-": lambda x, y: x - y,
+            "^": lambda x, y: x ** y,
+            "/": lambda x, y: x / y,
+            "*": lambda x, y: x * y,
+        }
+
+        self._equation_functions = {
+            "-": lambda x: -x,
+            "abs": lambda x: abs(x),
+            "sin": lambda x: sin(x),
+            "cos": lambda x: cos(x),
+            "tan": lambda x: tan(x),
+            "exp": lambda x: exp(x),
+            "log": lambda x: log(x),
+            "sqrt": lambda x: sqrt(x),
+        }
 
 
     def convert(self) -> None:
@@ -148,7 +165,7 @@ class PyomoConverter(GKConverter):
         math_fn = self.expr_get_math_fn(expr)
         if math_fn is not None:
             self._expr_index += len(math_fn)
-            left = self.expr_math_fn()[math_fn](self.expr_var(expr))
+            left = self._equation_functions[math_fn](self.expr_var(expr))
         else:
             left = self.expr_var(expr, left=True)
         if self._expr_index == len(expr) or expr[self._expr_index] == ")":
@@ -159,7 +176,7 @@ class PyomoConverter(GKConverter):
         self._expr_index += len(operator)
         # find the right side of the expression
         right = self.expr_var(expr, left=False)
-        return self.expr_operators()[operator](left, right)
+        return self._equation_operators[operator](left, right)
     
 
     def expr_var(self, expr, left=True):
@@ -185,13 +202,13 @@ class PyomoConverter(GKConverter):
             # if the variable is not found, it is a constant
             return float(var)
         return pyomo_obj
-    
+
 
     def expr_get_operator(self, expr):
         """
         look for an operator in an expression
         """
-        for operator in self.expr_operators():
+        for operator in self._equation_operators:
             if expr[self._expr_index:self._expr_index + len(operator)] == operator:
                 return operator
         return None
@@ -201,44 +218,10 @@ class PyomoConverter(GKConverter):
         """
         look for a math function in an expression
         """
-        for math_fn in self.expr_math_fn():
+        for math_fn in self._equation_functions:
             if expr[self._expr_index:self._expr_index + len(math_fn)] == math_fn:
                 return math_fn
         return None
-
-
-    def expr_operators(self):
-        """
-        return a dictionary of operators
-        """
-        return {
-            "<=": lambda x, y: x <= y,
-            ">=": lambda x, y: x >= y,
-            "<": lambda x, y: x <= y,
-            ">": lambda x, y: x >= y,
-            "=": lambda x, y: x == y,
-            "+": lambda x, y: x + y,
-            "-": lambda x, y: x - y,
-            "^": lambda x, y: x ** y,
-            "/": lambda x, y: x / y,
-            "*": lambda x, y: x * y,
-        }
-    
-
-    def expr_math_fn(self):
-        """
-        return a dictionary of prefix operators
-        """
-        return {
-            "-": lambda x: -x,
-            "abs": lambda x: abs(x),
-            "sin": lambda x: self.sin(x),
-            "cos": lambda x: self.cos(x),
-            "tan": lambda x: self.tan(x),
-            "exp": lambda x: self.exp(x),
-            "log": lambda x: self.log(x),
-            "sqrt": lambda x: self.sqrt(x),
-        }
     
 
     def add_objective(self, objective) -> None:
