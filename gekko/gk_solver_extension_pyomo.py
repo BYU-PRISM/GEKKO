@@ -52,8 +52,15 @@ class PyomoConverter(GKConverter):
             sin,
             cos,
             tan,
+            asin,
+            acos,
+            atan,
+            sinh,
+            cosh,
+            tanh,
             exp,
             log,
+            log10,
             sqrt
         )
         self.ConcreteModel = ConcreteModel
@@ -84,12 +91,21 @@ class PyomoConverter(GKConverter):
         self._equation_functions = {
             "-": lambda x: -x,
             "abs": lambda x: abs(x),
+            "sinh": lambda x: sinh(x),
+            "cosh": lambda x: cosh(x),
+            "tanh": lambda x: tanh(x),
             "sin": lambda x: sin(x),
             "cos": lambda x: cos(x),
             "tan": lambda x: tan(x),
+            "asin": lambda x: asin(x),
+            "acos": lambda x: acos(x),
+            "atan": lambda x: atan(x),
             "exp": lambda x: exp(x),
+            "log10": lambda x: log10(x),
             "log": lambda x: log(x),
             "sqrt": lambda x: sqrt(x),
+            "sigmd": lambda x: 1 / (1 + exp(-x)),
+            # note that erf and erfc are not supported by pyomo
         }
 
 
