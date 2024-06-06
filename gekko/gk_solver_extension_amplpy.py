@@ -127,7 +127,7 @@ class AMPLConverter(GKConverter):
             constraint_name = "constraint%s" % str(self._equations_num)
         constraint = {
             "name": constraint_name,
-            "value": self.convert_equation(constraint)
+            "value": constraint
         }
         text = "subject to %s: %s;" % (constraint["name"], constraint["value"])
         # add to file
@@ -154,62 +154,42 @@ class AMPLConverter(GKConverter):
     def add_prebuilt_object(self, prebuilt_object):
         """
         add a prebuilt object
+
+        supported prebuilt objects:
+        - sum
+        - abs
+        - sign
+        - max
+        - min
+        - pwl
         """
-        obj = {}
-        equation_values = prebuilt_object.split(" = ")
-        obj_name = equation_values[0]
-        obj["name"] = obj_name
-        obj_type = equation_values[1].split("(")[0]
-        obj["type"] = obj_type
-        obj["parameters"] = {}
-        for connection in self._gekko_model._connections:
-            if obj_name + "." in connection:
-                connection_values = connection.split(" = ")
-                variable = connection_values[0]
-                parameter = connection_values[1].split(obj_name + ".")[1]
-                parameter_name = parameter.split("[")[0]
-                if parameter_name not in obj["parameters"]:
-                    if "[" in parameter:
-                        obj["parameters"][parameter_name] = [variable]
-                    else:
-                        obj["parameters"][parameter_name] = variable
-                else:
-                    obj["parameters"][parameter_name].append(variable)
-        self.evaluate_object(obj)
+        obj_type = prebuilt_object["type"]
+        obj_name = prebuilt_object["name"]
+        obj_parameters = prebuilt_object["parameters"]
 
-
-    def evaluate_object(self, obj):
-        """
-        evaluate a prebuilt object and add it to the file
-        """
-        # object parameters
-        parameters = obj["parameters"]
-
-        # not all prebuilt objects are implemented
-
-        if obj["type"] == "sum":  # sum object
-            equation = "%s = 0" % parameters["y"]
-            for variable in parameters["x"]:
+        if obj_type == "sum":  # sum object
+            equation = "%s = 0" % obj_parameters["y"]
+            for variable in obj_parameters["x"]:
                 equation += " + %s" % variable
             self.add_constraint(equation)
 
-        elif obj["type"] == "abs":  # abs function
-            equation = "%s = abs(%s)" % (parameters["y"], parameters["x"])
+        elif obj_type == "abs":  # abs function
+            equation = "%s = abs(%s)" % (obj_parameters["y"], obj_parameters["x"])
             self.add_constraint(equation)
 
-        elif obj["type"] == "sign":  # sign function
-            equation = "%s = if %s>=0 then 1 else -1" % (parameters["y"], parameters["x"])
+        elif obj_type == "sign":  # sign function
+            equation = "%s = if %s>=0 then 1 else -1" % (obj_parameters["y"], obj_parameters["x"])
             self.add_constraint(equation)
 
-        elif obj["type"] in ["max", "min"]:  # max/min function
-            equation = "%s = %s(%s, %s)" % (parameters["y"], obj["type"], parameters["x"][0], parameters["x"][1])
+        elif obj_type in ["max", "min"]:  # max/min function
+            equation = "%s = %s(%s, %s)" % (obj_parameters["y"], obj_type, obj_parameters["x"][0], obj_parameters["x"][1])
             self.add_constraint(equation)
 
-        elif obj["type"] == "pwl":  # piece-wise linear function
+        elif obj_type == "pwl":  # piece-wise linear function
             x_values = []
             y_values = []
             # file path to pwl values
-            filename = "%s/%s.txt" % (self._gekko_model._path, obj["name"])
+            filename = "%s/%s.txt" % (self._gekko_model._path, obj_name)
             # read x and y values from file
             with open(filename) as file:
                 for line in file:
@@ -222,8 +202,8 @@ class AMPLConverter(GKConverter):
                 raise Exception("The pwl function requires at least 3 data points")
 
             equations = []
-            x = parameters["x"]
-            y = parameters["y"]
+            x = obj_parameters["x"]
+            y = obj_parameters["y"]
             for i in range(-1, len(x_values)):
                 point = i
                 # endpoints
@@ -260,14 +240,15 @@ class AMPLConverter(GKConverter):
 
         else:
             # object not supported or implemented yet
-            raise Exception("The %s object could not be converted to AMPL equivalent. It may not implemented within the module or entirely incompatible with AMPL." % obj["type"])
+            raise Exception("The %s object could not be converted to AMPL equivalent. It may not implemented within the module or entirely incompatible with AMPL." % obj_type["type"])
 
 
-    def convert_equation(self, equation):
+    def convert_equation(self, equation) -> str:
         """
         converts a gekko equation, such as a constraint or objective, into the ampl equivalent
         """
         # also does some checking as to whether the equation can be converted
+        equation = super().convert_equation(equation)
 
         # check the equation can be converted
         if "$" in equation:
@@ -275,7 +256,7 @@ class AMPLConverter(GKConverter):
             raise Exception("Differential equations are not supported by AMPL, so the model could not be converted.")
 
         # some solvers seem to not support strict equality
-        # convert instances of ">" or "<=" (strict equality) into ">=" or "<="
+        # convert instances of ">" or "<" (strict equality) into ">=" or "<="
         new_equation = ""
         i = 0
         while i < len(equation):
@@ -300,11 +281,9 @@ class AMPLConverter(GKConverter):
                     close_brackets -= 1
             equation = equation.replace(equation[initial_pos:current_pos + 1], "(1/(1+exp(-%s)))" % x)
 
-        # replace multiple operators resulting from signs
-        equation = equation.replace('++','+').replace('--','+').replace('+-','-').replace('-+','-')
-
         return equation
-    
+
+
     def get_parameter_value(self, name) -> float:
         return self._amplpy_model.get_parameter(name).value()
 

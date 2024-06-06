@@ -195,16 +195,54 @@ class GKConverter(ABC):
         for i in range(len(self._gekko_model._inter_equations)):
             intermediate_name = self._gekko_model._intermediates[i].name
             constraint_value = "%s=%s" % (intermediate_name, self._gekko_model._inter_equations[i])
-            self.add_constraint(constraint_value)
+            self.add_constraint(self.convert_equation(constraint_value))
         # add equations/constraints
         for equation in self._gekko_model._equations:
-            self.add_constraint(equation.value)
+            self.add_constraint(self.convert_equation(equation.value))
         # add objects
         for prebuilt_object in self._gekko_model._objects:
-            self.add_prebuilt_object(prebuilt_object)
+            self.create_prebuilt_object(prebuilt_object)
         # add objectives
         for objective in self._gekko_model._objectives:
             self.add_objective(objective)
+
+    
+    def convert_equation(self, equation) -> str:
+        # replace multiple operators resulting from signs
+        equation = equation.replace('++','+').replace('--','+').replace('+-','-').replace('-+','-')
+        return equation
+
+    
+    def create_prebuilt_object(self, prebuilt_object) -> None:
+        """
+        Create a prebuilt object
+        this involves parsing the object and finding the relevant connections.
+        The actual object is created in the add_prebuilt_object method which
+        should be implemented in the child converter class.
+        """
+        equation_values = prebuilt_object.split(" = ")
+        obj_name = equation_values[0]
+        obj_type = equation_values[1].split("(")[0]
+        obj_parameters = {}
+        for connection in self._gekko_model._connections:
+            if (obj_name + ".") in connection:
+                connection_values = connection.split(" = ")
+                variable = connection_values[0]
+                parameter = connection_values[1].split(obj_name + ".")[1]
+                parameter_name = parameter.split("[")[0]
+                if parameter_name not in obj_parameters:
+                    if "[" in parameter:
+                        obj_parameters[parameter_name] = [variable]
+                    else:
+                        obj_parameters[parameter_name] = variable
+                else:
+                    obj_parameters[parameter_name].append(variable)
+                break
+        self.add_prebuilt_object({
+            "name": obj_name,
+            "type": obj_type,
+            "parameters": obj_parameters
+        })
 
 
     def store(self) -> None:
