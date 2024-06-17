@@ -13,6 +13,7 @@ All notable changes to the GEKKO project are documented in this file.
   - Linux apm 64-bit, includes APOPT and BPOPT solvers
   - MacOS apm_mac 64-bit, includes APOPT and BPOPT solvers
   - ARM: apm_arm 32 bit, aarch64 64 bit includes BPOPT solver
+- Web service `remote=True` is 64-bit with APOPT, BPOPT, IPOPT solvers
 
 ## [v1.1.1] - Version 1.1.1 Stable Release, Date: 2024-04-11
 ### Changed
