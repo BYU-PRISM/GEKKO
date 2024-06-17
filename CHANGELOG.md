@@ -8,7 +8,7 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [v1.1.3] - Version 1.1.3 Stable Release, Date: 2024-06-17
 - Improve model initialization (Timer 47) with improved duplicate variable name searching for larger models
-- Update local APM executables to v1.0.3
+- Update local APM executables to v1.0.3 with `remote=False`
   - Windows apm.exe still 32-bit, includes APOPT, BPOPT, IPOPT solvers
   - Linux apm 64-bit, includes APOPT and BPOPT solvers
   - MacOS apm_mac 64-bit, includes APOPT and BPOPT solvers
