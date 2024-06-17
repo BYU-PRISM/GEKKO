@@ -16,7 +16,6 @@ All notable changes to the GEKKO project are documented in this file.
 - Web service `remote=True` is 64-bit with APOPT, BPOPT, IPOPT solvers
 
 ## [v1.1.1] - Version 1.1.1 Stable Release, Date: 2024-04-11
-### Changed
 - Fix Gekko arx bug for MIMO systems
 - Fix Gekko GPR bug for multiple features
 
