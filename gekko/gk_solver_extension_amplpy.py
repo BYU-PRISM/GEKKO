@@ -318,24 +318,25 @@ class AMPLConverter(GKConverter):
         return self._amplpy_model
     
 
+    def set_solver(self) -> None:
+        """
+        sest the solver
+        """
+        self._amplpy_model.setOption("solver", self._gekko_model.options.SOLVER)
+
+
     def set_options(self) -> None:
         """
         set the ampl model options
         """
-
-        # make sure the options are only set when using solver_extension
-        solver = self._gekko_model.options.SOLVER
-        # set the solver
-        self._amplpy_model.setOption("solver", solver)
-        options_str = ""
-
+        options_str = ""    
         # combine solver options to str
         for option in self._gekko_model.solver_options:
             data = option.split(" ")
             options_str += "%s=%s " % (data[0], data[1])
 
         # set solver options
-        self._amplpy_model.setOption(str(solver)+"_options", options_str)
+        self._amplpy_model.setOption(self._gekko_model.options.SOLVER + "_options", options_str)
 
 
     def solve(self) -> None:

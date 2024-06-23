@@ -60,6 +60,9 @@ def solve_with_converter(self, converter, disp=True):
     if self._remote:
         print("WARNING: Remote solve not supported by solver extension; defaulted to local solve.")
         self._remote = False
+
+    # setup solver
+    c.set_solver()
     
     # setup solve options
     c.set_options()
@@ -135,6 +138,13 @@ class GKConverter(ABC):
         Should return a list of the values of the objectives
         Note that gekko supports multiple objectives. The sum
         of the objectives is stored in the OBJFCNVAL option.
+        """
+        pass
+
+    @abstractmethod
+    def set_solver(self) -> None:
+        """
+        setup the solver based on m.options.SOLVER
         """
         pass
 

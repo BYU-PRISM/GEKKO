@@ -346,24 +346,29 @@ class PyomoConverter(GKConverter):
         return objective_values
     
 
+    def set_solver(self) -> None:
+        """
+        set the solver
+        """
+        # create a solver object
+        self._solver = self.SolverFactory(self._gekko_model.options.SOLVER)
+
+
     def set_options(self) -> None:
         """
         set the options for the pyomo model
         """
-        pass
+        for option in self._gekko_model.solver_options:
+            data = option.split(" ")  # option-value pairs
+            self._solver.options[data[0]] = data[1]
     
 
     def solve(self):
         """
         solve the pyomo model
         """
-        solver_name = self._gekko_model.options.SOLVER
-        if isinstance(solver_name, int):
-            raise ValueError("Solver extension requires a string for m.options.SOLVER for the solver you want to use")
-        # create a solver object
-        solver = self.SolverFactory(self._gekko_model.options.SOLVER)
         # solve the model
-        results = solver.solve(self._pyomo_model)
+        results = self._solver.solve(self._pyomo_model, tee=True)
         # check the results
         solver_status = results.solver.status
         solution_status = results.solver.termination_condition
