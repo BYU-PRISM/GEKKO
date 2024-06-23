@@ -237,7 +237,6 @@ class GKConverter(ABC):
                         obj_parameters[parameter_name] = variable
                 else:
                     obj_parameters[parameter_name].append(variable)
-                break
         self.add_prebuilt_object({
             "name": obj_name,
             "type": obj_type,
