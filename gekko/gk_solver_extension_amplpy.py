@@ -70,6 +70,17 @@ class AMPLConverter(GKConverter):
         self.create_amplpy_object()
 
 
+    def can_convert(self) -> None:
+        """
+        check if the model can be converted
+        """
+        super().can_convert()
+        # amplpy does not support differential equations -
+        # m.time should not be defined
+        if self._gekko_model.time is not None:
+            raise Exception("Differential equations are not supported by AMPL, so the model could not be converted. Make sure `m.time` is not defined when using the AMPLPY solver extension.")
+
+
     def add_constant(self, data):
         """
         add a constant

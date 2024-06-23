@@ -38,17 +38,20 @@ class PyomoConverter(GKConverter):
         if the user wants to use the pyomo solver extension, they need to have pyomo installed
         """
         from pyomo.environ import (
+            # model objects
             ConcreteModel, 
             Var,
             Param,
             Integers,
             Reals,
             Objective, 
-            Constraint, 
+            Constraint,
+            # solver objects
             SolverFactory,
             SolverStatus,
             TerminationCondition,
             value,
+            # math functions
             sin,
             cos,
             tan,
@@ -62,7 +65,11 @@ class PyomoConverter(GKConverter):
             log,
             log10,
             sqrt,
-            Piecewise
+            # objects
+            Piecewise,
+            # differential equation functions
+            Set,
+            DerivativeVar,
         )
         self.ConcreteModel = ConcreteModel
         self.Var = Var
@@ -119,6 +126,14 @@ class PyomoConverter(GKConverter):
         self._pyomo_model = self.ConcreteModel()
         # call base class convert method
         super().convert()
+
+    
+    def can_convert(self) -> None:
+        """
+        check if the model can be converted
+        """
+        # no additional checks needed
+        super().can_convert()
 
 
     def add_constant(self, constant) -> None:

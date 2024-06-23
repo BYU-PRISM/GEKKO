@@ -171,17 +171,23 @@ class GKConverter(ABC):
         return data
     
 
-    def can_convert(self) -> bool:
+    @abstractmethod
+    def can_convert(self) -> None:
         """
         Base check for whether the gekko model can be converted.
         Some functions are not supported by the relevant converter, while others may not be implemented in the converter yet.
         Some error checking is done during the conversion process as well.
+
+        The function should raise an exception if the model cannot be converted, 
+        or return None otherwise.
+
+        This method should be implemented in the child converter class, which should call
+        this base method and then add any additional checks.
         """
         if self._gekko_model._raw:
             raise Exception("Cannot convert a GEKKO model containing raw .apm syntax")
         if self._gekko_model._compounds:
             raise Exception("Cannot convert a GEKKO model using compounds")
-        return True
 
 
     def convert(self) -> None:
