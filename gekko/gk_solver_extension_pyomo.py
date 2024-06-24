@@ -223,11 +223,19 @@ class PyomoConverter(GKConverter):
             self._expr_index += 1
             return subexp
         var = ""
+        is_number = False
         # loop until we reach an operator, a closing bracket or the end of the expression
-        while self._expr_index < len(expr) and not (left and self.expr_get_operator(expr) is not None):
+        # also make sure we don't split a number with an "e" in it (e.g. 1e-06 - edge case)
+        while self._expr_index < len(expr) and not (left and self.expr_get_operator(expr) is not None and not (is_number and expr[self._expr_index - 1] == "e")):
             if expr[self._expr_index] == ")":
                 break
             var += expr[self._expr_index]
+            if len(var) == 1:
+                try:
+                    float(var)
+                    is_number = True
+                except:
+                    is_number = False
             self._expr_index += 1
         # now we have the variable as a string, we need to find the component in the pyomo object
         pyomo_obj = self._pyomo_model.find_component(var)
