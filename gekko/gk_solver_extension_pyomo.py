@@ -67,9 +67,6 @@ class PyomoConverter(GKConverter):
             sqrt,
             # objects
             Piecewise,
-            # differential equation functions
-            Set,
-            DerivativeVar,
         )
         self.ConcreteModel = ConcreteModel
         self.Var = Var
@@ -132,7 +129,10 @@ class PyomoConverter(GKConverter):
         """
         check if the model can be converted
         """
-        # no additional checks needed
+        # pyomo supports differential equations, but they are not implemented here yet
+        # so for now, raise an exception if m.time is defined
+        if self._gekko_model.time is not None:
+            raise Exception("Differential equations are supported by Pyomo, but not implemented in the pyomo solver extension yet. Make sure `m.time` is not defined when using the Pyomo solver extension.")
         super().can_convert()
 
 
