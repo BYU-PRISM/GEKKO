@@ -140,16 +140,16 @@ class PyomoConverter(GKConverter):
         """
         add a constant to the pyomo model
         """
-        pyomo_obj = self.Param(initialize=constant["value"])
-        self._pyomo_model.add_component(constant["name"], pyomo_obj)
+        # we will just consider the constant as a parameter
+        self.add_parameter(constant)
 
 
     def add_parameter(self, parameter) -> None:
         """
         add a parameter to the pyomo model
         """
-        # we will just consider the parameter as a variable
-        self.add_variable(parameter)
+        pyomo_obj = self.Param(initialize=parameter["value"])
+        self._pyomo_model.add_component(parameter["name"], pyomo_obj)
     
 
     def add_variable(self, variable) -> None:
