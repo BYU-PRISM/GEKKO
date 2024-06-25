@@ -392,11 +392,46 @@ class PyomoConverter(GKConverter):
         """
         # solve the model
         results = self._solver.solve(self._pyomo_model, tee=True)
+
+        # reset stdout
+        self.solve_complete()
+        
         # check the results
         solver_status = results.solver.status
-        solution_status = results.solver.termination_condition
+        termination_condition = results.solver.termination_condition
 
-        if solver_status != self.SolverStatus.ok:
-            raise Exception("Solver did not exit normally. Solver status: %s" % solver_status)
-        if solution_status != self.TerminationCondition.optimal:
-            raise Exception("The solver did not find an optimal solution.")
+        status_dict = {
+            self.SolverStatus.ok: "ok",
+            self.SolverStatus.warning: "warning",
+            self.SolverStatus.error: "error",
+            self.SolverStatus.aborted: "error",
+            self.SolverStatus.unknown: "error",
+        }
+        termination_condition_dict = {
+            self.TerminationCondition.unknown: "warning",
+            self.TerminationCondition.maxTimeLimit: "warning",
+            self.TerminationCondition.maxIterations: "warning",
+            self.TerminationCondition.minFunctionValue: "warning",
+            self.TerminationCondition.minStepLength: "warning",
+            self.TerminationCondition.globallyOptimal: "ok",
+            self.TerminationCondition.locallyOptimal: "ok",
+            self.TerminationCondition.feasible: "ok",
+            self.TerminationCondition.optimal: "ok",
+            self.TerminationCondition.maxEvaluations: "warning",
+            self.TerminationCondition.other: "warning",
+            self.TerminationCondition.unbounded: "warning",
+            self.TerminationCondition.infeasible: "error",
+            self.TerminationCondition.infeasibleOrUnbounded: "error",
+            self.TerminationCondition.invalidProblem: "error",
+            self.TerminationCondition.intermediateNonInteger: "warning",
+            self.TerminationCondition.noSolution: "warning",
+            self.TerminationCondition.solverFailure: "error",
+            self.TerminationCondition.internalSolverError: "error",
+            self.TerminationCondition.error: "error",
+            self.TerminationCondition.userInterrupt: "error",
+            self.TerminationCondition.resourceInterrupt: "error",
+            self.TerminationCondition.licensingProblems: "error",
+        }
+
+        self.handle_status(status_dict, solver_status, "Solver exited with status: %s" % solver_status)
+        self.handle_status(termination_condition_dict, termination_condition, "Solver termination condition: %s" % termination_condition)
