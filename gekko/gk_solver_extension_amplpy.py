@@ -247,7 +247,7 @@ class AMPLConverter(GKConverter):
                 equations.append(f"({segment_equation}) * ({condition})")
 
             # add a constraint as the sum of the equations
-            self.add_constraint(" + ".join(equations), y)
+            self.add_constraint("%s = %s" % (y, " + ".join(equations)))
 
         else:
             # object not supported or implemented yet
