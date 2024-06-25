@@ -308,7 +308,7 @@ class PyomoConverter(GKConverter):
 
         else:
             # object not supported or implemented yet
-            raise Exception("The %s object could not be converted to Pyomo equivalent. It may not implemented within the module or entirely incompatible with Pyomo." % obj_type["type"])
+            raise Exception("The %s object could not be converted to Pyomo equivalent. It may not implemented within the module or entirely incompatible with Pyomo." % obj_type)
 
 
     def get_parameter_value(self, name) -> float:

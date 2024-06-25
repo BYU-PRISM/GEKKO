@@ -249,7 +249,7 @@ class AMPLConverter(GKConverter):
 
         else:
             # object not supported or implemented yet
-            raise Exception("The %s object could not be converted to AMPL equivalent. It may not implemented within the module or entirely incompatible with AMPL." % obj_type["type"])
+            raise Exception("The %s object could not be converted to AMPL equivalent. It may not implemented within the module or entirely incompatible with AMPL." % obj_type)
 
 
     def convert_equation(self, equation) -> str:
