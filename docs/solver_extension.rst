@@ -5,28 +5,33 @@
 	:maxdepth: 2
 
 Solver Extension
-=======================================
-
+================
     GEKKO includes a limited interface to access more solvers. The solver extension module
     allows for converting the GEKKO model to other mathematical optimization libraries,
     opening up access to more solvers. It currently contains two converters, allowing the
     GEKKO model to be solved through AMPLPY or Pyomo.
 
+Setup
+-----
+
     To use the solver extension module:
 
-    -    ``m.options.SOLVER_EXTENSION = <converter>``
-         set to the converter you want to use (either ``AMPLPY`` or ``PYOMO``)
+    -   Set the SOLVER_EXTENSION option to the converter you want to use (either ``AMPLPY`` or ``PYOMO``)
 
-    -    ``m.options.SOLVER = <solver>``
-         set to the solver you want to use (eg. ``ipopt``). Note that depending on your OS, 
-         the string specifying the solver may be case sensitive. 
+        - ``m.options.SOLVER_EXTENSION = <converter>``
+        
+    -   Set the SOLVER option to the solver you want to use (eg. ``ipopt``). Note that
+        the string specifying the solver may be case sensitive. 
 
-    -    The GEKKO model can be declared like normal. The results from the solve are placed 
-         back into the GEKKO model variables.
+        - ``m.options.SOLVER = <solver>``
+
+    -   The GEKKO model can be declared like normal. The results from the solve are placed 
+        back into the GEKKO model variables.
 
 
 Solver Options
----------------
+^^^^^^^^^^^^^^
+
     Solver options are specified within m.solver_options as normal::
 
         # Use options relevant to the solver you are using.
@@ -37,7 +42,8 @@ Solver Options
                             ]
 
 AMPLPY
--------
+------
+
     The solver extension module supports converting to AMPL syntax, allowing access to various 
     supported solvers by making use of the AMPLPY library. Alternatively, a .mod file (AMPL model 
     file) can be output and solved by uploading to `NEOS <https://neos-server.org>`_.
@@ -54,6 +60,9 @@ AMPLPY
     Functions relating to dynamic optimization (time, derivatives, etc) are not supported
     by AMPLPY and cannot be used in the converter.
 
+Setup
+^^^^^
+
     The solver extension module requires AMPLPY to solve within GEKKO::
 
         $ pip install amplpy
@@ -64,7 +73,8 @@ AMPLPY
 
 
 AMPLPY Example
----------------
+^^^^^^^^^^^^^^
+
     Example use of the solver extension module with the AMPLPY converter is shown below::
 
         from gekko import GEKKO
@@ -79,7 +89,8 @@ AMPLPY Example
 
 
 Additional AMPLPY converter methods
-----------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
     The AMPLPY converter provides some utility methods to the GEKKO model object:
 
 .. py:classmethod:: m.create_amplpy_object()
@@ -92,6 +103,7 @@ Additional AMPLPY converter methods
 
     For more information view the `amplpy documentation <https://amplpy.readthedocs.io/>`_.
 
+
 .. py:classmethod:: m.generate_ampl_file(filename="model.mod")
 
     Generates an ampl model (.mod) file in the current directory or as specified by ``filename``::
@@ -100,7 +112,8 @@ Additional AMPLPY converter methods
 
 
 Pyomo
-------
+-----
+
     The solver extension module supports converting to `Pyomo <https://www.pyomo.org/>`_, a python library
     for mathematical optimization. Pyomo supports a variety of solvers, including an interface with ASL 
     (AMPL Solver Library). One of the primary advantages of Pyomo is that it is entirely open source (BSD license), 
@@ -110,6 +123,9 @@ Pyomo
     constants, intermediates, constraints, and objectives. In its current state, it does not support 
     dynamic optimization (time, derivatives, etc). However, this has the potential to be
     implemented in the future through use of Pyomo DAE (Differential Algebraic Equations) module.
+
+Setup
+^^^^^
 
     The solver extension module requires Pyomo to solve within GEKKO::
 
@@ -122,7 +138,8 @@ Pyomo
 
 
 Pyomo Example
----------------
+^^^^^^^^^^^^^
+
     Example use of the solver extension module with the Pyomo converter is shown below::
 
         from gekko import GEKKO
@@ -137,7 +154,8 @@ Pyomo Example
 
 
 Additional Pyomo converter methods
-----------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
     The Pyomo converter provides some utility methods to the GEKKO model object:
 
 .. py:classmethod:: m.create_pyomo_object()
