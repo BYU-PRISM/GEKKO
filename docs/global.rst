@@ -828,13 +828,15 @@ Explanation: SOLVER selects the solver to use in an attempt to find a solution. 
 SOLVER_EXTENSION
 ------------------------
 
-Type: Integer, Input
+Type: Integer*, Input
 
 Default Value: 0
 
-Description: Solver extension module, 0=Off, 1=On
+Description: Solver extension module, 0=Off, 1=AMPLPY, 2=PYOMO
 
-Explanation: Whether to use the solver extension module to solve, allowing access to a wider range of solvers. For more information see the `solver extension <solver_extension.html>`_ module.
+Explanation: Set SOLVER_EXTENSION to 1 (AMPLPY) or 2 (PYOMO) to use the solver extension module to solve, allowing access to a wider range of solvers. For more information see the `solver extension <solver_extension.html>`_ module.
+
+\* SOLVER_EXTENSION also allows both the strings ``AMPLPY`` and ``PYOMO`` instead of the corresponding number.
 
 
 .. _solvestatus:

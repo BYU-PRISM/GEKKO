@@ -5,11 +5,17 @@ All notable changes to the GEKKO project are documented in this file.
 ### Added
 
 ### Changed
+
+## [v1.1.3] - Version 1.1.3 Stable Release, Date: 2024-06-17
 - Improve model initialization (Timer 47) with improved duplicate variable name searching for larger models
-- Update local APM executables to v1.0.3
+- Update local APM executables to v1.0.3 with `remote=False`
+  - Windows apm.exe still 32-bit, includes APOPT, BPOPT, IPOPT solvers
+  - Linux apm 64-bit, includes APOPT and BPOPT solvers
+  - MacOS apm_mac 64-bit, includes APOPT and BPOPT solvers
+  - ARM: apm_arm 32 bit, aarch64 64 bit includes BPOPT solver
+- Web service `remote=True` is 64-bit with APOPT, BPOPT, IPOPT solvers
 
 ## [v1.1.1] - Version 1.1.1 Stable Release, Date: 2024-04-11
-### Changed
 - Fix Gekko arx bug for MIMO systems
 - Fix Gekko GPR bug for multiple features
 
@@ -246,7 +252,8 @@ All notable changes to the GEKKO project are documented in this file.
 ## 0.0.1a1 - Version 0.0.1 Alpha 1, Date: 2018-01-05
 ### Initial GEKKO public release, alpha version
 
-[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.3...HEAD
+[v1.1.3]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.1...v1.1.3
 [v1.1.1]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.0...v1.1.1
 [v1.1.0]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.7...v1.1.0
 [v1.0.7]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.6...v1.0.7
