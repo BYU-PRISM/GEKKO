@@ -184,6 +184,7 @@ class PyomoConverter(GKConverter):
         self._expr_index = 0
         # find the expression
         expression = self.expression(constraint)
+        print(expression)
         # create a pyomo constraint object
         pyomo_obj = self.Constraint(expr=expression)
         self._pyomo_model.add_component("constraint" + str(self._equations_num), pyomo_obj)
@@ -286,7 +287,6 @@ class PyomoConverter(GKConverter):
         supported prebuilt objects:
         - sum
         - abs
-        - pwl
         """
         obj_type = prebuilt_object["type"]
         obj_name = prebuilt_object["name"]
@@ -306,30 +306,6 @@ class PyomoConverter(GKConverter):
         elif obj_type == "abs":  # abs function
             equation = "%s=abs(%s)" % (obj_parameters["y"], obj_parameters["x"])
             self.add_constraint(equation)
-
-        elif obj_type == "pwl":  # piece-wise linear function
-            x_values = []
-            y_values = []
-            # file path to pwl values
-            filename = "%s/%s.txt" % (self._gekko_model._path, obj_name)
-            # read x and y values from file
-            with open(filename) as file:
-                for line in file:
-                    csv_array = line.strip().split(",")
-                    x_values.append(float(csv_array[0]))
-                    y_values.append(float(csv_array[1]))
-
-            # some checking to make sure the pwl function is valid
-            if len(x_values) < 3:
-                raise Exception("The pwl function requires at least 3 data points")
-
-            x = self._pyomo_model.find_component(obj_parameters["x"])
-            y = self._pyomo_model.find_component(obj_parameters["y"])
-
-            x.domain = self.Reals
-
-            pwl_fn = self.Piecewise(y, x, pw_pts=x_values, pw_constr_type="EQ", f_rule=y_values, unbounded_domain_var=True)
-            self._pyomo_model.add_component(obj_name, pwl_fn)
 
         else:
             # object not supported or implemented yet
