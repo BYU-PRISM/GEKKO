@@ -351,10 +351,25 @@ class AMPLConverter(GKConverter):
 
 
     def solve(self) -> None:
-        # solve the ampl model
+        """
+        solve the ampl model
+        """
         self._amplpy_model.solve()
 
         # check that a valid solution was found, otherwise raise an error.
         solve_result = self._amplpy_model.get_value("solve_result")
         if solve_result != "solved":
-            raise Exception("@error: " + solve_result)
+            status_string = "Solver exit code: %s" % self._amplpy_model.get_value("solve_result_num")
+            # from amplpy documentation
+            if solve_result == "solved?":
+                print("WARNING: Optimal solution indicated, but error likely. " + status_string)
+            elif solve_result == "infeasible":
+                raise Exception("@error: Infeasible - Constraints cannot be satisfied. " + status_string)
+            elif solve_result == "unbounded":
+                print("WARNING: Unbounded - Objective can be improved without limit. " + status_string)
+            elif solve_result == "limit":
+                print("WARNING: Limit - Stopped by a limit that you set (such as on iterations). " + status_string)
+            elif solve_result == "failure":
+                raise Exception("@error: Failure - Stopped by an error condition in the solver routines. " + status_string)
+            else:
+                raise Exception("@error: Unexpected solve result - " + solve_result + " - " + status_string)
