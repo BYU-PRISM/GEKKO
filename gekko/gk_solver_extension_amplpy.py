@@ -30,9 +30,7 @@ def create_amplpy_object(self):
     """returns the AMPLPY equivalent of the GEKKO model"""
     # create a converter
     converter = AMPLConverter(self)
-    # create ampl equivalent model
-    converter.convert()
-    # return the amplpy model
+    # return the amplpy model object
     return converter.create_amplpy_object()
 
 
