@@ -82,8 +82,9 @@ AMPLPY Example
         x = m.Var()
         y = m.Var()
         m.Equations([3*x+2*y==1, x+2*y==0])
-        m.options.SOLVER_EXTENSION = "AMPLPY"   # enable solver extension and use AMPLPY converter
-        m.options.SOLVER = "bonmin"             # use BONMIN solver
+        # enable solver extension and use AMPLPY converter
+        m.options.SOLVER_EXTENSION = "AMPLPY"
+        m.options.SOLVER = "bonmin"  # use BONMIN solver
         m.solve()    # solve
         print(x.value,y.value)
 
@@ -147,8 +148,9 @@ Pyomo Example
         x = m.Var()
         y = m.Var()
         m.Equations([3*x+2*y==1, x+2*y==0])
-        m.options.SOLVER_EXTENSION = "PYOMO"   # enable solver extension and use Pyomo converter
-        m.options.SOLVER = "cbc"               # use CBC solver
+        # enable solver extension and use Pyomo converter
+        m.options.SOLVER_EXTENSION = "PYOMO"
+        m.options.SOLVER = "cbc"  # use CBC solver
         m.solve()    # solve
         print(x.value,y.value)
 
