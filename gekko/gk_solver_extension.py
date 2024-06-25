@@ -270,10 +270,15 @@ class GKConverter(ABC):
         """
         handle the status of the solver
         """
+        self._gekko_model.options.SOLVESTATUS = 1  # OK
         match status_dict.get(status, "error"):
-            case "ok": pass
-            case "warning": print("WARNING: %s" % (status_string))
-            case "error": raise Exception("@error: %s" % (status_string))
+            case "ok":
+                pass
+            case "warning": 
+                print("WARNING: %s" % (status_string))
+            case "error": 
+                self._gekko_model.options.SOLVESTATUS = 0  # Error
+                raise Exception("@error: %s" % (status_string))
     
 
     def store(self) -> None:
