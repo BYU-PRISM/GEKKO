@@ -148,7 +148,7 @@ Pyomo Example
         y = m.Var()
         m.Equations([3*x+2*y==1, x+2*y==0])
         m.options.SOLVER_EXTENSION = "PYOMO"   # enable solver extension and use Pyomo converter
-        m.options.SOLVER = "couenne"           # use COUENNE solver
+        m.options.SOLVER = "cbc"               # use CBC solver
         m.solve()    # solve
         print(x.value,y.value)
 
