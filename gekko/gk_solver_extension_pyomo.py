@@ -184,7 +184,6 @@ class PyomoConverter(GKConverter):
         self._expr_index = 0
         # find the expression
         expression = self.expression(constraint)
-        print(expression)
         # create a pyomo constraint object
         pyomo_obj = self.Constraint(expr=expression)
         self._pyomo_model.add_component("constraint" + str(self._equations_num), pyomo_obj)
