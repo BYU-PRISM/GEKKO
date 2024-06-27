@@ -3,8 +3,21 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+- `pyomo` extension and interface to `gekko`
 
 ### Changed
+- Split `gk_solver_extension.py` into 3 files: 
+    - `gk_solver_extension.py`: Holds the code for running the different converter modules, and an abstract base `GKConverter` class that the converters need to implement. This base class reduces repeated code and provides a template if this module were to be extended again in the future. 
+    - `gk_solver_extension_amplpy.py`: Holds the `amplpy` converter - changed to fit with the new abstract base converter class.
+    - `gk_solver_extension_pyomo.py`: Holds the `pyomo` converter
+- Modified the option `m.options.SOLVER_EXTENSION`:
+    - `0` / `GEKKO` (default): Solver extension off, solve GEKKO as normal
+    - `1` / `AMPL` / `AMPLPY`: Solver extension on, solve through `amplpy` - maintains compatibility with previous version
+    - `2` / `PYOMO`: Solver extension on, solve through `pyomo`
+- Update documentation 
+    - Rewrote a lot of `docs/solver_extension.rst` to include the pyomo converter
+    - Updated `docs/global.rst` - `SOLVER_EXTENSION` option in global options
+- The two converters continue to not require `amplpy` or `pyomo` to be installed, unless the solver extension module is used.
 
 ## [v1.1.3] - Version 1.1.3 Stable Release, Date: 2024-06-17
 - Improve model initialization (Timer 47) with improved duplicate variable name searching for larger models
