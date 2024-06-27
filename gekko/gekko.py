@@ -2009,7 +2009,9 @@ class GEKKO(object):
     from .gk_debug import gk_logic_tree, verify_input_options, like, name_check
     from .gk_write_files import _write_solver_options, _generate_dbs_file, _write_info, _write_csv, _build_model
     from .gk_post_solve import load_JSON, load_results
-    from .gk_solver_extension import solve_extension, create_amplpy_object, generate_ampl_file, generate_ampl_statements
+    from .gk_solver_extension import solver_extension, solve_with_converter
+    from .gk_solver_extension_amplpy import solver_extension_amplpy, create_amplpy_object, generate_ampl_file
+    from .gk_solver_extension_pyomo import solver_extension_pyomo, create_pyomo_object
 
 
     #%% Get a solution
@@ -2033,9 +2035,10 @@ class GEKKO(object):
                 options.append("%s %s" % (option, self.solver_options[option]))
             self.solver_options = options
 
-        if self.options.SOLVER_EXTENSION:
+        solver_extension_option = self.options.SOLVER_EXTENSION
+        if solver_extension_option and not (isinstance(solver_extension_option, str) and solver_extension_option.upper() == "GEKKO"):
             # solve using solver extension
-            self.solve_extension(disp=disp)
+            self.solver_extension(disp=disp)
             return
 
         # else solve normally

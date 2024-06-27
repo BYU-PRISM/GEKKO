@@ -5,23 +5,63 @@
 	:maxdepth: 2
 
 Solver Extension
-=======================================
-
+================
     GEKKO includes a limited interface to access more solvers. The solver extension module
-    converts the model to AMPL, allowing access to various supported solvers by
-    making use of the AMPLPY library. Alternatively, a .mod file (AMPL model file) can be output
-    and solved by uploading to `NEOS <https://neos-server.org>`_.
+    allows for converting the GEKKO model to other mathematical optimization libraries,
+    opening up access to more solvers. It currently contains two converters, allowing the
+    GEKKO model to be solved through AMPLPY or Pyomo.
+
+Setup
+-----
+
+    To use the solver extension module:
+
+    -   Set the SOLVER_EXTENSION option to the converter you want to use (either ``AMPLPY`` or ``PYOMO``)
+
+        - ``m.options.SOLVER_EXTENSION = <converter>``
+        
+    -   Set the SOLVER option to the solver you want to use (eg. ``ipopt``). Note that
+        the string specifying the solver may be case sensitive. 
+
+        - ``m.options.SOLVER = <solver>``
+
+    -   The GEKKO model can be declared like normal. The results from the solve are placed 
+        back into the GEKKO model variables.
+
+
+Solver Options
+^^^^^^^^^^^^^^
+
+    Solver options are specified within m.solver_options as normal::
+
+        # Use options relevant to the solver you are using.
+        m.solver_options = ['max_iter 10', \
+                            'tol 0.01', \
+                            'outlev 1' \
+                            # etc...
+                            ]
+
+AMPLPY
+------
+
+    The solver extension module supports converting to AMPL syntax, allowing access to various 
+    supported solvers by making use of the AMPLPY library. Alternatively, a .mod file (AMPL model 
+    file) can be output and solved by uploading to `NEOS <https://neos-server.org>`_.
 
     The base version of AMPL limits a model to 500 variables and 500 constraints (300 for
     nonlinear problems, and fewer for certain solvers). AMPL offers a free Community Edition
     license with no limitations on variables or constraints. Licensing and more details can
     be obtained from the `AMPL website <https://ampl.com>`_.
 
-    The converter between GEKKO model to AMPL syntax is limited and does not support
+    The converter between the GEKKO model and AMPLPY is limited and does not support
     the full range of model building functions and options available in GEKKO. However,
-    basic model building functions such as (but not limited to) variables, parameters,
-    constraints, and objectives are supported by the converter and can be used within
-    the solver extension module. A full list of supported properties is included below.
+    basic model building functions such as (but not limited to) variables, parameters, 
+    constants, intermediates, constraints, and objectives are supported by the converter.
+    Functions relating to dynamic optimization (time, derivatives, etc) are not supported
+    by AMPLPY and cannot be used in the converter.
+
+Setup
+^^^^^
 
     The solver extension module requires AMPLPY to solve within GEKKO::
 
@@ -31,40 +71,28 @@ Solver Extension
 
         $ python -m amplpy.modules install <solver>
 
-Example
---------
-    To use the solver extension module, set m.SOLVER_EXTENSION = 1 and specify the
-    solver you want to use. The GEKKO model can be declared like normal. The results
-    from the solve are placed back into the GEKKO model variables.
 
-    Example use of the solver extension module is shown below::
+AMPLPY Example
+^^^^^^^^^^^^^^
+
+    Example use of the solver extension module with the AMPLPY converter is shown below::
 
         from gekko import GEKKO
         m = GEKKO(remote=False)  # remote=True not supported
         x = m.Var()
         y = m.Var()
         m.Equations([3*x+2*y==1, x+2*y==0])
-        m.options.SOLVER_EXTENSION = 1   # enable solver extension
-        m.options.SOLVER = "BONMIN"         # use BONMIN solver
+        # enable solver extension and use AMPLPY converter
+        m.options.SOLVER_EXTENSION = "AMPLPY"
+        m.options.SOLVER = "bonmin"  # use BONMIN solver
         m.solve()    # solve
         print(x.value,y.value)
 
-Solver Options
----------------
 
-    Solver options are specified within m.solver_options::
+Additional AMPLPY converter methods
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-        # Use options relevant to the solver you are using.
-        m.solver_options = ['max_iter 10', \
-                            'tol 0.01', \
-                            'outlev 1' \
-                            # etc...
-                            ]
-
-Solver Extension Methods
--------------------------
-
-    The solver extension module provides some utility methods to the GEKKO model object:
+    The AMPLPY converter provides some utility methods to the GEKKO model object:
 
 .. py:classmethod:: m.create_amplpy_object()
 
@@ -76,6 +104,7 @@ Solver Extension Methods
 
     For more information view the `amplpy documentation <https://amplpy.readthedocs.io/>`_.
 
+
 .. py:classmethod:: m.generate_ampl_file(filename="model.mod")
 
     Generates an ampl model (.mod) file in the current directory or as specified by ``filename``::
@@ -83,60 +112,60 @@ Solver Extension Methods
         m.generate_ampl_file()
 
 
-Supported Properties
------------------------
+Pyomo
+-----
 
-    Included below is the full list of supported model methods for conversion with the solver extension module.
-    Functions not mentioned are either not implemented within the module or entirely incompatible with AMPL.
+    The solver extension module supports converting to `Pyomo <https://www.pyomo.org/>`_, a python library
+    for mathematical optimization. Pyomo supports a variety of solvers, including an interface with ASL 
+    (AMPL Solver Library). One of the primary advantages of Pyomo is that it is entirely open source (BSD license), 
+    and therefore has no constraints on model size and is free for commercial use.
 
-    - Model Building Functions
+    The converter to Pyomo supports the basic GEKKO model building functions such as variables, parameters,
+    constants, intermediates, constraints, and objectives. In its current state, it does not support 
+    dynamic optimization (time, derivatives, etc). However, this has the potential to be
+    implemented in the future through use of Pyomo DAE (Differential Algebraic Equations) module.
 
-        - ``Const``
-        - ``Param``
-        - ``Var``
-        - ``Intermediate``
-        - ``Equation``
-        - ``Equations``
-        - ``Obj``
-        - ``Minimize``
-        - ``Maximize``
-        - ``Array``
-        - ``solve``
-        - ``solver_options``
+Setup
+^^^^^
 
-    - Equation Functions
+    The solver extension module requires Pyomo to solve within GEKKO::
 
-        - ``sin``
-        - ``cos``
-        - ``tan``
-        - ``asin``
-        - ``acos``
-        - ``atan``
-        - ``sinh``
-        - ``cosh``
-        - ``tanh``
-        - ``exp``
-        - ``log``
-        - ``log10``
-        - ``sqrt``
-        - ``sigmoid``
+        $ pip install Pyomo
 
-    - Logical Functions
+    Solvers should be installed by either compiling them from source or obtaining the relevant binaries.
+    The location of the executable should then be added to PATH in order for Pyomo to recognise the solver.
 
-        - ``abs2``
-        - ``abs3``
-        - ``if2``
-        - ``if3``
-        - ``max2``
-        - ``max3``
-        - ``min2``
-        - ``min3``
-        - ``pwl``
-        - ``sos1``
-        - ``sign2``
-        - ``sign3``
+    You can check if the solver has been installed correctly by running a version check, ie. ``<solver> -v``.
 
-    - Pre-built Objects
 
-        - ``sum``
+Pyomo Example
+^^^^^^^^^^^^^
 
+    Example use of the solver extension module with the Pyomo converter is shown below::
+
+        from gekko import GEKKO
+        m = GEKKO(remote=False)  # remote=True not supported
+        x = m.Var()
+        y = m.Var()
+        m.Equations([3*x+2*y==1, x+2*y==0])
+        # enable solver extension and use Pyomo converter
+        m.options.SOLVER_EXTENSION = "PYOMO"
+        m.options.SOLVER = "cbc"  # use CBC solver
+        m.solve()    # solve
+        print(x.value,y.value)
+
+
+Additional Pyomo converter methods
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    The Pyomo converter provides some utility methods to the GEKKO model object:
+
+.. py:classmethod:: m.create_pyomo_object()
+
+    Returns an pyomo ConcreteModel object::
+
+        pyomo_model = m.create_pyomo_object()
+        # do some stuff with the pyomo ConcreteModel
+        #...
+
+    For more information view the `Pyomo documentation <https://pyomo.readthedocs.io/en/stable/>`_.
