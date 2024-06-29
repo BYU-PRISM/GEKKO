@@ -4,6 +4,7 @@ All notable changes to the GEKKO project are documented in this file.
 ## [Unreleased]
 ### Added
 - `pyomo` extension and interface to `gekko`
+- Example Jupyter notebook for Optimization Under Uncertainty with GPR Model
 
 ### Changed
 - Split `gk_solver_extension.py` into 3 files: 
