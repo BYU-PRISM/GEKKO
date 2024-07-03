@@ -3,6 +3,11 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+## [v1.2.0] - Version 1.2.0 Stable Release, Date: 2024-07-03
+### Added
 - `pyomo` extension and interface to `gekko`
 - Example Jupyter notebook for Optimization Under Uncertainty with GPR Model
 
@@ -266,7 +271,8 @@ All notable changes to the GEKKO project are documented in this file.
 ## 0.0.1a1 - Version 0.0.1 Alpha 1, Date: 2018-01-05
 ### Initial GEKKO public release, alpha version
 
-[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.3...HEAD
+[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.2.0...HEAD
+[v1.2.0]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.3...v1.2.0
 [v1.1.3]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.1...v1.1.3
 [v1.1.1]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.0...v1.1.1
 [v1.1.0]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.7...v1.1.0
