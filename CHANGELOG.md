@@ -5,6 +5,7 @@ All notable changes to the GEKKO project are documented in this file.
 ### Added
 
 ### Changed
+- Remove `match` in `gk_solver_extension.py` because this breaks compatibility with Python versions below 3.10
 
 ## [v1.2.0] - Version 1.2.0 Stable Release, Date: 2024-07-03
 ### Added
