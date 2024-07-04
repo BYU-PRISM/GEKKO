@@ -7,12 +7,18 @@ def solver_extension_amplpy(self, disp=True):
     solve the GEKKO model using AMPLPY
     """
     try:
+        import amplpy
+    except:
+        # amplpy not installed
+        raise ImportError("AMPLPY not installed. Run `$ pip install amplpy` to install AMPLPY in order to use solver extension to access more solvers.")
+    # setup modules
+    try:
         from amplpy import modules
         # load the amplpy modules
         modules.load()
     except:
-        # amplpy not installed
-        raise ImportError("AMPLPY not installed. Run `$ pip install amplpy` to install AMPLPY in order to use solver extension to access more solvers.")
+        # modules not installed
+        raise ImportError("AMPLPY modules not installed. Run `$ python -m amplpy.modules install` to install the base AMPLPY module.")
     # check if the solver is installed
     try:
         solver = self.options.SOLVER
@@ -22,7 +28,10 @@ def solver_extension_amplpy(self, disp=True):
             # solver not installed
             raise ImportError("Solver `%s` not installed. Try running `$ python -m amplpy.modules install %s`. See https://dev.ampl.com/ampl/python/modules.html" % (solver, solver))
         else:
-            raise ModuleNotFoundError("Unknown solver `%s`. Refer to the AMPLPY documentation or run `$ python -m amplpy.modules available` to view available solvers." % solver)
+            raise ModuleNotFoundError((
+                "Unknown solver `%s`. Refer to the AMPLPY documentation or run `$ python -m amplpy.modules available` to view available solvers. "
+                "If you are trying to use a solver from COIN-OR, make sure you have the `coin` package installed."
+            ) % solver)
 
     self.solve_with_converter(AMPLConverter, disp)
 

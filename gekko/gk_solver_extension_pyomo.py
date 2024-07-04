@@ -367,7 +367,10 @@ class PyomoConverter(GKConverter):
         solve the pyomo model
         """
         # solve the model
-        results = self._solver.solve(self._pyomo_model, tee=True)
+        try:
+            results = self._solver.solve(self._pyomo_model, tee=True)
+        except Exception as e:
+            raise Exception("@error: Pyomo: %s" % e) from e
 
         # reset stdout
         self.solve_complete()
