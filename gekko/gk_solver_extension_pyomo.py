@@ -1,4 +1,5 @@
 from .gk_solver_extension import GKConverter
+from typing import List
 
 
 def solver_extension_pyomo(self, disp=True):
@@ -332,7 +333,7 @@ class PyomoConverter(GKConverter):
         return self.get_variable_value(name)
     
 
-    def get_objective_values(self) -> list[int]:
+    def get_objective_values(self) -> List[int]:
         """
         get the values of the objectives
         """

@@ -1,5 +1,6 @@
 import sys
 from abc import ABC, abstractmethod
+from typing import List
 
 """
 Solver extension module for GEKKO
@@ -123,7 +124,7 @@ class GKConverter(ABC):
         pass
 
     @abstractmethod
-    def get_objective_values(self) -> list[int]:
+    def get_objective_values(self) -> List[int]:
         """
         Should return a list of the values of the objectives
         Note that gekko supports multiple objectives. The sum

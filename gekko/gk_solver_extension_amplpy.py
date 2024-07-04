@@ -1,4 +1,5 @@
 from .gk_solver_extension import GKConverter
+from typing import List
 
 
 def solver_extension_amplpy(self, disp=True):
@@ -302,7 +303,7 @@ class AMPLConverter(GKConverter):
     def get_intermediate_value(self, name) -> float:
         return self.get_variable_value(name)
     
-    def get_objective_values(self) -> list[int]:
+    def get_objective_values(self) -> List[int]:
         return [
             objective[1].value() for objective in self._amplpy_model.get_objectives()
         ]
