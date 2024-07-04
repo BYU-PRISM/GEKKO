@@ -7,16 +7,13 @@ All notable changes to the GEKKO project are documented in this file.
 ### Changed
 
 ## [v1.2.1] - Version 1.2.1 Stable Release, Date: 2024-07-03
-### Changed
-- Replace `match` in `gk_solver_extension.py` with `if` statements - breaks compatibility with Python versions below 3.10
-- Fix `get_objective_values(self)` in `gk_solver_extension_*.py` to maintain compatibility with earlier Python versions
-
-## [v1.2.0] - Version 1.2.0 Stable Release, Date: 2024-07-03
 ### Added
 - `pyomo` extension and interface to `gekko`
 - Example Jupyter notebook for Optimization Under Uncertainty with GPR Model
 
 ### Changed
+- Replace `match` in `gk_solver_extension.py` with `if` statements - breaks compatibility with Python versions below 3.10
+- Fix `get_objective_values(self)` in `gk_solver_extension_*.py` to maintain compatibility with earlier Python versions
 - Split `gk_solver_extension.py` into 3 files: 
     - `gk_solver_extension.py`: Holds the code for running the different converter modules, and an abstract base `GKConverter` class that the converters need to implement. This base class reduces repeated code and provides a template if this module were to be extended again in the future. 
     - `gk_solver_extension_amplpy.py`: Holds the `amplpy` converter - changed to fit with the new abstract base converter class.
@@ -277,8 +274,7 @@ All notable changes to the GEKKO project are documented in this file.
 ### Initial GEKKO public release, alpha version
 
 [Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.2.1...HEAD
-[v1.2.1]: https://github.com/BYU-PRISM/GEKKO/compare/v1.2.0...v1.2.1
-[v1.2.0]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.3...v1.2.0
+[v1.2.1]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.3...v1.2.1
 [v1.1.3]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.1...v1.1.3
 [v1.1.1]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.0...v1.1.1
 [v1.1.0]: https://github.com/BYU-PRISM/GEKKO/compare/v1.0.7...v1.1.0
