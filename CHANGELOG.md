@@ -5,7 +5,11 @@ All notable changes to the GEKKO project are documented in this file.
 ### Added
 
 ### Changed
-- Remove `match` in `gk_solver_extension.py` because this breaks compatibility with Python versions below 3.10
+
+## [v1.2.1] - Version 1.2.1 Stable Release, Date: 2024-07-03
+### Changed
+- Replace `match` in `gk_solver_extension.py` with `if` statements - breaks compatibility with Python versions below 3.10
+- Fix `get_objective_values(self)` in `gk_solver_extension_*.py` to maintain compatibility with earlier Python versions
 
 ## [v1.2.0] - Version 1.2.0 Stable Release, Date: 2024-07-03
 ### Added
@@ -272,7 +276,8 @@ All notable changes to the GEKKO project are documented in this file.
 ## 0.0.1a1 - Version 0.0.1 Alpha 1, Date: 2018-01-05
 ### Initial GEKKO public release, alpha version
 
-[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.2.1...HEAD
+[v1.2.1]: https://github.com/BYU-PRISM/GEKKO/compare/v1.2.0...v1.2.1
 [v1.2.0]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.3...v1.2.0
 [v1.1.3]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.1...v1.1.3
 [v1.1.1]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.0...v1.1.1
