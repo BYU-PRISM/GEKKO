@@ -1,4 +1,3 @@
-import sys
 from abc import ABC, abstractmethod
 from typing import List
 
@@ -53,8 +52,6 @@ def solve_with_converter(self, converter, disp=True):
     if self._remote:
         print("WARNING: Remote solve not supported by solver extension; defaulted to local solve.")
         self._remote = False
-    
-    c.setup_stdout_redirect(disp)
 
     # setup solver
     c.set_solver()
@@ -63,7 +60,7 @@ def solve_with_converter(self, converter, disp=True):
     c.set_options()
 
     # solve the model
-    c.solve()
+    c.solve(disp)
 
     # store the results back into the gekko model
     c.store()
@@ -108,7 +105,7 @@ class GKConverter(ABC):
         pass
 
     @abstractmethod
-    def solve(self) -> None:
+    def solve(self, disp=True) -> None:
         pass
 
     @abstractmethod
@@ -249,22 +246,6 @@ class GKConverter(ABC):
             "type": obj_type,
             "parameters": obj_parameters
         })
-    
-
-    def setup_stdout_redirect(self, disp):
-        # direct stdout to a file
-        self._output_file = open(self._gekko_model._path + "/output.txt", "w")
-        if disp:
-            sys.stdout = OutputRedirector(sys.stdout, self._output_file)
-        else:
-            # dont display output on console
-            sys.stdout = OutputRedirector(self._output_file)
-        
-    
-    def solve_complete(self):
-        # tear down stdout redirect
-        sys.stdout = sys.__stdout__
-        self._output_file.close()
 
 
     def handle_status(self, status_dict, status, status_string) -> None:
