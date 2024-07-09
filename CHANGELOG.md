@@ -3,6 +3,7 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+- Energy dispatch optimization benchmark problems with Jupyter notebook
 
 ### Changed
 
