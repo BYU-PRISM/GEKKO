@@ -1,5 +1,6 @@
-from .gk_solver_extension import GKConverter
+import os
 from typing import List
+from .gk_solver_extension import GKConverter
 
 
 def solver_extension_amplpy(self, disp=True):
@@ -208,7 +209,7 @@ class AMPLConverter(GKConverter):
             x_values = []
             y_values = []
             # file path to pwl values
-            filename = "%s/%s.txt" % (self._gekko_model._path, obj_name)
+            filename = os.path.join(self._gekko_model._path, "%s.txt" % obj_name)
             # read x and y values from file
             with open(filename) as file:
                 for line in file:
@@ -357,12 +358,47 @@ class AMPLConverter(GKConverter):
         # set solver options
         self._amplpy_model.setOption(self._gekko_model.options.SOLVER + "_options", options_str)
 
+    
+    def output_redirect(self, filename: str, disp: bool) -> None:
+        """
+        redirect solver output to a file, also writing to stdout if disp is True
+        """
+        from amplpy import OutputHandler
 
-    def solve(self) -> None:
+        class SolverOutputHandler(OutputHandler):
+            """
+            handles redirection of solver output
+            """
+            def __init__(self, filename: str, disp: bool):
+                self._output_file = open(filename, "w")
+                self._disp = disp
+            
+            def output(self, kind, message):
+                if self._disp:
+                    print(message, end="", flush=True)
+                self._output_file.write(message)
+            
+            def close(self):
+                self._output_file.close()
+        
+        # set the output handler
+        self._output_handler = SolverOutputHandler(filename, disp)
+        self._amplpy_model.set_output_handler(self._output_handler)
+
+
+    def solve(self, disp=True) -> None:
         """
         solve the ampl model
         """
+        # setup stdout redirection
+        output_file = os.path.join(self._gekko_model._path, "output.txt")
+        self.output_redirect(output_file, disp)
+
+        # solve the model
         self._amplpy_model.solve()
+
+        # close the output file
+        self._output_handler.close()
 
         solve_result_dict = {
             "solved": "ok",
