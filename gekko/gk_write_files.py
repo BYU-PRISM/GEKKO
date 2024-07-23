@@ -311,6 +311,7 @@ def _write_solver_options(self):
 
         #write each option to a line
         opt_file += '\n'.join(self.solver_options)
+        opt_file += '\n' # otherwise ignores last option
 
         #If remote solve, pass string to append to .apm file
         if self._remote is True:
