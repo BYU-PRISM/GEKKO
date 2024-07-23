@@ -1,5 +1,6 @@
-from .gk_solver_extension import GKConverter
+import os
 from typing import List
+from .gk_solver_extension import GKConverter
 
 
 def solver_extension_pyomo(self, disp=True):
@@ -362,15 +363,16 @@ class PyomoConverter(GKConverter):
             self._solver.options[data[0]] = data[1]
     
 
-    def solve(self):
+    def solve(self, disp=True) -> None:
         """
         solve the pyomo model
         """
         # solve the model
-        results = self._solver.solve(self._pyomo_model, tee=True)
-
-        # reset stdout
-        self.solve_complete()
+        output_file = os.path.join(self._gekko_model._path, "output.txt")
+        try:
+            results = self._solver.solve(self._pyomo_model, tee=disp, logfile=output_file)
+        except Exception as e:
+            raise Exception("@error: Pyomo: %s" % e) from e
         
         # check the results
         solver_status = results.solver.status

@@ -1,5 +1,6 @@
-from .gk_solver_extension import GKConverter
+import os
 from typing import List
+from .gk_solver_extension import GKConverter
 
 
 def solver_extension_amplpy(self, disp=True):
@@ -7,12 +8,18 @@ def solver_extension_amplpy(self, disp=True):
     solve the GEKKO model using AMPLPY
     """
     try:
+        import amplpy
+    except:
+        # amplpy not installed
+        raise ImportError("AMPLPY not installed. Run `$ pip install amplpy` to install AMPLPY in order to use solver extension to access more solvers.")
+    # setup modules
+    try:
         from amplpy import modules
         # load the amplpy modules
         modules.load()
     except:
-        # amplpy not installed
-        raise ImportError("AMPLPY not installed. Run `$ pip install amplpy` to install AMPLPY in order to use solver extension to access more solvers.")
+        # modules not installed
+        raise ImportError("AMPLPY modules not installed. Run `$ python -m amplpy.modules install` to install the base AMPLPY module.")
     # check if the solver is installed
     try:
         solver = self.options.SOLVER
@@ -22,7 +29,10 @@ def solver_extension_amplpy(self, disp=True):
             # solver not installed
             raise ImportError("Solver `%s` not installed. Try running `$ python -m amplpy.modules install %s`. See https://dev.ampl.com/ampl/python/modules.html" % (solver, solver))
         else:
-            raise ModuleNotFoundError("Unknown solver `%s`. Refer to the AMPLPY documentation or run `$ python -m amplpy.modules available` to view available solvers." % solver)
+            raise ModuleNotFoundError((
+                "Unknown solver `%s`. Refer to the AMPLPY documentation or run `$ python -m amplpy.modules available` to view available solvers. "
+                "If you are trying to use a solver from COIN-OR, make sure you have the `coin` package installed."
+            ) % solver)
 
     self.solve_with_converter(AMPLConverter, disp)
 
@@ -199,7 +209,7 @@ class AMPLConverter(GKConverter):
             x_values = []
             y_values = []
             # file path to pwl values
-            filename = "%s/%s.txt" % (self._gekko_model._path, obj_name)
+            filename = os.path.join(self._gekko_model._path, "%s.txt" % obj_name)
             # read x and y values from file
             with open(filename) as file:
                 for line in file:
@@ -348,12 +358,47 @@ class AMPLConverter(GKConverter):
         # set solver options
         self._amplpy_model.setOption(self._gekko_model.options.SOLVER + "_options", options_str)
 
+    
+    def output_redirect(self, filename: str, disp: bool) -> None:
+        """
+        redirect solver output to a file, also writing to stdout if disp is True
+        """
+        from amplpy import OutputHandler
 
-    def solve(self) -> None:
+        class SolverOutputHandler(OutputHandler):
+            """
+            handles redirection of solver output
+            """
+            def __init__(self, filename: str, disp: bool):
+                self._output_file = open(filename, "w")
+                self._disp = disp
+            
+            def output(self, kind, message):
+                if self._disp:
+                    print(message, end="", flush=True)
+                self._output_file.write(message)
+            
+            def close(self):
+                self._output_file.close()
+        
+        # set the output handler
+        self._output_handler = SolverOutputHandler(filename, disp)
+        self._amplpy_model.set_output_handler(self._output_handler)
+
+
+    def solve(self, disp=True) -> None:
         """
         solve the ampl model
         """
+        # setup stdout redirection
+        output_file = os.path.join(self._gekko_model._path, "output.txt")
+        self.output_redirect(output_file, disp)
+
+        # solve the model
         self._amplpy_model.solve()
+
+        # close the output file
+        self._output_handler.close()
 
         solve_result_dict = {
             "solved": "ok",
