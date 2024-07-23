@@ -6,6 +6,7 @@ All notable changes to the GEKKO project are documented in this file.
 - Energy dispatch optimization benchmark problems with Jupyter notebook
 
 ### Changed
+- Solver extension package update with more descriptive error handling
 
 ## [v1.2.1] - Version 1.2.1 Stable Release, Date: 2024-07-03
 ### Added
