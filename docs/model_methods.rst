@@ -601,7 +601,7 @@ Pre-built objects are common model constructs that facilitate data analysis, reg
 
     Create Ax=b, Ax<b, Ax>b, Ax<=b, or Ax>=b models::
     
-        Usage: x = m.axb(A,b,etype='=,<,>,<=,>=',sparse=[True,False])
+        Usage: x = m.axb(A,b,x=None,etype='=,<,>,<=,>=',sparse=[True,False])
 	
     Inputs: 
     	* A = numpy 2D array or list in dense or sparse form
