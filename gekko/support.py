@@ -125,7 +125,7 @@ class agent:
         '''
         import asyncio
         nb = agent.is_notebook()
-        uri = "wss://alphapeak.io/gekko"
+        uri = "wss://alphapeak.io:3001"
 
         full_q = self._build_context(q)
 
