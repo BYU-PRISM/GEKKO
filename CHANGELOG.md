@@ -6,6 +6,7 @@ All notable changes to the GEKKO project are documented in this file.
 - Energy dispatch optimization benchmark problems with Jupyter notebook
 
 ### Changed
+- Updated websocket connection address for GenAI Gekko support
 - Solver extension package update with more descriptive error handling
 - Fixed [Issue #163](https://github.com/BYU-PRISM/GEKKO/issues/186) that ignored the last solver option when solving locally
 
