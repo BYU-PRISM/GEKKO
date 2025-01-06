@@ -9,12 +9,17 @@ try:
     from sklearn import svm
     import sklearn.gaussian_process as gp
     from sklearn.neural_network import MLPRegressor
+    from sklearn.preprocessing import StandardScaler, MinMaxScaler
 except:
     print('Warning: most recent scikit-learn is not installed')
 try:
     import gpflow
 except:
     print('Warning: most recent gpflow is not installed')
+try:
+    import lineartree
+except:
+    print('Warning: most recent linear-tree is not installed')
 
 """
 GEKKO can solve a wide variety of optimization problems and machine learned models 
@@ -577,257 +582,241 @@ class Gekko_SVR():
     
 
 
-class Gekko_NN_SKlearn():
-    """This interface is used to take a neural network that was trained
-    with sklearn and implement it into Gekko. Model data should have been
-    scaled using the scaleForGekko_NN scaler. """
-    
-    def __init__(self,model,minMaxarray,m):
+#only for sklearn
+class GekkoDense_sk():
+    def __init__(self,layer,m=None):
+        n_in,n_out,W,b,activation = layer
+        self.weights = W
+        self.bias = b
+        if m != None:
+            self.hookGekko(m)
+            
+        self.af = activation
+        
+    #hooks to gekko
+    def hookGekko(self,m):
         self.m = m
         
+    def activation(self,x,skipAct=False):
+        af = self.af
+        if skipAct:
+            return x
+        if af == 'relu':                                               # If activation is relu
+            return self.m.max3(0,x)                                    # Use GEKKO to return relu function
+                                                   # Return the input
+        elif af == 'sigmoid':                                            # If activation is sigmoid
+            return 1/(1 + self.m.exp(-x))                              # Use GEKKO to return sigmoid function
+        elif af == 'tanh':                                               # If activation is tanh
+            return self.m.tanh(x)                                      # Use GEKKO to return tanh function
+        elif af == 'softsign':                                           # If activation function is softsign
+            return x / (self.m.abs2(x) + 1)                            # Use GEKKO to return softsign
+        elif af == 'exponential':                                        # If activation is exponential
+            return self.m.exp(x)                                       # Use GEKKO to return exponential
+        elif af == 'softplus':                                           # If activation is softplus
+            return self.m.log(self.m.exp(x) + 1)                       # Use GEKKO to return softplus function
+        elif af == 'elu':                                                # If activation function is elu
+            alpha = 1.0                                                # will need to be changed to match whatever input is
+            return self.m.if3(x,alpha * (self.m.exp(x) - 1),x)         # Use GEKKO to return elu function
+        elif af == 'selu':                                               # If activation is selu
+            alpha = 1.67326324                                         # Set alpha parameter
+            scale = 1.05070098                                         # Set scale parameter
+            return self.m.if3(x,scale*alpha*(self.m.exp(x)-1),scale*x)
+        else:
+            return x
+        
+    def forward(self,x,skipAct=False):
+        n = self.weights.shape[1]
+        return [self.m.Intermediate(self.activation(self.m.sum(self.weights[:,i] * x) + self.bias[i],skipAct)) for i in range(n)]
+        #lNext = []
+        #for i in range(n):
+        #    lNext.append(self.m.Intermediate(self.activation(self.m.sum(self.weights[:,i] * x) + self.bias[i])))
+        return lNext
+    def __call__(self,x,skipAct=False):
+        return self.forward(x,skipAct)
+
+
+
+#decompose the model
+class Gekko_NN_Sklearn():
+    def __init__(self,model,m):
+        self.m = m
+
         self.W = model.coefs_
         self.b = model.intercepts_
         self.hidden_layer_sizes = model.hidden_layer_sizes
         self.n_in = model.n_features_in_
         self.n_out = model.n_outputs_
         self.activation = model.activation
-        
-        self.scaleMin = minMaxarray[0]
-        self.scaleMax = minMaxarray[1]
-        self.scaleMinLabel = minMaxarray[2]
-        self.scaleMaxLabel = minMaxarray[3]
-        
-        
-        
-    def predict(self,a,return_std=False):
-        
-        layer_sizes = self.hidden_layer_sizes.copy()
-        layer_sizes.insert(0,self.n_in)
-        layer_sizes.append(self.n_out)
-        
-        # Internal Functions
-        def activation(x):
-            
-            if self.activation == 'relu':
-                return self.m.max2(0,x)
-            
-            if self.activation == 'identity':
-                return x
-            
-            if self.activation == 'logistic':
-                return 1/(1 + self.m.exp(-x))
-            
-            if self.activation == 'tanh':
-                return self.m.tanh(x)
-        
-        def feedforward(a,n,W,b):
-            
-            """Return the output of the next layer if ``a`` is an input layer of layer 'n'
-            with weights 'W' and bias 'b'."""
-            aNext = []
-            try:
-                a_len = layer_sizes[n+1]
-            except:
-                a_len = 1
-            for i in range(a_len):
-                aNext.append(self.m.Intermediate(activation(self.m.sum(W[n].T[i] * a)+b[n][i])))
-            return aNext
-        
-        def scale_x(x):
-            scaled = []
-            for i in range(len(x)):
-                scaled.append((x[i] - self.scaleMin[i])/(self.scaleMax[i] - self.scaleMin[i]))
-            return scaled
-        def unscale_y(y):
-            unscaled = []
-            try:
-                for i in range(len(y)):
-                    unscaled.append(y[i]*(self.scaleMaxLabel[i] - self.scaleMinLabel[i]) + self.scaleMinLabel[i])
-            except:
-                unscaled = y*(self.scaleMaxLabel[0] - self.scaleMinLabel[0]) + self.scaleMinLabel[0]
-            return unscaled
 
-        ### End internal functions ###
-        a_scaled = scale_x(a)
-        aNext = []
-        for n in range(len(layer_sizes) - 1):
-            if len(aNext)==0:
-                aNext = feedforward(a_scaled,n,self.W,self.b)
-            else:
-                aNext = feedforward(aNext,n,self.W,self.b)
-        if return_std:
-            U_pred = 0
-            return self.m.Intermediate(unscale_y(aNext[0])),U_pred # uncertainty isn't caluclated yet
-        return self.m.Intermediate(unscale_y(aNext[0])) 
+        self.layers = []
+        if len(model.hidden_layer_sizes) == 0:
+            layer = [self.n_in,self.n_out,self.W[0],self.b[0],self.activation]
+            self.layers.append(GekkoDense_sk(layer,m))
+        else:
+            layer = [self.n_in,self.hidden_layer_sizes[0],self.W[0],self.b[0],self.activation]
+            self.layers.append(GekkoDense_sk(layer,m))
+            for i in range(len(self.hidden_layer_sizes)-1):
+                layer = [self.hidden_layer_sizes[i],self.hidden_layer_sizes[i+1],self.W[i+1],self.b[i+1],self.activation]
+                self.layers.append(GekkoDense_sk(layer,m))
+            layer = [self.hidden_layer_sizes[-1],self.n_out,self.W[-1],self.b[-1],self.activation]
+            self.layers.append(GekkoDense_sk(layer,m))
     
-    def scaledData(self):
-        """Returns scaled data"""
-        
-        return self.newdataScaled
-    
-    def hidden(self):
-        return self.hidden_layer_sizes
-    
-    def minMaxValues(self):
-        """Returns the min and max values of the features and labels
-        OUTPUT: [[minimum feature values], [maximum feature values], 
-                 [minimum label values],   [maximum label values]]"""
-        
-        return self.scaleMin,self.scaleMax,self.scaleMinLabel,self.scaleMaxLabel
-    
-    def scale_y(self,y):
-        scaled = []
-        try:
-            for i in range(len(y)):
-                scaled.append((y[i] - self.scaleMinLabel[i])/(self.scaleMaxLabel[i] - self.scaleMinLabel[i]))
-        except:
-            scaled = (y - self.scaleMinLabel[0])/(self.scaleMaxLabel[0] - self.scaleMinLabel[0])
-        return scaled
-    
-    def scale_x(self,x):
-        scaled = []
-        for i in range(len(x)):
-            scaled.append((x[i] - self.scaleMin[i])/(self.scaleMax[i] - self.scaleMin[i]))
-        return scaled
+    def forward(self,x):
+        l = x
+        skipAct = False
+        for i in range(len(self.layers)):
+            if i==len(self.layers) - 1:
+                skipAct = True
+            l = self.layers[i](l,skipAct)
+        return l
 
-    def unscale_y(self,y):
-        unscaled = []
-        try:
-            for i in range(len(y)):
-                unscaled.append(y[i]*(self.scaleMaxLabel[i] - self.scaleMinLabel[i]) + self.scaleMinLabel[i])
-        except:
-            unscaled = y*(self.scaleMaxLabel[0] - self.scaleMinLabel[0]) + self.scaleMinLabel[0]
-        return unscaled
-
-    def unscale_x(self,x):
-        unscaled = []
-        for i in range(len(x)):
-            unscaled.append(x[i]*(self.scaleMax[i] - self.scaleMin[i]) + self.scaleMin[i])
-        return unscaled
-        
-        
-class Gekko_NN_TF():
-    """This interface is used to take a neural network that was trained
-    in tensorflow and implement it into Gekko. Model data should have been
-    scaled using the scaleForGekko_NN scaler. """
+    def predict(self,x):
+        return self.forward(x)    
     
-    def __init__(self,model,minMaxarray,m,n_output = 2,activationFxn = 'relu'):
+    def __call__(self,x):
+        return self.forward(x)
+    
+
+#only for tensorflow
+class GekkoDense_tf():
+    def __init__(self,layer,m=None):
+        self.weights = layer.weights[0].numpy()
+        self.bias = layer.weights[1].numpy()
+        if m != None:
+            self.hookGekko(m)
+            
+        self.af = layer.get_config()['activation']
+        
+    #hooks to gekko
+    def hookGekko(self,m):
         self.m = m
         
-        self.W = []
-        self.b = []
-        self.layer_sizes = []
-        for i in range(len(model.layers)):
-            self.W.append(model.layers[i].get_weights()[0])
-            self.b.append(model.layers[i].get_weights()[1])
-            self.layer_sizes.append(len(model.layers[i].get_weights()[0]))
-        self.layer_sizes.append(n_output) # may need to change this to be an input into function
-        self.activation = activationFxn
-        
-        
-        self.scaleMin = minMaxarray[0]
-        self.scaleMax = minMaxarray[1]
-        self.scaleMinLabel = minMaxarray[2]
-        self.scaleMaxLabel = minMaxarray[3]
-
-    def predict(self,a,return_std=False):
-        
-        #fix xi, allow it to work even if its a scalar
-        #xi = np.array(xi, ndmin=1, copy=False)
-        
-        def activation(x):
-            if self.activation == 'relu':
-                return self.m.max2(0,x)
-            
-            if self.activation == None:
-                return x
-            
-            if self.activation == 'sigmoid':
-                return 1/(1 + self.m.exp(-x))
-            
-            if self.activation == 'tanh':
-                return self.m.tanh(x)
-            
-            if self.activation == 'softsign':
-                return x / (self.m.abs2(x) + 1)
-            
-            if self.activation == 'exponential':
-                return self.m.exp(x)
-        
-            if self.activation == 'softplus':
-                return self.m.log(self.m.exp(x) + 1)
-            
-            if self.activation == 'elu':
-                alpha = 1.0 # will need to be changed to match whatever input is
-                return self.m.if3(x,alpha * (self.m.exp(x) - 1),x)
-            
-            if self.activation == 'selu':
-                alpha = 1.67326324
-                scale = 1.05070098
-                return self.m.if3(x,scale*alpha*(self.m.exp(x)-1),scale*x)
-            
-            ### Below functions do not yet work correctly
-            
-            if self.activation == 'softmax':
-                return 'ERROR No matching GEKKO fxn' #self.m.exp(x) / self.m.exp(x) # no gekko funciton to match
-            
-            ###
-
-        def feedforward(a,n,W,b):
-            """Return the output of the next layer if ``a`` is an input layer of layer 'n'
-            with weights 'W' and bias 'b'."""
-            aNext = []
-            a_len = self.layer_sizes[n+1]
-            for i in range(a_len):
-                aNext.append(self.m.Intermediate(activation(self.m.sum(W[n].T[i] * a)+b[n][i])))
-            return aNext
-        
-        def feedforward_sigma(a,n,W,b):
-            """Return the output of the next layer if ``a`` is an input layer of layer 'n'
-            with weights 'W' and bias 'b'."""
-            aNext = []
-            a_len = self.layer_sizes[n+1]
-            for i in range(a_len):
-                if i == a_len - 1:
-                    aNext.append(self.m.Intermediate(sum(W[n].T[i] * a)+b[n][i]))
-                else:
-                    aNext.append(self.m.Intermediate(activation(sum(W[n].T[i] * a)+b[n][i])))
-            return aNext
-        
-        def scale_x(x):
-            scaled = []
-            for i in range(len(x)):
-                scaled.append((x[i] - self.scaleMin[i])/(self.scaleMax[i] - self.scaleMin[i]))
-            return scaled
-        
-        def unscale_y(y):
-            unscaled = []
-            try:
-                for i in range(len(y)):
-                    unscaled.append(y[i]*(self.scaleMaxLabel[i] - self.scaleMinLabel[i]) + self.scaleMinLabel[i])
-            except:
-                unscaled = y*(self.scaleMaxLabel[0] - self.scaleMinLabel[0]) + self.scaleMinLabel[0]
-            return unscaled
-
-        ### End internal functions ###
-        a_scaled = scale_x(a)
-        aNext = []
-        for n in range(len(self.layer_sizes) - 1):
-            if len(aNext)==0:
-                aNext = feedforward(a_scaled,n,self.W,self.b)
-            else:
-                aNext = feedforward(aNext,n,self.W,self.b)
-        if return_std:
-            aNextSigma = []
-            for n in range(len(self.layer_sizes) - 1):
-                if len(aNextSigma)==0:
-                    aNextSigma = feedforward(a_scaled,n,self.W,self.b)
-                else:
-                    aNextSigma = feedforward_sigma(aNextSigma,n,self.W,self.b)
-            
-            return self.m.Intermediate(unscale_y(aNext[0])), self.m.Intermediate(self.m.exp(aNextSigma[1]))
+    def activation(self,x):
+        af = self.af
+        if af == 'relu':                                               # If activation is relu
+            return self.m.max2(0,x)                                    # Use GEKKO to return relu function
+                                                   # Return the input
+        elif af == 'sigmoid':                                            # If activation is sigmoid
+            return 1/(1 + self.m.exp(-x))                              # Use GEKKO to return sigmoid function
+        elif af == 'tanh':                                               # If activation is tanh
+            return self.m.tanh(x)                                      # Use GEKKO to return tanh function
+        elif af == 'softsign':                                           # If activation function is softsign
+            return x / (self.m.abs2(x) + 1)                            # Use GEKKO to return softsign
+        elif af == 'exponential':                                        # If activation is exponential
+            return self.m.exp(x)                                       # Use GEKKO to return exponential
+        elif af == 'softplus':                                           # If activation is softplus
+            return self.m.log(self.m.exp(x) + 1)                       # Use GEKKO to return softplus function
+        elif af == 'elu':                                                # If activation function is elu
+            alpha = 1.0                                                # will need to be changed to match whatever input is
+            return self.m.if3(x,alpha * (self.m.exp(x) - 1),x)         # Use GEKKO to return elu function
+        elif af == 'selu':                                               # If activation is selu
+            alpha = 1.67326324                                         # Set alpha parameter
+            scale = 1.05070098                                         # Set scale parameter
+            return self.m.if3(x,scale*alpha*(self.m.exp(x)-1),scale*x)
         else:
-            return self.m.Intermediate(unscale_y(aNext[0])) 
+            return x
+        
+    def forward(self,x):
+        n = self.weights.shape[1]
+        return [self.m.Intermediate(self.activation(self.m.sum(self.weights[:,i] * x) + self.bias[i])) for i in range(n)]
+        #lNext = []
+        #for i in range(n):
+        #    lNext.append(self.m.Intermediate(self.activation(self.m.sum(self.weights[:,i] * x) + self.bias[i])))
+        return lNext
+    def __call__(self,x):
+        return self.forward(x)
+
+
+
+#decompose the model
+class Gekko_NN_TF():
+    def __init__(self,model,m):
+        self.m = m
+        self.layers = []
+        for i in range(len(model.layers)):
+            layer = model.layers[i]
+            if 'dropout' not in layer.name and 'input' not in layer.name:
+                self.layers.append(GekkoDense_tf(layer,m))
+    
+    def forward(self,x):
+        l = x
+        for i in range(len(self.layers)):
+            l = self.layers[i](l)
+        return l
+            
+    def __call__(self,x):
+        return self.forward(x)
+    
+    def predict(self,x,return_std=False):
+        return self.forward(x)[0]
+    
+
+
+
+class Gekko_Scaled_Model():
+    """This Interface wraps min-max or standard sk-learn scalers (for the input or output) around any of the Gekko model interfaces.
+        currently, StandardScaler and MinMaxScaler are supported."""
+    def __init__(self,gmodel,scaler_x=None,scaler_y=None):
+        self.gmodel = gmodel
+        self.s1 = scaler_x
+        self.s2 = scaler_y
+        
+    def predict(self,X,return_std=False):
+        X = np.array([X]).flatten()
+        #scale X
+        if self.s1 is not None:
+            if type(self.s1) == StandardScaler:
+
+                mean = np.array([self.s1.mean_]).flatten()
+                scale = np.array([self.s1.scale_]).flatten()
+
+                Xs = [m.Intermediate((X[k] - mean[k]) / scale[k]) for k in range(len(X))]
+            elif type(self.s1) == MinMaxScaler:
+                dmax = self.s1.data_max_
+                dmin = self.s1.data_min_
+                drange = dmax-dmin
+
+                Xs = [m.Intermediate((X[k] - dmin[k])/drange[k]) for k in range(len(X))]
+
+                
+        #Make prediction
+        if return_std:
+            pred,std = self.gmodel.predict(Xs,return_std)
+            #reshape pred if needed
+            pred = np.array([pred]).flatten()
+            std = np.array([std]).flatten()
+        else:
+            pred = self.gmodel.predict(Xs)
+            #reshape pred if needed
+            pred = np.array([pred]).flatten()
+            std = np.zeros(len(X))
+        
+        
+
+        #Unscale y
+        if self.s2 is not None:
+            if type(self.s2) == StandardScaler:
+                mean = np.array(self.s2.mean_).flatten()
+                scale = np.array(self.s2.scale_).flatten()
+
+                pred = [m.Intermediate(pred[k]*scale[k] + mean[k]) for k in range(len(pred))]
+                std = [m.Intermediate(std[k]*scale[k]) for k in range(len(std))]
+
+            elif type(self.s2) == MinMaxScaler:
+                dmax = self.s2.data_max_
+                dmin = self.s2.data_min_
+                drange = dmax-dmin
+                pred = [m.Intermediate((pred[k] * drange[k]) + dmin[k]) for k in range(len(pred))]
+                std = [m.Intermediate(std[k]*drange[k]) for k in range(len(std))]
+                
+        if len(pred) == 1:
+            pred = pred[0]
+            std = std[0]
+        
+        if return_std:
+            return pred,std
+        else:
+            return pred
         
 
 #very simple linear regression
@@ -848,31 +837,203 @@ class Gekko_LinearRegression:
             return self.m.Intermediate(pred + self.intercept),self.m.Intermediate(0)
         else:
             return self.m.Intermediate(pred + self.intercept)
+        
+#sklearn decision tree
+class Gekko_DecisionTree():
+
+    #parse through tree structure
+    def _print_leaves(self,tree,i,ret,cond0=[]):
+        is_split = tree.children_left[i] != tree.children_right[i]
+
+        if is_split:
+            cond1 = [tree.feature[i],tree.threshold[i],0]
+            cond2 = [tree.feature[i],tree.threshold[i],1]
+            cond01 = cond0.copy()
+            cond01.append(cond1)
+            cond02 = cond0.copy()
+            cond02.append(cond2)
+
+            self._print_leaves(tree,tree.children_left[i],ret,cond01)
+            self._print_leaves(tree,tree.children_right[i],ret,cond02)
+        else:
+            cond0.append(tree.value[i])
+            cond0.append(tree.n_node_samples[i] / self.n) #probability, useful for analysis/UQ
+            ret[i] = cond0
+
+    #Comparison operator
+    def comp(self,val,bool):
+        eps = self.eps
+        if self.ifo == 3: #maybe add sigmoid function as an option in the future?
+            ifo = self.m.if3
+        else:
+            ifo = self.m.if2
+        if bool[2]:
+            return ifo(bool[1]-val[bool[0]]+eps,1,0)
+        else:
+            return ifo(bool[1]-val[bool[0]]-eps,0,1)
+
+    #Initialization 
+    def __init__(self,model,m,ifo=2,eps=1e-3):
+        self.model = model
+        self.ifo = ifo
+        self.eps = eps
+
+        self.n = model.tree_.n_node_samples[0]
+
+        ret = {}
+        self._print_leaves(self.model.tree_,0,ret)
+        self.ret = ret
+        self.m = m
+    
+    #Prediction function
+    def predict(self,input,return_proba=False,return_conds=False):
+        
+        input = np.array([input]).flatten()
+        pred = 0
+        proba = 0
+        val = 0
+        conds = []
+        for i in self.ret:
+            cond = None
+            for j,c in enumerate(self.ret[i]):
+                if j == len(self.ret[i])-2:
+                    val = c
+                    proba_ = self.ret[i][j+1]
+                    break
+                tc = self.comp(input,c)
+                if cond is None:
+                    cond = tc
+                else:
+                    cond *= tc
+            conds.append(self.m.Intermediate(cond))
+            pred += cond * val.flatten()[0] #only 1D output for now
+            if return_proba:
+                proba += cond * proba_
+
+        if return_conds:
+            return self.m.Intermediate(pred),conds
+        if return_proba:
+            return self.m.Intermediate(pred),self.m.Intermediate(proba)
+
+        return self.m.Intermediate(pred)
+
+
+class Gekko_RandomForest():
+    def __init__(self,model,m,ifo=2,eps=1e-3):
+        self.model = model
+        self.m = m
+        self.ifo = ifo
+        self.eps=eps
+
+        
+    def predict(self,input):
+        n = len(self.model.estimators_)
+        pred = 0
+        for mod in self.model.estimators_:
+            gm = Gekko_DecisionTree(mod,self.m,self.ifo,self.eps)
+            pred_ = gm.predict(input,False)
+            pred += pred_ / n
+
+        return m.Intermediate(pred)
+    
+#Same code as above, but packaged into a class and gekko compatible language.
+class Gekko_GradientBooster():
+    def __init__(self,model,m,ifo=2,eps=1e-3):
+
+        self.F0 = model.init_.constant_[0][0]
+        self.v = model.learning_rate
+        self.h = model.estimators_
+        self.m = m
+        self.ifo = ifo
+        self.eps=eps
+
+        
+    def predict(self,input):
+        pred = self.F0
+        for mod in self.h:
+            gm = Gekko_DecisionTree(mod[0],self.m,self.ifo,self.eps)
+            pred_ = gm.predict(input,False)
+            pred += self.v*pred_
+
+        return m.Intermediate(pred)
+    
+
+class Gekko_LinearTree():
+    def _print_leaves(self,node,i,ret,cond0=[]):
+        if 'children' in node:
+            cond1 = [node['col'],node['th'],0]
+            cond2 = [node['col'],node['th'],1]
+            cond01 = cond0.copy()
+            cond01.append(cond1)
+            cond02 = cond0.copy()
+            cond02.append(cond2)
+
+            self._print_leaves(self.summary[node['children'][0]],node['children'][0],ret,cond01)
+            self._print_leaves(self.summary[node['children'][1]],node['children'][1],ret,cond02)
+        else:
+            ret[i] = cond0
+
+    #a small error term is added to prevent when the condition is 0.0
+    #use if2 or if3???
+    def comp(self,val,bool):
+        eps = self.eps
+        if self.ifo == 3: #maybe add sigmoid function as an option in the future?
+            ifo = m.if3
+        else:
+            ifo = m.if2
+        if bool[2]:
+            return ifo(bool[1]-val[bool[0]]+eps,1,0)
+        else:
+            return ifo(bool[1]-val[bool[0]]-eps,0,1)
+
+    def __init__(self,model,m,ifo=2,eps=0):
+        self.eps = eps
+        self.model = model
+        self.m = m
+        self.ifo = ifo
+        self.summary = model.summary()
+        ret = {}
+        self._print_leaves(self.summary[0],0,ret)
+        self.ret = ret
+
+
+    def predict(self,input,return_conds=False):
+        pred = 0
+        conds = []
+        for i in self.ret:
+            cond = None
+            for c in self.ret[i]:
+                tc = self.comp(input,c)
+                if cond is None:
+                    cond = tc
+                else:
+                    cond *= tc
+            conds.append(m.Intermediate(cond))
+            pred += cond * (np.dot(self.summary[i]['models'].coef_,input) + self.summary[i]['models'].intercept_)
+        if return_conds:
+            return m.Intermediate(pred),conds
+        else:
+            return m.Intermediate(pred)
+
+
+
 
 class Delta():
-    def __init__(self,model,Xtrain,RMSE,m):
+    def __init__(self,model,m,X,s):
         self.m = m
-        self.RMSE = RMSE
-        self.Xtrain = Xtrain
-        if(type(model) == type(gp.GaussianProcessRegressor())):
-            self.model = Gekko_GPR(model,self.m)
-        elif(type(model) == type(svm.SVR())):
-            self.model = Gekko_SVR(model,self.m)
-        elif(len(model) != 1):
-            if(type(model[0] == type(MLPRegressor()))):
-                self.model = Gekko_NN_SKlearn(model[0],model[1],self.m)
-        else:
-            self.model = Gekko_LinearRegression(model,self.m)
+        self.s = s
+        self.X = X
+        self.model = model
                 
-    def predict(self,xi,return_std=False,conf=0.9):
+    def predict(self,xi,return_std=False,conf=0.9,PI=0):
         decision = self.model.predict(xi)
         
         if return_std:
-            n = len(self.Xtrain)
-            G = np.linalg.inv(np.dot(self.Xtrain.T,self.Xtrain))
+            n = len(self.X)
+            G = np.linalg.inv(np.dot(self.X.T,self.X))
             p = len(G)
             t = ss.t.isf(q=(1-conf)/2,df=n-p)
-            u = self.RMSE*t*self.m.sqrt(1 + np.dot(np.dot(xi,G),xi))
+            u = self.s*t*self.m.sqrt(PI + np.dot(np.dot(xi,G),xi)) #if PI is 0, return a confidence interval, otherwise a prediction interval
             return self.m.Intermediate(decision),self.m.Intermediate(u)
         else:
             return self.m.Intermediate(decision)
@@ -880,17 +1041,7 @@ class Delta():
 class Bootstrap():
     def __init__(self,models,m):
         self.m = m
-        self.models = []
-        for model in models:
-            if(type(model) == type(gp.GaussianProcessRegressor())):
-                self.models.append(Gekko_GPR(model,self.m))
-            elif(type(model) == type(svm.SVR())):
-                self.models.append(Gekko_SVR(model,self.m))
-            elif(len(model) != 1):
-                if(type(model[0] == type(MLPRegressor()))):
-                   self.models.append(Gekko_NN_SKlearn(models[model].model[0],models[model].model[1],self.m))
-            else:
-                self.models.append(Gekko_LinearRegression(model,self.m))
+        self.models = models
                 
     def predict(self,xi,return_std=False):
         decision = self.m.Intermediate(0)
@@ -910,17 +1061,11 @@ class Bootstrap():
             return self.m.Intermediate(decision)
         
 class Conformist():
-    def __init__(self,modelinfo,m):
+    def __init__(self,model,m,u):
         self.m = m
-        model,u = modelinfo
+        self.model = model
         self.u = u
-        if(type(model) == type(gp.GaussianProcessRegressor())):
-            self.model = Gekko_GPR(model,self.m)
-        elif(type(model) == type(svm.SVR())):
-            self.model = Gekko_SVR(model,self.m)
-        elif(len(model) != 1):
-            if(type(model[0] == type(MLPRegressor()))):
-                self.model = Gekko_NN_SKlearn(model[0],model[1],self.m)
+
                 
     def predict(self,xi,return_std=False):
         decision = self.model.predict(xi)
@@ -930,104 +1075,5 @@ class Conformist():
         else:
             return self.m.Intermediate(decision)
               
-class ScalerWrapper():
-    def __init__(self,model,Scaler,m):
-        self.m = m
-        self.Scaler = Scaler
-        if(type(model) == type(gp.GaussianProcessRegressor())):
-            self.model = Gekko_GPR(model,self.m)
-        elif(type(model) == type(svm.SVR())):
-            self.model = Gekko_SVR(model,self.m)
-        elif(len(model) != 1):
-            if(type(model[0] == type(MLPRegressor()))):
-                self.model = Gekko_NN_SKlearn(model[0],model[1],self.m)
-                
-    def predict(self,xi,return_std=False):
-        xi = self.Scaler.scale_x(xi)
-        
-        if return_std:
-            decision,u = self.model.predict(xi,return_std=True)
-            u = self.Scaler.unscale_y(decision + u)
-            decision = self.Scaler.unscale_y(decision)
-            u -= decision
-            return self.m.Intermediate(decision),self.m.Intermediate(u)
-        else:
-            decision = self.model.predict(xi)
-            decision = self.Scaler.unscale_y(decision)
-            return self.m.Intermediate(decision)
-        
-        
-class CustomMinMaxGekkoScaler():
-    """This interface takes data and scales it using a minMax scalar in a
-    manner that allows a neural network to scale and unscale the data 
-    inside a GEKKO interface."""
-    
-    def __init__(self,newdata,features,label):
-        try:
-            newdata.reset_index(inplace = True)
-        except:
-            None
-        self.scaleMin = []
-        self.scaleMax = []
-        self.scaleMinLabel = []
-        self.scaleMaxLabel = []
-        self.newdataScaled = newdata.copy()
-        
-        for i in range(len(features)): # somewhere I need to define features and label
-            holdArray = newdata[features[i]]
-            self.scaleMax.append(max(holdArray))
-            self.scaleMin.append(min(holdArray))
-            for j in range(len(newdata[features[i]])):
-                self.newdataScaled[features[i]][j] = (self.newdataScaled[features[i]][j] - 
-                                                 self.scaleMin[i])/(self.scaleMax[i] - self.scaleMin[i])
 
-        for i in range(len(label)):
-            holdArray = newdata[label[i]]
-            self.scaleMaxLabel.append(max(holdArray))
-            self.scaleMinLabel.append(min(holdArray))
-            for j in range(len(newdata[label[i]])):
-                self.newdataScaled[label[i]][j] = (self.newdataScaled[label[i]][j] - 
-                                                 self.scaleMinLabel[i])/(self.scaleMaxLabel[i] - self.scaleMinLabel[i])
-
-        
-    def scaledData(self):
-        """Returns scaled data"""
-        
-        return self.newdataScaled
-    
-    def minMaxValues(self):
-        """Returns the min and max values of the features and labels
-        OUTPUT: [[minimum feature values], [maximum feature values], 
-                 [minimum label values],   [maximum label values]]"""
-        
-        return self.scaleMin,self.scaleMax,self.scaleMinLabel,self.scaleMaxLabel
-    
-    def scale_y(self,y):
-        scaled = []
-        try:
-            for i in range(len(y)):
-                scaled.append((y[i] - self.scaleMinLabel[i])/(self.scaleMaxLabel[i] - self.scaleMinLabel[i]))
-        except:
-            scaled = (y - self.scaleMinLabel[0])/(self.scaleMaxLabel[0] - self.scaleMinLabel[0])
-        return scaled
-    
-    def scale_x(self,x):
-        scaled = []
-        for i in range(len(x)):
-            scaled.append((x[i] - self.scaleMin[i])/(self.scaleMax[i] - self.scaleMin[i]))
-        return scaled
-
-    def unscale_y(self,y):
-        unscaled = []
-        try:
-            for i in range(len(y)):
-                unscaled.append(y[i]*(self.scaleMaxLabel[i] - self.scaleMinLabel[i]) + self.scaleMinLabel[i])
-        except:
-            unscaled = y*(self.scaleMaxLabel[0] - self.scaleMinLabel[0]) + self.scaleMinLabel[0]
-        return unscaled
-
-    def unscale_x(self,x):
-        unscaled = []
-        for i in range(len(x)):
-            unscaled.append(x[i]*(self.scaleMax[i] - self.scaleMin[i]) + self.scaleMin[i])
-        return unscaled
+# %%
