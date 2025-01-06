@@ -66,41 +66,87 @@ Machine Learning Interface models
 
    `Gekko_Model`: Gekko model (created by `GEKKO()`) that is appended with the new NN model.
 
-.. py:class:: Model = ML.Gekko_LinearRegression(model,Xtrain,RMSE,Gekko_Model)
+.. py:class:: Model = ML.Gekko_LinearRegression(model,Gekko_Model)
 
    Import a trained linear regression model from sklearn.
-   This model calculates uncertainty through the delta method for
-   regression methods.
 
    `model`: trained model from sklearn as a
    Ridge Regression or Linear Regression model.
 
-   `Xtrain`: input training set, needed to calculate
-   the prediction interval.
-
-   `RMSE`: root mean squared error calculated during
-   training for the entire data set. This is used to calculate the
-   prediction interval.
-
    `Gekko_Model`: Gekko model (created by `GEKKO()`) that is appended with the new Linear Regression model.
 
-.. py:class:: Model = ML.Gekko_NN_TF(model,minMaxArray,Gekko_Model,n_output=2,activationFxn)
+.. py:class:: Model = ML.Gekko_NN_TF(model,Gekko_Model)
 
    Import a Tensorflow and Keras Neural Network into Gekko.
-   A specific loss function must be used during training to calculate
+   A customized loss function must be used during training to calculate
    uncertainty.
 
    `model`: trained model from the TensorFlow.
 
-   `minMaxArray`: min-max array for scaling created by the
-   custom min max scaler. This is necessary as neural networks often use
-   a scaled dataset.
+   `Gekko_Model`: Gekko model solver object (created by `GEKKO()`).
 
-   `Gekko_Model`: Gekko model (created by `GEKKO()`) that is appended with the new Neural Network model.
+.. py:class:: Model = ML.Gekko_DecisionTree(model,gekkoModel,ifo=2,eps=1e-3)
 
-   `output`: output dimensions; 1=prediction only, 2=predictions and uncertainty through a loss function.
+   Import a sklearn decision tree model (sklearn.tree.DecisionTreeRegressor) into Gekko. Tree-based Gekko models use if2 and if3 functions,
+   defaulting the solver to APOPT. These functions may be inaccurate, so it may be good to test different 'ifo'/'eps' parameters to achieve desired accuracy.
+   When predicting with tree models, pass in the argument 'return_proba' to return the probability of the selected class, or
+   'return_conds' to validate which tree leaf is active for the Gekko prediction.
 
-   `activationFxn`: activation function used between layers.
+   `model`: trained model from sklearn.
+
+   `Gekko_Model`: Gekko model solver object (created by `GEKKO()`).
+
+   `ifo`: The 'if' Gekko function to use. ifo=2 uses GEKKO.if2(), ifo3 uses GEKKO.if3().
+
+   `eps`: An error term to add to the conditional logic to encourage the solver failing on tree conditional statements.
+
+
+.. py:class:: Model = ML.Gekko_RandomForest(model,gekkoModel,ifo=2,eps=1e-3)
+
+   Import a sklearn Random Forest model (sklearn.ensemble.RandomForestRegressor) into Gekko. For tree-based ensemble methods, too many base_estimators or
+   excessively deep trees may cause the solver to stall or fail to converge. Tree-based Gekko models use if2 and if3 functions,
+   defaulting the solver to APOPT. These functions may be inaccurate, so it may be good to test different 'ifo'/'eps' parameters to achieve desired accuracy.
+   When predicting with tree models, pass in the argument 'return_proba' to return the probability of the selected class, or
+   'return_conds' to validate which tree leaf is active for the Gekko prediction.
+
+   `model`: trained model from sklearn.
+
+   `Gekko_Model`: Gekko model solver object (created by `GEKKO()`).
+
+   `ifo`: The 'if' Gekko function to use. ifo=2 uses GEKKO.if2(), ifo3 uses GEKKO.if3().
+
+   `eps`: An error term to add to the conditional logic to encourage the solver failing on tree conditional statements.
+
+.. py:class:: Model = ML.Gekko_GradientBooster(model,gekkoModel,ifo=2,eps=1e-3)
+
+   Import a sklearn Gradient Boosting Regressor model (sklearn.ensemble.GradientBoostingRegressor) into Gekko. For tree-based ensemble methods, too many base_estimators or
+   excessively deep trees may cause the solver to stall or fail to converge. Tree-based Gekko models use if2 and if3 functions,
+   defaulting the solver to APOPT. These functions may be inaccurate, so it may be good to test different 'ifo'/'eps' parameters to achieve desired accuracy.
+   When predicting with tree models, pass in the argument 'return_proba' to return the probability of the selected class, or
+   'return_conds' to validate which tree leaf is active for the Gekko prediction.
+
+   `model`: trained model from sklearn.
+
+   `Gekko_Model`: Gekko model solver object (created by `GEKKO()`).
+
+   `ifo`: The 'if' Gekko function to use. ifo=2 uses GEKKO.if2(), ifo3 uses GEKKO.if3().
+
+   `eps`: An error term to add to the conditional logic to encourage the solver failing on tree conditional statements.
+
+   .. py:class:: Model = ML.Gekko_LinearTree(model,gekkoModel,ifo=2,eps=1e-3)
+
+   Import a linear tree regressor model from the linear-tree package into Gekko. Tree-based Gekko models use if2 and if3 functions,
+   defaulting the solver to APOPT. These functions may be inaccurate, so it may be good to test different 'ifo'/'eps' parameters to achieve desired accuracy.
+   When predicting with tree models, pass in the argument 'return_proba' to return the probability of the selected class, or
+   'return_conds' to validate which tree leaf is active for the Gekko prediction.
+
+   `model`: trained model from sklearn.
+
+   `Gekko_Model`: Gekko model solver object (created by `GEKKO()`).
+
+   `ifo`: The 'if' Gekko function to use. ifo=2 uses GEKKO.if2(), ifo3 uses GEKKO.if3().
+
+   `eps`: An error term to add to the conditional logic to encourage the solver failing on tree conditional statements.
 
 .. py:class:: Model = ML.Boootstrap(models,Gekko_Model)
 
@@ -108,47 +154,35 @@ Machine Learning Interface models
 
    `models`: an array of models including GPR, SVR, and/or sklearn-NN models.
 
-   `Gekko_Model`: Gekko model (created by `GEKKO()`) that is appended with the new Ensemble model.
+   `Gekko_Model`: Gekko model solver object (created by `GEKKO()`).
 
-.. py:class:: Model = ML.Conformist(modelinfo,Gekko_Model)
+.. py:class:: Model = ML.Conformist(model,Gekko_Model,u)
 
    Conformal prediction wrapper for the previous listed
    machine learning models.
 
-   `modelinfo`: a 2-length array; the first item is the model (one of
-   the above ones), and the second is a constant margin used for
-   prediction intervals; it can be calulculated through conformal
-   prediction methods.
+   `model`: trained model from sklearn.
 
-   `Gekko_Model`: Gekko model (created by `GEKKO()`) that is appended with the new conformal prediction method.
+   `Gekko_Model`: Gekko model solver object (created by `GEKKO()`).
 
-.. py:class:: Model = ML.Delta(modelinfo,Gekko_Model)
+   `u`: The uncertainty interval provided by split conformal prediction. For conformalized ensembles, a custom version of the Bootstrap() interface is needed.
 
-   Delta uncertainty wrapper for previous listed machine
-   learning models.
+.. py:class:: Model = ML.Delta(model,Gekko_Model,X,s)
 
-   `modelinfo`: a 3-length array; the first item is the model, the
-   second is the RMSE from training, and the third is the x component of
-   the training set.
+   Delta uncertainty wrapper for interfaced models. For machine learning models, a least squares model is used as surrogate for uncertainty quantification.
 
-   `Gekko_Model`: Gekko model (created by `GEKKO()`) that is appended with the new conformal prediction method.
+  `model`: trained model from sklearn.
 
-.. py:class:: Model = ML.ScalerWrapper(model,Scaler,m)
+   `Gekko_Model`: Gekko model solver object (created by `GEKKO()`).
 
-   Scaler wrapper for the models previously listed
-   (unnecesary for neural networks); based on the custom Gekko min max
-   scaler, it scales the input and unscales the output for model usage
-   and prediction.
+  `X`: The design matrix for a least squares model / surrogate model.
 
-   `model`: Machine learned model.
-
-   `Scaler`: custom scaler with data.
-
-   `Gekko_Model`: Gekko model (created by `GEKKO()`) that is appended with the new Scaler wrapper.
+  `s` The approximation of the model error, or root mean square error.
   
 .. py:classmethod:: prediction = Model.predict(xi,return_std=True):
 
-   For any model class built by the above functions, the function predict is called to generate a prediction.
+   For any model class built by the above functions, the function predict is called to generate a prediction. Some models may have multi-output (like neural networks) or additional
+   return statements.
 
    `xi`: input array. It must be the same shape as the features used to train the model. 
    It can be scalar/array quantities, or it can be gekko variables as the input can be gekko variables.
@@ -159,13 +193,18 @@ Machine Learning Interface models
    then it provides an uncertainty. Some methods may increase runtime of the process, especially 
    if the training set is large for the model.
 
-.. py:class:: Scaler = ML.CustomMinMaxGekkoScaler(data,features,label)
+.. py:class:: model = Gekko_Scaled_Model(gmodel,scaler_x=None,scaler_y=None)
 
-.. container:: cell markdown
+   This interface wraps any gekko interface-model with scalers from sklearn. A scaler can be provided for the input and/or output. 
+   Sklearn's MinMaxScaler and StandardScaler are currently supported.
 
-   This scaler wraps around a dataset and scales it for use of neural networks 
-   or models wrapped in the scaler wrapper. It provides the same functionality as 
-   the min-max scaler in `scikit-learn`, except it is performed with Gekko variables.
+   `gmodel`: a ML model (listed above) already interfaced into Gekko.
+
+   `Gekko_Model`: Gekko model solver object (created by `GEKKO()`).
+
+   `scaler_x`: sklearn scaler object for the input features.
+
+   `scaler_y`: sklearn scaler object for output features.
 
 Example problem
 ------------
@@ -472,6 +511,26 @@ Gekko's optimization functionality is used to find a minimum of this function.
          x: 0.49209592754
          Gekko Solvetime: 0.2622 s
 
+.. container:: cell code
+
+   .. code:: python
+
+      from gekko import GEKKO
+      x = m.Var(.0,lb = 0,ub=1)
+      y = Gekko_NN_TF(model,mma,m,n_output = 1).predict([x])
+      m.Obj(y)
+      m.solve(disp=False)
+      print('solution:',y.value[0])
+      print('x:',x.value[0])
+      print('Gekko Solvetime:',m.options.SOLVETIME,'s')
+
+   .. container:: output stream stdout
+
+      ::
+
+         solution: -1.1491270614
+         x: 0.49209592754
+         Gekko Solvetime: 0.2622 s
 
 Bootstrap Uncertainty Quantification
 -------------------------------
