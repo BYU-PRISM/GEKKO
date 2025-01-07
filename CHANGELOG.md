@@ -4,6 +4,8 @@ All notable changes to the GEKKO project are documented in this file.
 ## [Unreleased]
 ### Added
 - Energy dispatch optimization benchmark problems with Jupyter notebook
+- Tree-based models to the `ML.py` gekko package.
+- Documentation for the new Tree-based models.
 
 ### Changed
 - Updated websocket connection address for GenAI Gekko support
@@ -14,8 +16,6 @@ All notable changes to the GEKKO project are documented in this file.
 ### Added
 - `pyomo` extension and interface to `gekko`
 - Example Jupyter notebook for Optimization Under Uncertainty with GPR Model
-- Tree-based models to the `ML.py` gekko package.
-- Documentation for the new Tree-based models.
 
 ### Changed
 - Replace `match` in `gk_solver_extension.py` with `if` statements - breaks compatibility with Python versions below 3.10
