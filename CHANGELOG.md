@@ -11,6 +11,7 @@ All notable changes to the GEKKO project are documented in this file.
 - Updated websocket connection address for GenAI Gekko support
 - Solver extension package update with more descriptive error handling
 - Fixed [Issue #163](https://github.com/BYU-PRISM/GEKKO/issues/186) that ignored the last solver option when solving locally
+- Update LICENSE to latest open-source MIT version
 
 ## [v1.2.1] - Version 1.2.1 Stable Release, Date: 2024-07-03
 ### Added
