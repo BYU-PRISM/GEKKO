@@ -346,7 +346,9 @@ Traditional logical expressions such as if statements cannot be used in gradient
     Generates the absolute value with continuous first and second derivatives. 
     	The traditional method for absolute value (abs) has
         a point that is not continuously differentiable at an argument value
-        of zero and can cause a gradient-based optimizer to fail to converge::
+        of zero and can cause a gradient-based optimizer to fail to converge.
+        The abs2 function creates a continuous differentiable function with
+        a complementarity constraint::
 	
         	Usage: y = m.abs2(x)
 		
@@ -359,7 +361,8 @@ Traditional logical expressions such as if statements cannot be used in gradient
 
     Generates the absolute value with a binary switch. 
     	The traditional method for absolute value (abs) has a point that is not continuously differentiable
-        at an argument value of zero and can cause a gradient-based optimizer to fail to converge::
+        at an argument value of zero and can cause a gradient-based optimizer to fail to converge. The
+        abs3 introduces a new binary variable and equation that requires a mixed integer solver, such as APOPT::
 	
         	Usage: y = m.abs3(x)
 		
@@ -373,7 +376,7 @@ Traditional logical expressions such as if statements cannot be used in gradient
     IF conditional with complementarity constraint switch variable.
         The traditional method for IF statements is not continuously
         differentiable and can cause a gradient-based optimizer to fail
-        to converge. The if2 method uses a binary switching variable to
+        to converge. The if2 method uses a complementarity condition to
 	determine whether y=x1 (when condition<0) or y=x2 (when condition>=0)::
 	
         	Usage: y = m.if2(condition,x1,x2)
@@ -391,7 +394,7 @@ Traditional logical expressions such as if statements cannot be used in gradient
         y = x2 when condition>0
 	
     When condition~0, the solution may be `x1`, `x2`, or a linear combination of the two with `if2`.
-    Use `if3` to avoid the linear combination of the two values `x1` and `x2`. 
+    Use `if3` to avoid the linear combination of the two values `x1` and `x2`.
 			       
     Example usage::
     
@@ -458,7 +461,8 @@ Traditional logical expressions such as if statements cannot be used in gradient
     Generates the maximum value with continuous first and second derivatives. 
 	The traditional method for max value (max) is not
         continuously differentiable and can cause a gradient-based optimizer
-        to fail to converge::
+        to fail to converge. The max2 function creates the complementarity 
+        constraints with continuous derivatives::
 	
         	Usage: y = m.max2(x1,x2)
 		
@@ -500,7 +504,8 @@ Traditional logical expressions such as if statements cannot be used in gradient
     Generates the maximum value with a binary switch variable.
         The traditional method for max value (max) is not continuously
         differentiable and can cause a gradient-based optimizer to fail
-        to converge::
+        to converge. The max3 function creates a new binary variable that
+        must be solved with a mixed integer solver, such as APOPT::
         	
 		Usage: y = m.max3(x1,x2)
         
