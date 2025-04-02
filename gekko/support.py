@@ -1,7 +1,7 @@
 class agent:
     '''
     This class provides an interface for sending questions to a WebSocket server 
-    and receiving answers. It maintains a context of previous Q&A pairs to provide 
+    and receiving streamed answers. It maintains a context of previous Q&A pairs to provide 
     context for new questions.
 
     Attributes:
@@ -11,7 +11,7 @@ class agent:
 
     Methods:
         is_notebook(): Check if the runtime environment is a Jupyter notebook.
-        _msg(uri, q, nb): Send a question to the WebSocket server and return the response.
+        _msg(uri, q, nb): Send a question to the WebSocket server and stream the response.
         _build_context(new_q): Build a context string for the current question.
         ask(q): Send a question and update the context with the answer.
         history(): Return the current context of Q&A pairs.
@@ -43,51 +43,46 @@ class agent:
         return True
 
     @staticmethod
-    async def _msg(uri,q,nb):
-        '''
-        Send a question to the WebSocket server and update the context with the answer.
-
-        Args:
-            q (str): The question to be sent.
-
-        Returns:
-            str: The answer received from the server, if not in a Jupyter notebook.
-                 None if in a Jupyter notebook, as the answer is displayed directly.
-        '''
+    async def _msg(uri, q, nb):
+        """
+        Send a question to the WebSocket server and stream the response.
+        """
         try:
             import websockets
         except ImportError:
             print("Error: Install websockets with 'pip install websockets'")
             return
 
+        async def stream_response(websocket):
+            full_answer = ''
+            if nb:
+                from IPython.display import display, Markdown, update_display
+                # Create a persistent display area using a unique display_id.
+                md_display_id = "streaming_answer"
+                display(Markdown(""), display_id=md_display_id)
+                async for chunk in websocket:
+                    full_answer += chunk
+                    update_display(Markdown(full_answer), display_id=md_display_id)
+            else:
+                async for chunk in websocket:
+                    full_answer += chunk
+                    print(chunk, end='', flush=True)
+            return full_answer
+
         try:
-            # use secure connection
             async with websockets.connect(uri) as websocket:
                 await websocket.send(q)
-                a = await websocket.recv()
-                if nb:
-                    from IPython.display import display, Markdown
-                    display(Markdown(a))
-                    return a
-                else:
-                    print(f'Answer: {a}')
-                    return a
-        except:
-            # problem with certifi on local computer
+                answer = await stream_response(websocket)
+                return answer
+        except Exception:
             import ssl
             ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
-            async with websockets.connect(uri,ssl=ssl_context) as websocket:
+            async with websockets.connect(uri, ssl=ssl_context) as websocket:
                 await websocket.send(q)
-                a = await websocket.recv()
-                if nb:
-                    from IPython.display import display, Markdown
-                    display(Markdown(a))
-                    return a
-                else:
-                    print(f'Answer: {a}')
-                    return a
+                answer = await stream_response(websocket)
+                return answer
 
     def _build_context(self, new_q):
         '''
@@ -101,11 +96,11 @@ class agent:
                          the new question at the end.
         '''
         context_str = ""
-        if len(self.context)<=self.context_size:
-            # use all Q+A < self.context_size
+        if len(self.context) <= self.context_size:
+            # use all Q+A pairs if less than or equal to context_size
             cnxt = self.context
         else:
-            # only use the last three
+            # only use the last context_size pairs
             cnxt = self.context[-self.context_size:]
         for q, a in cnxt:
             context_str += f"### Prior Question for Context: {q} ### Prior Answer for Context: {a}\n\n"
@@ -120,8 +115,8 @@ class agent:
             q (str): The question to be sent.
 
         Returns:
-            answer (str): The answer received from the server, if not in a Jupyter notebook.
-               None if in a Jupyter notebook, as the answer is displayed directly.
+            answer (str): The full streamed answer received from the server if not in a 
+                          Jupyter notebook. In a notebook, the answer is displayed live.
         '''
         import asyncio
         nb = agent.is_notebook()
@@ -156,4 +151,3 @@ class agent:
             list: A list of tuples with past questions and answers.
         '''
         return self.context
-        
