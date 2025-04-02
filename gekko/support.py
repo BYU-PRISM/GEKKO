@@ -1,3 +1,5 @@
+import uuid
+
 class agent:
     '''
     This class provides an interface for sending questions to a WebSocket server 
@@ -8,45 +10,67 @@ class agent:
         context (list): A list of tuples containing past questions and answers.
         context_size (int): The maximum number of Q&A pairs to keep in the context.
                             Reduce context_size if there is a server time-out.
-
-    Methods:
-        is_notebook(): Check if the runtime environment is a Jupyter notebook.
-        _msg(uri, q, nb): Send a question to the WebSocket server and stream the response.
-        _build_context(new_q): Build a context string for the current question.
-        ask(q): Send a question and update the context with the answer.
-        history(): Return the current context of Q&A pairs.
     '''
+    # Class-level variables for IPython display functions (initialized once)
+    _ipython_initialized = False
+    _ipython_display = None
+    _ipython_Markdown = None
+    _ipython_update_display = None
+
     def __init__(self, context_size=3):
         '''
-        Initializes the agent with a specified context size.
-
+        Initializes the agent with a specified context size and, if in a notebook,
+        imports IPython display functions once.
+        
         Args:
             context_size (int): The number of Q&A pairs to store in the context. Default is 3.
         '''
         self.context = []
         self.context_size = context_size
+        self.nb = agent.is_notebook()
+        if self.nb and not agent._ipython_initialized:
+            try:
+                from IPython.display import display, Markdown, update_display
+                agent._ipython_display = display
+                agent._ipython_Markdown = Markdown
+                agent._ipython_update_display = update_display
+                agent._ipython_initialized = True
+            except Exception:
+                # If for some reason the import fails, treat as not in notebook mode.
+                self.nb = False
 
     @staticmethod
     def is_notebook():
         '''
-        Check if the current environment is a Jupyter notebook.
-
+        Check if the current environment is a Jupyter notebook. Also attempts to import 
+        IPython display functions.
+        
         Returns:
-            bool: True if in a Jupyter notebook, False otherwise.
+            bool: True if in a Jupyter notebook with IPython display available, False otherwise.
         '''
         try:
             from IPython import get_ipython
             if 'IPKernelApp' not in get_ipython().config:
                 return False
+            # The following imports are attempted here but are stored in __init__
+            from IPython.display import display, Markdown, update_display
         except Exception:
             return False
         return True
 
     @staticmethod
     async def _msg(uri, q, nb):
-        """
+        '''
         Send a question to the WebSocket server and stream the response.
-        """
+        
+        Args:
+            uri (str): The WebSocket server URI.
+            q (str): The question (with context) to be sent.
+            nb (bool): True if running in a Jupyter notebook.
+        
+        Returns:
+            str: The complete answer (concatenated from all chunks) after the stream ends.
+        '''
         try:
             import websockets
         except ImportError:
@@ -56,13 +80,14 @@ class agent:
         async def stream_response(websocket):
             full_answer = ''
             if nb:
-                from IPython.display import display, Markdown, update_display
-                # Create a persistent display area using a unique display_id.
-                md_display_id = "streaming_answer"
-                display(Markdown(""), display_id=md_display_id)
+                # Create a unique display ID for this streamed answer
+                display_id = str(uuid.uuid4())
+                # Initialize the persistent display area with the unique display_id
+                agent._ipython_display(agent._ipython_Markdown(""), display_id=display_id)
                 async for chunk in websocket:
                     full_answer += chunk
-                    update_display(Markdown(full_answer), display_id=md_display_id)
+                    # Update the same display area with the new concatenated text
+                    agent._ipython_update_display(agent._ipython_Markdown(full_answer), display_id=display_id)
             else:
                 async for chunk in websocket:
                     full_answer += chunk
@@ -87,20 +112,17 @@ class agent:
     def _build_context(self, new_q):
         '''
         Build context from prior questions and answers.
-
+        
         Args:
             new_q (str): The new question to be sent.
-
+        
         Returns:
-            context_str: The question and answer pairs according to context_size with
-                         the new question at the end.
+            str: The context string composed of previous Q&A pairs plus the new question.
         '''
         context_str = ""
         if len(self.context) <= self.context_size:
-            # use all Q+A pairs if less than or equal to context_size
             cnxt = self.context
         else:
-            # only use the last context_size pairs
             cnxt = self.context[-self.context_size:]
         for q, a in cnxt:
             context_str += f"### Prior Question for Context: {q} ### Prior Answer for Context: {a}\n\n"
@@ -110,43 +132,35 @@ class agent:
     def ask(self, q):
         '''
         Send a question to the WebSocket server and update the context with the answer.
-
+        
         Args:
             q (str): The question to be sent.
-
+        
         Returns:
-            answer (str): The full streamed answer received from the server if not in a 
-                          Jupyter notebook. In a notebook, the answer is displayed live.
+            str or None: The full streamed answer if not in a notebook; otherwise, the answer 
+                         is displayed live.
         '''
         import asyncio
-        nb = agent.is_notebook()
+        nb = self.nb
         uri = "wss://hedengren.net/gekko"
 
         full_q = self._build_context(q)
 
-        answer = None
         if nb:
-            # Use the existing event loop in the notebook environment
             import nest_asyncio
             nest_asyncio.apply()
             loop = asyncio.get_event_loop()
             answer = loop.run_until_complete(agent._msg(uri, full_q, nb))
         else:
-            # Use a new event loop in a standard Python environment
             answer = asyncio.run(agent._msg(uri, full_q, nb))
 
-        # Update context with the most recent question and answer
         self.context.append((q, answer))
-        
-        if nb:
-            return
-        else:
-            return answer
+        return None if nb else answer
 
     def history(self):
         '''
         Return the current context of Q&A pairs.
-
+        
         Returns:
             list: A list of tuples with past questions and answers.
         '''
