@@ -87,7 +87,7 @@ Contents
 	examples
 	support
 
-A PDF of the complete Gekko (stable release) documentation is available from this `link <https://gekko.readthedocs.io/_/downloads/en/latest/pdf/>`_.
+A PDF of the complete Gekko (latest release) documentation is available from this `link <https://gekko.readthedocs.io/_/downloads/en/latest/pdf/>`_.
 
 Overview of GEKKO
 --------
