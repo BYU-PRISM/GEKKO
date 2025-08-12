@@ -2117,6 +2117,8 @@ class GEKKO(object):
                     apm_exe = os.path.join(dirname,'bin','apm_aarch64')
                 elif (os.uname()[4].startswith("arm") or os.uname()[4].startswith("aarch")): # ARM / AARCH processor 32-bit
                     apm_exe = os.path.join(dirname,'bin','apm_arm')
+                elif "Microsoft" in os.uname().release or "WSL" in os.uname().release:
+                    apm_exe = os.path.join(dirname,'bin','apm.exe') # WSL is able to run win32 binaries
                 else: # Other Linux
                     apm_exe = os.path.join(dirname,'bin','apm')
             else:

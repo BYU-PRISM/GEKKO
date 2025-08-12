@@ -18,7 +18,7 @@ The [most recent version is listed on PyPi](https://pypi.org/project/gekko/). Yo
 pip install --upgrade gekko
 ```
 
-GEKKO runs in remote mode (solved on high performance server) or on a local CPU when option ```remote=False``` such as ```m=GEKKO(remote=False)```. The pip package includes the Windows executable (apm.exe), a Linux executable (apm), a MacOS executable (apm_mac), and a Linux ARM processor executable such as for a Raspberry Pi (apm_arm). Gekko can be used with remote server access (default option) for all operating systems.
+GEKKO runs in remote mode (solved on high performance server) or on a local CPU when option ```remote=False``` such as ```m=GEKKO(remote=False)```. The pip package includes the Windows executable (apm.exe), a Linux executable (apm), a MacOS executable (apm_mac), and a Linux ARM processor executable such as for a Raspberry Pi (apm_arm). With Linux under WSL on x86 platform, the Windows executable is used. Gekko can be used with remote server access (default option) for all operating systems.
 
 ## What does GEKKO do?
 
