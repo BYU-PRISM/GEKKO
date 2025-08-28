@@ -21,17 +21,14 @@ x2 = m.Var(5, 1, 5, false);
 x3 = m.Var(5, 1, 5, false);
 x4 = m.Var(1, 1, 5, true);   % integer variable
 
-% Slack variable for the inequality constraint
-s1 = m.Var(0, 0, inf);
-
 % Equality constraint: sum of squares equals 40
-m.Equation(@() x1()^2 + x2()^2 + x3()^2 + x4()^2 - 40);
+m.Equation(@() x1()^2 + x2()^2 + x3()^2 + x4()^2 == 40);
 
 % Inequality g1 >= 0 implemented with slack
-m.Equation(@() x1()*x2()*x3()*x4() - 25 - s1());
+m.Equation(@() x1()*x2()*x3()*x4() >= 25);
 
 % Objective with penalty on slack
-m.Minimize(@() x1()*x4()*(x1() + x2() + x3()) + x3() + 1000 * s1());
+m.Minimize(@() x1()*x4()*(x1() + x2() + x3()) + x3());
 
 % Solve the mixed integer problem
 m.solve();
