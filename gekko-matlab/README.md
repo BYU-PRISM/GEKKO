@@ -120,7 +120,7 @@ m.Equation(@() x1()^2 + x2()^2 + x3()^2 + x4()^2 == 40);
 % Inequality constraint
 m.Equation(@() x1()*x2()*x3()*x4() >= 25);
 
-% Objective function with penalty on slack
+% Objective function
 m.Minimize(@() x1()*x4()*(x1() + x2() + x3()) + x3());
 
 % Solve the optimization problem
