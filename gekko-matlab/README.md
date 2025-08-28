@@ -1,6 +1,6 @@
 # Gekko‑MATLAB
 
-**gekko‑matlab** is an open‑source attempt to replicate the core
+**gekko‑matlab** is an open‑source replica of the core
 functionality of the [GEKKO Optimization Suite](https://github.com/BYU-PRISM/GEKKO) in
 MATLAB.  GEKKO is a Python package for machine learning and optimization
 of mixed–integer and differential algebraic equations.  It exposes an
@@ -33,9 +33,8 @@ using a high‑level, declarative approach.
   implicitly together.
 * **Objectives:** Define one or more objective functions to
   minimise or maximise.  Multiple objectives may be specified with
-  weightings using `Obj`, `Minimise` or `Maximise`.
-* **Solvers:** Optimization problems are solved by the
-  [APMonitor](https://apmonitor.com/wiki/index.php/Main/CommandLine)
+  weightings using `Obj`, `Minimize` or `Maximize`.
+* **Solvers:** Optimization problems are solved by the APMonitor
   optimization engine.  The model file and options are translated to
   the APMonitor format and then solved either **locally** with the
   `apm` executable or **remotely** on the hosted APMonitor server.  If
@@ -89,7 +88,7 @@ addpath('path/to/gekko-matlab/src');
 ## Quick start
 
 The following example demonstrates how to solve a simple nonlinear
-optimization problem.  It mirrors the syntax of GEKKO’s Python API
+optimization problem.  It mirrors the syntax of the GEKKO Python API
 and illustrates how to perform a remote solve.
 
 ```matlab
@@ -134,7 +133,7 @@ fprintf('  x1 = %.4f\n  x2 = %.4f\n  x3 = %.4f\n  x4 = %.4f\n', x1.value, x2.val
 
 ## Tutorial examples
 
-The `tutorial` folder includes scripts that mirror the
+The `examples` folder includes scripts that mirror the
 examples from the GEKKO Python optimization tutorial.  Each script
 illustrates a different aspect of modeling and optimization, from
 linear and nonlinear equation solving to regression, optimal control,
@@ -143,8 +142,8 @@ control.  To run the tutorials:
 
 ```
 addpath('gekko-matlab/src');
-cd('gekko-matlab/tutorial');
-run example01_solver_selection
+cd('gekko-matlab/examples');
+run example01_simple_equation
 run example02_linear_equations
 ...
 run example18_debugging_resources
@@ -188,4 +187,4 @@ We welcome contributions and feedback to help extend this library.
 
 ## License
 
-This project is licensed under the MIT Licence.
+This project is licensed under the [MIT License]((https://github.com/BYU-PRISM/GEKKO/LICENSE).
