@@ -187,4 +187,4 @@ We welcome contributions and feedback to help extend this library.
 
 ## License
 
-This project is licensed under the [MIT License](https://github.com/BYU-PRISM/GEKKO/LICENSE).
+This project is licensed under the [MIT License](https://github.com/BYU-PRISM/GEKKO/blob/master/LICENSE).
