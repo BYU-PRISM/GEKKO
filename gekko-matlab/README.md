@@ -3,7 +3,11 @@
 **gekko‑matlab** is an open‑source replica of the core
 functionality of the [GEKKO Optimization Suite](https://github.com/BYU-PRISM/GEKKO) in
 MATLAB.  GEKKO is a Python package for machine learning and optimization
-of mixed–integer and differential algebraic equations.  It exposes an
+of mixed–integer and differential algebraic equations.
+
+![Gekko Logo](/gekko.png)
+
+It exposes an
 object‑oriented modeling language with variables, parameters, equations,
 objectives and solver options.  GEKKO has several types of variables –
 constants, parameters, variables, intermediates, fixed variables (FV),
