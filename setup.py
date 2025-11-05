@@ -37,7 +37,7 @@ hardened control and optimization on Windows, Linux, MacOS, ARM processors, or a
 runs Python. Options are available for local, edge, and cloud solutions to manage memory or compute 
 resources.
 
-- [Gekko Homepage](https://machinelearning.byu.edu)
+- [Gekko Homepage](https://apmonitor.com/gekko)
 - [Gekko Documentation](https://gekko.readthedocs.io/en/latest/)
 - [Gekko Examples](https://apmonitor.com/wiki/index.php/Main/GekkoPythonOptimization)
 - [Get Gekko Help on Stack Overflow](https://stackoverflow.com/questions/tagged/gekko)
@@ -59,7 +59,7 @@ extra_files = gui_files + ['bin/apm.exe','bin/apm','bin/apm_aarch64','bin/apm_ar
 # versions: a (alpha), b (beta), rc (release candidate)
 # update version here, __init__.py, and create a GitHub release
 setup(name='gekko',
-    version='1.3.0',
+    version='1.3.1',
     description='Machine learning and optimization for dynamic systems',
     long_description=long_description,
     long_description_content_type = 'text/markdown',
@@ -78,6 +78,7 @@ setup(name='gekko',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
         'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14',
     ],
     keywords='differential deep learning solver equations optimization mixed-integer',
     url='https://github.com/BYU-PRISM/GEKKO',
@@ -94,3 +95,4 @@ setup(name='gekko',
     package_data={'gekko': extra_files},
     python_requires='>=2.6',
     zip_safe=False)
+
