@@ -1,6 +1,6 @@
 # GEKKO
 
-[GEKKO](http://gekko.readthedocs.io/en/latest/) is a Python package for [machine learning and optimization](https://machinelearning.byu.edu), specializing in time series and differential algebraic equations (DAE) systems. GEKKO provides a user-friendly interface to the [APMonitor optimization suite](http://apmonitor.com/wiki/). It is coupled with large-scale solvers for linear, quadratic, nonlinear, and mixed integer programming (LP, QP, NLP, MILP, MINLP). Modes of operation include parameter regression, dynamic data reconciliation, real-time optimization, dynamic simulation, and nonlinear predictive control.
+[GEKKO](http://gekko.readthedocs.io/en/latest/) is a Python package for [machine learning and optimization](https://apmonitor.com/gekko), specializing in time series and differential algebraic equations (DAE) systems. GEKKO provides a user-friendly interface to the [APMonitor optimization suite](http://apmonitor.com/wiki/). It is coupled with large-scale solvers for linear, quadratic, nonlinear, and mixed integer programming (LP, QP, NLP, MILP, MINLP). Modes of operation include parameter regression, dynamic data reconciliation, real-time optimization, dynamic simulation, and nonlinear predictive control.
 
 ![Gekko Logo](/gekko.png)
 
@@ -69,3 +69,4 @@ When the system of equations does not converge, APMonitor produces a convergence
 > Beal, L.D.R., Hill, D., Martin, R.A., and Hedengren, J. D., [GEKKO Optimization Suite](https://www.mdpi.com/2227-9717/6/8/106), Processes, Volume 6, Number 8, 2018, doi: 10.3390/pr6080106. [Article (Open Access)](https://www.mdpi.com/2227-9717/6/8/106)
 
 [![Star History Chart](https://api.star-history.com/svg?repos=BYU-PRISM/GEKKO&type=Date)](https://star-history.com/#BYU-PRISM/GEKKO&Date)
+
