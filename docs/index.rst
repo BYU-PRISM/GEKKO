@@ -6,7 +6,7 @@ GEKKO Optimization Suite
 Overview
 --------
 
-`GEKKO is a Python package for machine learning and optimization <https://machinelearning.byu.edu>`_ of mixed-integer and
+`GEKKO is a Python package for machine learning and optimization <https://apmonitor.com/gekko>`_ of mixed-integer and
 differential algebraic equations. It is coupled with large-scale solvers for
 linear, quadratic, nonlinear, and mixed integer programming (LP, QP, NLP, MILP,
 MINLP). Modes of operation include parameter regression, data reconciliation, real-time optimization,
