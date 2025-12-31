@@ -5,6 +5,14 @@ All notable changes to the GEKKO project are documented in this file.
 ### Added
 ### Changed
 
+## [v1.3.1]
+
+### Changed
+- With downloads at 100,000+ per month, the public servers can't be the default
+- Switch default option to `GEKKO(remote=False)` as the default
+- Local solves will be the default when not specified as with `GEKKO()`
+- Local solve support is available for Windows, Linux, MacOS although some solver options are not available
+
 ## [v1.3.0]
 ### Added
 - Energy dispatch optimization benchmark problems with Jupyter notebook
@@ -315,3 +323,4 @@ All notable changes to the GEKKO project are documented in this file.
 [0.1b2]: https://github.com/BYU-PRISM/GEKKO/compare/0.1b1...0.1b2
 [0.1b1]: https://github.com/BYU-PRISM/GEKKO/compare/v0.1a2...0.1b1
 [0.1a2]: https://github.com/BYU-PRISM/GEKKO/compare/0.0.4...v0.1a2
+
