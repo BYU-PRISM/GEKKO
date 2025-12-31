@@ -41,6 +41,7 @@ resources.
 - [Gekko Documentation](https://gekko.readthedocs.io/en/latest/)
 - [Gekko Examples](https://apmonitor.com/wiki/index.php/Main/GekkoPythonOptimization)
 - [Get Gekko Help on Stack Overflow](https://stackoverflow.com/questions/tagged/gekko)
+- [Get Gekko Help with GenAI](https://chatgpt.com/g/g-sl8WNWdO7-gekko-support)
 
 """
 
@@ -59,7 +60,7 @@ extra_files = gui_files + ['bin/apm.exe','bin/apm','bin/apm_aarch64','bin/apm_ar
 # versions: a (alpha), b (beta), rc (release candidate)
 # update version here, __init__.py, and create a GitHub release
 setup(name='gekko',
-    version='1.3.1',
+    version='1.3.2',
     description='Machine learning and optimization for dynamic systems',
     long_description=long_description,
     long_description_content_type = 'text/markdown',
@@ -95,4 +96,5 @@ setup(name='gekko',
     package_data={'gekko': extra_files},
     python_requires='>=2.6',
     zip_safe=False)
+
 
