@@ -54,7 +54,7 @@ class GEKKO(object):
     """Create a model object. This is the basic object for solving optimization problems"""
     _ids = count(0) #keep track of number of active class instances to not overwrite each other with default model name
 
-    def __init__(self, remote=True, server='http://byu.apmonitor.com', name=None):
+    def __init__(self, remote=False, server='http://byu.apmonitor.com', name=None):
         self._remote = remote
         self._server = compatible_string_strip(server)
         self.options = GKGlobalOptions()
@@ -2402,3 +2402,4 @@ class GEKKO(object):
             from .gk_gui import GK_GUI
             self.gui = GK_GUI(self._path)
             self.gui.display()
+
