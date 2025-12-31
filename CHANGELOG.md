@@ -5,13 +5,16 @@ All notable changes to the GEKKO project are documented in this file.
 ### Added
 ### Changed
 
-## [v1.3.1]
-
+## [v1.3.2]
+### Added
+- GenAI support for Gekko
+  
 ### Changed
-- With downloads at 100,000+ per month, the public servers can't be the default
 - Switch default option to `GEKKO(remote=False)` as the default
+- With downloads at 100,000+ per month, the public servers can't be the default
 - Local solves will be the default when not specified as with `GEKKO()`
 - Local solve support is available for Windows, Linux, MacOS although some solver options are not available
+- Update to Support documentation page
 
 ## [v1.3.0]
 ### Added
@@ -293,8 +296,8 @@ All notable changes to the GEKKO project are documented in this file.
 ## 0.0.1a1 - Version 0.0.1 Alpha 1, Date: 2018-01-05
 ### Initial GEKKO public release, alpha version
 
-[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.3.1...HEAD
-[v1.3.1]: https://github.com/BYU-PRISM/GEKKO/compare/v1.3.0...v1.3.1
+[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.3.2...HEAD
+[v1.3.2]: https://github.com/BYU-PRISM/GEKKO/compare/v1.3.0...v1.3.2
 [v1.3.0]: https://github.com/BYU-PRISM/GEKKO/compare/v1.2.1...v1.3.0
 [v1.2.1]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.3...v1.2.1
 [v1.1.3]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.1...v1.1.3
@@ -324,5 +327,6 @@ All notable changes to the GEKKO project are documented in this file.
 [0.1b2]: https://github.com/BYU-PRISM/GEKKO/compare/0.1b1...0.1b2
 [0.1b1]: https://github.com/BYU-PRISM/GEKKO/compare/v0.1a2...0.1b1
 [0.1a2]: https://github.com/BYU-PRISM/GEKKO/compare/0.0.4...v0.1a2
+
 
 
