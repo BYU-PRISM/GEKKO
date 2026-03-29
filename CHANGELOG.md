@@ -14,6 +14,7 @@ All notable changes to the GEKKO project are documented in this file.
 - Use both `x.dt` (as a property) and `x.dt()` (as a method) interchangeably.
 - Updated documentation index to include the MCP helper documentation page
 - Added direct import support for `from gekko import gk_mcp`
+- Revamp of the MATLAB-APM interface modeled after Gekko. 
 
 ## [v1.3.2]
 ### Added
