@@ -1,194 +1,264 @@
-# Gekko‑MATLAB
+# Gekko-MATLAB
 
-**gekko‑matlab** is an open‑source replica of the core
-functionality of the [GEKKO Optimization Suite](https://github.com/BYU-PRISM/GEKKO) in
-MATLAB.  GEKKO is a Python package for machine learning and optimization
-of mixed–integer and differential algebraic equations.
+`gekko-matlab` is a native MATLAB wrapper for the APMonitor optimization
+engine with a GEKKO-style modeling interface. It does not require Python.
+Models are assembled directly into APMonitor sections such as
+`Constants`, `Parameters`, `Variables`, `Intermediates`, `Equations`,
+`Connections`, and `Objects`, and then solved either locally with the
+`apm` executable or remotely on the APMonitor server.
 
-![Gekko Logo](/gekko.png)
+## What Changed
 
-It exposes an
-object‑oriented modeling language with variables, parameters, equations,
-objectives and solver options.  GEKKO has several types of variables –
-constants, parameters, variables, intermediates, fixed variables (FV),
-manipulated variables (MV), state variables (SV) and controlled
-variables (CV).  Constants and parameters are fixed by the user, while
-variables and intermediates are degrees of freedom that the solver
-changes.  FV, MV, SV and CV inherit from these base
-types and include extra attributes to facilitate dynamic optimization
-and on‑line control.
+The MATLAB wrapper no longer depends on parsing anonymous-function source
+with `func2str` as its primary modeling path. Variables, parameters, and
+intermediates now build APMonitor expressions directly through operator
+overloading, which makes the interface much closer to Python GEKKO while
+remaining a direct APMonitor wrapper.
 
-This project aims to provide a MATLAB implementation with a familiar
-syntax.  It is not a drop‑in replacement for the Python library and
-does not yet support every feature of the original GEKKO.  The goal is
-to make it easier to build and solve optimization problems in MATLAB
-using a high‑level, declarative approach.
+This means the following patterns are now first-class:
+
+```matlab
+m = Gekko();
+x = m.Var(1,0,10);
+y = m.Var(2,0,10);
+
+m.Equation(x + y == 3);
+m.Minimize((x-1)^2 + (y-2)^2);
+m.solve();
+```
+
+The older anonymous-function style is still supported:
+
+```matlab
+m.Equation(@() x() + y() == 3);
+```
 
 ## Features
 
-* **Model object:** Create a `Gekko` model to hold variables,
-  parameters, equations and objectives.  Variables are created with
-  `Var` and have optional lower/upper bounds and integer flags
-  (boolean for mixed‑integer solvers).
-* **Parameters and constants:** Parameters store fixed values
-  throughout a calculation and may be scalars or arrays.
-* **Equations:** Add equality constraints to the model.  Each
-  equation must evaluate to zero at the optimum; they are solved
-  implicitly together.
-* **Objectives:** Define one or more objective functions to
-  minimise or maximise.  Multiple objectives may be specified with
-  weightings using `Obj`, `Minimize` or `Maximize`.
-* **Solvers:** Optimization problems are solved by the APMonitor
-  optimization engine.  The model file and options are translated to
-  the APMonitor format and then solved either **locally** with the
-  `apm` executable or **remotely** on the hosted APMonitor server.  If
-  `m.remote = false` (default) the library searches for a local `apm`
-  binary and executes it to solve the problem.  If `m.remote = true`
-  the solver uses the web API: it posts the model and options to
-  `http://byu.apmonitor.com` via HTTP, requests a solve, and retrieves
-  `results.csv` to update the variables.  The
-  solver (APOPT, BPOPT or IPOPT) is selected with the model’s `solver`
-  property or by setting `m.solver`.  Translation from MATLAB
-  anonymous functions currently handles only simple algebraic
-  expressions; unsupported constructs are commented out in the
-  generated model.  Dynamic problems may be solved remotely by
-  providing a time vector and appropriate options – the APMonitor
-  server performs collocation internally.
-* **Global options and time horizon:** The model object exposes global 
-  solver settings.  Fields such as
-  `imode` (solution mode), `nodes` (collocation nodes) and `solver`
-  can be set directly (e.g., `m.imode = 4` for dynamic
-  simulation).  A numeric time vector may be assigned to the
-  `m.time` property to specify the simulation or optimization
-  horizon.  These options are automatically written to the
-  solver configuration file when `m.solve()` is invoked.
+Core model building:
 
-* **Remote API helper:** An `APMonitorAPI` class in the `src`
-  folder wraps the APMonitor web functions in static methods.  These
-  include `apm`, `apm_load`, `csv_load`, `apm_option`, `apm_info` and
-  `apm_sol`, which send commands, upload model/data files and
-  retrieve results from the server.  When `m.remote = true` the
-  solver uses these methods automatically; advanced users may call
-  them directly.
-* **Advanced types:** Classes for FV, MV, SV, CV and intermediates are
-  provided to mirror the Python API.  Each variable (and its
-  subclasses) now includes an `options` struct where APMonitor
-  variable‑specific settings such as `status`, `fstatus` or `dmax`
-  can be specified.  These options are not yet passed through to the
-  solver but offer a place to record desired behaviour and future
-  compatibility.  The classes themselves currently store attributes
-  but do not enforce all advanced behaviours.  They make it
-  easier to migrate existing GEKKO models to MATLAB.
+* `Const`, `Param`, `FV`, `MV`, `Var`, `SV`, `CV`
+* `Intermediate` / `Intermed`
+* `Equation`, `Equations`, `Obj`, `Minimize`, `Maximize`
+* differential expressions with `x.dt()`
+* direct APMonitor passthrough with `Raw`
+* APMonitor connections with `Connection`, `fix`, `fix_initial`,
+  `fix_final`, `free`, `free_initial`, and `free_final`
+
+Math / expression helpers:
+
+* overloaded algebra and comparisons
+* `abs`, `acos`, `acosh`, `asin`, `asinh`, `atan`, `atanh`
+* `cos`, `cosh`, `erf`, `erfc`, `exp`, `log`, `log10`
+* `sin`, `sinh`, `sqrt`, `tan`, `tanh`, `sigmoid`
+
+GEKKO-style object helpers currently implemented directly in MATLAB:
+
+* `abs2`, `abs3`
+* `arx`
+* `axb`
+* `bspline`
+* `cov`
+* `delay`
+* `if2`, `if3`
+* `integral`
+* `max2`, `max3`
+* `min2`, `min3`
+* `periodic`
+* `pwl`
+* `qobj`
+* `cspline`
+* `sign2`, `sign3`
+* `sos1`
+* `state_space`
+* `sum`
+* `sysid`
+* `vsum`
+* `Array`
+
+Solver integration:
+
+* local APMonitor execution with `apm`
+* remote APMonitor execution with `m.remote = true`
+* automatic `.apm`, `.dbs`, `.info`, and `.csv` generation
+* support for dynamic horizons through `m.time`
+* solver option files via `m.solver_options`
 
 ## Installation
 
-Clone or download this repository and add the `src` folder to your
-MATLAB path.  The code requires MATLAB R2017a or newer.
+Add the source folder to the MATLAB path:
 
-```
+```matlab
 addpath('path/to/gekko-matlab/src');
 ```
 
-## Quick start
+For local solves, make sure the APMonitor executable is available:
 
-The following example demonstrates how to solve a simple nonlinear
-optimization problem.  It mirrors the syntax of the GEKKO Python API
-and illustrates how to perform a remote solve.
+* set `APM_EXE` to the full path of `apm`, or
+* place `apm` on the system path, or
+* place `apm` beside the MATLAB source files
+
+## Quick Start
+
+### Steady-State NLP
 
 ```matlab
-% Example 9: Nonlinear programming optimization with constraints
-%
-% Solve the following nonlinear optimization problem:
-%
-%     minimize    f(x) = x1 * x4 * (x1 + x2 + x3) + x3
-%     subject to  x1 * x2 * x3 * x4 >= 25
-%                 x1^2 + x2^2 + x3^2 + x4^2 = 40
-%                 1 <= x_i <= 5  for i=1..4
-%
 addpath('../src')
 
-% Create a GEKKO model
 m = Gekko();
-% Solve remotely on APMonitor server
 m.remote = true;
 
-% Define decision variables with bounds and initial guesses
-x1 = m.Var(1, 1, 5);
-x2 = m.Var(5, 1, 5);
-x3 = m.Var(5, 1, 5);
-x4 = m.Var(1, 1, 5);
+x1 = m.Var(1,1,5);
+x2 = m.Var(5,1,5);
+x3 = m.Var(5,1,5);
+x4 = m.Var(1,1,5);
 
-% Equality constraint: x1^2 + x2^2 + x3^2 + x4^2 = 40
-m.Equation(@() x1()^2 + x2()^2 + x3()^2 + x4()^2 == 40);
+m.Equation(x1^2 + x2^2 + x3^2 + x4^2 == 40);
+m.Equation(x1*x2*x3*x4 >= 25);
+m.Minimize(x1*x4*(x1+x2+x3) + x3);
 
-% Inequality constraint
-m.Equation(@() x1()*x2()*x3()*x4() >= 25);
-
-% Objective function
-m.Minimize(@() x1()*x4()*(x1() + x2() + x3()) + x3());
-
-% Solve the optimization problem
 m.solve();
 
-% Display the optimal solution
-fprintf('Example 9 solution:\n');
-fprintf('  x1 = %.4f\n  x2 = %.4f\n  x3 = %.4f\n  x4 = %.4f\n', x1.value, x2.value, x3.value, x4.value);
+fprintf('x1 = %.4f\n', x1.value);
+fprintf('x2 = %.4f\n', x2.value);
+fprintf('x3 = %.4f\n', x3.value);
+fprintf('x4 = %.4f\n', x4.value);
 ```
 
-## Tutorial examples
+### Dynamic Model
 
-The `examples` folder includes scripts that mirror the
-examples from the GEKKO Python optimization tutorial.  Each script
-illustrates a different aspect of modeling and optimization, from
-linear and nonlinear equation solving to regression, optimal control,
-mixed‑integer programming, parameter estimation and model predictive
-control.  To run the tutorials:
+```matlab
+addpath('../src')
 
+m = Gekko();
+m.time = linspace(0,5,41);
+m.options.imode = 4;
+
+k = m.Param(2);
+x = m.Var(0);
+
+m.Equation(x.dt() == -k*x + 1);
+m.solve();
+
+plot(m.time, x.value)
+xlabel('time')
+ylabel('x')
 ```
-addpath('gekko-matlab/src');
-cd('gekko-matlab/examples');
-run example01_simple_equation
-run example02_linear_equations
-...
-run example18_debugging_resources
+
+### APMonitor Object Helper
+
+```matlab
+addpath('../src')
+
+m = Gekko();
+x = m.Var();
+y = m.Var();
+z = m.max2(x,y);
+
+m.Equation(x == 2);
+m.Equation(y == -1);
+m.solve();
+
+disp(z.value)
 ```
 
-Most tutorials set `m.remote = true` to submit the optimization
-problem to the hosted APMonitor server.  This enables features such as
-dynamic simulation and mixed‑integer solvers without requiring a local
-installation of `apm`.  See the comments at the top of each script
-for a description of the problem and usage notes.
+### State-Space Helper
 
-Notes:
+```matlab
+addpath('../src')
 
-* Each variable is a function handle returning its current value.  This
-  design allows equations and objectives to reference variables
-  directly without building symbolic expressions.
-* Equations are passed as anonymous functions returning a numeric
-  residual.  The solver enforces equality by driving these
-  expressions to zero.
-* Integer decision variables are indicated with `integer=true`
+m = Gekko();
+m.time = linspace(0,5,51);
+m.options.imode = 4;
 
-## Limitations
+A = -1;
+B = 1;
+C = 1;
 
-This is an early release and does not match all features of the
-original GEKKO.  In particular:
+[x,y,u] = m.state_space(A,B,C,[],[],false,true);
+m.fix(u,1);
 
-* Dynamic modeling, collocation and integrators are not yet
-  implemented.  This version supports only steady‑state algebraic
-  optimization.  In future versions we plan to implement direct
-  collocation and full support for dynamic models through the
-  APMonitor engine.
-* Only one objective function is supported at present; multiple
-  objectives may be combined manually.
-* The API for advanced variable types (FV, MV, SV, CV) is largely
-  incomplete.  Attributes and options can be set but they are not
-  yet written to the solver options file.  Consequently settings
-  such as variable status, tuning parameters or deadbands are
-  placeholders.
+m.solve();
+plot(m.time, x.value)
+```
 
-We welcome contributions and feedback to help extend this library.
+### ARX Helper
+
+```matlab
+addpath('../src')
+
+m = Gekko();
+m.remote = true;
+m.time = linspace(0,10,51);
+m.options.imode = 4;
+
+p = struct();
+p.a = 0.7;
+p.b = zeros(1,2,1);
+p.b(1,1,1) = 0.2;
+p.b(1,2,1) = 0.1;
+p.c = 0.0;
+
+[y,u] = m.arx(p);
+u.value = double(m.time(:) >= 2.0);
+
+m.solve();
+plot(m.time, y.value)
+```
+
+### System Identification Helper
+
+```matlab
+addpath('../src')
+
+t = (0:20)';
+u = double(t >= 5);
+y = zeros(size(t));
+for k = 3:numel(t)
+    y(k) = 0.6*y(k-1) - 0.1*y(k-2) + 0.25*u(k-1) + 0.1*u(k-2) + 0.05;
+end
+
+m = Gekko();
+[ypred,p,K] = m.sysid(t,u,y,2,2,0,'calc',true,0,'meas');
+```
+
+`pred='meas'` performs the explicit ARX regression directly in MATLAB.
+Switch to `pred='model'` to refine the coefficients with an APMonitor
+solve when you want output-error fitting.
+
+### Direct APMonitor Escape Hatch
+
+`Raw` is useful when a specialized APMonitor block is needed before a
+dedicated MATLAB helper exists:
+
+```matlab
+m = Gekko();
+m.Raw('! custom APMonitor lines appended after End Model');
+```
+
+This keeps the MATLAB wrapper direct to APMonitor even for advanced
+features that are not yet wrapped one-by-one.
+
+## Notes
+
+* `Array` returns MATLAB cell arrays of GEKKO objects.
+* Parameters and variables with vector values are written to the solver
+  CSV file automatically when `m.time` is supplied or array data is used.
+* `pwl`, `cspline`, and `bspline` follow Python GEKKO and expect their
+  dependent output to be a GEKKO variable rather than a parameter.
+* `FV` and `MV` are emitted through APMonitor parameter-style sections and
+  classified with the generated `.info` file, matching GEKKO semantics
+  more closely than the earlier subset implementation.
+
+## Current Gaps
+
+The specialized APMonitor object helpers are now available directly from
+MATLAB, but full one-to-one parity with the Python package is still a
+larger effort. Higher-level utilities outside the core object/helper
+surface, such as some machine-learning, chemistry, and GUI add-ons, are
+not yet mirrored in `gekko-matlab`.
 
 ## License
 
-This project is licensed under the [MIT License](https://github.com/BYU-PRISM/GEKKO/blob/master/LICENSE).
+This project is licensed under the
+[MIT License](https://github.com/BYU-PRISM/GEKKO/blob/master/LICENSE).
