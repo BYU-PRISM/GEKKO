@@ -1,4 +1,5 @@
 from .gekko import GEKKO
+from . import gk_mcp
 #from .brain import Brain
 #from .chemical import Properties
 
