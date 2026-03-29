@@ -6,10 +6,14 @@ All notable changes to the GEKKO project are documented in this file.
 - Added covariance `cov()` function to GEKKO for scalar and matrix covariance calculations
 - Updated `cov()` function to use native GEKKO equations with input validation
 - Warning with Mixed Integer parameters or variables and not using APOPT (MINLP) solver
+- Added `gekko.gk_mcp` add-on module for MCP-style model building, syntax checking, diagnostics, troubleshooting, and tuning helpers
+- Added `docs/mcp.rst` documentation page for the new `gk_mcp` workflow with live `GEKKO()` objects
 ### Changed
 - Catch `+Inf`, `-Inf`, and `Inf` in the results.json file. Replace with `NaN`.
 - Dual usage of `dt` is allowed for derivative values.
 - Use both `x.dt` (as a property) and `x.dt()` (as a method) interchangeably.
+- Updated documentation index to include the MCP helper documentation page
+- Added direct import support for `from gekko import gk_mcp`
 
 ## [v1.3.2]
 ### Added
