@@ -4,7 +4,7 @@ classdef APMonitorAPI
     %   They rely on MATLAB's webread/webwrite functions to post
     %   form‑encoded data to the APMonitor server and retrieve responses.
     %   Users typically do not call these methods directly; they are
-    %   invoked by GekkoModel when remote solves are requested.
+    %   invoked by Gekko when remote solves are requested.
 
     methods (Static)
         function response = apm(server, app, aline)
@@ -16,20 +16,26 @@ classdef APMonitorAPI
             url = strtrim([server '/online/apm_line.php']);
             data = struct('p', app, 'a', aline);
             opts = weboptions('Timeout', 60);
-            % use a GET request by
-            % constructing a query string.  Encode the parameters to
-            % ensure special characters such as newlines are properly
-            % transmitted.
             try
+                % Prefer POST because large models and embedded file
+                % blocks can exceed URL length limits with GET requests.
+                response = webwrite(url, data, opts);
+                if isstring(response)
+                    response = char(response);
+                end
+            catch
+                % Fallback to GET for older MATLAB releases / server quirks.
                 encApp = urlencode(app);
                 encAline = urlencode(aline);
                 query = ['?p=' encApp '&a=' encAline];
                 fullUrl = [url query];
-                response = webread(fullUrl, opts);
-            catch
-                % As a final fallback, attempt to pass the parameters
-                % directly to webread to build the query string for us.
-                response = webread(url, 'p', app, 'a', aline, opts);
+                try
+                    response = webread(fullUrl, opts);
+                catch
+                    % As a final fallback, attempt to pass the parameters
+                    % directly to webread to build the query string for us.
+                    response = webread(url, 'p', app, 'a', aline, opts);
+                end
             end
         end
 
@@ -74,9 +80,9 @@ classdef APMonitorAPI
 
         function [solutionCsv, resultMap] = apm_sol(server, app)
             %APM_SOL Retrieve solution results as CSV and parsed values.
-            %   Returns the raw CSV text and a struct mapping variable
-            %   names to arrays of values.  Requires an active remote
-            %   session identified by server and app name.
+            %   Returns the raw CSV text and a containers.Map that
+            %   preserves original APMonitor variable names, including
+            %   indexed names such as a[1][2].
             ip = APMonitorAPI.apm_ip(server);
             % Construct URL to results.csv
             url = [strtrim(server) '/online/' ip '_' app '/results.csv'];
@@ -116,17 +122,17 @@ classdef APMonitorAPI
                 end
             catch
                 solutionCsv = '';
-                resultMap = struct();
+                resultMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
                 return;
             end
-            % Parse CSV into a struct of arrays.  Each non-empty line of
+            % Parse CSV into a map of arrays.  Each non-empty line of
             % the CSV corresponds to a single variable.  The first entry
             % on the line is the variable name and the remaining entries
             % are numeric values.  For steady‑state problems there will
             % only be one numeric value; for dynamic problems each
             % subsequent entry corresponds to a different time point.
             lines = regexp(solutionCsv, '\r?\n', 'split');
-            resultMap = struct();
+            resultMap = containers.Map('KeyType', 'char', 'ValueType', 'any');
             for idx = 1:numel(lines)
                 line = strtrim(lines{idx});
                 if isempty(line)
@@ -152,7 +158,7 @@ classdef APMonitorAPI
                         values(ii - 1) = str2double(valStr);
                     end
                 end
-                resultMap.(varName) = values;
+                resultMap(varName) = values;
             end
         end
 
