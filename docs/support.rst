@@ -58,8 +58,6 @@ To use the skill in an AI tool:
 
 Example prompts for an AI assistant with the skill loaded:
 
-::
-
-* Use the Gekko skill to formulate this optimization problem as a GEKKO model. Include variable declarations, equations, objective function, solver options, and debugging checks.
-* Use the Gekko skill to debug this failed solve. Explain whether the issue is degrees of freedom, initialization, scaling, solver selection, infeasibility, or an invalid GEKKO expression.
-* Use the Gekko skill to convert this dynamic system into an MPC application with MV, CV, IMODE, time grid, tuning parameters, and a minimal runnable example.
+#. Use the Gekko skill to formulate this optimization problem as a GEKKO model. Include variable declarations, equations, objective function, solver options, and debugging checks.
+#. Use the Gekko skill to debug this failed solve. Explain whether the issue is degrees of freedom, initialization, scaling, solver selection, infeasibility, or an invalid GEKKO expression.
+#. Use the Gekko skill to convert this dynamic system into an MPC application with MV, CV, IMODE, time grid, tuning parameters, and a minimal runnable example.
