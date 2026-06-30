@@ -39,6 +39,10 @@ Generative AI
 
 Generative AI can also help with basic and advanced questions. Most Large Language Models (LLMs) have knowledge of the Gekko syntax and are able to help with generating prototype applications, suggesting performance improvements, answering questions that would be found in the documentation, designing applications, and working through errors. A context aware OpenAI GPT model is available for `Gekko GenAI Support <https://chat.openai.com/g/g-sl8WNWdO7-gekko-support>`_.
 
+.. image:: /ML_Gekko_pics/gekko_gpt.png
+   :width: 100%
+   :align: center
+
 Gekko Skill for AI Tools
 ------------------------
 
@@ -64,8 +68,3 @@ Example prompts for an AI assistant with the skill loaded:
 
    Use the Gekko skill to convert this dynamic system into an MPC application with MV, CV,
    IMODE, time grid, tuning parameters, and a minimal runnable example.
-
-.. image:: /ML_Gekko_pics/gekko_gpt.png
-   :width: 100%
-   :align: center
-
