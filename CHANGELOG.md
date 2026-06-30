@@ -7,7 +7,8 @@ All notable changes to the GEKKO project are documented in this file.
 - Updated `cov()` function to use native GEKKO equations with input validation
 - Warning with Mixed Integer parameters or variables and not using APOPT (MINLP) solver
 - Added `gekko.gk_mcp` add-on module for MCP-style model building, syntax checking, diagnostics, troubleshooting, and tuning helpers
-- Added `docs/mcp.rst` documentation page for the new `gk_mcp` workflow with live `GEKKO()` objects
+- New `docs/mcp.rst` documentation page for the new `gk_mcp` workflow with live `GEKKO()` objects
+- Download skill `gekko-skill.zip` for AI agents to build, troubleshoot, and run gekko applications
 ### Changed
 - Catch `+Inf`, `-Inf`, and `Inf` in the results.json file. Replace with `NaN`.
 - Dual usage of `dt` is allowed for derivative values.
