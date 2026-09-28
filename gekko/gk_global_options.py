@@ -9,7 +9,7 @@ global_option_list = ['APPINFO', 'APPINFOCHG', 'APPSTATUS', 'BNDS_CHK', 'COLDSTA
                       'MV_STEP_HOR', 'MV_TYPE', 'NODES', 'OBJFCNVAL', 'OTOL', 'PRED_HOR',
                       'PRED_TIME', 'REDUCE', 'REQCTRLMODE', 'RTOL', 'SCALING', 'SENSITIVITY',
                       'SOLVESTATUS', 'SOLVER', 'SOLVER_EXTENSION', 'SOLVETIME', 'SPECS', 'TIME_SHIFT',
-                      'WEB', 'WEB_MENU', 'WEB_REFRESH']
+                      'WEB', 'WEB_MENU', 'WEB_PLOT_FREQ', 'WEB_REFRESH', 'WSL_EXE']
 """                      
 global_options_inputs =  ['AUTO_COLD', 'BNDS_CHK', 'CSV_READ', 'CSV_WRITE', 
 'CTRL_UNITS', 'CV_WGT_SLOPE', 'CV_WGT_START', 'CV_TYPE', 'DBS_LEVEL', 
@@ -18,7 +18,7 @@ global_options_inputs =  ['AUTO_COLD', 'BNDS_CHK', 'CSV_READ', 'CSV_WRITE',
 'MAX_MEMORY', 'MAX_TIME', 'MEAS_CHK', 'MV_DCOST_SLOPE', 'MV_STEP_HOR', 
 'MV_TYPE', 'NODES', 'OTOL', 'REDUCE', 'REPLAY', 'REQCTRLMODE', 'RTOL', 
 'SCALING', 'SENSITIVITY', 'SEQUENTIAL', 'SOLVER', 'SOLVER_EXTENSION', 'SPECS', 'SPC_CHART', 
-'STREAM_LEVEL', 'TIME_SHIFT', 'WEB', 'WEB_MENU', 'WEB_REFRESH', 'WEB_PLOT_FREQ']
+'STREAM_LEVEL', 'TIME_SHIFT', 'WEB', 'WEB_MENU', 'WEB_PLOT_FREQ', 'WEB_REFRESH', 'WSL_EXE']
 
 global_options_outputs= ['APPINFO', 'APPINFOCHG', 'APPSTATUS', 'CTRLMODE', 
 'ITERATIONS', 'OBJFCNVAL', 'SOLVESTATUS', 'SOLVETIME']
@@ -90,6 +90,7 @@ class GKGlobalOptions():
         self.WEB_MENU = 1
         self.WEB_PLOT_FREQ = 1
         self.WEB_REFRESH = 10
+        self.WSL_EXE = 1
         #outputs
         self.APPINFO = 0
         self.APPINFOCHG = 0

@@ -987,3 +987,18 @@ Default Value: 1
 Description: Automatic refresh rate on web interface plots
 
 Explanation: WEB_PLOT_FREQ is an internal time in seconds to refresh the web-interface plots. This option does not automatically reload the page but just the plot within the web-page. The default value is 1 second but this value can be increased to lessen the network load as data is repeatedly sent from the server to the web-interface. Processes with slow dynamics or long cycle times may not need the fast refresh rates. If an error message appears, it may indicate that the plot source files were in the process of being rewritten when the new request for data was initiated. The error message is resolved by reloading the web-page.
+
+
+
+.. _wsl_exe:
+
+WSL_EXE
+-----------------
+
+Type: Integer, Input
+
+Default Value: 1
+
+Description: Options: 0 = Use Linux executable in WSL, 1 = Use Windows executable in WSL
+
+Explanation: WSL_EXE allows to select which executable is used if GEKKO is run in the Windows Subsystem for Linux (WSL). While the WSL itself is running on a Linux kernel and can therefore run the Linux binary, contrary to a pure Linux system, WSL can also run the Windows binary. Both have advantages and disadvantages. The Windows binary is 32-bit only at the moment, but has access to other features (e.g. IPOPT). When in doubt, try both options for a specific problem.

@@ -2240,7 +2240,12 @@ class GEKKO(object):
                 elif (os.uname()[4].startswith("arm") or os.uname()[4].startswith("aarch")): # ARM / AARCH processor 32-bit
                     apm_exe = os.path.join(dirname,'bin','apm_arm')
                 elif "Microsoft" in os.uname().release or "WSL" in os.uname().release:
-                    apm_exe = os.path.join(dirname,'bin','apm.exe') # WSL is able to run win32 binaries
+                    if self.options.WSL_EXE==0:
+                        apm_exe = os.path.join(dirname,'bin','apm') # Linux binary
+                    elif self.options.WSL_EXE==1:
+                        apm_exe = os.path.join(dirname,'bin','apm.exe') # WSL is able to run win32 binaries
+                    else:
+                        raise ValueError("WSL executable selection not recognized. Use 0 for Linux executable, or 1 (default) for Windows executable.")
                 else: # Other Linux
                     apm_exe = os.path.join(dirname,'bin','apm')
             else:
