@@ -10,6 +10,7 @@ All notable changes to the GEKKO project are documented in this file.
 - New `docs/mcp.rst` documentation page for the new `gk_mcp` workflow with live `GEKKO()` objects
 - Download skill `gekko-skill.zip` for AI agents to build, troubleshoot, and run gekko applications
 ### Changed
+- Windows local 64-bit executable is now available in the `bin` folder.
 - Catch `+Inf`, `-Inf`, and `Inf` in the results.json file. Replace with `NaN`.
 - Dual usage of `dt` is allowed for derivative values.
 - Use both `x.dt` (as a property) and `x.dt()` (as a method) interchangeably.
