@@ -3,6 +3,10 @@ All notable changes to the GEKKO project are documented in this file.
 
 ## [Unreleased]
 ### Added
+### Changed
+
+## [v1.3.3]
+### Added
 - Added covariance `cov()` function to GEKKO for scalar and matrix covariance calculations
 - Updated `cov()` function to use native GEKKO equations with input validation
 - Warning with Mixed Integer parameters or variables and not using APOPT (MINLP) solver
@@ -310,7 +314,8 @@ All notable changes to the GEKKO project are documented in this file.
 ## 0.0.1a1 - Version 0.0.1 Alpha 1, Date: 2018-01-05
 ### Initial GEKKO public release, alpha version
 
-[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.3.2...HEAD
+[Unreleased]: https://github.com/BYU-PRISM/GEKKO/compare/v1.3.3...HEAD
+[v1.3.3]: https://github.com/BYU-PRISM/GEKKO/compare/v1.3.2...v1.3.3
 [v1.3.2]: https://github.com/BYU-PRISM/GEKKO/compare/v1.3.0...v1.3.2
 [v1.3.0]: https://github.com/BYU-PRISM/GEKKO/compare/v1.2.1...v1.3.0
 [v1.2.1]: https://github.com/BYU-PRISM/GEKKO/compare/v1.1.3...v1.2.1
