@@ -6,7 +6,7 @@ m = GEKKO(remote=False)
 
 Versions of the local executable include:
 
-- Windows (32 or 64 bit): apm.exe
+- Windows (64 bit): apm.exe
 - Linux (64 bit): apm
 - MacOS (64 bit): apm_mac
 - Linux ARM (64-bit): apm_aarch64
