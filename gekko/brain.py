@@ -16,7 +16,7 @@ Nevertheless, training in gekko is available.
 
 class Brain():
     
-    def __init__(self,m=[],remote=True,bfgs=True,explicit=True):
+    def __init__(self,m=[],remote=False,bfgs=True,explicit=True):
         if m==[]:
             self.m = GEKKO(remote=remote)
         else:
