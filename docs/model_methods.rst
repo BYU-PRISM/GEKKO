@@ -19,6 +19,21 @@ Model Functions
 	
 	Certain solver options are not available for local solve because of distribution restrictions and the requirement for solver licenses.
 
+	Remote solves use ``https://byu.apmonitor.com`` by default. To select a
+	different server, pass its full URL, for example
+	``GEKKO(remote=True, server='https://byu.apmonitor.com')``. HTTPS uses
+	Python's default certificate verification. Start with the HTTPS URL
+	directly: HTTP-to-HTTPS redirects can turn a model upload POST into a GET
+	and discard its form data. Explicit HTTP URLs remain available for
+	servers that require them.
+
+	Remote requests identify themselves with ``User-Agent: GEKKO``. If a
+	server returns HTTP 403 (for example, Cloudflare error 1010), check its
+	firewall rules for automated API clients on ``/online/apm_line.php``,
+	``/ip.php``, and result downloads under ``/online/``. Connection errors
+	include the original HTTP or TLS error; certificate verification should
+	remain enabled.
+
 .. py:classmethod::    c =  m.Const(value, [name])
 
     A constant value in the optimization problem. This is a static value and is not changed by the optimizer. Constants are fixed values that represent model inputs, fixed constants, or any other value that does not change. Constants are not modified by the solver as it searches for a solution. As such, constants do not contribute to the number of degrees of freedom (DOF)::
@@ -996,7 +1011,7 @@ These are GEKKO model attributes used internally. They are not intended for exte
 
 .. py:attribute::   server
 
-    String representation of the server url where the model is solved. The default is 'http://byu.apmonitor.com'. This is set by the optional argument `server` when intializing a model.
+    String representation of the server url where the model is solved. The default is 'https://byu.apmonitor.com'. This is set by the optional argument `server` when intializing a model.
 
 .. py:attribute::   remote
 
