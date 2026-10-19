@@ -14,6 +14,12 @@ Mostly writing an end-to-end test for gekko is like writing a specific use case,
 - Use `assert` methods or similar from a testing package to confirm the test ran properly
 
 ## Running
+
+Remote transport unit tests run without contacting a server. From the repository
+root, run `python -m unittest gekko.apm_test -v`. These cover the HTTPS default,
+client identification on uploads and downloads, form encoding, solve output,
+explicit HTTP servers, and HTTP/TLS error reporting.
+
 The E2E(end-to-end) tests can all be run together with the following:
 ```bash
 python run_tests.py
