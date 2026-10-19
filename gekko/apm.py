@@ -7,9 +7,20 @@ ver = sys.version_info[0]
 #print('Version: '+str(ver))
 if ver==2:  # Python 2
     import urllib    
+    import urllib2
 else:       # Python 3+
     import urllib.request, urllib.parse, urllib.error
     #import socket
+
+
+def _request(url, data=None):
+    # Identify all requests, including IP lookup and result downloads. Some
+    # server firewalls reject urllib's default Python User-Agent.
+    headers = {'User-Agent': 'GEKKO'}
+    if ver == 2:
+        return urllib2.urlopen(urllib2.Request(url, data, headers))
+    return urllib.request.urlopen(urllib.request.Request(url, data, headers))
+
 
 if ver==2:  # Python 2
 
@@ -25,7 +36,7 @@ if ver==2:  # Python 2
             app = app.lower()
             app.replace(" ", "")
             params = urllib.urlencode({'p': app, 'a': aline})
-            f = urllib.urlopen(url_base, params)
+            f = _request(url_base, params)
             # initialize apm_error recording
             record_error = False
             apm_error = ''
@@ -53,8 +64,8 @@ if ver==2:  # Python 2
                 response = apm_error
             else:
                 response = f.read()
-        except:
-            response = 'Failed to connect to server'
+        except IOError as exc:
+            raise IOError('APMonitor command failed at {0}: {1}'.format(url_base, exc))
         return response
     
 
@@ -63,7 +74,7 @@ if ver==2:  # Python 2
            server   = address of server'''
         # get ip address for web-address lookup
         url_base = string.strip(server) + '/ip.php'
-        f = urllib.urlopen(url_base)
+        f = _request(url_base)
         ip = string.strip(f.read())
         return ip
 
@@ -78,7 +89,7 @@ if ver==2:  # Python 2
         app = app.lower()
         app.replace(" ","")
         url = string.strip(server) + '/online/' + ip + '_' + app + '/' + filename
-        f = urllib.urlopen(url)
+        f = _request(url)
         # Send request to web-server
         file = f.read()
         # Write the file
@@ -102,7 +113,7 @@ else:       # Python 3+
             app.replace(" ","")
             params = urllib.parse.urlencode({'p':app,'a':aline})
             en_params = params.encode()
-            f = urllib.request.urlopen(url_base,en_params)
+            f = _request(url_base, en_params)
             # initialize apm_error recording
             record_error = False
             apm_error = ''
@@ -132,8 +143,8 @@ else:       # Python 3+
                 # Send request to web-server
                 en_response = f.read()
                 response = en_response.decode()
-        except:
-            response = 'Failed to connect to server'
+        except IOError as exc:
+            raise IOError('APMonitor command failed at {0}: {1}'.format(url_base, exc))
         return response
 
     def get_ip(server):
@@ -141,7 +152,7 @@ else:       # Python 3+
            server   = address of server'''
         # get ip address for web-address lookup
         url_base = server.strip() + '/ip.php'
-        f = urllib.request.urlopen(url_base)
+        f = _request(url_base)
         fip = f.read()
         ip = fip.decode().strip()
         return ip
@@ -157,7 +168,7 @@ else:       # Python 3+
         app = app.lower()
         app.replace(" ","")
         url = server.strip() + '/online/' + ip + '_' + app + '/' + filename
-        f = urllib.request.urlopen(url)
+        f = _request(url)
         # Send request to web-server
         file = f.read()
         # Write the file
